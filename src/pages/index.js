@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import classnames from "classnames";
+import fs from "fs";
 
-export default function Home() {
+export default function Home({ issues }) {
+  const [issue, setIssue] = useState(issues[0]);
+
   return (
     <>
       <Head>
@@ -26,4 +29,16 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+export async function getStaticProps() {
+  const slugs = fs.readdirSync("./ustj");
+  const issues =
+    slugs?.map((slug) => {
+      return JSON.parse(fs.readFileSync(`./ustj/${slug}`, "utf8"));
+    }) || null;
+
+  return {
+    props: { issues },
+  };
 }
