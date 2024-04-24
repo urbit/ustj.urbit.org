@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import classnames from "classnames";
@@ -6,6 +6,16 @@ import fs from "fs";
 
 export default function Home({ issues }) {
   const [issue, setIssue] = useState(issues[0]);
+
+  useEffect(() => {
+    if (issue) {
+      document.body.style =
+        `--black:${issue.theme.black};` +
+        `--white:${issue.theme.white};` +
+        `--primary:${issue.theme.primary};` +
+        `--muted:${issue.theme.muted};`;
+    }
+  }, [issue]);
 
   return (
     <>
