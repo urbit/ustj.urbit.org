@@ -1,0 +1,31 @@
+{
+  "issue": "SP2024: Vol. 1, No. 1",
+  "title": "The Journal of Solid-State Computing",
+  "content": [
+    { "author": ["lagrev-nocfep"], "title": "Letter from the Editor" },
+    { "author": ["rovnys-ricfer"], "title": "After the Whitepaper" },
+    {
+      "author": ["rovnys-ricfer", "fodwyt-ragful"],
+      "title": "The Stakes of Scrying"
+    },
+    {
+      "author": ["rovnys-ricfer", "wicdev-wisryt"],
+      "title": "Static & Dynamic Libs"
+    },
+    { "author": ["nomryg-nilref"], "title": "Inductive Testing" },
+    { "author": ["mopfel-winrux"], "title": "Urbit IPC Interfaces" },
+    { "author": ["lagrev-nocfep"], "title": "Floating-Point Determinism" },
+    { "author": ["dozreg-toplud"], "title": "UrWasm" }
+  ],
+  "theme": {
+    "black": "#141A14",
+    "white": "#FFFFFF",
+    "primary": "#FFF450",
+    "muted": "#B9B13D"
+  },
+  "links": {
+    "cover": "/cover/ustj-v01-i01.png",
+    "issue": "/issue/ustj-v01-i01.pdf",
+    "shop": ""
+  }
+}
