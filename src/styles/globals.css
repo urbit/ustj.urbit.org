@@ -2,19 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.theme {
-  --black: #141A14;
-  --white: #FFFFFF;
-  --primary: #FFF450;
-  --muted: #B9B13D
-}
-
-:root {
-  @apply theme bg-primary;
-}
-
 body {
-  @apply text-lg md:text-xl 2xl:text-2xl;
+  @apply text-lg md:text-xl 2xl:text-2xl bg-primary;
 }
 
 .layout {
