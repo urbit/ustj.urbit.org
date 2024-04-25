@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply text-lg md:text-xl 2xl:text-2xl bg-primary;
+  @apply text-base xs:text-lg md:text-xl xl:text-2xl bg-primary;
 }
 
 .layout {
