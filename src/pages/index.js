@@ -30,9 +30,11 @@ export default function Home({ issues }) {
         </header>
         <main className="flex flex-col flex-1 layout">
           <div
-            className="w-full bg-black layout-px"
+            className="flex items-center justify-center w-full bg-black layout-px"
             style={{ height: "calc((100vh/4) * 3)" }}
-          ></div>
+          >
+            <img className="h-3/4 w-auto" alt="" src={issue.links.cover} />
+          </div>
           <div className="h-96 w-full bg-primary layout layout-px"></div>
         </main>
         <footer></footer>
