@@ -57,9 +57,9 @@ export default function Home({ issues }) {
         </main>
         <footer className="flex justify-center w-full bg-primary">
           <div className="w-full layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
-            <div>{issue.issue}</div>
-            <hr className="border-t border-black" />
             <div>{issue.title}</div>
+            <hr className="border-t border-black" />
+            <div>{issue.issue}</div>
             {issue.content.map((o) => {
               const renderAuthors = (authors) =>
                 authors.map((s) => <p>~ {s}</p>);
