@@ -1,0 +1,2604 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>The State of Urbit:
+Eight ears fter he hitepaper</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="mss.css" /> 
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">The State of Urbit:<br />
+Eight Years After the Whitepaper</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">Ted Blackman</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12">~rovnys-ricfer</span>
+<br />       <span 
+class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 41--><p class="noindent" ><span 
+class="ec-lmr-9">The Urbit whitepaper was released in 2016. In the</span>
+     <span 
+class="ec-lmr-9">intervening  eight  years,  the  project  has  become</span>
+     <span 
+class="ec-lmr-9">much  more  ﬂeshed  out:  the  sketch  has  started</span>
+     <span 
+class="ec-lmr-9">to take on color and detail. This article explores</span>
+     <span 
+class="ec-lmr-9">the  major  developments  since  the  whitepaper,</span>
+     <span 
+class="ec-lmr-9">including  changes  to  the  runtime,  the  network,</span>
+     <span 
+class="ec-lmr-9">the  kernel,  and  the  userspace.  It  also  discusses</span>
+     <span 
+class="ec-lmr-9">the  current  state  of  the  project  and  intended</span>
+     <span 
+class="ec-lmr-9">reﬁnements.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a 
+ id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a 
+href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a 
+href="#x1-30002" id="QQ2-1-3">Changes to Urbit</a></span>
+<br />     <span class="subsectionToc" >2.1 <a 
+href="#x1-40002.1" id="QQ2-1-4">Solid-Stateness</a></span>
+<br />     <span class="subsectionToc" >2.2 <a 
+href="#x1-50002.2" id="QQ2-1-5">Clay “Theory of a Desk”</a></span>
+<br />      <span class="subsubsectionToc" >2.2.1 <a 
+href="#x1-60002.2.1" id="QQ2-1-6">Remote Scry Protocol</a></span>
+<br />     <span class="subsectionToc" >2.3 <a 
+href="#x1-90002.3" id="QQ2-1-9">Gall %grow Namespace</a></span>
+<br />     <span class="subsectionToc" >2.4 <a 
+href="#x1-100002.4" id="QQ2-1-10">Persistent Nock Memoization</a></span>
+<br />     <span class="subsectionToc" >2.5 <a 
+href="#x1-110002.5" id="QQ2-1-11">Breadth-First Arvo Move Ordering</a></span>
+<br />     <span class="subsectionToc" >2.6 <a 
+href="#x1-120002.6" id="QQ2-1-12">Shrubbery</a></span>
+<br />      <span class="subsubsectionToc" >2.6.1 <a 
+href="#x1-130002.6.1" id="QQ2-1-13">Move Ordering in Shrubbery</a></span>
+<br />    <span class="sectionToc" >3 <a 
+href="#x1-140003" id="QQ2-1-14">Continuity</a></span>
+<br />     <span class="subsectionToc" >3.1 <a 
+href="#x1-150003.1" id="QQ2-1-15">Azimuth: On-Chain <span 
+class="ec-lmcsc-10">pki </span>(2019)</a></span>
+<br />      <span class="subsubsectionToc" >3.1.1 <a 
+href="#x1-160003.1.1" id="QQ2-1-16">Azimuth: Individual Continuity Breaches</a></span>
+<br />      <span class="subsubsectionToc" >3.1.2 <a 
+href="#x1-170003.1.2" id="QQ2-1-17">Azimuth: Constitution</a></span>
+<br />      <span class="subsubsectionToc" >3.1.3 <a 
+href="#x1-180003.1.3" id="QQ2-1-18">Azimuth: Naive Rollup</a></span>
+<br />     <span class="subsectionToc" >3.2 <a 
+href="#x1-190003.2" id="QQ2-1-19">New Ames &#x0026; New Jael (2019)</a></span>
+<br />     <span class="subsectionToc" >3.3 <a 
+href="#x1-200003.3" id="QQ2-1-20">Ford Fusion (2020)</a></span>
+<br />     <span class="subsectionToc" >3.4 <a 
+href="#x1-210003.4" id="QQ2-1-21">Essential Desks (2023–24)</a></span>
+<br />     <span class="subsectionToc" >3.5 <a 
+href="#x1-220003.5" id="QQ2-1-22">Future Work</a></span>
+<br />    <span class="sectionToc" >4 <a 
+href="#x1-230004" id="QQ2-1-23">Maturation</a></span>
+<br />     <span class="subsectionToc" >4.1 <a 
+href="#x1-240004.1" id="QQ2-1-24">Changes to Development Practices</a></span>
+<br />      <span class="subsubsectionToc" >4.1.1 <a 
+href="#x1-250004.1.1" id="QQ2-1-25">Organizational Changes</a></span>
+<br />      <span class="subsubsectionToc" >4.1.2 <a 
+href="#x1-260004.1.2" id="QQ2-1-26">Urbit Improvement Proposals</a></span>
+<br />     <span class="subsectionToc" >4.2 <a 
+href="#x1-270004.2" id="QQ2-1-27">Scaling</a></span>
+<br />     <span class="subsectionToc" >4.3 <a 
+href="#x1-280004.3" id="QQ2-1-28">Reliability</a></span>
+<br />     <span class="subsectionToc" >4.4 <a 
+href="#x1-290004.4" id="QQ2-1-29">Runtime Work</a></span>
+<br />     <span class="subsectionToc" >4.5 <a 
+href="#x1-300004.5" id="QQ2-1-30">Control Plane</a></span>
+<br />    <span class="sectionToc" >5 <a 
+href="#x1-310005" id="QQ2-1-31">Extensibility</a></span>
+<br />     <span class="subsectionToc" >5.1 <a 
+href="#x1-320005.1" id="QQ2-1-32">Software Distribution</a></span>
+<br />     <span class="subsectionToc" >5.2 <a 
+href="#x1-330005.2" id="QQ2-1-33">Clay Static Linking and Deduplication</a></span>
+<br />     <span class="subsectionToc" >5.3 <a 
+href="#x1-340005.3" id="QQ2-1-34">Clay Tombstoning</a></span>
+<br />     <span class="subsectionToc" >5.4 <a 
+href="#x1-350005.4" id="QQ2-1-35">Userspace Permissions</a></span>
+<br />    <span class="sectionToc" >6 <a 
+href="#x1-360006" id="QQ2-1-36">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a 
+href="#Q1-1-38">Appendix</a></span>
+<br />    <span class="sectionToc" ><a 
+href="#x1-65000" id="QQ2-1-66">References</a></span>
+                                                
+                                                
+   </div>
+<!--l. 50--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a 
+ id="x1-20001"></a>Introduction</h3>
+<!--l. 52--><p class="noindent" >The Urbit whitepaper (<a 
+ id="x1-2001"></a> ~sorreg-namtyv et al., 2016) publicly
+elaborated the technical prospectus for a solid-state operating
+function, an operating system built as a simple state machine
+deﬁned as a pure function of its events. While much of the
+whitepaper was concerned with establishing the philosophical
+objectives of the project, there was also substantial exposition
+about key parts of the Arvo event handler, the language, and
+the network. Given that the whitepaper was a snapshot of the
+project and its ambitions as it stood in 2016, how has
+that vision held up in practice, and how has the project
+fared?
+</p><!--l. 54--><p class="indent" >   While the whitepaper by its own admission presented itself
+as a “work-in-progress presentation” of a “semi-closed
+alpha test”, the basic claims of the Urbit whitepaper
+are still true today. Most of the intervening work over
+the past eight years has gone into improving robustness
+and better support for applications. A capsule history
+of “late early” Urbit includes the following milestones:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 56--><p class="noindent" >2015–2017: Early vane explosion
+     </p></li>
+     <li class="itemize">
+     <!--l. 57--><p class="noindent" >2017–2019: Rewrites of Hoon, Ford, Eyre, and Vere
+     reﬁne the system
+     </p></li>
+     <li class="itemize">
+     <!--l. 58--><p class="noindent" >2018–2019: Rewrites of Azimuth and Ames reﬁne the
+     network stack
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 59--><p class="noindent" >2018–2019: Nock bytecode interpreter
+     </p></li>
+     <li class="itemize">
+     <!--l. 60--><p class="noindent" >2020: Ford Fusion enables network continuity
+     </p></li>
+     <li class="itemize">
+     <!--l. 61--><p class="noindent" >2020: Security audit on Ames
+     </p></li>
+     <li class="itemize">
+     <!--l. 62--><p class="noindent" >2021: Azimuth Layer2
+     </p></li>
+     <li class="itemize">
+     <!--l. 63--><p class="noindent" >2021: Software distribution introduced
+     </p></li>
+     <li class="itemize">
+     <!--l. 64--><p class="noindent" >2022–2024: Software distribution maturation
+     </p></li>
+     <li class="itemize">
+     <!--l. 65--><p class="noindent" >2023–2024: Network scaling</p></li></ul>
+<!--l. 68--><p class="noindent" >This article will discuss the changes to Urbit since the
+whitepaper, focusing on the runtime, the network, the kernel,
+and the userspace. It will also discuss the current state of the
+project and intended reﬁnements.
+</p><!--l. 72--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a 
+ id="x1-30002"></a>Changes to Urbit</h3>
+                                                
+                                                
+<!--l. 74--><p class="noindent" >Brieﬂy, the lower layers of the system have deviated very little
+from their descriptions in the whitepaper. Nock (the
+machine code), Hoon (the programming language), and Arvo
+(the operating system kernel) – which implies atomic
+event processing and orthogonal persistence – are very
+much the same system today as they were even a decade
+ago.
+</p><!--l. 76--><p class="indent" >   Since 2016, Nock has undergone a revision from kelvin
+version 5K down to 4K. This was a reﬁnement rather than
+a deviation, mainly adding an opcode to manage tree
+mutation (see appendix for details). Hoon has undergone a
+number of changes but is certainly recognizable as the same
+language.
+</p><!--l. 78--><p class="indent" >   At the next layer up, the Arvo kernel, despite having been
+rewritten at least once, serves the same purpose and has a
+similar shape to the one that existed at the time of the
+whitepaper.
+</p><!--l. 81--><p class="indent" >   The system has primarily changed via addition,
+mostly growing upward in the stack: runtime and kernel
+infrastructure to support distributing, installing, running, and
+upgrading userspace applications. Changes have been
+made to peer-to-peer networking, <span 
+class="ec-lmcsc-10">http </span>serving, source
+code management in Clay, and Arvo kernel upgrades.
+Permanent network continuity was achieved at the end of
+2020, largely by deleting the Ford build system vane,
+integrating the build system into the source control system in
+the Clay vane, and modifying the Arvo kernel’s upgrade
+semantics.
+</p><!--l. 83--><p class="indent" >   Urbit’s “scry” data namespace is also much more real and
+ﬂeshed out than it was when the whitepaper was written. The
+concept of scrying predates Urbit itself (<a 
+ id="x1-3001"></a> ~sorreg-namtyv
+(2006); compare <a 
+ id="x1-3002"></a> ~sorreg-namtyv (2010)), but was not used
+heavily by applications.
+</p><!--l. 85--><p class="indent" >   The other big change is the public key infrastructure (<span 
+class="ec-lmcsc-10">pki</span>).
+The whitepaper’s <span 
+class="ec-lmcsc-10">pki</span>, which was eﬀectively live from 2013 to
+2019, had no double-spend protection and was eﬀectively
+centralized. To ﬁx this, the <span 
+class="ec-lmcsc-10">pki </span>was moved to a set of
+Ethereum contracts. Going on-chain made the ownership
+ledger for Urbit IDs censorship-resistant ... until a year later
+                                                
+                                                
+when high transaction fees on Ethereum brought network
+growth to a standstill and the core developers were forced to
+write a custom “naive rollup” Ethereum contract. This
+brought the price of spawning a new Urbit node down from
+hundreds of dollars to under a dollar, at the cost of on-chain
+interoperability.
+</p><!--l. 88--><p class="indent" >   Going on-chain also enabled “personal continuity
+breaches”, in which a ship (instance) owner can notify the
+network through the chain that their Urbit node was
+rebooted from scratch, due to data loss, unrecoverable
+error, or compromised security. This feature necessitated
+some rework of the kernel to ensure data consistency
+across vanes when receiving a notiﬁcation that a peer had
+breached.
+</p><!--l. 90--><p class="indent" >   Finally, a ton of work has been done on Urbit’s runtime.
+Lots of 2016 vaporware is corporeal in 2024.
+</p><!--l. 92--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a 
+ id="x1-40002.1"></a>Solid-Stateness</h4>
+<!--l. 94--><p class="noindent" >
+     </p><blockquote class="quote">
+     <!--l. 95--><p class="noindent" >Urbit            is            a            “solid-state
+     interpreter”: an interpreter with no transient
+     state.  The  interpreter  is  an  <span 
+class="ec-lmcsc-10">acid  </span>database;
+     an event is a transaction in a log-checkpoint
+     system. (<a 
+ id="x1-4001"></a> ~sorreg-namtyv et al., 2016)</p></blockquote>
+<!--l. 100--><p class="noindent" >Urbit is a solid-state interpreter but some of its higher layers
+are more solid-state than others. The scry namespace, hardly
+mentioned in the whitepaper, provides the primary means of
+preserving solid-stateness higher up the stack, especially into
+userspace.
+</p><!--l. 102--><p class="indent" >   A program is considered more solid-state if it has fewer
+moving parts, fewer complex asynchronous code paths, less
+transient state, more idempotence, more immutability, more
+                                                
+                                                
+referential transparency, clearer transaction boundaries, less
+ordering dependence, more declarativeness, and more
+determinism.
+</p><!--l. 104--><p class="indent" >   Much of Urbit’s kernel modules and application model
+were originally written in ways that were less solid-state than
+they could have been. As the reliability requirements for
+Urbit have increased, more attention has been devoted
+toward making the system more solid-state, as the main
+pathway toward increasing simplicity and reliability. More
+attention has been paid to the scry namespace in particular,
+to increase its capabilities to allow it to be used more
+heavily.
+</p><!--l. 106--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a 
+ id="x1-50002.2"></a>Clay “Theory of a Desk”</h4>
+<!--l. 108--><p class="noindent" >A relatively early change that increased the solid-stateness of
+the system was called the “Theory of a Desk”. This was
+implemented as part of the Ford Fusion project in early
+2020. Ford, the build system, was moved from being a
+standalone vane (kernel module) into the Clay source
+management vane. When Ford stood alone, despite – or
+maybe exacerbated by – multiple rewrites, it was diﬃcult to
+achieve full correctness of source builds during a kernel
+upgrade. It was common for post-upgrade ﬁles to be
+built erroneously using the old kernel. This behavior was
+eﬀectively nondeterministic because it relied on the ordering
+of short hashes (“mug”s) that identiﬁed subscribers to
+Clay ﬁle-changed notiﬁcations. Sometimes it would work
+correctly by luck; other times it would fail in various
+hard-to-reason-about ways.
+</p><!--l. 110--><p class="indent" >   Moving Ford into Clay removed asynchrony from the
+system: instead of Ford requesting ﬁles one by one from Clay
+and building them, Ford became a subroutine in Clay that
+Clay could call synchronously. This “fusion” allowed the Ford
+build semantics to be modiﬁed to depend only on ﬁles in the
+current revision of the “desk” (Clay’s version of a Git
+                                                
+                                                
+repository).
+</p><!--l. 112--><p class="indent" >   Previous versions of Clay only allowed ﬁles of a newly
+deﬁned ﬁletype (“mark”) to be added <span 
+class="ec-lmri-10">after </span>a commit that
+added a “mark ﬁle” that deﬁned the semantics of that
+ﬁletype. This meant that no Clay revision was ever truly
+self-contained: a deterministic understanding of how its ﬁles
+would be validated required knowledge of the previous commit
+as well.
+</p><!--l. 114--><p class="indent" >   The “theory of a desk” paradigm uses only the current
+snapshot of the desk to build any mark ﬁles needed to validate
+the ﬁles in the desk. This was not technically impossible
+while Ford was a separate vane, but the asynchronous
+communication back and forth made it exceedingly diﬃcult.
+The new Ford shrank from 6,000 lines of code down to
+about 500, and became much easier to reason about and
+debug.
+</p><!--l. 116--><p class="indent" >   A year later, near the end of 2021, the “software distribution”
+project completed, allowing third-party developers to
+distribute userspace applications to their users over the Urbit
+network, storing and building the code in Clay. This
+necessitated reproducible builds, which is a notoriously
+solid-state requirement. Ford Fusion builds were reproducible,
+but the system had to be extended quite a bit to practically
+support multiple userspace installations. These extensions
+caused a new set of problems.
+</p><!--l. 118--><p class="indent" >   The interaction between Gall (which runs applications)
+and Clay (which stores and builds their source code) was also
+complex, asynchronous, and bug-prone. A year after software
+distribution, in the second half of 2022, the “agents in Clay”
+project moved the locus of control over which userspace
+applications were supposed to be running from Gall itself to
+Clay. This allowed Clay to send a single “move” (eﬀect) to
+Gall containing the full list of all agents that Gall should now
+be running.
+</p><!--l. 120--><p class="indent" >   Note that this latest iteration, with a single large
+eﬀect, is more declarative, has less transient state, is more
+deterministic, has less ordering dependence, and is more
+idempotent – in other words, signiﬁcantly more solid-state. As
+expected, this system has been much more reliable than the
+                                                
+                                                
+initial software-distribution system.
+</p><!--l. 122--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.2.1   </span> <a 
+ id="x1-60002.2.1"></a>Remote Scry Protocol</h5>
+<!--l. 124--><p class="noindent" >A major part of making the namespace more
+usablae was to expose namespace queries over the
+network. Designed in 2021 and deployed in 2023, the
+“Fine”<span class="footnote-mark"><a 
+href="mss2.html#fn1x0"><sup class="textsuperscript">1</sup></a></span><a 
+ id="x1-6001f1"></a> 
+remote scry network protocol was added to Urbit. The ﬁrst
+use cases were Clay, which uses it for downloading desks, and
+the Gall <code class="lstinline"><span style="color:#000000">%grow</span></code> namespace, described in more detail in a later
+section.
+</p><!--l. 126--><p class="indent" >   This protocol lets one ship fetch data at a namespace path
+bound by another ship. The runtime includes a cache so later
+requests for the same data are typically served from the
+runtime cache rather than requiring Arvo’s <code class="lstinline"><span style="color:#000000">+peek</span></code> arm to be
+called again. In addition to the scalability beneﬁts this
+provided, it also represented a fairly large conceptual shift:
+instead of Urbit’s networking only being able to express
+commands (writes) over the network, it could now also
+support reads.
+</p><!--l. 128--><p class="indent" >   These reads are from the immutable namespace, so they’re
+quite solid-state.
+</p>
+<!--l. 130--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-7000"></a><span 
+class="ec-lmbx-10">Two-Party Encrypted Remote Scry: %chum</span></span>
+   The remote scry protocol authenticates responses (scry
+bindings), but it does not have any concept of encryption built
+in – everything published over the network is public.
+Since most Urbit applications deal with private data,
+there needed to be a way to distribute data privately.
+The <code class="lstinline"><span style="color:#000000">%chum</span></code> namespace overlay was the ﬁrst way to do
+this.
+                                                
+                                                
+</p><!--l. 132--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">%chum</span></code> namespace overlay allows a ship to make an
+authenticated and encrypted scry request to another ship.
+Only the publisher ship can decrypt the request, which is
+symmetrically encrypted using the Diﬃe–Hellman of the two
+ships’ Azimuth networking keys. The scry response is also
+encrypted symmetrically, so only the requesting ship can
+decrypt it. Crucially, this system uses the Arvo kernel’s
+security mask (which was described in the whitepaper but not
+enforced until this protocol made use of it) to inform
+the publishing module about which ship is making the
+request.
+</p><!--l. 134--><p class="indent" >   The ﬁrst version of this system uses the Fine protocol
+unmodiﬁed, although the Directed Messaging project’s
+implementation has explicit support for symmetric encryption,
+which it also uses for pokes (commands).
+</p>
+<!--l. 136--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-8000"></a><span 
+class="ec-lmbx-10">Multi-Party Encrypted Remote Scry</span></span>
+   The symmetric encryption of the <code class="lstinline"><span style="color:#000000">%chum</span></code> namespace
+overlay has a problem in a multi-party context like a social
+group: no two requesting ships can share entries in the
+runtime cache, meaning each subscriber has to make a
+separate call to Arvo’s <code class="lstinline"><span style="color:#000000">+peek</span></code> arm. To ﬁx this, a multi-party
+form of encrypted remote scry was added.
+</p><!--l. 140--><p class="indent" >   To use this system, a publishing application must register
+a scry path preﬁx as a security domain, to which the
+kernel associates a (rotatable) symmetric key. Subscriber
+ships request access to this key. The publisher ship’s
+kernel asks the publishing application whether that ship
+should be allowed to view the content at that path preﬁx.
+Once the subscribing ship has the key for a path preﬁx, it
+requests data under that preﬁx by encrypting the request
+path and placing the key’s identiﬁer in cleartext so the
+publishing ship knows which key to use to try to decrypt the
+path.
+</p><!--l. 142--><p class="indent" >   Querying the publishing application dynamically like this
+allows the publishing application to avoid materializing the set
+                                                
+                                                
+of all ships who are allowed to see this content. Materializing
+that set in a complex application with layers of roles,
+whitelists, blacklists, and other criteria could be prohibitively
+slow, superlinear in the number of allowed subscribers. This
+arrangement should allow the application to keep the query
+time to roughly logarithmic in the number of subscribers,
+which is much more practical.
+</p><!--l. 145--><p class="indent" >   The next steps in increasing the utility of the scry
+namespace include <code class="lstinline"><span style="color:#000000">%pine</span></code> (a non-referentially-transparent
+“request-at-latest” network protocol) and “sticky scry”, which
+would facilitate scry-based network subscriptions by allowing
+requests for unbound data to persist on a publisher until the
+data is published, at which point it will be pushed down to
+subscribers with low latency.
+</p><!--l. 147--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.3   </span> <a 
+ id="x1-90002.3"></a>Gall %grow Namespace</h4>
+<!--l. 149--><p class="noindent" >Gall agents were not able to directly bind data into the scry
+namespace until the <code class="lstinline"><span style="color:#000000">%grow</span></code> namespace was added in early
+2023 in the same release as the ﬁrst remote scry protocol. A
+Gall agent can emit an eﬀect to bind a path to a value in the
+<code class="lstinline"><span style="color:#000000">%grow</span></code> namespace.
+</p><!--l. 151--><p class="indent" >   This allows applications to publish data that can be read
+remotely using the remote scry protocol, making applications
+more legible and solid-state.
+</p><!--l. 153--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.4   </span> <a 
+ id="x1-100002.4"></a>Persistent Nock Memoization</h4>
+<!--l. 155--><p class="noindent" >For around a decade, Nock interpreters have supported
+the <code class="lstinline"><span style="color:#000000">%memo</span></code> memoization hint, informing the interpreter
+that the enclosed Nock computation should be cached.
+Since Nock is purely functional, these caches will never
+need invalidation, an important property. However, until
+early 2024, runtime Nock caches were ephemeral – they
+                                                
+                                                
+did not last past a single Arvo event, or were even more
+short-lived.
+</p><!--l. 157--><p class="indent" >   Persistent Nock caching allows for removal of most
+caching-related state from the kernel and applications,
+allowing code to focus on business logic. Making more logic
+stateless contributes strongly to solid-stateness. Persistent
+Nock caching also opens up new architectural possibilities,
+such as userspace build systems that share a runtime cache to
+avoid rerunning compilations or duplicating libraries, even if
+they have varying semantics.
+</p><!--l. 159--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.5   </span> <a 
+ id="x1-110002.5"></a>Breadth-First Arvo Move Ordering</h4>
+<!--l. 161--><p class="noindent" >Arvo has traditionally used “depth-ﬁrst” ordering when
+processing “moves”, i. e. messages passed between parts of the
+system. Since each module in Arvo emits a list of moves
+whenever it runs, and then the moves are delivered one at a
+time to their destination modules for processing, at any given
+time there is a tree of unprocessed moves that have been
+emitted but not delivered.
+</p><!--l. 163--><p class="indent" >   Processing moves in depth-ﬁrst order is planned on being
+changed. A version of Arvo that instead uses breadth-ﬁrst
+move order has been written and is intended for deployment in
+Zuse 410 or 409. This remains somewhat controversial,
+though.
+</p><!--l. 165--><p class="indent" >   Depth-ﬁrst move ordering has the advantage of a
+certain kind of consistency. Consider the case where as the
+result of a single activation, Gall agent <code class="lstinline"><span style="color:#000000">%foo</span></code> “pokes”
+(sends a command to) <code class="lstinline"><span style="color:#000000">%bar</span></code> and another to <code class="lstinline"><span style="color:#000000">%baz</span></code>. With
+depth-ﬁrst move order, any moves emitted by <code class="lstinline"><span style="color:#000000">%bar</span></code> upon
+receiving <code class="lstinline"><span style="color:#000000">%foo</span></code>’s poke will be processed before <code class="lstinline"><span style="color:#000000">%baz</span></code>
+receives <code class="lstinline"><span style="color:#000000">%foo</span></code>’s poke. This applies recursively, so if upon
+receiving <code class="lstinline"><span style="color:#000000">%foo</span></code>’s poke, <code class="lstinline"><span style="color:#000000">%bar</span></code> poked <code class="lstinline"><span style="color:#000000">%qux</span></code> and <code class="lstinline"><span style="color:#000000">%qux</span></code> poked
+<code class="lstinline"><span style="color:#000000">%qux2</span></code>, all that still happens before <code class="lstinline"><span style="color:#000000">%baz</span></code> receives <code class="lstinline"><span style="color:#000000">%foo</span></code>’s
+poke.
+</p><!--l. 167--><p class="indent" >   This means <code class="lstinline"><span style="color:#000000">%foo</span></code> can rely on <code class="lstinline"><span style="color:#000000">%bar</span></code> completely handling
+                                                
+                                                
+the ﬁrst poke before <code class="lstinline"><span style="color:#000000">%baz</span></code> receives the second poke, even if
+<code class="lstinline"><span style="color:#000000">%bar</span></code> has to issue further commands in order to do so
+– at least as long as all the pokes are, one, domestic
+(in the same ship) and two, processable synchronously,
+i. e. no operations need to be spread across multiple Arvo
+events, such as waiting for a timer to elapse or waiting
+for a user to type input on the command line. If both
+these conditions are met, then the poke to <code class="lstinline"><span style="color:#000000">%bar</span></code> has one
+view of the system’s state, and the poke to <code class="lstinline"><span style="color:#000000">%baz</span></code> has
+a newer, updated view, but both views are consistent
+in the sense that for either one of them, <code class="lstinline"><span style="color:#000000">%bar</span></code>’s move
+processing has either not started at all or completely
+ﬁnished.
+</p><!--l. 169--><p class="indent" >   A major issue with depth-ﬁrst move order is that many
+common interactions, including anything social that involves
+peer nodes, cannot preserve both of those properties that let
+each module send commands to other modules without
+acknowlegment but still rest assured that those commands will
+complete in order and with each having a consistent view of
+the state. This means the system has needed to incorporate
+the concept of an acknowledgment for a poke, since a poke
+could be over the network rather than local. In the current
+formulation, local pokes are also acknowledged, losing some of
+the streamlining one would hope for with depth-ﬁrst
+ordering.
+</p><!--l. 171--><p class="indent" >   Another problem with depth-ﬁrst ordering is that it makes
+consistency among modules diﬃcult to guarantee. Jael delivers
+a notiﬁcation that a peer has breached to Ames and Gall.
+When Ames hears the notiﬁcation, it deletes all state
+regarding the old pre-breach ship and updates its state to
+store a cache of the peer’s new post-breach <span 
+class="ec-lmcsc-10">pki </span>state (public
+key, etc.). When Gall hears the notiﬁcation, for each
+agent that had subscriptions to the old ship, it closes the
+subscriptions and notiﬁes the agent that the subscription was
+closed.
+</p><!--l. 173--><p class="indent" >   The problem comes up when an agent wakes up with the
+notiﬁcation that its subscription was closed and emits a move
+to resubscribe. Gall then sends this move to Ames. If
+Gall heard the breach notiﬁcation before Ames, then the
+                                                
+                                                
+resubscribe request would be sent to the old pre-breach ship,
+since in depth-ﬁrst move ordering, Ames hears Gall’s
+requests before Jael’s breach notiﬁcation. Since the ship had
+breached, it ignores the resubscribe request to its old
+key.
+</p><!--l. 175--><p class="indent" >   This can be band-aided by baking the speciﬁcs of the
+interaction into Jael, so it knows to tell Ames about the
+breach before Gall. This approach works as long as the data
+dependencies among modules remains acyclic, but as soon as
+two modules could both send moves to each other upon being
+notiﬁed – meaning they need to be notiﬁed “at the same time”
+– it becomes nontrivial to provide consistency. It could be
+achieved through a two-phase commit system where Jael
+delivers two moves for each notiﬁcation, and the receiving
+modules would know to update their state in response to the
+ﬁrst notiﬁcation but only emit moves upon hearing the second
+notiﬁcation.
+</p><!--l. 177--><p class="indent" >   The ﬁnal problem with depth-ﬁrst ordering is that it is
+empirically diﬃcult to reason about. Moves are not processed
+chronologically – later moves can jump to the front of the
+queue. This has led to a number of subtle bugs due to later
+moves invalidating earlier moves, such as canceling a
+subscription that hadn’t been established yet because
+the unsubscribe move jumped in front of the subscribe
+move.
+</p><!--l. 179--><p class="indent" >   An alternative has been built which uses breadth-ﬁrst
+move ordering. This is strictly chronological, does not reorder
+moves, has a concept of simultaneity for maintaining
+consistency when delivering notiﬁcations, and works equally
+well locally and over the network. The major disadvantage of
+breadth-ﬁrst ordering is that there is no automatically growing
+transaction: everything requires explicit acknowledgment.
+</p><!--l. 181--><p class="indent" >   The latest “shrubbery” (q. v.) experiment uses a hybrid
+move ordering: depth-ﬁrst for local pokes within the same
+application, and breadth-ﬁrst otherwise.
+</p><!--l. 183--><p class="noindent" >
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.6   </span> <a 
+ id="x1-120002.6"></a>Shrubbery</h4>
+<!--l. 185--><p class="noindent" >“Shrubbery” refers to an architectural concept in which all
+userspace data is addressible in the scry namespace. This
+would include source code and application state in addition to
+inert ﬁle-like data.
+</p><!--l. 187--><p class="indent" >   A well-functioning shrubbery vane would replace Clay and
+Gall, unifying the storage and management of data and code
+into a single namespace-backed system.
+</p><!--l. 189--><p class="indent" >   A shrubbery model has the potential to make application
+programming signiﬁcantly more solid-state. Each piece of data
+in a shrubbery system has a canonical name to which
+it is immutably bound. The state of pending I/O will
+also live in the namespace, facilitating inspection and
+recovery after a suspension or breach. Subscription and state
+synchronization become declarative. Functional reactive
+programming features would allow for declarative composition
+of programs.
+</p><!--l. 191--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.6.1   </span> <a 
+ id="x1-130002.6.1"></a>Move Ordering in Shrubbery</h5>
+<!--l. 193--><p class="noindent" >The latest “shrubbery” experiment attempts a hybrid solution
+to get the best of both modalities. A typical shrubbery “app”
+will be broken into a hierarchy of event handlers at various
+subpaths. When sending a move “downward” into a subpath,
+the system will handle that move depth-ﬁrst, since an app is
+presumed to know the characteristics of its sub-apps. These
+moves will not need to be acknowledged, since they will
+be truly depth-ﬁrst. When passing a move “upward”
+or “sideways”, i. e. outside of the sub-tree, that move
+will be appended to one global queue, to be handled
+breadth-ﬁrst.
+</p><!--l. 195--><p class="indent" >   This hybrid approach can be thought of as the lowest
+layers of the move tree being depth-ﬁrst, with breadth-ﬁrst
+at higher layers. Core developers expect the shrubbery
+experiment to be runnable within a month of this writing.
+                                                
+                                                
+</p><!--l. 197--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a 
+ id="x1-140003"></a>Continuity</h3>
+<!--l. 199--><p class="noindent" >Since the whitepaper was written in 2016, quite a bit of eﬀort
+has gone into improving Urbit’s continuity. Continuity in this
+context might best be deﬁned in contrast to its opposite: a
+“continuity breach” refers to the act of restarting an Urbit
+from scratch, throwing away all its previous data and the
+states of its connections with other ships.
+</p><!--l. 201--><p class="indent" >   Until the end of 2020, core developers would routinely
+conduct network-wide breaches. Every ship on the network
+would need to be restarted from scratch in order to communicate
+with other ships.
+</p><!--l. 203--><p class="indent" >   For a user, the experience of discontinuity is one of loss of
+data and possibly even of friends. This document will use the
+term “continuity” in a broad sense.
+</p><!--l. 205--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a 
+ id="x1-150003.1"></a>Azimuth: On-Chain PKI (2019)</h4>
+<!--l. 207--><p class="noindent" >One major event that improved the level of continuity was
+moving Urbit’s public key infrastructure (<span 
+class="ec-lmcsc-10">pki</span>) from an
+informal spreadsheet maintained by the Tlon Corporation to a
+set of smart contracts on the Ethereum blockchain (<a 
+ id="x1-15001"></a>
+~ravmel-ropdyl, 2019).
+</p><!--l. 209--><p class="indent" >   This ensured Byzantine fault-tolerant ownership of an
+Urbit ship and permissionless entry – anyone can buy an Urbit
+address, without needing to communicate with any particular
+person or organization. This had always been the goal, but it
+wasn’t feasible until programmable smart-contract blockchains
+became production-worthy.
+</p><!--l. 211--><p class="indent" >   In addition to moving the address ownership and
+sponsorship information on-chain, other features were
+added.
+                                                
+                                                
+</p><!--l. 213--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">3.1.1   </span> <a 
+ id="x1-160003.1.1"></a>Azimuth: Individual Continuity Breaches</h5>
+<!--l. 216--><p class="noindent" >The capability to perform an “individual continuity breach”
+was added. Before going on-chain, if an Urbit suﬀered any
+major data loss, it would be permanently dead and could
+never communicate with peers again. An individual continuity
+breach allows a user to post a transaction to chain that
+increments the “rift” number for their address, signaling to the
+network that the ship has been restarted from scratch. Peer
+ships that were storing message sequence numbers for the
+breached ship reset their networking state for the breached
+ship.
+</p><!--l. 219--><p class="indent" >   This allows a user to continue to use the address they
+purchased even if their Urbit loses data. The newly written
+<code class="lstinline"><span style="color:#000000">%phoenix</span></code> app implements a system of encrypted backups, so
+that after a breach, a user can recover application data from
+the latest backup (<a 
+ id="x1-16001"></a> ~midden-fabler, 2024).
+</p><!--l. 221--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">3.1.2   </span> <a 
+ id="x1-170003.1.2"></a>Azimuth: Constitution</h5>
+<!--l. 224--><p class="noindent" >The Urbit galaxies have always been considered to form a
+senate, acting as the Shelling point for network governance.
+Before going on chain, this was merely an idea – now it is a
+formalized reality. Galaxies can vote on-chain, using a
+smart contract that has control over the other smart
+contracts.
+</p><!--l. 226--><p class="indent" >   There are two ways galaxies can vote: on (the hash of) a
+document to signal support of that document, and on a new
+constitution contract, which will trigger the old constitution
+contract to cede control to the new constitution contract that
+replaces it. This means the galaxies can vote to upgrade the
+constitution as they see ﬁt – an elegant example of social
+metacircularity.
+</p><!--l. 228--><p class="indent" >   It should be noted that galactic governance is purely
+voluntary: because users have full control over their own
+                                                
+                                                
+personal servers, they retain the power to “vote with
+their feet” and decide to use a diﬀerent <span 
+class="ec-lmcsc-10">pki </span>or a diﬀerent
+governance structure.
+</p><!--l. 230--><p class="indent" >   It is incumbent upon the galaxies to make decisions that
+are prudent enough not to fork the network – or prudent
+enough to fork the network, if called for. Using a blockchain
+means a fork could be performed in an orderly manner
+without losing consistency. This added technical feasibility of
+forking puts virtuous pressure on the galaxies to govern
+reasonably.
+</p><!--l. 232--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">3.1.3   </span> <a 
+ id="x1-180003.1.3"></a>Azimuth: Naive Rollup</h5>
+<!--l. 234--><p class="noindent" >In 2020, Ethereum transaction fees rose to levels high enough
+that Urbit network growth ground to a halt. The core
+developers, after evaluating then-nascent “zero-knowledge”
+and “optimistic” rollup technologies for reducing fees,
+determined they were not yet production-worthy and wrote a
+simpler rollup that they called a “naive rollup”. This brought
+the price of spawning a planet down from roughly $100 to
+under $1.
+</p><!--l. 236--><p class="indent" >   The naive rollup treats Ethereum as an inert data store for
+storing a series of transaction inputs. Each Urbit ship then
+reads those transaction inputs from Ethereum and executes
+them itself, arriving at the latest state of the rollup. This can
+be thought of as a simpliﬁcation of an optimistic rollup, where
+the chain does not have any representation of the latest state
+of the rollup, only the inputs that would lead to that state.
+This obviates the need for fraud proofs and bond slashing,
+yielding a substantially simpler system at the cost of some
+interoperability between Urbit addresses in the rollup
+and other Ethereum contracts, which do not have any
+cryptographic proof on chain regarding which Ethereum
+address owns those addresses.
+</p><!--l. 238--><p class="indent" >   Each ship’s Azimuth state is stored either in the rollup or
+in the original contract. Galaxies cannot be moved into the
+                                                
+                                                
+rollup. For the time being, addresses cannot be moved back
+out of the rollup.
+</p><!--l. 240--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a 
+ id="x1-190003.2"></a>New Ames &#x0026; New Jael (2019)</h4>
+<!--l. 242--><p class="noindent" >In order to take advantage of the new <span 
+class="ec-lmcsc-10">pki</span>, the Ames
+networking vane and Jael secret storage vane both had to be
+rewritten. This was done in 2019, with new Ames being
+deployed later, near the end of the year.
+</p><!--l. 244--><p class="indent" >   The “new” Ames and Jael – now in their fourth year of
+use, with Ames having had some refactoring and extension
+– support individual continuity breaches and on-chain
+sponsorship changes (“escapes”).
+</p><!--l. 246--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.3   </span> <a 
+ id="x1-200003.3"></a>Ford Fusion (2020)</h4>
+<!--l. 248--><p class="noindent" >As described earlier, the Ford Fusion project moved Urbit’s
+build system from a standalone vane to a synchronously
+callable function inside Clay and rectiﬁed over-the-air Arvo
+kernel upgrades.
+</p><!--l. 251--><p class="indent" >   This was crucial for performing the last network breach at
+the end of 2020, establishing permanent continuity – since
+then, many dozens of over-the-air upgrades have been
+deployed. Without a reliable upgrade process, this continuity
+era would be infeasible.
+</p><!--l. 253--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.4   </span> <a 
+ id="x1-210003.4"></a>Essential Desks (2023–24)</h4>
+<!--l. 255--><p class="noindent" >Having gained experience with managing deployments of both
+kernelspace and userspace desks, it became clear that the
+original way that kernel updates synchronized with app
+updates needed more ﬂexibility. Any app could block a kernel
+                                                
+                                                
+upgrade if its developer had not also pushed out a new version
+that was compatible with the new kernel. A user could always
+suspend a stale app to allow the upgrade, but this had to be
+done manually.
+</p><!--l. 257--><p class="indent" >   A later update modiﬁed this behavior. A newly installed
+app is now marked as non-essential by default. The kernel will
+only block an upgrade if an essential app is stale. A stale
+non-essential app will be suspended automatically on upgrade.
+If a user wants to ensure an app will never be suspended, they
+can mark it as essential.
+</p><!--l. 259--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.5   </span> <a 
+ id="x1-220003.5"></a>Future Work</h4>
+<!--l. 261--><p class="noindent" >The next major frontier in continuity will be “kelvin shims”,
+i. e. a kernel that can keep stale apps designed to work with
+previous kernels running (through a “shim” for a previous
+kelvin version), not just apps designed to run at exactly the
+current version. This is a thorny problem that the core
+development team experimented with in early 2023 but
+abandoned.
+</p><!--l. 263--><p class="indent" >   The hard part of kelvin shimming turned out to be that the
+current version of the userspace/kernelspace <span 
+class="ec-lmcsc-10">api </span>is complex.
+Taming that interface and localizing application-related state
+to make it easier to migrate will be critical for enabling
+kelvin shims. The shrubbery experiment is a step in this
+direction.
+</p><!--l. 265--><p class="indent" >   More sophisticated kernel support for migrating applications
+is also likely to be a fruitful line of work. This involves
+migrating application state from an old type to a new type, as
+well as supporting protocol negotiation to upgrade or
+downgrade commands and subscription updates to maintain
+compatibility between old and new versions of the same app
+on diﬀerent ships.
+</p><!--l. 267--><p class="noindent" >
+                                                
+                                                
+</p>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a 
+ id="x1-230004"></a>Maturation</h3>
+<!--l. 269--><p class="noindent" >Urbit has matured along several dimensions since the
+whitepaper was written. This work can be roughly categorized
+into organizational changes, scaling improvements, reliability
+work, work on the runtime, and adding an explicit control
+plane.
+</p><!--l. 271--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a 
+ id="x1-240004.1"></a>Changes to Development Practices</h4>
+<!--l. 273--><p class="noindent" >Since 2016, a much larger number of developers are involved in
+core development, and the development practices have evolved
+accordingly.
+</p><!--l. 275--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.1   </span> <a 
+ id="x1-250004.1.1"></a>Organizational Changes</h5>
+<!--l. 277--><p class="noindent" >In early 2023, the responsibility for core development
+transferred from the Tlon Corporation, which had managed it
+since 2013, to the newer Urbit Foundation, a nonproﬁt. The
+Urbit Foundation has become the custodian of the Urbit
+kernel and ecosystem. UF adopted and continued to modify
+Tlon’s release workﬂow, including CI/CD (continuous
+integration/continuous deployment), multi-stage canary
+deployments, and repository management practices. This
+process has more recently been extended to include a liaison
+period for each kelvin update where organizations that
+use Urbit can use the prerelease software on their own
+infrastructure ﬁrst and report any bugs to UF.
+</p><!--l. 279--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.2   </span> <a 
+ id="x1-260004.1.2"></a>Urbit Improvement Proposals</h5>
+                                                
+                                                
+<!--l. 281--><p class="noindent" >The Urbit Improvement Proposal system was introduced
+in mid-2023. This is an <span 
+class="ec-lmcsc-10">rfc </span>system based heavily on
+Bitcoin’s <span 
+class="ec-lmcsc-10">bip </span>system and Ethereum’s <span 
+class="ec-lmcsc-10">eip </span>system. On a
+biweekly basis, proposals are reviewed by core developers
+in group calls. Since its launch, over twenty <span 
+class="ec-lmcsc-10">uip</span>s have
+been written, of which thirteen have been ratiﬁed and
+built.
+</p><!--l. 283--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a 
+ id="x1-270004.2"></a>Scaling</h4>
+<!--l. 285--><p class="noindent" >In 2016, the Urbit network could barely handle a few hundred
+online ships. In 2024, at 411 kelvin, the network can easily
+handle many tens of thousands of online ships, if not more.
+Packet forwarding is now stateless and does not run Nock.
+Sponsor pinging now uses the <span 
+class="ec-lmcsc-10">stun </span>protocol, incurring no disk
+writes on sponsoring galaxies.
+</p><!--l. 287--><p class="indent" >   The Directed Messaging project will increase network
+throughput by roughly a factor of a thousand, fast enough to
+saturate a gigabit ethernet link. The Ares project will increase
+the maximum persistent data storage by a factor of several
+thousand, up to 64 terabytes. Ares should also improve Nock
+execution speed dramatically, paving the way toward Nock
+being able to be compiled to machine code comparable to that
+emitted by a C compiler.
+</p><!--l. 289--><p class="indent" >   Heavy use of the scry namespace facilitates scalable data
+dissemination through the network, following a diﬀusion
+model, where intermediate relays can cache arbitrary data,
+minimizing duplicate packets across the network.
+</p><!--l. 291--><p class="indent" >   Future work will likely include multithreaded scry
+requests, shared-memory interprocess communication
+in the runtime, and more advanced Nock interpreter
+optimizations.
+</p><!--l. 293--><p class="noindent" >
+</p>
+                                                
+                                                
+   <h4 class="subsectionHead"><span class="titlemark">4.3   </span> <a 
+ id="x1-280004.3"></a>Reliability</h4>
+<!--l. 295--><p class="noindent" >All through 2017 and 2018, Urbit would crash for the typical
+user on a roughly weekly basis. As of 2024, that frequency
+seems to be anecdotally once every few months, usually
+from running out of disk space due to excessive event log
+buildup; this has already been addressed on NativePlanet’s
+systems, which perform automatic event log rollover and
+truncation.
+</p><!--l. 297--><p class="indent" >   Kernel and app upgrades are much more reliable.
+The system runs out of memory much less often. The
+network maintains connectivity much better. Commonly
+used applications have fewer bugs. Browser page loads
+are much faster and more reliable. Individual continuity
+breaches cause fewer downstream bugs in the kernel and
+applications. Arvo error handling has fewer known ﬂaws. Gall
+subscriptions underwent a major rearchitecture in 2022 to ﬁx
+a queue desynchronization bug. The Behn timer module was
+rewritten multiple times to shake out several diﬀerent
+bugs.
+</p><!--l. 299--><p class="indent" >   The list goes on. While Urbit still has ﬂaws and occasional
+crashes, its level of robustness is strikingly higher than it was
+when the whitepaper was written. By early 2025, we
+expect Urbit to be reliable enough to pass a security
+audit that includes penetration testing. At that point,
+custodial cryptographic applications will be viable on the
+platform.
+</p><!--l. 301--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.4   </span> <a 
+ id="x1-290004.4"></a>Runtime Work</h4>
+<!--l. 303--><p class="noindent" >The runtime has absorbed a large percentage of the work that
+has been done in the system in the last eight years. The naive
+tree-walking Nock interpreter was replaced by a custom
+bytecode interpreter. The system was made to recover from
+out-of-memory errors and automatically reclaim memory.
+A memory allocator trick called “pointer compression”
+was used to increase data storage from 2 GB to 8 GB
+                                                
+                                                
+while remaining a 32-bit interpreter. Demand paging was
+introduced, reducing the cost of running an Urbit ship from
+over $10 per month to $0.15 per month on some hosting
+platforms.
+</p><!--l. 305--><p class="indent" >   The runtime was broken into two processes, allowing I/O
+and Arvo event processing to run in parallel. The event log
+was moved out of a custom ﬁle into an <span 
+class="ec-lmcsc-10">lmdb </span>database, then
+broken up into “epochs” allowing for event log rollover and
+truncation. The I/O drivers in the runtime have continued to
+be developed, including full rewrites of the <span 
+class="ec-lmcsc-10">http</span>, Ames, and
+terminal drivers.
+</p><!--l. 307--><p class="indent" >   The Ares project, close to initial deployment as of writing,
+includes a clean-slate rewrite of the Nock interpreter, using an
+all-new allocator, a novel static analysis technique called
+Subject Knowledge Analysis to achieve substantial Nock
+execution speed improvements, and a new persistence module
+called the Persistent Memory Arena, using a copy-on-write B+
+tree to keep memory pages synchronized between disk and
+<span 
+class="ec-lmcsc-10">ram</span>.
+</p><!--l. 309--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.5   </span> <a 
+ id="x1-300004.5"></a>Control Plane</h4>
+<!--l. 311--><p class="noindent" >Since Urbits are now commonly run in one of a few cloud
+hosting platforms, the Khan I/O driver and vane were added,
+giving Urbit an explicit external control plane. Khan can
+manage runtime lifecycle events and send arbitrary commands
+and queries to a running ship, all over a Unix domain socket.
+This has facilitated cloud orchestration of large ﬂeets of Urbit
+ships. NativePlanet’s GroundSeg user-facing ship management
+interface (<a 
+ id="x1-30001"></a> NativePlanet, 2024) also uses Khan, in a self-hosted
+setting.
+</p><!--l. 313--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a 
+ id="x1-310005"></a>Extensibility</h3>
+                                                
+                                                
+<!--l. 315--><p class="noindent" >A large portion of development eﬀorts since the whitepaper
+has gone into various improvements in making the system
+extensible. Mostly this has been in the direction of userspace
+applications, but some runtime extensibility has also been
+added.
+</p><!--l. 317--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">5.1   </span> <a 
+ id="x1-320005.1"></a>Software Distribution</h4>
+<!--l. 319--><p class="noindent" >In 2021, a major incision was made into Clay, Gall, Kiln (the
+userspace agent that manages agent upgrades), and the
+Arvo kernel to enable application developers to publish
+bundles of source code that could be installed and run as
+applications.
+</p><!--l. 321--><p class="indent" >   Before that, a user would have to run a command-line
+merge in order to install any software other than the base
+distribution. This eﬀectively meant forking the source code of
+your ship, and it commonly caused downstream issues when
+trying to stay up to date. Within a few months of launching
+this feature, several Urbit application companies formed to
+take advantage of the new capability.
+</p><!--l. 323--><p class="indent" >   This system has evolved some in the ensuing few years, but
+the basic concepts and components remain the same as the
+ones introduced in 2021.
+</p><!--l. 325--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">5.2   </span> <a 
+ id="x1-330005.2"></a>Clay Static Linking and Deduplication</h4>
+<!--l. 327--><p class="noindent" >Once users started to have multiple desks with complex
+applications in them, the Ford build system started to have
+quite a bit of duplication, where multiple desks would build
+the exact same library or ﬁletype deﬁnition, leading to several
+copies of common libraries in memory.
+</p><!--l. 329--><p class="indent" >   Having many copies of the same library in memory is a
+well-known problem with static linking, which is logically
+what Ford does to link Hoon programs together. The
+                                                
+                                                
+linking step is a trivial dynamically typed (“vase-mode”)
+‘cons’ operation, since Hoon’s variable lookup simply
+traverses the “subject” (environment) type left-to-right.
+Importing a library means prepending that library to the
+environment.
+</p><!--l. 331--><p class="indent" >   Fortunately, because Urbit supports structural sharing and
+Ford is a purely functional build system, a referentially
+transparent cache was added to Ford. This cache does not
+know which desk a build is being run in, so it can cache and
+deduplicate builds across desks seamlessly without losing the
+logical static linking (see <a 
+ id="x1-33001"></a> ~rovnys-ricfer and ~wicdev-wisryt
+(2024), pp. 75–82 in this issue).
+</p><!--l. 333--><p class="indent" >   Urbit thus gets the best of both worlds: the sanity of
+static linking and the memory deduplication of dynamic
+linking.
+</p><!--l. 335--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">5.3   </span> <a 
+ id="x1-340005.3"></a>Clay Tombstoning</h4>
+<!--l. 337--><p class="noindent" >Besides noun deduplication, Clay has also introduced a
+tombstoning system. Files in all revisions before the current
+one may be “tombstoned”, meaning that the old data has been
+deleted and just the reference remains. Tombstoning policy
+can be conﬁgured for ﬁles, directories, etc, so that large ﬁles
+aren’t duplicated while full revision history can be retained for
+other things where it’s appropriate.
+</p><!--l. 339--><p class="indent" >   Tombstoning is not at odds with the referential
+transparency of scries, since a scry attempt may return
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>, a permanent scry failure (that resource will never be
+available).
+</p><!--l. 341--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">5.4   </span> <a 
+ id="x1-350005.4"></a>Userspace Permissions</h4>
+<!--l. 343--><p class="noindent" >As users install more applications, it becomes increasingly
+important for the system to be able to protect itself and other
+                                                
+                                                
+apps from a malicious app. A basic measure was introduced
+in 2023 so that a Gall agent can tell which other local
+agent sent it a command. This “poke provenance” was
+enough to prevent certain kinds of confused deputy attacks
+involving ships delegating some functionality to their
+moons.
+</p><!--l. 345--><p class="indent" >   For full protection, however, a system of “userspace
+permissions” is required, where the user must approve an
+agent’s access to kernel features and other applications with
+some granularity. Such a system was prototyped in late 2022
+and is scheduled for further development and deployment later
+in 2024.
+</p><!--l. 347--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a 
+ id="x1-360006"></a>Conclusion</h3>
+<!--l. 349--><p class="noindent" >Urbit development has begun to realize many of the promises
+of the 2016 whitepaper. The system is more reliable, more
+scalable, more extensible, and more secure than it was then.
+The network has grown to include thousands of users, and the
+system is now capable of supporting a much larger userbase.
+Indeed, this article omits many quality-of-life improvements,
+such as scrying over <span 
+class="ec-lmcsc-10">http</span>, EAuth, <code class="lstinline"><span style="color:#000000">%bout</span></code> timing hints,
+bootstrap pill management, reliability and usability of Tlon’s
+social media application, color printing, ordered map
+data structures, compile-time evaluation in Hoon, the
+Bridge contract operations tool for Azimuth, and details of
+the Urbit HD wallet. More detail on past and planned
+accomplishments are provided at the published roadmap,
+<a 
+href="https://roadmap.urbit.org/" class="url" >https://roadmap<span 
+class="cmmi-10">.</span>urbit<span 
+class="cmmi-10">.</span>org/</a>.
+</p><!--l. 351--><p class="indent" >   While more work remains to be done, the kernel of Urbit is
+sound and the contours of the kelvin-cooled system have
+begun to assume more resolution.  <img 
+src="ustj-logo-.png" alt="PIC"  
+ />
+</p><!--l. 353--><p class="noindent" >
+                                                
+                                                
+</p>
+   <h3 class="likesectionHead"><a 
+ id="x1-37000"></a>Appendix</h3>
+<a 
+ id="Q1-1-38"></a>
+<!--l. 356--><p class="noindent" >This appendix addresses developments from content in the
+whitepaper by section. While this is somewhat narratively
+unsatisfactory, it provides an easy reference. In cases where no
+signiﬁcant changes have been made, the section has been
+omitted.
+</p><!--l. 358--><p class="indent" >   Accessing Urbit’s namespace as a <span 
+class="ec-lmcsc-10">fuse </span>ﬁlesystem still
+has not been implemented. Some of the whitepaper was
+written in the “prophetic present tense”, and while a lot
+of those prophecies have come true, that one remains
+aspirational.
+</p><!--l. 360--><p class="indent" >   Web 2.0 interoperability (as the whitepaper discusses,
+Urbit as a “browser for the server side”) has been partially
+superseded by Web3 interoperability. In 2016 Web3 barely
+existed, but by 2024 it has become a relatively established
+industry. Over the last few years, acceptance of Urbit’s
+complementary nature to blockchains has broadened.
+</p><!--l. 362--><p class="indent" >   Web3 is based on the idea of individual sovereignty: open
+entry and permissionless extensibility. Blockchains strive to
+provide these properties for public, global state. For individual
+sovereignty over personal and private social computing,
+something like Urbit is needed. Web3 has an Urbit-shaped
+hole.
+</p><!--l. 364--><p class="indent" >   Urbit is still “neither secure nor reliable”, but it is much
+more reliable than back then. We estimate that about two
+more “nines” have been added to its uptime percentage.
+Error handling has improved dramatically. Userspace
+apps can be managed by a user. The runtime and kernel
+both clean up after themselves better in several diﬀerent
+ways, so crashes due to resource exhaustion are much less
+common.
+</p><!--l. 366--><p class="indent" >   All of the commands that users now lean on for managing
+resource usage were written after the whitepaper: </p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 368--><p class="noindent" ><code class="lstinline"><span style="color:#000000">|trim</span></code> cache pruning
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 369--><p class="noindent" ><code class="lstinline"><span style="color:#000000">|pack</span></code> defragmentation
+     </p></li>
+     <li class="itemize">
+     <!--l. 370--><p class="noindent" ><code class="lstinline"><span style="color:#000000">|meld</span></code> deduplication
+     </p></li>
+     <li class="itemize">
+     <!--l. 371--><p class="noindent" ><code class="lstinline"><span style="color:#000000">chop</span></code> event log truncation
+     </p></li>
+     <li class="itemize">
+     <!--l. 372--><p class="noindent" ><code class="lstinline"><span style="color:#000000">roll</span></code> event log rollover</p></li></ul>
+<!--l. 375--><p class="indent" >   Nock’s changes going from 5K to 4K resulted from
+~fodwyt-ragful’s bytecode interpreter in 2018. Three changes
+were made:
+</p><!--l. 377--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-37002x1">
+     <!--l. 378--><p class="noindent" >The  Nock  5  equality  check  opcode  was  tweaked
+     to  enforce  taking  two  subexpressions,  rather  than
+     optionally  taking  a  single  expression  that  could
+     return a cell (pair), whose head and tail would then
+     be compared for equality. This optionality turned out
+     to be annoying when writing an interpreter, and it
+     provided little utility.
+     </p></li>
+<li 
+  class="enumerate" id="x1-37004x2">
+     <!--l. 379--><p class="noindent" >Nock  version  4  added  a  new  Nock  10  opcode  to
+     replace part of a tree with a new value. Creating
+     mutant trees like this is a basic operation that Hoon
+     code performs regularly, using the <code class="lstinline"><span style="color:#000000">%=</span></code> rune and its
+                                                
+                                                
+     variants (<code class="lstinline"><span style="color:#000000">%*</span></code>, <code class="lstinline"><span style="color:#000000">%_</span></code>, <code class="lstinline"><span style="color:#000000">=.</span></code>, and <code class="lstinline"><span style="color:#000000">=:</span></code>). Before the addition
+     of  the  Nock  10  opcode,  the  Hoon  compiler  would
+     use  the  type  of  the  trees  involved  in  a  mutation
+     expression to codegen a tuple of Nock “auto-cons”
+     expressions (cells of expressions that return cells of
+     their results) that would reconstruct the mutant tree
+     out  of  the  new  subtree  cons’d  together  with  the
+     remaining pieces of the original tree.
+     </p><!--l. 381--><p class="noindent" >This had a few problems. It allocated more Nock cells
+     at runtime than needed. It prevented the interpreter
+     from optimizing in-place mutation of a noun with
+     a reference count of one. If no one else is looking,
+     creating a mutant copy can be done by overwriting
+     the noun in-place and nobody can tell on you. <span 
+class="ec-lmcsc-10">apl</span>
+     interpreters, which have a similar memory model to
+     Nock nouns, usually include this optimization, and
+     Urbit’s current runtime does as well.
+     </p></li>
+<li 
+  class="enumerate" id="x1-37006x3">
+     <!--l. 383--><p class="noindent" >A tertiary beneﬁt to adding Nock 10 was that the
+     calling convention for “slamming a gate” (providing
+     an argument to an anonymous function and running
+     the  function’s  body)  could  now  be  expressed  in
+     statically  generated  Nock  code  without  needing
+     to  invoke  the  Hoon  compiler.  This  allowed  a  bit
+     of  additional  expressivity  in  some  Hoon  standard
+     library routines that call into untyped Nock.</p></li></ol>
+<!--l. 386--><p class="indent" >   Parsing and compiling are still slow, unfortunately, but
+there have been massive performance improvements to Hoon
+compilation, especially in memory usage. In 2017 compiling
+kernelspace would use around a gigabyte of <span 
+class="ec-lmcsc-10">ram</span>; now it uses
+on the order of a hundred megabytes. Reducing this memory
+pressure alleviated a lot of crashes from out-of-memory errors
+(<code class="lstinline"><span style="color:#000000">bail:meme</span></code> errors) – it was a major contributor to the
+increase in overall reliability.
+</p><!--l. 388--><p class="indent" >   The Udon and Sail domain-speciﬁc languages were added
+                                                
+                                                
+to Hoon, for Markdown-like rich text and <span 
+class="ec-lmcsc-10">xml</span>/<span 
+class="ec-lmcsc-10">html</span>,
+respectively. There is a tentative consensus among core
+developers that these <span 
+class="ec-lmcsc-10">dsl</span>s should be kicked up a layer out
+of the base Hoon language, but making Hoon syntax
+recursively extensible likely requires splitting out the
+deﬁnition of the Hoon <span 
+class="ec-lmcsc-10">ast </span>into a recursion scheme, which is
+nontrivial.
+</p><!--l. 390--><p class="indent" >   Hoon’s recent changes have reduced the prevalence of
+the “<span 
+class="ec-lmcsc-10">tmi </span>problem”. Since Hoon’s type system supports
+subtyping, it is common for code to fail to compile due to
+having “too much information” (<span 
+class="ec-lmcsc-10">tmi</span>) – sometimes a more
+speciﬁc type cannot be used in place of a more general one,
+namely when that type is in “contravariant position”. For
+example, if the type of some ﬁeld in the Hoon subject was a
+list but was specialized in a conditional branch to be a
+non-null list, attempting to “overwrite” (really, create a
+mutant copy of) that ﬁeld in the subject with a normal list,
+the compiler will throw a type error because it cannot
+guarantee that the normal list is not null. If the compiler
+did not know the subject’s list ﬁeld was non-null, then
+overwriting it with some other list would “just work”. Almost
+always, the eventual result of the expression admits a null
+list, so the type error is an annoyance rather than an
+assurance.
+</p><!--l. 392--><p class="indent" >   Hoon type system changes have also included multiple
+attempts at resolving another diﬃculty with subtyping:
+“wetness”. A “wet core” is a Hoon core (pair of code
+and data, where the code is run using the whole core
+as the subject) with a “sample” (argument slot – the
+head of the “data” tail by convention in the type system)
+whose type can vary. This is very closely related to the
+mathematical idea of parametric polymorphism. Like
+some other languages (including Haskell), Hoon does
+not strictly guarantee “parametricity”, but wetness is
+used to implement parametrically polymorphic functions
+and even type constructors (called “mold builders” in
+Hoon).
+</p><!--l. 394--><p class="indent" >   Wetness has an issue where the “faces” (names for
+particular slots within the tree) in the sample type in the
+                                                
+                                                
+deﬁnition of the wet core can diﬀer from the faces in the
+sample type at any given call site. Deciding which of those
+faces to use in the body of the code is a subtle, thorny
+problem. The Hoon at the time of the whitepaper employed
+one solution; another was written afterward, around 2017; a
+third was deployed in 2019. This last revision, called
+“repainting”, is generally thought to be the right strategy, but
+its implementation remains unﬁnished in 2024 – it has an issue
+where the precedence of call-site vs. deﬁnition-site face names
+is not preserved under recursion. This issue will need to be
+ﬁxed before we can say the right answer to this issue has been
+achieved.
+</p><!--l. 396--><p class="indent" >   Wetness in general is an interesting and novel approach to
+both polymorphic and recursive types, both of which are
+directly represented as lazily evaluated types (Urbit core
+developers often call the “evaluation” step “type inference”
+informally, but it corresponds to the “type synthesis” direction
+of a bidirectional typechecker in type theory terminology).
+This has pros and cons.
+</p><!--l. 398--><p class="indent" >   On one hand, this representation allows for more
+expressivity than many comparable type systems at around
+the same spot on <a 
+ id="x1-37007"></a> Barendregt’s lambda cube (: types and
+values can both depend on types). For example, the <code class="lstinline"><span style="color:#000000">$_</span></code> rune
+allows the programmer to declare the type of one expression in
+terms of the return type of any other expression, without that
+expression ever needing to be run, only “type-inferred”
+(synthesized). This is very convenient for programs that return
+modiﬁed versions of themselves, which is ubiquitous in
+Urbit.
+</p><!--l. 400--><p class="indent" >   On the other hand, wetness can be diﬃcult to reason
+about – it is the hardest part of Hoon to understand
+fully. In addition, it likely slows down the Hoon compiler
+considerably, since every call-site needs to run a separate
+full type synthesis step, and in chains of wet calls, that
+synthesis becomes recursive. It is not diﬃcult to imagine
+running up against exponential asymptotics in a system like
+this.
+</p><!--l. 402--><p class="indent" >   There is some interest among core developers in
+experimenting with a more constrained type scheme that
+                                                
+                                                
+could be compiled to a fully evaluated data structure with de
+Bruijn indices. Such a quantiﬁed type scheme with binders
+could make Hoon’s type system easier to learn and reason
+about.
+</p><!--l. 404--><p class="indent" >   The formal Arvo boot sequence as described in the
+whitepaper was not implemented at the time it was written. It
+was deployed in 2019. Around the same time a lot of other
+runtime changes were made. The runtime was split into
+an I/O process and an Arvo worker process. The event
+log was switched from a custom binary ﬁle to the <span 
+class="ec-lmcsc-10">lmdb</span>
+database.
+</p><!--l. 406--><p class="indent" >   Meanwhile, in userspace, the <code class="lstinline"><span style="color:#000000">%spider</span></code> agent was added,
+to run a new kind of userspace program: a <code class="lstinline"><span style="color:#000000">%thread</span></code>. This is
+not a separate processor thread of execution, but rather a
+system of monadic I/O based heavily on Haskell’s I/O monad.
+Unlike agents, which are designed to allow a programmer to
+implement multiple long-lived asynchronous operations
+concurrently using non-blocking I/O, a thread is designed for
+building a linear sequence of asynchronous operations, more
+akin to a coroutine.
+</p><!--l. 408--><p class="indent" >   Arvo’s “duct” as a reiﬁed vane call stack is still very much
+in use. The patterns of use have evolved somewhat. It is now
+much more common for vanes to use “synthetic ducts” as the
+origins of certain operations to disconnect them from their
+cause.
+</p><!--l. 410--><p class="indent" >   For example, Ames uses a synthetic duct for each
+“ﬂow” (Ames’s version of a socket connection) to set
+packet re-send timers for that ﬂow and pass requests
+to other vanes. This disconnects the ﬂow’s duct from
+the duct that the runtime used to inject the event into
+Arvo, preventing Unix process restarts from causing
+desynchronization. As another example, Gall now uses a
+per-agent synthetic duct for the moves coming out of that
+agent.<span class="footnote-mark"><a 
+href="mss3.html#fn2x0"><sup class="textsuperscript">2</sup></a></span><a 
+ id="x1-37008f2"></a> 
+                                                
+                                                
+</p><!--l. 412--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune no longer blocks until complete.
+Because the agent model expects non-blocking I/O, a single
+dotket could make an entire agent stuck if it can’t be
+completed. While a lot of work has gone into ﬂeshing out the
+scry namespace, core developers are now entertaining the
+notion that the expectation of synchronous access to the
+namespace might not be worth it for agents. An Urbit
+Improvement Proposal has been submitted that would remove
+the <code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune in favor of a move-based interface to
+the namespace (see <a 
+ id="x1-37009"></a> ~rovnys-ricfer, ~fodwyt-ragful, and
+~mastyr-bottec (2024), pp. 47–58 in this issue).
+</p><!--l. 414--><p class="indent" >   This shift reﬂects a subtler attitude shift toward being
+more wary about asynchronicity. Earlier Urbit designs were
+bolder about introducing asynchronous operations; more
+modern ones treat asynchronous operations as complex and
+bug-prone, to be avoided if possible. This shift has come from
+experience – it is surprising to ﬁnd race conditions in a
+single-threaded, purely functional operating system, but we
+have found and ﬁxed plenty over the years.
+</p><!--l. 416--><p class="indent" >   The whitepaper states that “most data is now in Clay”.
+This is no longer true. Now most data lives in Gall as agents
+and their state. Clay has proven diﬃcult to use for storing
+application data for a number of reasons, and Gall has become
+more featureful. There is consensus among the core developers
+that a better userspace model should be devised to unify Clay
+and Gall. One such model, called “shrubbery”, is now being
+investigated.
+</p><!--l. 418--><p class="indent" >   Urbit is still a non-preemptive OS, but it could be made
+preemptive by letting the kernel emit a Nock hint to the
+runtime to enforce a time limit on the enclosed computation.
+If it failed to complete within the given time limit, the
+runtime would abort the entire Arvo event. This would be
+considered a nondeterministic error (<code class="lstinline"><span style="color:#000000">bail:fail</span></code>), like a
+user-initiated event interruption (Ctrl-C). This could
+potentially even be used to turn Urbit into a real-time
+OS.
+</p>
+                                                
+                                                
+<!--l. 420--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-38000"></a><span 
+class="ec-lmbx-10">3.1 Uniform Persistence</span></span>
+   Signiﬁcant work has gone into improving the runtime’s
+implementation of uniform persistence: </p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 424--><p class="noindent" >demand paging to allow storage of more data on disk
+     than ﬁts in <span 
+class="ec-lmcsc-10">ram</span>;
+     </p></li>
+     <li class="itemize">
+     <!--l. 425--><p class="noindent" >a guard page to eﬃciently prevent stack smashing;
+     </p></li>
+     <li class="itemize">
+     <!--l. 426--><p class="noindent" >a   snapshot   migration   framework   to   facilitate
+     upgrades;
+     </p></li>
+     <li class="itemize">
+     <!--l. 427--><p class="noindent" >separating ephemeral and persistent state to avoid
+     extraneous disk writes;
+     </p></li>
+     <li class="itemize">
+     <!--l. 428--><p class="noindent" >using the <span 
+class="ec-lmcsc-10">lmdb </span>database for the event log, instead
+     of a custom binary ﬁle;
+     </p></li>
+     <li class="itemize">
+     <!--l. 429--><p class="noindent" >the Ares project’s Persistent Memory Arena (<span 
+class="ec-lmcsc-10">pma</span>), a
+     general-purpose single-level store that can eﬃciently
+     manage the persistence and paging for 64 terabytes
+     of data, using a copy-on-write B+ tree;
+     </p></li>
+     <li class="itemize">
+     <!--l. 430--><p class="noindent" >the “epoch system”, which broke the event log into
+     epochs, allowing event log rollover and truncation;
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 431--><p class="noindent" >persistent                    Nock                    caches,
+     allowing arbitrary computations to be memoized in
+     the runtime in a way that persists across Arvo events
+     and Unix process restarts.</p></li></ul>
+<!--l. 434--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-39000"></a><span 
+class="ec-lmbx-10">3.2 Source-Independent Networking</span></span>
+   Ames is still sequential and idempotent for commands.
+Despite having been described as “content-centric” and
+“source-independent” in the whitepaper, those two properties
+are only now being realized, in the “directed messaging”
+project that is currently underway. Directed messaging
+refactors Ames to be much more like the Named Data
+Networking project (<a 
+ id="x1-39001"></a> Zhang et al., 2014): packets and
+messages are both constrained to be request/response, with
+routing being achieved using a Pending Interest Table just like
+in <span 
+class="ec-lmcsc-10">ndn</span>.
+</p><!--l. 438--><p class="indent" >   Directed messaging supports network reads in the form of
+namespace reads. A ship can send a network request
+to read from another ship’s namespace. The requesting
+ship sends request packets containing a scry path, and
+the publishing ship responds with an authenticated scry
+binding: a pair of the path and the data bound to that
+path.
+</p><!--l. 440--><p class="indent" >   Network writes (commands) are factored in terms of
+reads: a write request is sent as a read request for an
+acknowledgment that the command has been performed by
+the receiving ship. When the receiving ship hears this
+request, it sends a network read request to download
+the command datum from the sending ship, who has
+published it in its scry namespace. Once the command
+ﬁnishes downloading, the receiving ship performs the
+command and makes the acknowledgment available in its own
+namespace.
+</p><!--l. 442--><p class="indent" >   As an optimization, the requesting ship places the ﬁrst
+fragment of the command datum in the ﬁrst request packet it
+                                                
+                                                
+sends. In the common case of a 1 KB command datum, the
+entire command+ack interaction consists of a single packet
+roundtrip.
+</p><!--l. 444--><p class="indent" >   This is only the latest in a series of changes that have been
+made to Ames since the whitepaper: </p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 446--><p class="noindent" >it is now backed by Azimuth, on the blockchain
+     </p></li>
+     <li class="itemize">
+     <!--l. 447--><p class="noindent" >it supports personal continuity breaches
+     </p></li>
+     <li class="itemize">
+     <!--l. 448--><p class="noindent" >“stateless forwarding” brought orders of magnitude
+     more scalability
+     </p></li>
+     <li class="itemize">
+     <!--l. 449--><p class="noindent" >the  <code class="lstinline"><span style="color:#000000">%clog</span></code>  backpressure  system  was  added  to
+     prevent  unbounded  packet  queueing  on  publisher
+     ships; this was later tuned for better performance
+     </p></li>
+     <li class="itemize">
+     <!--l. 450--><p class="noindent" >ﬂows can now be closed, so their memory resources
+     can be reclaimed
+     </p></li>
+     <li class="itemize">
+     <!--l. 451--><p class="noindent" >“dead  ﬂow  consolidation”:  outbound  requests  to
+     unresponsive ships now share one global timer every
+     two minutes, dramatically reducing the number of
+     Arvo events
+     </p></li>
+     <li class="itemize">
+                                                
+                                                
+     <!--l. 452--><p class="noindent" >the  <code class="lstinline"><span style="color:#000000">%flub</span></code> system  was  added  to  close  a  DoS
+     vulnerability: the system can drop incoming requests
+     until  it  is  ready  to  process  them,  without  any
+     queueing
+     </p></li>
+     <li class="itemize">
+     <!--l. 453--><p class="noindent" >the  <code class="lstinline"><span style="color:#000000">|snub</span></code> and  <code class="lstinline"><span style="color:#000000">|ruin</span></code> commands  were  added  to
+     allow manual blacklisting of peers
+     </p></li>
+     <li class="itemize">
+     <!--l. 454--><p class="noindent" >network reads have been implemented </p>
+         <ul class="itemize2">
+         <li class="itemize">
+         <!--l. 456--><p class="noindent" >the Fine remote scry protocol
+         </p></li>
+         <li class="itemize">
+         <!--l. 457--><p class="noindent" >the  <code class="lstinline"><span style="color:#000000">%chum</span></code> one-to-one  encrypted  remote  scry
+         protocol
+         </p></li>
+         <li class="itemize">
+         <!--l. 458--><p class="noindent" >the    one-to-many    encrypted    remote    scry
+         protocol</p></li></ul>
+     </li></ul>
+<!--l. 462--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-40000"></a><span 
+class="ec-lmbx-10">3.4 Interruption, etc.</span></span>
+   There are still no worker threads, but a potential
+strategy has been devised for them, and the Ares <span 
+class="ec-lmcsc-10">pma</span>
+should support parallel execution. There are still no event
+timeouts, but we do not expect them to be diﬃcult to
+implement.
+                                                
+                                                
+</p>
+<!--l. 464--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-41000"></a><span 
+class="ec-lmbx-10">3.5 Solid-State Interpreter</span></span>
+   While there is not yet a unikernel, a speciﬁcation has been
+written for one. There is no Raft cluster but the <code class="lstinline"><span style="color:#000000">%phoenix</span></code>
+app now uses encrypted remote scry to back up application
+state. There have also been proposals to use FoundationDB to
+replicate event log storage.
+</p>
+<!--l. 466--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-42000"></a><span 
+class="ec-lmbx-10">4.2 Larval State</span></span>
+   This section is still applicable. Arvo still has a larval stage,
+and it does more or less the same thing.
+</p><!--l. 470--><p class="indent" >   The “bring your own boot system” work, which has been
+built but not deployed, will allow a user to assemble a
+boot sequence out of kernel source and a list of userspace
+desks (app source packages). This could also be used to
+facilitate “quickboot”. Nock caches could be injected into the
+runtime along with kernel or app source. These caches could
+contain all invocations of the Hoon parser and compiler,
+reducing boot time to well under a second on common
+machines.
+</p>
+<!--l. 472--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-43000"></a><span 
+class="ec-lmbx-10">5.1 Nouns</span></span>
+   The Murmur3 system was aspirational but has been
+subsequently realized. A few years ago, a horrendous bug was
+found and ﬁxed in the “mug” short hash for cells: the
+algorithm was symmetric, so <code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">0]</span></code> hashed to the same value
+as <code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">1]</span></code>. This led to far more hash collisions than there
+should have been, degrading the asymptotics of a number of
+data structures.
+</p>
+<!--l. 474--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-44000"></a><span 
+class="ec-lmbx-10">6.3 Nock Optimization</span></span>
+                                                
+                                                
+   The “jet dashboard” (the module in the runtime responsible
+for registering, matching, and running jets) has been rewritten
+multiple times. ~fodwyt-ragful has proposed a jet dashboard
+that would match Nock formulas on the basis of noun equality
+rather than matching Nock cores (a code/data pair used as
+the unit of code organization) while ignoring mutable
+slots, the way the previous ones have worked. This would
+have the advantage of simplicity, but it could be more
+diﬃcult to implement more complex pieces of code, such as
+closures.
+</p><!--l. 476--><p class="indent" >   The Ares project has another new approach to jet
+matching, which is to resolve the matching statically
+during a transpilation step from Nock to a more optimized
+representation. This is facilitated by a novel static analysis
+technique for Nock, called Subject Knowledge Analysis (<span 
+class="ec-lmcsc-10">ska</span>),
+the brainchild of ~ritpub-sipsyl. <span 
+class="ec-lmcsc-10">ska </span>analyzes the data
+dependencies within a Nock formula, allowing inference about
+the tree shape of the “subject” (environment, or scope) at
+diﬀerent points of the computation. <span 
+class="ec-lmcsc-10">ska </span>should allow for more
+eﬃcient registerization of intermediate values, and will also
+provide enough information to statically compute whether a
+jet will match. The goal is for Ares to convert a hot loop in
+Nock into similar machine code that would be emitted by a C
+compiler, including direct jumps back to the start of the
+loop.
+</p><!--l. 478--><p class="indent" >   The Rust interpreter project mentioned in the whitepaper
+is dead, but in the meantime several other interpreters have
+been written:
+</p><!--l. 480--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-44002x1">
+     <!--l. 481--><p class="noindent" >Jaque,    written    using    the    Graal/Truﬄe    <span 
+class="ec-lmcsc-10">jit</span>
+     framework;
+     </p></li>
+<li 
+  class="enumerate" id="x1-44004x2">
+                                                
+                                                
+     <!--l. 482--><p class="noindent" >NockJS,  an  interpreter  in  JavaScript  that  uses
+     trampolining;
+     </p></li>
+<li 
+  class="enumerate" id="x1-44006x3">
+     <!--l. 483--><p class="noindent" >cl-urbit, a Common Lisp interpreter used as a jet
+     dashboard testbed; and
+     </p></li>
+<li 
+  class="enumerate" id="x1-44008x4">
+     <!--l. 484--><p class="noindent" >Ares, written in Rust and C, intended as the next
+     mainline interpreter version.</p></li></ol>
+<!--l. 487--><p class="indent" >   In 2019, a custom Nock bytecode was written and
+deployed. This was so much faster than the old tree-walking
+interpreter that we were able to delete tens of thousands of
+lines of C code that jetted the Hoon compiler. Until then, the
+Hoon compiler was almost entirely jetted, since the Nock
+interpretation overhead was so bad. Since then, the allocator
+and Nock function calls have been slow, but the speed of
+Nock noun manipulation has been comparable to manual
+manipulation in C.
+</p><!--l. 489--><p class="indent" >   An interesting optimization that was added to Vere more
+recently is called “tail-call modulo cons” (<a 
+ id="x1-44009"></a> Leijen and
+Lorenzen, 2023). This approach allows recursive loops that
+are almost tail-recursive to be optimized as if they are
+tail-recursive, as long as the only operation that happens after
+each recursive call is a “cons” that prepends or appends
+another value to the result of the recursion.
+</p><!--l. 491--><p class="indent" >   Another optimization, introduced with the bytecode
+interpreter and reﬁned recently, was to optimize the Nock 10
+opcode that overwrites a slot in a tree. In the case that there
+is only one reference to the tree being modiﬁed, the mutation
+can be performed in-place, by overwriting memory, rather
+than by allocating a new mutant tree and then decrementing
+the refcount on the old one.
+                                                
+                                                
+</p>
+<!--l. 493--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-45000"></a><span 
+class="ec-lmbx-10">6.5 Transition Function</span></span>
+   The whitepaper mentions oﬀ-handedly that Nock could not
+be replaced. While this author does not expect Nock to
+be changed, much less replaced, this could be done if
+needed. Such implementation is left as an exercise for the
+reader.
+</p>
+<!--l. 497--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-46000"></a><span 
+class="ec-lmbx-10">7.1 Hoon Semantics</span></span>
+   Hoon has grown, but the semantics have largely remained
+intact. <code class="lstinline"><span style="color:#000000">$span</span></code> and <code class="lstinline"><span style="color:#000000">$twig</span></code> have been renamed, but this may
+be reverted at some point. (Most core developers prefer the
+older names.) Core types have “chapters” added to them,
+mostly for documentation purposes.
+</p><!--l. 501--><p class="indent" >   Head recursion still requires a cast in Hoon. The compiler
+can go into an inﬁnite loop if given malformed input.
+Interestingly, of all the challenges experienced by Hoon
+developers, this has turned out not to be a severe issue in
+practice. (Future language designers take note: needing to hit
+Ctrl-C if your compilation takes a lot longer than normal is
+not a show stopper.)
+</p><!--l. 503--><p class="indent" >   Hoon keywords, employed in the whitepaper appendices,
+was removed due to disuse and disinterest. Keyword Hoon
+may be re-introduced for pedagogical purposes, but for all
+essential purposes, runes are the most expressive and intuitive
+way to think about Hoon as a mature developer.
+</p>
+<!--l. 505--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-47000"></a><span 
+class="ec-lmbx-10">7.2 Type Deﬁnition</span></span>
+   All of the whitepaper’s high-level claims about Hoon are still
+true, but a few changes to mold (type) declaration and the
+scope of the language’s keyword equivalent (runes) has been
+                                                
+                                                
+expanded.<span class="footnote-mark"><a 
+href="mss4.html#fn3x0"><sup class="textsuperscript">3</sup></a></span><a 
+ id="x1-47001f3"></a> 
+There have been two or three revisions of syntax and type
+system. The latest change added “doccords”, a form of
+docstring, to the syntax.
+</p><!--l. 509--><p class="indent" >   The syntax for declaring molds has changed, and as of the
+last major revision to the mold system in 2019, it is now
+possible to add a predicate gate to a mold deﬁnition that
+will be run whenever the derived mold function (“gate”)
+is run to coerce a raw noun into a noun of that type.
+This is useful for ingesting data that has constraints
+other than tree shape, such as the ordering of keys in a
+map.
+</p><!--l. 511--><p class="indent" >   A number of runes have been added to Hoon:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-47003x1">
+     <!--l. 514--><p class="noindent" ><code class="lstinline"><span style="color:#000000">|$</span></code> barbuc (produce mold builder wet gate)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47005x2">
+     <!--l. 515--><p class="noindent" ><code class="lstinline"><span style="color:#000000">|@</span></code> barpat (produce wet core)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47007x3">
+     <!--l. 516--><p class="noindent" ><code class="lstinline"><span style="color:#000000">$|</span></code> bucbar (produce structure to satisfy validator)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47009x4">
+     <!--l. 517--><p class="noindent" ><code class="lstinline"><span style="color:#000000">$&#x003C;</span></code> bucgal (ﬁlter a mold, exclude)
+     </p></li>
+                                                
+                                                
+<li 
+  class="enumerate" id="x1-47011x5">
+     <!--l. 518--><p class="noindent" ><code class="lstinline"><span style="color:#000000">$&#x003E;</span></code> bucgar (ﬁlter a mold, match)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47013x6">
+     <!--l. 519--><p class="noindent" ><code class="lstinline"><span style="color:#000000">$:</span></code> bucmic (enter manual value mode)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47015x7">
+     <!--l. 520--><p class="noindent" ><code class="lstinline"><span style="color:#000000">$~</span></code> bucsig (deﬁne default custom type value)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47017x8">
+     <!--l. 521--><p class="noindent" ><code class="lstinline"><span style="color:#000000">#/</span></code> haxfas (produce typed path)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47019x9">
+     <!--l. 522--><p class="noindent" ><code class="lstinline"><span style="color:#000000">+$</span></code> lusbuc (type constructor arm)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47021x10">
+     <!--l. 523--><p class="noindent" ><code class="lstinline"><span style="color:#000000">+*</span></code> lustar (door alias)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47023x11">
+     <!--l. 524--><p class="noindent" ><code class="lstinline"><span style="color:#000000">;&#x003C;</span></code> micgal (monadic do notation)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47025x12">
+     <!--l. 525--><p class="noindent" ><code class="lstinline"><span style="color:#000000">^~</span></code> tissig (compose many expressions)
+                                                
+                                                
+     </p></li>
+<li 
+  class="enumerate" id="x1-47027x13">
+     <!--l. 526--><p class="noindent" ><code class="lstinline"><span style="color:#000000">?#</span></code> wuthax (match type, experimental)
+     </p></li>
+<li 
+  class="enumerate" id="x1-47029x14">
+     <!--l. 527--><p class="noindent" ><code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal (extract vase to mold)</p></li></ol>
+<!--l. 530--><p class="indent" >   The canonical pronunciations for syllables was changed in
+2019, then reverted due to eﬀectively unanimous demand.
+The one modiﬁcation that persisted was the change of <code class="lstinline"><span style="color:#000000">;</span></code>
+from ‘sem’ to ‘mic’, since ‘sem’ sounded too close to ‘cen’
+(<code class="lstinline"><span style="color:#000000">%</span></code>).
+</p><!--l. 532--><p class="indent" >   The Hoon type system used to use an idempotence check
+when coercing a raw noun into a typed noun. As of the 2019
+type system revision, that check has been removed, and the
+mold gate will crash (<code class="lstinline"><span style="color:#000000">!!</span></code> zapzap) if the noun fails to
+validate.
+</p>
+<!--l. 534--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-48000"></a><span 
+class="ec-lmbx-10">8.1 Arvo Kernel Interface</span></span>
+   Arvo’s <code class="lstinline"><span style="color:#000000">+peek</span></code> arm is employed much more than it used to
+be, since we make heavier use of the namespace, and because
+as Urbit matures, the runtime needs to do more inspection of
+the Arvo state.
+</p><!--l. 536--><p class="indent" >   The “wires” (request identiﬁer paths) that Vere uses were
+cleaned up to share the same conventions and match the name
+of the target vane.
+</p>
+<!--l. 538--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-49000"></a><span 
+class="ec-lmbx-10">8.2 Arvo Kernel Modules</span></span>
+   Vane routing has long used only the ﬁrst letter of the vane;
+this is now specialized to the standard vanes, and new
+vanes can be added that have an arbitrary number of
+letters, although four-letter vane names remain standard.
+                                                
+                                                
+This allows for an arbitrary number of vanes, not 26
+maximum.
+</p><!--l. 540--><p class="indent" >   The vanes have changed quite a bit since the whitepaper
+was written. No vane has remained untouched.
+</p><!--l. 542--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-49002x1">
+     <!--l. 543--><p class="noindent" >Ames (p2p networking) was rewritten twice.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49004x2">
+     <!--l. 544--><p class="noindent" >Behn (timers) was added, rewritten, and then heavily
+     modiﬁed.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49006x3">
+     <!--l. 545--><p class="noindent" >Clay (revision control) has undergone several major
+     transformations   (discussed   elsewhere   throughout
+     this article).
+     </p></li>
+<li 
+  class="enumerate" id="x1-49008x4">
+     <!--l. 546--><p class="noindent" >Dill (terminal interaction) has been rewritten.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49010x5">
+     <!--l. 547--><p class="noindent" >Eyre  (<span 
+class="ec-lmcsc-10">http</span>)  was  rewritten  and  its  <span 
+class="ec-lmcsc-10">http  </span>client
+     functionality was split into a new vane, Iris, leaving
+     Eyre as just the server side.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49012x6">
+                                                
+                                                
+     <!--l. 548--><p class="noindent" >Ford (build system for Hoon) was written, rewritten,
+     and ﬁnally moved into Clay.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49014x7">
+     <!--l. 549--><p class="noindent" >Gall (application runner) has been rewritten and has
+     had many major changes made to it.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49016x8">
+     <!--l. 550--><p class="noindent" >Jael   (<span 
+class="ec-lmcsc-10">pki</span>)   was   added   for   secret   management,
+     rewritten to track the <span 
+class="ec-lmcsc-10">pki</span>, then modiﬁed to work
+     with the <span 
+class="ec-lmcsc-10">pki </span>rollup.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49018x9">
+     <!--l. 551--><p class="noindent" >Khan (control plane) was added to allow scripting
+     and lifecycle management from Unix.
+     </p></li>
+<li 
+  class="enumerate" id="x1-49020x10">
+     <!--l. 552--><p class="noindent" >Lick (Unix inter-process communication) was added
+     recently, so Urbit can communicate using nouns with
+     other local Unix processes.</p></li></ol>
+<!--l. 555--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-50000"></a><span 
+class="ec-lmbx-10">8.3 Structured Events</span></span>
+   Depth-ﬁrst move ordering is being revised, as described in
+more detail in an earlier section.
+</p><!--l. 557--><p class="indent" >   The whitepaper mentions it is “not conventional” in Urbit
+to use promises. <code class="lstinline"><span style="color:#000000">%spider</span></code> threads are now a major exception
+to this. Threads are all killed on upgrade to prevent leaking
+the old kernel inside the closures.
+                                                
+                                                
+</p>
+<!--l. 559--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-51000"></a><span 
+class="ec-lmbx-10">8.4 Security Mask</span></span>
+   “Arvo is single-homed” per the whitepaper. This property
+was subsequently changed to multi-homed to support
+onboarding as a comet and upgrading to a planet, then
+removed again when Azimuth was put on-chain.
+</p><!--l. 561--><p class="indent" >   The security mask is just now starting to be enforced by
+the vanes. This was necessitated by the <code class="lstinline"><span style="color:#000000">%chum</span></code> one-to-one
+encrypted remote scry protocol. Agent provenance was added
+to pokes, so an agent now knows which local agent poked
+it.
+</p><!--l. 563--><p class="indent" >   This represents a shift in thinking among core developers.
+Rather than a more monolithic, static, trusted userspace
+in earlier designs, userspace is now thought of as more
+multicentric, dynamic, and untrusted. If apps can all be
+trusted, there is no need to protect one app against the others.
+In practice, however, there is a compelling need to prevent a
+single malicious (or, equivalently, badly written) app from
+breaking the security properties of any other app. Allowing an
+app to see which other local app is poking it provides enough
+information to resolve a major class of confused deputy
+problems without implementing a full-ﬂedged capabilities
+system.
+</p><!--l. 565--><p class="indent" >   The security mask model is not expressive enough to
+encode the idea of a private group with a dynamically
+calculated set of participants. This was needed for the
+one-to-many encrypted remote scry protocol, since otherwise
+an app would need to fully materialize the set of allowed peers
+whenever it published a piece of data. The computational cost
+of this would have superlinear asymptotics, which was deemed
+unacceptable at the base layer.
+</p><!--l. 567--><p class="indent" >   Instead, the encrypted remote system has its own separate
+concept of a “security domain” as a path preﬁx, and the kernel
+performs a dynamic query when a peer asks for access to
+private data with that preﬁx. While the performance is not a
+direct comparison with the security mask solution, the
+dynamic query can typically be implemented in logarithmic
+time by the application, e. g. a binary search through a
+Hoon <code class="lstinline"><span style="color:#000000">$map</span></code> data structure (a treap). For more complex
+                                                
+                                                
+permissions models, this approach should scale much
+better.
+</p>
+<!--l. 569--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-52000"></a><span 
+class="ec-lmbx-10">9.2 Cryptosuite</span></span>
+   The cryptosuite is still not upgradeable through the
+initially intended mechanism, where an interface core would be
+sent to Ames and stored there until a kernel update, when it
+would need to be deleted and re-sent to avoid leaking the
+old kernel that would be in the closure of the crypto
+interface core. The “new” <code class="lstinline"><span style="color:#000000">crub</span></code> cryptosuite core has
+been in use for several years now, though, with standard
+cryptographic algorithms jetted by reference implementations.
+The Ames cryptosuite currently in use was audited by a
+security ﬁrm in 2020 (<a 
+ id="x1-52001"></a> ~rovyns-ricfer and ~poldec-tonteg,
+2020).
+</p><!--l. 573--><p class="indent" >   In practice, the Ames protocol has changed a few times
+since the whitepaper, but the cryptosuite has not. Allowing
+the cryptosuite to continue to upgrade after kelvin zero will
+probably still need to be implemented, but we have not yet
+done so.
+</p><!--l. 575--><p class="indent" >   For simplicity, when going on chain, the Ames protocol key
+handshake was changed to a stateless Diﬃe-Hellman key
+exchange between the public keys listed on chain. This has the
+advantage that two ships can start sending encrypted,
+authenticated packets to each other without any handshake at
+all. The downside is that forward secrecy is limited to
+on-chain key updates, which have a cost, so in practice
+there is very little forward secrecy. This will likely be
+revised in a later protocol version to support better forward
+secrecy.
+</p><!--l. 577--><p class="indent" >   With the Directed Messaging rewrite, a new packet
+authentication protocol has been added, called LockStep. This
+protocol is based on the <span 
+class="ec-lmcsc-10">bao </span>streaming authentication
+protocol (<a 
+ id="x1-52002"></a> O’Connor, 2024). Like <span 
+class="ec-lmcsc-10">bao</span>, it uses the Blake3 tree
+hash to establish ﬁngerprints for both individual packets and
+the full message datum. It diﬀers from <span 
+class="ec-lmcsc-10">bao </span>in two main ways:
+                                                
+                                                
+it is packet-oriented rather than byte-oriented, and it
+guarantees that as long as packets are received in order, each
+packet can be authenticated immediately without waiting for
+any other packets.
+</p><!--l. 579--><p class="indent" >   The encrypted remote scry protocol also uses the <code class="lstinline"><span style="color:#000000">+crub</span></code>
+cryptosuite with deterministic encryption, but it does have
+forward secrecy, tunable by each application.
+</p>
+<!--l. 581--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-53000"></a><span 
+class="ec-lmbx-10">9.3 PKI</span></span>
+   Azimuth, the set of Ethereum contracts, replaced the
+whitepaper’s original <span 
+class="ec-lmcsc-10">pki</span>. About two years later, the “Layer
+2” naive rollup was added to reduce the cost of spawning
+planets.
+</p><!--l. 583--><p class="indent" >   “Wills” and “deeds”, as described in this section, are no
+longer part of the system. 8-bit galaxies, 16-bit stars, and
+32-bit planets all have their public keys listed on Ethereum. A
+64-bit moon is assigned its public key by the planet that
+spawned and owns it, and other ships ﬁnd the moon’s public
+key by asking the planet. A 128-bit comet signs its address
+with its own key, and other ships validate the comet’s
+key by checking that it hashes to the comet’s address.
+This prevents comets from breaching, but it allows them
+to self-authenticate without being part of the on-chain
+<span 
+class="ec-lmcsc-10">pki</span>.
+</p>
+<!--l. 585--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-54000"></a><span 
+class="ec-lmbx-10">9.4 Update, Routing, and Parental Trust</span></span>
+   Urbit’s federated routing system can still be analogized to
+a combination of <span 
+class="ec-lmcsc-10">stun </span>and <span 
+class="ec-lmcsc-10">turn </span>approaches to <span 
+class="ec-lmcsc-10">nat</span>
+traversal.
+</p><!--l. 589--><p class="indent" >   The <span 
+class="ec-lmcsc-10">stun </span>protocol is now used explicitly: a sponsee ship
+sends a <span 
+class="ec-lmcsc-10">stun </span>request to its sponsor every twenty-ﬁve seconds.
+It only sends an Ames command to its sponsor to tell
+the sponsor it has moved to a new transport address
+(IPv4 address and port) when the <span 
+class="ec-lmcsc-10">stun </span>response changes,
+                                                
+                                                
+indicating that from the perspective of the sponsor, the
+sponsee is at a new transport address. A caveat “from
+the perspective of the sponsor” is due to the policies of
+some routers to expose a diﬀerent source address for each
+outgoing destination (“source <span 
+class="ec-lmcsc-10">nat</span>”) – if the sponsee is
+behind a source <span 
+class="ec-lmcsc-10">nat</span>, each ship on the network will see
+a diﬀerent source address on packets coming from the
+sponsee.
+</p><!--l. 591--><p class="indent" >   With directed messaging, routing is now “directed”: if ship \(A\)
+sends a request to ship \(C\) through \(C\)’s sponsor \(B\), then the
+request takes the path \(A \rightarrow B \rightarrow C\) through the network, and the
+response takes the reversed path \(C \rightarrow B \rightarrow A\). This is in contrast to all
+previous versions of Ames, in which the response path
+will ignore any relays in the request’s path and instead
+get relayed through \(A\)’s sponsor, in so-called “criss-cross
+routing”.
+</p><!--l. 593--><p class="indent" >   This directedness promises to reduce routing complexity
+and handle more <span 
+class="ec-lmcsc-10">nat </span>conﬁgurations, including source <span 
+class="ec-lmcsc-10">nat</span>. It
+has already proven to reduce complexity in several other layers
+of the networking stack.
+</p><!--l. 595--><p class="indent" >   As for parental trust, the trend has been toward
+minimizing the amount a parent needs to be trusted. Code
+signing could be done by a consortium of galaxies or other
+nodes designated with such a task, such as a set of core
+developer ships. Urbit’s hierarchical deterministic wallet
+system could require a signature by an upstream key –
+associated with an Urbit ID but kept “cold” by not being
+used for any other purpose – to authenticate sensitive
+updates, such as kernel updates. That way, even if a
+vulnerability is found that compromises a planet’s sponsoring
+galaxy or star, the planet would validate the signatures
+by the upstream keys, so that attack on its own would
+not be enough to load malicious source code onto the
+planet.
+</p><!--l. 597--><p class="indent" >   There is support at both the <span 
+class="ec-lmcsc-10">cli </span>and in Urbit’s standard
+user interface, Tlon’s “landscape” app, for turning kernel
+updates on and oﬀ and switching the download source of
+kernel source code to any ship the user likes.
+</p><!--l. 599--><p class="indent" >   Userspace apps can be downloaded from any ship on the
+                                                
+                                                
+network, not just the ship’s sponsor. This is another step away
+from obtaining all software from the parent. Userspace apps
+could use the same kind of code signing mechanism described
+above – which to be clear, is still vaporware as of the time of
+this writing.
+</p>
+<!--l. 601--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-55000"></a><span 
+class="ec-lmbx-10">9.5 Deed Distribution</span></span>
+   This section is now obsolete except for comets, which as
+described earlier, are self-signed. It is worth noting that the
+double-spend problem inherent in the whitepaper’s <span 
+class="ec-lmcsc-10">pki </span>design
+has now been solved, through using a blockchain.
+</p>
+<!--l. 603--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-56000"></a><span 
+class="ec-lmbx-10">9.6 Permanent Networking</span></span>
+   Urbit’s networking is still permanent, but edging toward
+more ﬂexibility and recoverability.
+</p><!--l. 605--><p class="indent" >   Ames ﬂows (Ames’s version of socket connections) can now
+be killed, allowing both participating ships to reclaim memory
+resources used for storing the sequence numbers and other
+metadata about that ﬂow. This is a good example of Urbit
+doing more to clean up after itself than it did when the
+whitepaper was written.
+</p><!--l. 607--><p class="indent" >   The whitepaper reads “brain damage is fatal by default”,
+and “event backup makes no sense”, but these claims are no
+longer considered true. Various forms of recoverability have
+been added. Personal breaches allow a ship to reset its
+communications with other ships after losing information. The
+<code class="lstinline"><span style="color:#000000">%phoenix</span></code> app lets app state be backed up and restored – if
+the restoration occurs after a breach, it is heuristic and could
+be lossy, but apps can be written defensively to maintain as
+much state as possible across a breach. Future work will likely
+push harder on recoverability.
+</p><!--l. 610--><p class="indent" >   Moving more network activity from writes to reads,
+through the scry namespace, has been shifting our conception
+of exactly-once delivery. It now seems likely that by a year or
+                                                
+                                                
+two from now, Urbit’s traditional notion of exactly-once
+delivery will be opt-in, built on top of the more general
+substrate of publishing scry bindings.
+</p><!--l. 613--><p class="indent" >   This requires another vaporware warning, but one
+could imagine a userspace application sending three poke
+commands to ~zod by binding the commands to three paths
+like <code class="lstinline"><span style="color:#000000">/poke/~zod/foo/1</span></code>, <code class="lstinline"><span style="color:#000000">/poke/~zod/foo/2</span></code>, and
+<code class="lstinline"><span style="color:#000000">/poke/~zod/foo/3</span></code>, into a subtree of its own scry
+namespace. The kernel would ensure ~zod is notiﬁed of those
+bindings. ~zod would download the values at those paths and
+notify its <code class="lstinline"><span style="color:#000000">%foo</span></code> application. The app would interpret the
+values as a sequence of poke commands, to be applied once
+and in order. Once it processes each poke, it would bind an
+acknowledgment value to a predetermined path in its own
+namespace, such as <code class="lstinline"><span style="color:#000000">/ack/~nec/1</span></code>.
+</p>
+<!--l. 615--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-57000"></a><span 
+class="ec-lmbx-10">9.7 Permanent Applications</span></span>
+   Applications are generally no longer considered permanent.
+The current Gall model lets a user suspend an application and
+revive it later. Unfortunately the current model is known to be
+unsound: “signs”, i. e. responses to outgoing commands or
+queries, to a Gall agent are dropped while the agent is
+suspended, leading to an inconsistent state.
+</p><!--l. 617--><p class="indent" >   Future designs for Urbit userspace will likely include a
+suspension notiﬁcation for agents. The kernel also needs to
+intercept and store all pending I/O in and out of agents,
+so it can cancel the I/O and let the agent know it was
+canceled.
+</p><!--l. 619--><p class="indent" >   This goal is at least somewhat at odds with exactly-once
+network messaging, since in order for the invariants of
+exactly-once messaging to hold, the sending agent needs to
+be delivered the acknowledgment reliably. If the ack is
+dropped while the agent is suspended, that could lead to an
+inconsistent state between the requesting and receiving
+ships.
+</p><!--l. 621--><p class="indent" >   Something namespace-oriented, like the example with
+                                                
+                                                
+poking ~zod by binding paths in our local namespace, could
+be more amenable to maintaining exactly-once delivery across
+suspension and revival without the kernel needing to
+maintain an unbounded queue of acks to deliver to the
+agent. It could also help with recoverability after a breach,
+since storing userspace data with absolute references
+(i. e. scry paths) allows for more seamless social recovery
+– if any peer still has the scry binding, the breached
+ship could download and reinstate it. The importance of
+immutable absolute references for data is one of the key
+insights leading to the “shrubbery” noun-maximalist way of
+thinking.
+</p><!--l. 623--><p class="indent" >   One way in which applications are more persistent now
+than at the time of the whitepaper is that upgrades are now
+quite real. The kernel and userspace apps can both upgrade
+“over the air” (<span 
+class="ec-lmcsc-10">ota</span>) by receiving new source code over the
+Urbit network. The kernel’s upgrade system was too buggy for
+production use until 2020, when the Ford Fusion project
+moved Ford into Clay – ridding Ford of all its buggy
+asynchronicities – and enforced a bottom-up upgrade order:
+Hoon, Arvo, vanes, then userspace.
+</p><!--l. 625--><p class="indent" >   A year later, near the end of 2021, the ability for Urbit to
+distribute and install userspace apps was added, enabled by
+major internal changes to Gall, Clay, and the Arvo kernel to
+ensure each Clay desk (unit of source distribution) is
+independently buildable, bootstrapped from its own source
+code without any external dependencies.
+</p><!--l. 627--><p class="indent" >   App publishers can push down source code to their
+users for the next version of their app, intended to be
+built and run using the next kelvin version of the kernel.
+When the user’s ship receives the kernel’s source code
+for the new kelvin, it upgrades the apps and the kernel
+atomically with each other, ensuring all apps (soon: only
+apps marked as “essential”) update succesfully – if an
+app fails to upgrade to the new kelvin version, the Arvo
+event is aborted, rolling back the kernel upgrade and
+any other app upgrades that had happened during the
+event.
+</p><!--l. 629--><p class="indent" >   Eventually, the kernel should be able to keep agents
+                                                
+                                                
+designed for older kernels running. We call this idea a
+“kelvin shim”. A project along these lines was attempted
+at the start of 2023, but the current userspace model
+turns out to be to be too tightly coupled to the kernel for
+shimming to be feasible. This experience has informed our
+next generation of ideas for the kernelspace/userspace
+interface.
+</p>
+<!--l. 631--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-58000"></a><span 
+class="ec-lmbx-10">9.8 Acknowledgment</span></span>
+   Acknowledgments have changed in a number of ways.
+Packet-level acks are being (mostly) removed. Authentication
+for both packets and messages is being redone in the Directed
+Messaging project. Negative acknowledgments are no longer a
+space leak and are cleaned up without loss of correctness after
+a certain number of later messages. Finally, congestion control
+is being moved into the runtime.
+</p><!--l. 633--><p class="indent" >   Some things have stayed the same. A message is still an
+application-level transaction. Ignoring the computation time
+to process a message is still a useful optimization for
+congestion control. Negative acknowledgments are still
+considered to be string-like data describing an error, rather
+than a programmatically manipulable exception data
+structure.
+</p>
+<!--l. 635--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-59000"></a><span 
+class="ec-lmbx-10">9.9 Packet Rejection</span></span>
+   Cryptography failures (failure to decrypt or authenticate a
+packet) still cause a silent packet drop. To streamline the
+implementation of this, the <code class="lstinline"><span style="color:#000000">bail:evil</span></code> error tag was added
+to the system so the runtime can know not to inject an error
+notiﬁcation event into Arvo in the case of cryptographic
+failure.
+</p><!--l. 637--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">%flub</span></code> move is a new reason to drop a packet. When
+Ames passes a message to a local vane, the vane can now
+respond with a <code class="lstinline"><span style="color:#000000">%flub</span></code> move, indicating it is not yet ready to
+                                                
+                                                
+process the message. If a message sent to a Gall agent that is
+not running, for example, then Gall will respond with a
+<code class="lstinline"><span style="color:#000000">%flub</span></code>. The sending ship will keep retrying, slowly, on a
+timer, until the message goes through, but the receiving
+ship does not have to update any state in response –
+previous versions of the system required the receiving ship
+to maintain an unbounded queue of incoming pokes to
+agents that were not running, which was a denial-of-service
+vector.
+</p>
+<!--l. 639--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-60000"></a><span 
+class="ec-lmbx-10">10 Ames Part 2: Bitstream</span></span>
+   The “jam” serialization format for nouns remains
+unchanged. Its implementation in Vere is now much more
+ﬂexible and optimized. There are now also implementations in
+Rust, JavaScript, Haskell, and Common Lisp.
+</p><!--l. 641--><p class="indent" >   There are more use cases for jammed nouns now.
+Portable Arvo snapshots are jammed nouns. Interprocess
+communication between the two Vere processes uses jammed
+nouns for its messages. The Khan and Lick vanes also use
+jammed nouns for <span 
+class="ec-lmcsc-10">ipc</span>, and Eyre, the <span 
+class="ec-lmcsc-10">http </span>vane, now
+supports <span 
+class="ec-lmcsc-10">http </span>subscriptions using jammed nouns in addition
+to <span 
+class="ec-lmcsc-10">json</span>.
+</p>
+<!--l. 643--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-61000"></a><span 
+class="ec-lmbx-10">10.4 Packet Structure</span></span>
+   Modern Ames packets are still jammed nouns with a 32-bit
+header but other than that almost everything is diﬀerent. For
+one thing, their internal ﬁelds are now byte-aligned, making
+them more human-readable in Wireshark or other Terran
+packet inspection programs.
+</p><!--l. 645--><p class="indent" >   A bigger shift is that as of Directed Messaging, packets are
+actually source-independent for the ﬁrst time.
+</p>
+                                                
+                                                
+<!--l. 647--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-62000"></a><span 
+class="ec-lmbx-10">10.5 Message Decoding</span></span>
+   This has been totally rewritten multiple times. There is
+no more unencrypted ﬁrst packet. Routing will now be
+directed.
+</p>
+<!--l. 649--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-63000"></a><span 
+class="ec-lmbx-10">10.7 Poke Processing</span></span>
+   Pokes are still typed and transactional. Mark lookup is
+now performed on a per-desk basis, rather than globally, since
+each app can deﬁne its own marks.
+</p><!--l. 651--><p class="indent" >   Deferred acknowledgments remain vaporware.
+</p>
+<!--l. 653--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-64000"></a><span 
+class="ec-lmbx-10">11 System Status and Roadmap</span></span>
+   The whitepaper’s 30,000 source lines of code has expanded
+to roughly 40,000. This number should go down a bit over
+time. Other aspects of reliability and performance have been
+extensively discussed above.
+</p><!--l. 657--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a 
+ id="x1-65000"></a>References</h3>
+<!--l. 657--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Barendregt1991" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+                                                
+                                                
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Barendregt1991"></a>Barendregt, Henk
+   (1991).
+   “Introduction
+   to
+   generalized
+   type
+   systems.”
+   In:
+   <span 
+class="ec-lmri-10">Journal</span>
+   <span 
+class="ec-lmri-10">of</span>
+   <span 
+class="ec-lmri-10">Functional</span>
+   <span 
+class="ec-lmri-10">Programming</span>
+   1.2,
+   pp. 125–154.
+   <span class="small-caps">doi</span>:
+   <a 
+href="https://doi.org/10.1017/s0956796800020025" >10.1017/s0956796800020025</a>.
+   </p></dd><dt id="X0-Leijen2023" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Leijen2023"></a>Leijen, Daan
+   and
+   Anton Lorenzen
+   (2023).
+   “Tail
+   Recursion
+   Modulo
+   Context:
+   An
+   Equational
+   Approach.”
+   In:
+   <span 
+class="ec-lmri-10">Proceedings</span>
+   <span 
+class="ec-lmri-10">of</span>
+   <span 
+class="ec-lmri-10">the</span>
+   <span class="small-caps">acm</span>
+   <span 
+class="ec-lmri-10">on</span>
+   <span 
+class="ec-lmri-10">Programming</span>
+   <span 
+class="ec-lmri-10">Languages</span>
+   7.<span 
+class="ec-lmcsc-10">popl</span>
+                                                
+                                                
+   40,
+   pp. 1–30.
+   <span class="small-caps">doi</span>:
+   <a 
+href="https://doi.org/10.1145/3571233" >10.1145/3571233</a>.
+   </p></dd><dt id="X0-Wilson2024" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Wilson2024"></a>~midden-fabler, Scott Wilson
+   (2024)
+   “%phoenix”.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://github.com/urbit/phoenix" class="url" >https://github.com/urbit/phoenix</a>
+   (visited
+   on
+   ~2024.4.24).
+   </p></dd><dt id="X0-GroundSeg" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@GroundSeg"></a>NativePlanet
+   (2024)
+   “GroundSeg”.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://github.com/Native-Planet/GroundSeg" class="url" >https://github.com/Native-Planet/GroundSeg</a>
+   (visited
+   on
+   ~2024.4.8).
+   </p></dd><dt id="X0-BAO" class="thebibliography">
+</dt><dd 
+id="bib-5" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@BAO"></a>O’Connor, Jack
+   (2024)
+   “Bao”.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://github.com/oconnor663/bao" class="url" >https://github.com/oconnor663/bao</a>
+   (visited
+   on
+   ~2024.4.8).
+                                                
+                                                
+   </p></dd><dt id="X0-WolfePauly2019" class="thebibliography">
+</dt><dd 
+id="bib-6" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@WolfePauly2019"></a>~ravmel-ropdyl, Galen Wolfe-Pauly
+   (2019)
+   “Azimuth
+   is
+   On
+   Chain”.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://urbit.org/blog/azimuth-is-on-chain" class="url" >https://urbit.org/blog/azimuth-is-on-chain</a>
+   (visited
+   on
+   ~2024.4.24).
+   </p></dd><dt id="X0-Blackman2024a" class="thebibliography">
+</dt><dd 
+id="bib-7" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Blackman2024a"></a>~rovnys-ricfer, Ted Blackman,
+   Paul Driver ~fodwyt-ragful,
+   and
+   Matthew Levan ~mastyr-bottec
+   (2024).
+   “The
+   Stakes
+   of
+   Scrying:
+   .^
+   Dotket
+   and
+   the
+   Seer
+   Proposal.”
+   In:
+   <span 
+class="ec-lmri-10">Urbit</span>
+   <span 
+class="ec-lmri-10">Systems</span>
+   <span 
+class="ec-lmri-10">Technical</span>
+   <span 
+class="ec-lmri-10">Journal</span>
+   1.1,
+   pp. 47–58.
+                                                
+                                                
+   </p></dd><dt id="X0-Blackman2024" class="thebibliography">
+</dt><dd 
+id="bib-8" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Blackman2024"></a>~rovnys-ricfer, Ted Blackman
+   and
+   Philip C. Monk ~wicdev-wisryt
+   (2024).
+   “A
+   Solution
+   to
+   Static
+   vs. Dynamic
+   Linking.”
+   In:
+   <span 
+class="ec-lmri-10">Urbit</span>
+   <span 
+class="ec-lmri-10">Systems</span>
+   <span 
+class="ec-lmri-10">Technical</span>
+   <span 
+class="ec-lmri-10">Journal</span>
+   1.1,
+   pp. 75–82.
+   </p></dd><dt id="X0-AmesAudit" class="thebibliography">
+</dt><dd 
+id="bib-9" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@AmesAudit"></a>~rovyns-ricfer, Ted Blackman
+   and
+   Anthony Arroyo ~poldec-tonteg
+   (2020)
+   “Ames
+   Security
+   Audit
+   and
+   the
+   Future
+   of
+   the
+   Protocol”.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://urbit.org/blog/security-audit" class="url" >https://urbit.org/blog/security-audit</a>
+   (visited
+                                                
+                                                
+   on
+   ~2024.4.8).
+   </p></dd><dt id="X0-Yarvin2006a" class="thebibliography">
+</dt><dd 
+id="bib-10" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Yarvin2006a"></a>~sorreg-namtyv, Curtis Yarvin
+   (2006)
+   “U,
+   a
+   small
+   model”.
+   <span class="small-caps">url</span>:
+   <a 
+href="http://lambda-the-ultimate.org/node/1269" class="url" >http://lambda-the-ultimate.org/node/1269</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-Yarvin2010" class="thebibliography">
+</dt><dd 
+id="bib-11" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Yarvin2010"></a>—   (2010)
+   “Urbit:
+   functional
+   programming
+   from
+   scratch”.
+   <span class="small-caps">url</span>:
+   <a 
+href="http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html" class="url" >http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Whitepaper" class="thebibliography">
+</dt><dd 
+id="bib-12" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Whitepaper"></a>~sorreg-namtyv, Curtis Yarvin
+   et al.
+   (2016).
+   <span 
+class="ec-lmri-10">Urbit:</span>
+   <span 
+class="ec-lmri-10">A</span>
+   <span 
+class="ec-lmri-10">Solid-State</span>
+                                                
+                                                
+   <span 
+class="ec-lmri-10">Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a 
+href="https://media.urbit.org/whitepaper.pdf" class="url" >https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Zhang2014" class="thebibliography">
+</dt><dd 
+id="bib-13" class="thebibliography">
+   <!--l. 657--><p class="noindent" ><a 
+ id="cite.0@Zhang2014"></a>Zhang, Lixia
+   et al.
+   (2014).
+   “Named
+   Data
+   Networking.”
+   In:
+   <span class="small-caps">acm</span>
+   <span class="small-caps">sigcomm</span>
+   <span 
+class="ec-lmri-10">Computer</span>
+   <span 
+class="ec-lmri-10">Communication</span>
+   <span 
+class="ec-lmri-10">Review</span>
+   44.3,
+   pp. 66–73.
+   <span class="small-caps">doi</span>:
+   <a 
+href="https://doi.org/10.1145/2656877.2656887" >10.1145/2656877.2656887</a>.</p></dd></dl>
+    
+</body> 
+</html>
+                                                
+
+
