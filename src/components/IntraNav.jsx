@@ -151,7 +151,7 @@ function Pages({ className, pages }) {
   );
 }
 
-export default function IntraNav() {
+export default function IntraNav({ shopUrl }) {
   return (
     <div className="sticky top-0 z-50 flex flex-col items-center w-full bg-primary">
       <div className="relative layout h-12 md:h-16">
@@ -162,9 +162,18 @@ export default function IntraNav() {
               <Dropdown className="lg:hidden" label="Menu" items={pages} />
               <Pages className="flex-1 overflow-x-auto" pages={pages} />
             </div>
-            {/* <div className="h-full w-1/3 lg:w-[14.5rem] xl:w-64 type-ui"> */}
-            {/*   {search} */}
-            {/* </div> */}
+            {shopUrl && (
+              <div className="h-full w-1/3 lg:w-[14.5rem] xl:w-64">
+                <div className="flex h-full w-full space-x-2 p-2 md:p-3 bg-gray">
+                  <Link
+                    className="btn border border-black bg-black hover:bg-primary text-primary hover:text-black ml-auto"
+                    href={shopUrl}
+                  >
+                    Buy $25
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
