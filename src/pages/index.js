@@ -23,7 +23,7 @@ export default function Home({ issues }) {
         <title>urbitsystems.tech</title>
         {/* {Meta(post, false, true)} */}
       </Head>
-      <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-primary">
+      <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
         <header className="flex items-center justify-between h-12 md:h-16 bg-primary layout layout-px">
           <span>Urbit Systems Technical Journal</span>
           <span>Information</span>
