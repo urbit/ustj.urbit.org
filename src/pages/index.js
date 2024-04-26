@@ -55,25 +55,28 @@ export default function Home({ issues }) {
             <img className="h-full w-auto" alt="" src={issue.links.cover} />
           </div>
         </main>
-        <footer className="w-full bg-primary layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
-          <div>{issue.issue}</div>
-          <hr className="border-t border-black" />
-          <div>{issue.title}</div>
-          {issue.content.map((o) => {
-            const renderAuthors = (authors) => authors.map((s) => <p>~ {s}</p>);
-            return (
-              <>
-                <hr className="border-t border-black" />
-                <div className="flex space-x-5">
-                  <div className="font-mono whitespace-nowrap">
-                    {renderAuthors(o.author)}
+        <footer className="flex justify-center w-full bg-primary">
+          <div className="w-full layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
+            <div>{issue.issue}</div>
+            <hr className="border-t border-black" />
+            <div>{issue.title}</div>
+            {issue.content.map((o) => {
+              const renderAuthors = (authors) =>
+                authors.map((s) => <p>~ {s}</p>);
+              return (
+                <>
+                  <hr className="border-t border-black" />
+                  <div className="flex space-x-5">
+                    <div className="font-mono whitespace-nowrap">
+                      {renderAuthors(o.author)}
+                    </div>
+                    <p>{o.title}</p>
                   </div>
-                  <p>{o.title}</p>
-                </div>
-              </>
-            );
-          })}
-          <hr className="border-t border-black" />
+                </>
+              );
+            })}
+            <hr className="border-t border-black" />
+          </div>
         </footer>
       </div>
     </>
