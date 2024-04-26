@@ -7,7 +7,7 @@ export default function Information() {
   return (
     <>
       <Head>
-        <title>urbitsystems.tech</title>
+        <title>ustj.urbit.org</title>
         {/* {Meta(post)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
