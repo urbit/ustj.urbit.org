@@ -6,6 +6,15 @@
 */
 
 @font-face {
+  font-family: "Urbit Sans";
+  src: url("https://media.urbit.org/fonts/UrbitSans/UrbitSansVFWeb-Regular.woff2")
+       format("woff2");
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Latin Modern';
   font-style: normal;
   font-weight: normal;
@@ -728,6 +737,10 @@ h4,
 h5,
 h6 {
   margin-bottom: 0.8rem;
+}
+
+h1, h2, h3, h4, h5, h6, .author, .paragraphHead {
+  font-family: "Urbit Sans";
 }
 
 p img {
