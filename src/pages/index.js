@@ -26,7 +26,7 @@ export default function Home({ issues }) {
   return (
     <>
       <Head>
-        <title>urbitsystems.tech</title>
+        <title>ustj.urbit.org</title>
         {/* {Meta(post, false, true)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
