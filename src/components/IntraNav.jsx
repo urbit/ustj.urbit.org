@@ -167,6 +167,7 @@ export default function IntraNav({ shopUrl }) {
                 <div className="flex h-full w-full space-x-2 p-2 md:p-3 bg-gray">
                   <Link
                     className="btn border-2 border-black bg-black hover:bg-primary text-primary hover:text-black ml-auto"
+                    target="_blank"
                     href={shopUrl}
                   >
                     Buy $25
