@@ -66,11 +66,16 @@ export default function Home({ issues }) {
               return (
                 <>
                   <hr className="border-t border-black" />
-                  <div className="flex space-x-5">
+                  <div
+                    className={classnames("flex space-x-5", {
+                      "text-muted pointer-events-none": !o.pdf,
+                    })}
+                  >
+                    <Link href={o.pdf || ""}>PDF</Link>
                     <div className="font-mono whitespace-nowrap">
                       {renderAuthors(o.author)}
                     </div>
-                    <p>{o.title}</p>
+                    <Link href={o.html || ""}>{o.title}</Link>
                   </div>
                 </>
               );
