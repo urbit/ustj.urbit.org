@@ -30,7 +30,7 @@ export default function Home({ issues }) {
         {/* {Meta(post, false, true)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
-        <IntraNav />
+        <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
           <div className="inline-flex items-center h-12 md:h-16 space-x-5">
             <select
@@ -44,9 +44,9 @@ export default function Home({ issues }) {
                 <option value={issue.issue}>{issue.issue}</option>
               ))}
             </select>
-            <Link className="btn bg-primary text-black" href={issue.links.shop}>
-              Buy $25
-            </Link>
+            {/* <Link className="btn bg-primary text-black" href={issue.links.shop}> */}
+            {/*   Buy $25 */}
+            {/* </Link> */}
           </div>
           <div
             className="flex items-center justify-center w-full layout-px"
