@@ -6,6 +6,11 @@ import fs from "fs";
 
 export default function Home({ issues }) {
   const [issue, setIssue] = useState(issues[0]);
+  const byKey = issues.reduce((res, curr) => {
+    const newRes = { ...res };
+    newRes[curr.issue] = curr;
+    return newRes;
+  }, {});
 
   useEffect(() => {
     if (issue) {
@@ -28,36 +33,50 @@ export default function Home({ issues }) {
           <span>Urbit Systems Technical Journal</span>
           <span>Information</span>
         </header>
-        <main className="flex flex-col flex-1 layout">
-          <div
-            className="flex items-center justify-center w-full bg-black layout-px"
-            style={{ height: "calc((100vh/4) * 3)" }}
-          >
-            <img className="h-3/4 w-auto" alt="" src={issue.links.cover} />
+        <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
+          <div className="inline-flex items-center h-12 md:h-16 space-x-5">
+            <select
+              className="btn outline-0 border border-primary text-primary bg-black"
+              value={issue.issue}
+              onChange={(e) => {
+                setIssue(byKey[e.target.value]);
+              }}
+            >
+              {issues.map((issue) => (
+                <option value={issue.issue}>{issue.issue}</option>
+              ))}
+            </select>
+            <Link className="btn bg-primary text-black" href={issue.links.shop}>
+              Buy $25
+            </Link>
           </div>
-          <div className="w-full bg-primary layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
-            <div>{issue.issue}</div>
-            <hr className="border-t border-black" />
-            <div>{issue.title}</div>
-            {issue.content.map((o) => {
-              const renderAuthors = (authors) =>
-                authors.map((s) => <p>~ {s}</p>);
-              return (
-                <>
-                  <hr className="border-t border-black" />
-                  <div className="flex space-x-5">
-                    <div className="font-mono whitespace-nowrap">
-                      {renderAuthors(o.author)}
-                    </div>
-                    <p>{o.title}</p>
-                  </div>
-                </>
-              );
-            })}
-            <hr className="border-t border-black" />
+          <div
+            className="flex items-center justify-center w-full layout-px"
+            style={{ height: "calc(100vh * 0.6)" }}
+          >
+            <img className="h-full w-auto" alt="" src={issue.links.cover} />
           </div>
         </main>
-        <footer></footer>
+        <footer className="w-full bg-primary layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
+          <div>{issue.issue}</div>
+          <hr className="border-t border-black" />
+          <div>{issue.title}</div>
+          {issue.content.map((o) => {
+            const renderAuthors = (authors) => authors.map((s) => <p>~ {s}</p>);
+            return (
+              <>
+                <hr className="border-t border-black" />
+                <div className="flex space-x-5">
+                  <div className="font-mono whitespace-nowrap">
+                    {renderAuthors(o.author)}
+                  </div>
+                  <p>{o.title}</p>
+                </div>
+              </>
+            );
+          })}
+          <hr className="border-t border-black" />
+        </footer>
       </div>
     </>
   );

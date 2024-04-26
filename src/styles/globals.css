@@ -13,3 +13,21 @@ body {
 .layout-px {
   @apply px-4 lg:px-8 xl:px-12;
 }
+
+.btn {
+  @apply inline-flex justify-center items-center whitespace-nowrap font-semibold;
+  padding: 0.2em 0.4em;
+  border-radius: 0.5em;
+}
+
+select {
+  /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Add custom arrow */
+  /* background-image: url(...); */
+}
+select::-ms-expand {
+  display: none;
+}
