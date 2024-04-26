@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import classnames from "classnames";
 import fs from "fs";
+import IntraNav from "@/components/IntraNav";
 
 export default function Home({ issues }) {
   const [issue, setIssue] = useState(issues[0]);
@@ -29,10 +30,7 @@ export default function Home({ issues }) {
         {/* {Meta(post, false, true)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
-        <header className="flex items-center justify-between h-12 md:h-16 bg-primary layout layout-px">
-          <span>Urbit Systems Technical Journal</span>
-          <span>Information</span>
-        </header>
+        <IntraNav />
         <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
           <div className="inline-flex items-center h-12 md:h-16 space-x-5">
             <select

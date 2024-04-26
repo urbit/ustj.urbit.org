@@ -2,8 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+.wit {
+  --muted: #14140F;
+  --primary: #F8FAF8;
+}
+.mos {
+  --muted: #5A5A55;
+  --primary: #C3CDC3;
+}
+.mos-light {
+  --muted: #A3ABA3;
+  --primary: #54544F;
+}
+.blu {
+  --muted: #5A5A6E;
+  --primary: #A0DCE6;
+}
+
 body {
   @apply text-base xs:text-lg md:text-xl xl:text-2xl bg-black;
+}
+
+.type-ui {
+  @apply text-base md:text-lg 2xl:text-xl font-normal leading-none;
 }
 
 .layout {
@@ -11,7 +32,22 @@ body {
 }
 
 .layout-px {
-  @apply px-4 lg:px-8 xl:px-12;
+  @apply px-5 lg:px-10 xl:px-12;
+}
+
+.nav-space-x {
+  @apply space-x-2 lg:space-x-3.5 xl:space-x-5;
+}
+
+.nav-space-x-offset {
+  @apply pl-5 nav-space-x;
+}
+
+.max-h-content {
+  max-height: calc(100vh - 3rem);
+  @screen md {
+    max-height: calc(100vh - 4rem);
+  }
 }
 
 .btn {
