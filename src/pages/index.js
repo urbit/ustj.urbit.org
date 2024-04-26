@@ -33,20 +33,24 @@ export default function Home({ issues }) {
         <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
           <div className="inline-flex items-center h-12 md:h-16 space-x-5">
-            <select
-              className="btn outline-0 border border-primary text-primary bg-black"
-              value={issue.issue}
-              onChange={(e) => {
-                setIssue(byKey[e.target.value]);
-              }}
-            >
-              {issues.map((issue) => (
-                <option value={issue.issue}>{issue.issue}</option>
-              ))}
-            </select>
-            {/* <Link className="btn bg-primary text-black" href={issue.links.shop}> */}
-            {/*   Buy $25 */}
-            {/* </Link> */}
+            {issues.length > 1 && (
+              <>
+                <select
+                  className="btn outline-0 border border-primary text-primary bg-black"
+                  value={issue.issue}
+                  onChange={(e) => {
+                    setIssue(byKey[e.target.value]);
+                  }}
+                >
+                  {issues.map((issue) => (
+                    <option value={issue.issue}>{issue.issue}</option>
+                  ))}
+                </select>
+                {/* <Link className="btn bg-primary text-black" href={issue.links.shop}> */}
+                {/*   Buy $25 */}
+                {/* </Link> */}
+              </>
+            )}
           </div>
           <div
             className="flex items-center justify-center w-full layout-px"
