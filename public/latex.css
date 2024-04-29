@@ -285,6 +285,8 @@ code,
 pre,
 kbd {
   font-family: "Urbit Sans";
+  font-size: 90%;
+  font-weight: 500;
   font-variation-settings: "xtab" 500;
   hyphens: none;
 }
