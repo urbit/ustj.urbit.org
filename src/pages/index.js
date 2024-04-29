@@ -5,6 +5,48 @@ import classnames from "classnames";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 
+function Contents({ issue }) {
+  let comingSoonFlag = true;
+
+  return (
+    <div className="w-full layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
+      <div>{issue.title}</div>
+      <hr className="border-t border-black" />
+      <div>{issue.issue}</div>
+      {issue.content.map((o) => {
+        const renderAuthors = (authors) => authors.map((s) => <p>~ {s}</p>);
+        let ComingSoon = null;
+        if (!o.pdf && comingSoonFlag) {
+          ComingSoon = () => (
+            <img className="h-[1.5em]" alt="" src="/images/coming-soon.png" />
+          );
+          comingSoonFlag = false;
+        }
+        return (
+          <>
+            <hr className="border-t border-black" />
+            <div
+              className={classnames("flex justify-between", {
+                "text-muted pointer-events-none": !o.pdf,
+              })}
+            >
+              <div className="flex space-x-5">
+                <Link href={o.pdf || ""}>PDF</Link>
+                <div className="font-mono whitespace-nowrap">
+                  {renderAuthors(o.author)}
+                </div>
+                <Link href={o.html || ""}>{o.title}</Link>
+              </div>
+              {ComingSoon && <ComingSoon />}
+            </div>
+          </>
+        );
+      })}
+      <hr className="border-t border-black" />
+    </div>
+  );
+}
+
 export default function Home({ issues }) {
   const [issue, setIssue] = useState(issues[0]);
   const byKey = issues.reduce((res, curr) => {
@@ -60,32 +102,7 @@ export default function Home({ issues }) {
           </div>
         </main>
         <footer className="flex justify-center w-full bg-primary">
-          <div className="w-full layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
-            <div>{issue.title}</div>
-            <hr className="border-t border-black" />
-            <div>{issue.issue}</div>
-            {issue.content.map((o) => {
-              const renderAuthors = (authors) =>
-                authors.map((s) => <p>~ {s}</p>);
-              return (
-                <>
-                  <hr className="border-t border-black" />
-                  <div
-                    className={classnames("flex space-x-5", {
-                      "text-muted pointer-events-none": !o.pdf,
-                    })}
-                  >
-                    <Link href={o.pdf || ""}>PDF</Link>
-                    <div className="font-mono whitespace-nowrap">
-                      {renderAuthors(o.author)}
-                    </div>
-                    <Link href={o.html || ""}>{o.title}</Link>
-                  </div>
-                </>
-              );
-            })}
-            <hr className="border-t border-black" />
-          </div>
+          <Contents issue={issue} />
         </footer>
       </div>
     </>
