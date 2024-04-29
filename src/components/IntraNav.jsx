@@ -170,7 +170,7 @@ export default function IntraNav({ shopUrl }) {
                     target="_blank"
                     href={shopUrl}
                   >
-                    Buy $25
+                    Buy $29
                   </Link>
                 </div>
               </div>
