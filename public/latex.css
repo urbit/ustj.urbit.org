@@ -289,6 +289,7 @@ kbd {
   font-weight: 500;
   font-variation-settings: "xtab" 500;
   hyphens: none;
+  word-break: break-all;
 }
 pre {
   padding: 1rem 1.4rem;
