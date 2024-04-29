@@ -31,7 +31,7 @@ function Contents({ issue }) {
               })}
             >
               <div className="flex space-x-5">
-                <Link href={o.pdf || ""}>PDF</Link>
+                <Link className={!o.pdf ? "text-transparent" : ""} href={o.pdf || ""}>PDF</Link>
                 <div className="font-mono whitespace-nowrap">
                   {renderAuthors(o.author)}
                 </div>
