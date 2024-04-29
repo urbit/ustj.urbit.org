@@ -14,6 +14,8 @@
   font-display: swap;
 }
 
+@font-face{font-family:linux libertine o;font-style:normal;font-weight:400;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_R.woff) format('woff')}@font-face{font-family:linux libertine o;font-style:italic;font-weight:400;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_RI.woff) format('woff')}@font-face{font-family:linux libertine o;font-style:normal;font-weight:600;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_RZ.woff) format('woff')}@font-face{font-family:linux libertine o;font-style:italic;font-weight:600;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_RZI.woff) format('woff')}@font-face{font-family:linux libertine o;font-style:normal;font-weight:700;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_RB.woff) format('woff')}@font-face{font-family:linux libertine o;font-style:italic;font-weight:700;src:local('Linux Libertine O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_RBI.woff) format('woff')}@font-face{font-family:linux libertine display o;font-style:normal;font-weight:400;src:local('Linux Libertine Display O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_DR.woff) format('woff')}@font-face{font-family:linux libertine initials o;font-style:normal;font-weight:400;src:local('Linux Libertine Initials O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_I.woff) format('woff')}@font-face{font-family:linux libertine mono o;font-style:normal;font-weight:400;src:local('Linux Libertine Mono O'),url(https://fonts.cdnfonts.com/s/19933/LinLibertine_M.woff) format('woff')}
+
 @font-face {
   font-family: 'Latin Modern';
   font-style: normal;
@@ -178,7 +180,7 @@ dd {
 
 /* Make default font-size 1rem and add smooth scrolling to anchors */
 html {
-  font-size: 1rem;
+  font-size: 1.3125rem;
 }
 @media (prefers-reduced-motion: no-preference) {
   html {
@@ -191,7 +193,7 @@ body.libertinus {
 }
 
 body {
-  font-family: 'Latin Modern', Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-family: linux libertine o, 'Latin Modern', Georgia, Cambria, 'Times New Roman', Times, serif;
   line-height: 1.8;
 
   max-width: 80ch;
@@ -285,7 +287,6 @@ pre,
 kbd {
   font-family: "Urbit Sans";
   font-variation-settings: "xtab" 500;
-  font-size: 85%;
   hyphens: none;
 }
 pre {
@@ -531,10 +532,9 @@ dl dd {
   font-style: normal;
 }
 
-/* Center align author name, use small caps and add vertical spacing  */
+/* Center align author name and add vertical spacing  */
 .author {
   margin: 0.85rem 0;
-  font-variant-caps: small-caps;
   text-align: center;
 }
 
@@ -646,7 +646,6 @@ input.sidenote-toggle {
 /* Center title and paragraph */
 .abstract,
 .abstract p {
-  text-align: center;
   margin-top: 0;
 }
 .abstract {
@@ -655,6 +654,10 @@ input.sidenote-toggle {
 .abstract > h2 {
   font-size: 1rem;
   margin-bottom: -0.2rem;
+}
+
+.thebibliography p {
+  text-align: left;
 }
 
 /* Format the LaTeX symbol correctly (a higher up, e lower) */
@@ -677,34 +680,34 @@ input.sidenote-toggle {
 
 /* Heading typography */
 h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   line-height: 3.25rem;
   margin-bottom: 1.625rem;
 }
 
 h2 {
-  font-size: 1.7rem;
+  font-size: 2rem;
   line-height: 2rem;
   margin-top: 3rem;
 }
 
 h3 {
-  font-size: 1.4rem;
+  font-size: 1.875rem;
   margin-top: 2.5rem;
 }
 
 h4 {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   margin-top: 2rem;
 }
 
 h5 {
-  font-size: 1rem;
+  font-size: 1.3125rem;
   margin-top: 1.8rem;
 }
 
 h6 {
-  font-size: 1rem;
+  font-size: 1.3125rem;
   font-style: italic;
   font-weight: normal;
   margin-top: 2.5rem;
