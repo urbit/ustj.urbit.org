@@ -13,12 +13,12 @@
       "title": "The Stakes of Scrying"
     },
     {
-      "author": ["rovnys-ricfer", "wicdev-wisryt"],
-      "title": "Static & Dynamic Libs"
-    },
-    {
       "author": ["nomryg-nilref"],
       "title": "Inductive Testing"
+    },
+    {
+      "author": ["rovnys-ricfer", "wicdev-wisryt"],
+      "title": "Static & Dynamic Libs"
     },
     {
       "author": ["mopfel-winrux"],
