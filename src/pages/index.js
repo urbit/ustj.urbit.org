@@ -8,11 +8,15 @@ import IntraNav from "@/components/IntraNav";
 function Contents({ issue }) {
   let comingSoonFlag = true;
 
+  const Row = ({ children, className }) => (
+    <div className={classnames("layout-px py-2.5", className)}>{children}</div>
+  );
+
   return (
-    <div className="w-full layout layout-px space-y-2.5 pt-2.5 pb-12 md:pb-16">
-      <div>{issue.title}</div>
+    <div className="w-full layout pb-12 md:pb-16">
+      <Row>{issue.title}</Row>
       <hr className="border-t border-black" />
-      <div>{issue.issue}</div>
+      <Row>{issue.issue}</Row>
       {issue.content.map((o) => {
         const renderAuthors = (authors) => authors.map((s) => <p>~ {s}</p>);
         let ComingSoon = null;
@@ -25,20 +29,25 @@ function Contents({ issue }) {
         return (
           <>
             <hr className="border-t border-black" />
-            <div
+            <Row
               className={classnames("flex justify-between", {
                 "text-muted pointer-events-none": !o.pdf,
               })}
             >
               <div className="flex space-x-5">
-                <Link className={!o.pdf ? "text-transparent" : ""} href={o.pdf || ""}>PDF</Link>
+                <Link
+                  className={!o.pdf ? "text-transparent" : ""}
+                  href={o.pdf || ""}
+                >
+                  PDF
+                </Link>
                 <div className="font-mono whitespace-nowrap">
                   {renderAuthors(o.author)}
                 </div>
                 <Link href={o.html || ""}>{o.title}</Link>
               </div>
               {ComingSoon && <ComingSoon />}
-            </div>
+            </Row>
           </>
         );
       })}
