@@ -36,7 +36,11 @@ function Contents({ issue }) {
         let ComingSoon = null;
         if (!o.pdf && comingSoonFlag) {
           ComingSoon = () => (
-            <img className="h-[1.5em]" alt="" src="/images/coming-soon.png" />
+            <img
+              className="hidden sm:block h-[1.5em]"
+              alt=""
+              src="/images/coming-soon.png"
+            />
           );
           comingSoonFlag = false;
         }
