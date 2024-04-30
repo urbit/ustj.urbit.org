@@ -4,6 +4,7 @@ import Link from "next/link";
 import classnames from "classnames";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
+import PdfIcon from "@/components/PdfIcon";
 
 function Row({ children, className, href }) {
   const c = classnames(
@@ -50,13 +51,18 @@ function Contents({ issue }) {
             >
               <div className="flex space-x-5">
                 <span
-                  className={!o.pdf ? "text-transparent" : "hover:text-white"}
+                  className="flex items-center h-full"
                   onClick={(e) => {
                     e.preventDefault();
                     document.location = o.pdf || "";
                   }}
                 >
-                  PDF
+                  <PdfIcon
+                    className={classnames(
+                      !o.pdf ? "text-transparent" : "hover:text-white",
+                      "h-[1.5em]",
+                    )}
+                  />
                 </span>
                 <div className="font-mono whitespace-nowrap">
                   {renderAuthors(o.author)}
