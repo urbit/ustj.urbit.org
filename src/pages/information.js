@@ -4,6 +4,10 @@ import Link from "next/link";
 import IntraNav from "@/components/IntraNav";
 
 export default function Information() {
+  useEffect(() => {
+    document.body.style = `background-color:var(--black);`;
+  });
+
   return (
     <>
       <Head>
