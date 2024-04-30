@@ -5,12 +5,25 @@ import classnames from "classnames";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 
+function Row({ children, className, href }) {
+  const c = classnames(
+    "layout-px py-2.5",
+    { "hover:bg-black hover:text-primary cursor-pointer": href },
+    className,
+  );
+
+  if (href) {
+    return (
+      <Link className={c} href={href}>
+        {children}
+      </Link>
+    );
+  }
+  return <div className={c}>{children}</div>;
+}
+
 function Contents({ issue }) {
   let comingSoonFlag = true;
-
-  const Row = ({ children, className }) => (
-    <div className={classnames("layout-px py-2.5", className)}>{children}</div>
-  );
 
   return (
     <div className="w-full layout pb-12 md:pb-16">
@@ -33,18 +46,22 @@ function Contents({ issue }) {
               className={classnames("flex justify-between", {
                 "text-muted pointer-events-none": !o.pdf,
               })}
+              href={o.html || ""}
             >
               <div className="flex space-x-5">
-                <Link
-                  className={!o.pdf ? "text-transparent" : ""}
-                  href={o.pdf || ""}
+                <span
+                  className={!o.pdf ? "text-transparent" : "hover:text-white"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.location = o.pdf || "";
+                  }}
                 >
                   PDF
-                </Link>
+                </span>
                 <div className="font-mono whitespace-nowrap">
                   {renderAuthors(o.author)}
                 </div>
-                <Link href={o.html || ""}>{o.title}</Link>
+                <span>{o.title}</span>
               </div>
               {ComingSoon && <ComingSoon />}
             </Row>
