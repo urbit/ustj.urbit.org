@@ -107,8 +107,8 @@ export default function Home({ issues }) {
         <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
           <div className="inline-flex items-center h-12 md:h-16 space-x-5">
-            {issues.length > 1 && (
-              <>
+            <>
+              {issues.length > 1 && (
                 <select
                   className="btn outline-0 border border-primary text-primary bg-black"
                   value={issue.issue}
@@ -120,11 +120,14 @@ export default function Home({ issues }) {
                     <option value={issue.issue}>{issue.issue}</option>
                   ))}
                 </select>
-                {/* <Link className="btn bg-primary text-black" href={issue.links.shop}> */}
-                {/*   Buy $25 */}
-                {/* </Link> */}
-              </>
-            )}
+              )}
+              <Link
+                className="btn sm:hidden border-2 border-primary bg-primary hover:bg-black text-black hover:text-primary"
+                href={issue.links.shop}
+              >
+                Buy $29
+              </Link>
+            </>
           </div>
           <div
             className="flex items-center justify-center w-full layout-px"
