@@ -32,7 +32,8 @@ function Contents({ issue }) {
       <hr className="border-t border-black" />
       <Row>{issue.issue}</Row>
       {issue.content.map((o) => {
-        const renderAuthors = (authors) => authors.map((s) => <p>~ {s}</p>);
+        const renderAuthors = (authors) =>
+          authors.map((s) => <p key={s}>~ {s}</p>);
         let ComingSoon = null;
         if (!o.pdf && comingSoonFlag) {
           ComingSoon = () => (
@@ -45,7 +46,7 @@ function Contents({ issue }) {
           comingSoonFlag = false;
         }
         return (
-          <>
+          <div key={o.title}>
             <hr className="border-t border-black" />
             <Row
               className={classnames("flex justify-between", {
@@ -75,7 +76,7 @@ function Contents({ issue }) {
               </div>
               {ComingSoon && <ComingSoon />}
             </Row>
-          </>
+          </div>
         );
       })}
       <hr className="border-t border-black" />
@@ -121,7 +122,9 @@ export default function Home({ issues }) {
                   }}
                 >
                   {issues.map((issue) => (
-                    <option value={issue.issue}>{issue.issue}</option>
+                    <option key={issue.issue} value={issue.issue}>
+                      {issue.issue}
+                    </option>
                   ))}
                 </select>
               )}
