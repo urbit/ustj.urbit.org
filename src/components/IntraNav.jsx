@@ -33,6 +33,7 @@ const sites = [
     title: "Network Explorer ↗",
     href: "https://network.urbit.org",
     target: "_blank",
+    theme: "gry",
   },
 ];
 
