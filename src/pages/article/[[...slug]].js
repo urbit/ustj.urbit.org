@@ -18,7 +18,7 @@ export default function Article({ html }) {
         <main className="flex flex-col items-center flex-1 layout">
           <iframe
             className="flex-1 w-full overflow-auto"
-            src="/ustj/v01-i01/html/mss.html"
+            src="/ustj/v01-i01/html/mss0.html"
             frameBorder="0"
           />
         </main>
