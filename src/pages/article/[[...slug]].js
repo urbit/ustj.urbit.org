@@ -3,7 +3,7 @@ import Head from "next/head";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 
-export default function Article({ html }) {
+export default function Article({ issue, article }) {
   const ref = React.useRef(null);
   const [height, setHeight] = React.useState("0px");
 
@@ -20,7 +20,7 @@ export default function Article({ html }) {
   return (
     <>
       <Head>
-        <title>The State of Urbit: Eight Years After the Whitepaper</title>
+        <title>{article.title}</title>
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
         <IntraNav />
@@ -28,7 +28,7 @@ export default function Article({ html }) {
           <iframe
             ref={ref}
             className="w-full overflow-auto"
-            src="/ustj/v01-i01/mss0.html"
+            src={article.html}
             frameBorder="0"
             scrolling="no"
             style={{ height }}
@@ -41,21 +41,50 @@ export default function Article({ html }) {
 }
 
 export async function getStaticProps({ params }) {
-  // const slug = params.slug;
-  // const html = fs.readFileSync(`./content/${slug.join("/")}.html`, "utf8");
+  const issue = JSON.parse(
+    fs.readFileSync(`./ustj/${params.slug[0]}.json`, "utf8"),
+  );
+
+  const article = issue.content.find((c) => {
+    const slug = c.title
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9\s-]+/g, "")
+      .replaceAll(/\s+/g, "-");
+    return slug === params.slug[1];
+  });
 
   return {
     props: {
-      html: null,
+      issue,
+      article,
     },
   };
 }
 
 export async function getStaticPaths() {
-  const slugs = ["/article/v01-i01/after-the-whitepaper"];
+  const slugs = fs.readdirSync("./ustj");
+  const issues =
+    slugs?.map((slug) => {
+      return {
+        slug: slug.replace(/\.json$/g, ""),
+        ...JSON.parse(fs.readFileSync(`./ustj/${slug}`, "utf8")),
+      };
+    }) || null;
+
+  const paths = [];
+  issues.forEach((i) => {
+    i.content.forEach((c) => {
+      paths.push(
+        `/article/${i.slug}/${c.title
+          .toLowerCase()
+          .replaceAll(/[^a-z0-9\s-]+/g, "")
+          .replaceAll(/\s+/g, "-")}`,
+      );
+    });
+  });
 
   return {
-    paths: slugs,
+    paths,
     fallback: false,
   };
 }
