@@ -7,15 +7,15 @@ export default function Article({ html }) {
   const ref = React.useRef(null);
   const [height, setHeight] = React.useState("0px");
 
+  const onLoad = () => {
+    setHeight(ref.current.contentWindow.document.body.scrollHeight + "px");
+  };
+
+  useEffect(onLoad, [ref]);
+
   useEffect(() => {
     document.body.style = `background-color:hsl(210, 20%, 98%);`;
   });
-
-  useEffect(() => {
-    setHeight(
-      ref.current.contentWindow.document.documentElement.scrollHeight + "px",
-    );
-  }, [ref]);
 
   return (
     <>
@@ -31,7 +31,8 @@ export default function Article({ html }) {
             src="/ustj/v01-i01/mss0.html"
             frameBorder="0"
             scrolling="no"
-            style={{ height: height }}
+            style={{ height }}
+            onLoad={onLoad}
           />
         </main>
       </div>
