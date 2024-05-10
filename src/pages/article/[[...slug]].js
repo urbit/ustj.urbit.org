@@ -28,7 +28,7 @@ export default function Article({ html }) {
           <iframe
             ref={ref}
             className="w-full overflow-auto"
-            src="/ustj/v01-i01/html/mss0.html"
+            src="/ustj/v01-i01/mss0.html"
             frameBorder="0"
             scrolling="no"
             style={{ height: height }}
