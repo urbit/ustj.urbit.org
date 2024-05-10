@@ -4,9 +4,18 @@ import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 
 export default function Article({ html }) {
+  const ref = React.useRef(null);
+  const [height, setHeight] = React.useState("0px");
+
   useEffect(() => {
     document.body.style = `background-color:hsl(210, 20%, 98%);`;
   });
+
+  useEffect(() => {
+    setHeight(
+      ref.current.contentWindow.document.documentElement.scrollHeight + "px",
+    );
+  }, [ref]);
 
   return (
     <>
@@ -17,9 +26,12 @@ export default function Article({ html }) {
         <IntraNav />
         <main className="flex flex-col items-center flex-1 layout">
           <iframe
-            className="flex-1 w-full overflow-auto"
+            ref={ref}
+            className="w-full overflow-auto"
             src="/ustj/v01-i01/html/mss0.html"
             frameBorder="0"
+            scrolling="no"
+            style={{ height: height }}
           />
         </main>
       </div>
