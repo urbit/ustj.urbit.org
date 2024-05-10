@@ -45,6 +45,11 @@ function Contents({ issue }) {
           );
           comingSoonFlag = false;
         }
+        const articleUrl = `/article/${issue.slug}/${o.title
+          .toLowerCase()
+          .replaceAll(/[^a-z0-9\s-]+/g, "")
+          .replaceAll(/\s+/g, "-")}`;
+
         return (
           <div key={o.title}>
             <hr className="border-t border-black" />
@@ -52,7 +57,7 @@ function Contents({ issue }) {
               className={classnames("flex justify-between", {
                 "text-muted pointer-events-none": !o.pdf,
               })}
-              href={o.html || ""}
+              href={(o.html && articleUrl) || ""}
             >
               <div className="flex space-x-5">
                 <span
@@ -155,7 +160,10 @@ export async function getStaticProps() {
   const slugs = fs.readdirSync("./ustj");
   const issues =
     slugs?.map((slug) => {
-      return JSON.parse(fs.readFileSync(`./ustj/${slug}`, "utf8"));
+      return {
+        slug: slug.replace(/\.json$/g, ""),
+        ...JSON.parse(fs.readFileSync(`./ustj/${slug}`, "utf8")),
+      };
     }) || null;
 
   return {
