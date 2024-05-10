@@ -20,7 +20,7 @@ export default function Article({ issue, article }) {
   return (
     <>
       <Head>
-        <title>{article.title}</title>
+        <title>{article.title} • UrbitSTJ</title>
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
         <IntraNav />
