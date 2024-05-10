@@ -1,0 +1,920 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>The Stakes of Scrying:
+ .   ^otket and the Seer Proposal</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css">
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">The Stakes of Scrying:<br />
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket and the Seer
+Proposal</h2>
+  <div class="author" ><span 
+class="ec-lmbx-12">Ted Blackman</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~rovnys-ricfer</code></span>
+<br />   <span 
+class="ec-lmbx-12">Paul Driver</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~fodwyt-ragful</code></span>
+<br /><span 
+class="ec-lmbx-12">Matthew Levan</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~mastyr-bottec</code></span><span 
+class="ec-lmbx-12"> </span>
+<br />         <span 
+class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 42--><p class="noindent" ><span 
+class="ec-lmr-9">The expedient of Nock 12 and the </span><code class="lstinline"><span style="color:#000000">.^</span></code><span 
+class="ec-lmr-9"> dotket</span><span 
+class="ec-lmr-9"> rune</span>
+     <span 
+class="ec-lmr-9">break the referential transparency of Nock, with</span>
+     <span 
+class="ec-lmr-9">consequences for the purity of Urbit’s functional</span>
+     <span 
+class="ec-lmr-9">programming model. We consider the implications</span>
+     <span 
+class="ec-lmr-9">of  this  and  propose  a  movebased  replacement</span>
+     <span 
+class="ec-lmr-9">for  the  </span><code class="lstinline"><span style="color:#000000">.^</span></code><span 
+class="ec-lmr-9"> dotket</span><span 
+class="ec-lmr-9"> rune  that  restores  referential</span>
+     <span 
+class="ec-lmr-9">transparency.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-30002" id="QQ2-1-3">How <code class="lstinline"><span style="color:#000000">.^</span></code> dotket Works</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-40003" id="QQ2-1-4">Recommendations</a></span>
+<br />     <span class="subsectionToc" >3.1 <a href="#x1-50003.1" id="QQ2-1-5">The Seer Monad</a></span>
+<br />     <span class="subsectionToc" >3.2 <a href="#x1-60003.2" id="QQ2-1-6">Move-Based Scry Interface</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-70004" id="QQ2-1-7">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-8000" id="QQ2-1-8">References</a></span>
+   </div>
+<!--l. 52--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 54--><p class="noindent" >While Nock formally has twelve opcodes, numbered 0–11,
+it is convenient to expose in userspace a fake Nock 12
+opcode to expose the scry namespace to userspace
+developers without an asynchronous retrieval step.
+This opcode is trivially invoked by using the Hoon
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2001f1"></a> 
+However, Nock 12 breaks the referential transparency of Nock,
+and this has consequences for the purity of Urbit’s functional
+programming model.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-30002"></a>How <code class="lstinline"><span style="color:#000000">.^</span></code> dotket Works</h3>
+<!--l. 58--><p class="noindent" >The Nock 12 opcode and the <code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune are used by
+user-<br 
+class="newline" />space code to ask the kernel for data in the scry
+                                                
+                                                
+namespace.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-3001f2"></a> 
+When Urbit runs userspace code, that code is not raw
+Nock. It is instead called Mock, which is Nock with two
+additions: deterministic errors are caught and returned
+as values to the kernel; and there is an extra Nock
+opcode, opcode 12. A simple Nock 12 formula looks like
+<code class="lstinline"><span style="color:#000000">[12</span><span style="color:#000000"> </span><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar/baz</span><span style="color:#000000">]]</span></code>, where <code class="lstinline"><span style="color:#000000">/foo/bar/baz</span></code> is a path
+literal <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%foo</span><span style="color:#000000"> </span><span style="color:#000000">%bar</span><span style="color:#000000"> </span><span style="color:#000000">%baz</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>, representing a path in the
+scry namespace. The result of running this opcode will be the
+result of performing the scry request, i. e. dereferencing the
+path.
+</p><!--l. 60--><p class="indent" >   Catching deterministic errors is uncontroversial, but the
+Nock 12 opcode poses some diﬃculties and has been under
+scrutiny for years now. The most tangible problem with Nock
+12 is that it prevents userspace code from persistently
+memoizing Nock computations; at the moment, only
+kernelspace code can hold onto Nock memoization caches
+across multiple Arvo events. The lifetime of a userspace
+memoization cache is limited to a single metacircular
+evaluation context, i. e. a single call to <code class="lstinline"><span style="color:#000000">++mink</span></code> or an
+equivalent gate that runs Mock (virtual Nock with the extra
+opcode).
+</p><!--l. 62--><p class="indent" >   Userspace code cannot memoize Nock persistently because
+it is not feasible for the runtime to prevent a jet mismatch in
+the metacircular evaluator gate. A gate like <code class="lstinline"><span style="color:#000000">++mink</span></code> takes in a
+Mock expression (a cell of <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>) and a
+“scry handler gate” (which is described shortly), and returns a
+value which is one of:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 65--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">computation-result</span><span style="color:#000000">]</span></code>  for    a    successful
+     evaluation;
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 66--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">block</span><span style="color:#000000">]</span></code> in the case of a failed scry request; or
+     </p></li>
+     <li class="itemize">
+     <!--l. 67--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">error</span><span style="color:#000000">]</span></code> in the case of a deterministic error.</p></li></ul>
+<!--l. 70--><p class="noindent" >While error handling is not relevant to the current question, a
+brief description is included here for thoroughness. The <code class="lstinline"><span style="color:#000000">error</span></code>
+in <code class="lstinline"><span style="color:#000000">++mink</span></code>’s result <code class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">error</span><span style="color:#000000">]</span></code> is a deterministic error, meaning
+that every attempt to evaluate that <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>
+pair will always result in that same error value—deterministic
+errors correspond to the lines in the Nock spec where <code class="lstinline"><span style="color:#000000">*a</span></code>
+evaluates to <code class="lstinline"><span style="color:#000000">*a</span></code>, i. e. a trivial inﬁnite loop. Nondeterministic
+errors, such as running out of usable memory or getting
+interrupted by the user, result in the function failing
+to complete, and the Arvo event will be aborted and
+rolled back to its state before trying to run this new
+event.
+</p><!--l. 73--><p class="indent" >   As mentioned, the <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> pair is not the
+only input to <code class="lstinline"><span style="color:#000000">++mink</span></code>. There is also an argument of the
+form <code class="lstinline"><span style="color:#000000">scry=</span><span style="color:#000000"> </span><span style="color:#000000">$-</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000">)</span><span style="color:#000000">)</span><span style="color:#000000">)</span></code>, called the scry
+handler gate. When <code class="lstinline"><span style="color:#000000">++mink</span></code> encounters a Nock 12 opcode
+while evaluating an expression <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>, it
+evaluates the sub-formula to obtain a path to look up
+in the scry namespace. Once it has this path, it calls
+the scry handler gate on the path, which returns one
+of:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 76--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">value</span><span style="color:#000000">]</span></code> positive scry response;
+     </p></li>
+     <li class="itemize">
+     <!--l. 77--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span><span style="color:#000000"> </span></code>permanent scry failure; or
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 78--><p class="noindent" ><code class="lstinline"><span style="color:#000000">~</span></code> “block”.</p></li></ul>
+<!--l. 81--><p class="noindent" >The positive response case means that the scry was performed
+successfully and yielded a value, in which case <code class="lstinline"><span style="color:#000000">++mink</span></code> injects
+the value as the result of the Nock 12 opcode and continues to
+evaluate the Nock. The permanent failure means the scry
+namespace knows there will never be a value at that
+path, so <code class="lstinline"><span style="color:#000000">++mink</span></code> can immediately return a deterministic
+error.
+</p><!--l. 84--><p class="indent" >   A scry block means the system refused to answer the
+question, i. e. the request was &#x0022;blocked&#x0022; for some reason—this
+could be due to lack of permission, or because the request
+asked about the future, or the request asked for data from
+another ship that isn’t synchronously available within this
+Arvo event. If the scry blocks, <code class="lstinline"><span style="color:#000000">++mink</span></code> returns a <code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">block</span><span style="color:#000000">]</span></code>,
+where <code class="lstinline"><span style="color:#000000">block</span></code> is the scry request path whose value could not
+be resolved.
+</p><!--l. 86--><p class="indent" >   The Nock 12 opcode is problematic because it renders the
+result of the computation dependent on external data
+which are not in the <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> that is being
+evaluated. The result is no longer a pure function of the
+<code class="lstinline"><span style="color:#000000">subject</span></code> and <code class="lstinline"><span style="color:#000000">formula</span></code>: depending on what the scry
+handler gate is, the same <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> could
+yield diﬀerent results. Consider <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> of
+<code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">[12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span></code>. This returns the result of
+looking up the <code class="lstinline"><span style="color:#000000">/foo/bar</span></code> scry request path from the
+scry gate. Userspace code (which is untrusted) could call
+<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">mink</span><span style="color:#000000"> </span><span style="color:#000000">[[0</span><span style="color:#000000"> </span><span style="color:#000000">12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span><span style="color:#000000"> </span><span style="color:#000000">|=</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">33])</span><span style="color:#000000">)</span></code>, acquire a result
+<code class="lstinline"><span style="color:#000000">33</span></code>, then call <code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">mink</span><span style="color:#000000"> </span><span style="color:#000000">[[0</span><span style="color:#000000"> </span><span style="color:#000000">12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span><span style="color:#000000"> </span><span style="color:#000000">|=</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">44])</span><span style="color:#000000">)</span></code>
+to yield <code class="lstinline"><span style="color:#000000">44</span></code>. The <code class="lstinline"><span style="color:#000000">subject</span></code>s and <code class="lstinline"><span style="color:#000000">formula</span></code>s were identical, but
+because they were evaluated with diﬀerent scry gates, they
+yielded diﬀerent results.
+</p><!--l. 88--><p class="indent" >   Given that Urbit is supposed to be a pure-functional
+system, how can this be acceptable? The answer is that Mock,
+virtual Nock, <span 
+class="ec-lmri-10">is </span>purely functional (mathematically, a “partial
+function” like Nock itself) as long as it’s only ever run using
+the real scry namespace, which is referentially transparent.
+                                                
+                                                
+That is to say, all data in the scry namespace can be thought
+of as something like axiomatic data that everyone agrees on
+and never changes: all virtual Nock computations will get the
+same answers to all Nock 12 opcodes that complete, because
+everyone agrees on which value is bound to each path in the
+namespace.
+</p><!--l. 90--><p class="indent" >   Another way to think of the scry namespace is as
+comprising an extra implicit argument passed to every Mock
+computation along with the subject and formula. This extra
+argument is discovered dynamically over time as more ships
+bind more values. Since any path can only be bound once, it
+becomes immutable; all Mock expressions that dereference
+some scry path will either fail to complete or complete with
+identical results, hence pure functional.
+</p><!--l. 92--><p class="indent" >   Note that there’s no requirement that all the scry
+gates be noun-equivalent (intensionally equal), or even
+contain the same set of namespace paths and values
+(extensionally equal). The requirement is that no two scry
+gates ever return diﬀerent values for any given scry request
+path.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-3002f3"></a> 
+</p><!--l. 95--><p class="indent" >   The Arvo kernel’s scry handler gate, as described
+in the original Moron Lab blog post about Urbit (<a  id="x1-3003"></a>
+<code>~sorreg-namtyv</code>, 2010), is a “static functional namespace”;
+even though that gate changes frequently, it maintains the
+invariant that every scry path’s binding to a value is
+immutable.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-3004f4"></a> 
+</p><!--l. 97--><p class="indent" >   As long as a correct Arvo kernel is supplying the scry
+handler, Mock retains its purely functional nature. But
+consider again the case where userspace code runs the same
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> twice, but with two diﬀerent scry
+gates that give diﬀerent answers to some scry path. From
+                                                
+                                                
+the perspective of a simple Nock interpreter, it’s still
+deterministic: <code class="lstinline"><span style="color:#000000">++mink</span></code> is just some Nock function that runs
+some other computation (Mock) on some inputs. Because it’s
+just some Nock function, it can’t break determinism of the
+Arvo event; replaying the Arvo event will still yield the same
+result. The problem only arises when trying to get clever
+about how the runtime evaluates Nock, in particular by
+caching the results of Nock computations.
+</p><!--l. 99--><p class="indent" >   Development versions of Vere support persistent Nock
+memoization. This means a programmer can emit a Nock hint
+to the interpreter asking the interpreter to cache the result of
+the computation, so that if it gets run again, the result will be
+retrieved from the runtime’s cache instead of rerun step by
+step. The cache key is a <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> pair.
+When the interpreter sees a <code class="lstinline"><span style="color:#000000">%memo</span></code> hint, it looks at the
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> that the hint surrounds. If the
+memoization cache has a value for that key, the runtime uses
+that value as the result of the computation. Otherwise the
+runtime runs the computation, inserts the result into the
+cache, and returns the result.
+</p><!--l. 101--><p class="indent" >   For the moment, only the kernel can place items into the
+cache. Userspace code runs Mock, so if it were allowed to place
+items into the cache, there would be three options:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-3007x1">
+     <!--l. 104--><p class="noindent" >Let userspace code place arbitrary values into the
+     cache. This poses a severe security problem: event
+     replay  would  be  nondeterministic,  inﬂuenced  by
+     the  contents  of  the  memoization  cache,  allowing
+     malicious  userspace  agents  to  perform  a  kind  of
+     denial of service attack by preventing event replay,
+     or possibly even worse, by injecting cache lines that
+     other  applications  would  use,  causing  those  other
+     applications to malfunction in a way the malicious
+     code  wants.  The  worst  case  would  be  causing  a
+     system app such as <code class="lstinline"><span style="color:#000000">%hood</span></code> to fail to enforce a security
+     check, allowing the malicious code to escalate its own
+                                                
+                                                
+     privileges and permitting it to ask the system app to
+     do something like reinstall the kernel.
+     </p></li>
+<li 
+  class="enumerate" id="x1-3009x2">
+     <!--l. 106--><p class="noindent" >Place  the  scry  gate  into  the  cache  key  for  the
+     memoization  cache,  so  a  cache  key  would  be
+     <code class="lstinline"><span style="color:#000000">[[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span><span style="color:#000000"> </span><span style="color:#000000">scry-gate</span><span style="color:#000000">]</span></code> instead  of
+     just  <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>.  This  would  close  the
+     security hole, but since Arvo’s scry gate undergoes
+     small changes on between every agent activation, it
+     would make these cache lines useless outside of the
+     immediate execution context within a single <code class="lstinline"><span style="color:#000000">++mink</span></code>
+     call. This is exactly the situation userspace code is
+     already in, and thus not helpful at all.
+     </p></li>
+<li 
+  class="enumerate" id="x1-3011x3">
+     <!--l. 108--><p class="noindent" >Have   the   interpreter   record   the   set   of   scry
+     <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">path</span><span style="color:#000000"> </span><span style="color:#000000">value</span><span style="color:#000000">]</span></code> pairs looked up by the computation.
+     This   would   allow   userspace   code   to   perform
+     scry  requests  safely,  but  the  cost  is  a  nontrivial
+     amount of machinery in the runtime, along with a
+     computational cost of looking up a cache line that
+     grows linearly with the number of scry paths that
+     were requested. Of the three options listed here, this
+     is the most reasonable, but it is still highly nontrivial
+     and the requirement to compare all requested paths
+     could be onerous.</p></li></ol>
+<!--l. 110--><p class="noindent" >Instead of implementing any of these options, Urbit has currently
+simple disabled the ability for userspace code to modify the
+Nock memoization cache. This is enforced by the jet for
+<code class="lstinline"><span style="color:#000000">++mink</span></code>; the jet is simply a call back into the normal Nock
+interpreter, which is really a Mock interpreter, whose state
+includes a list of nouns representing the stack of scry handler
+gates for the current execution context. If this list is null <code class="lstinline"><span style="color:#000000">~</span></code>,
+                                                
+                                                
+then we must be in the kernel and the code is allowed to
+modify the memoization cache; otherwise, we are in some kind
+of Mock context, and the code is not allowed to modify the
+cache.
+</p><!--l. 113--><p class="indent" >   The concerns with <code class="lstinline"><span style="color:#000000">.^</span></code> dotket go deeper than memoization
+however, despite that being the only known major concrete
+issue.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-3012f5"></a> 
+Conceptually, the fact that a Mock computation has implicit
+external dependencies makes the pure-functional nature of the
+system more fragile—the memoization issue is downstream of
+this fragility.
+</p><!--l. 115--><p class="indent" >   Morally and aesthetically, the fact that Nock makes
+no assumptions about any of its contents is part of the
+magic of Urbit. Nock is a true functional programming
+language with no implicit external dependencies at all, and
+no constraints on the nouns it operates on. Anything
+that pollutes this vision is potentially harmful to the
+environment Urbit creates for programs and their authors.
+Mock’s implicit dependency on the namespace makes
+Nock context-dependent instead of context-independent,
+as it should be. A related issue is that userspace code
+does not have access to raw Nock, only Mock. The Hoon
+compiler willingly outputs Nock 12 instructions when
+handed a <code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune, and there is no means for
+userspace code to signal that it will refrain from using Nock
+12.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-40003"></a>Recommendations</h3>
+<!--l. 120--><p class="noindent" >The removal of Nock 12 is fraught with diﬃculty for userspace
+and kernel development. The core development team has
+considered two proposals which will allow the kernel to
+gracefully deprecate Nock 12. The two concrete lines of action
+are:
+                                                
+                                                
+</p><!--l. 122--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-4002x1">
+     <!--l. 123--><p class="noindent" >Add a new metacircular evaluator gate that does not
+     run Nock 12 expressions (the Seer proposal).
+     </p></li>
+<li 
+  class="enumerate" id="x1-4004x2">
+     <!--l. 124--><p class="noindent" >Add a move-based interface for scrying to the Gall
+     interface.</p></li></ol>
+<!--l. 127--><p class="indent" >   This approach will allow core developers and userspace
+application developers to experiment with code that does not
+use <code class="lstinline"><span style="color:#000000">.^</span></code> dotket. If that resulting code and associated design
+patterns work well, we will deprecate the <code class="lstinline"><span style="color:#000000">.^</span></code> dotket rune and
+the Nock 12 opcode in favor of move-based scrying.
+</p><!--l. 129--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a  id="x1-50003.1"></a>The Seer Monad</h4>
+<!--l. 131--><p class="noindent" >Seer is a monadic scry interface which allows application
+developers to read from the namespace without using
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket or its virtual Nock operator 12. Userspace code run
+inside of this gate can reestablish the guarantee that it is
+purely functional, allowing it to modify the memoization
+cache.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-5001f6"></a> 
+</p><!--l. 133--><p class="indent" >   Seer is designed as a replacement for <code class="lstinline"><span style="color:#000000">.^</span></code> dotket, and thus
+attempts to be as ergonomic as the <code class="lstinline"><span style="color:#000000">.^</span></code> dotket pattern.
+Consider a Gall agent that scries using the current
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket pattern:
+                                                
+                                                
+</p>
+   <!--l. 135-->
+   <pre class="lstlisting" id="listing-71"><span class="label"><a  id="x1-5002r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span> 
+<span class="label"><a  id="x1-5003r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5004r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo-result</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">.</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/cx/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/foo</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5006r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">do</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">something</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">with</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">foo-result...</span></span> 
+<span class="label"><a  id="x1-5007r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   
+<!--l. 144--><p class="indent" >   A corresponding snippet of a Gall agent that scries
+using <code class="lstinline"><span style="color:#000000">++seer</span></code> in the continuation style would look like
+this:
+</p>
+   <!--l. 146-->
+   <pre class="lstlisting" id="listing-73"><span class="label"><a  id="x1-5008r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">gall</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">seer</span></span> 
+<span class="label"><a  id="x1-5009r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=mold</span></span> 
+<span class="label"><a  id="x1-5010r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5011r4"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span> 
+<span class="label"><a  id="x1-5012r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5013r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span> 
+<span class="label"><a  id="x1-5014r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">(</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">seer</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">vase</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">(</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">quip</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">card</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">_this</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">))</span></span> 
+<span class="label"><a  id="x1-5015r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%scry</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/cx/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/foo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo=vase</span></span> 
+<span class="label"><a  id="x1-5016r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo-result</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5017r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">do</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">something</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">with</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">foo-result...</span></span> 
+<span class="label"><a  id="x1-5018r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   
+<!--l. 160--><p class="indent" >   <code class="lstinline"><span style="color:#000000">++seer</span></code> values can be composed using a monadic
+bind:
+</p>
+   <!--l. 162-->
+   <pre class="lstlisting" id="listing-75"><span class="label"><a  id="x1-5019r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">/foo</span></span> 
+<span class="label"><a  id="x1-5020r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bar</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">/bar</span></span> 
+<span class="label"><a  id="x1-5021r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span> 
+<span class="label"><a  id="x1-5022r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5023r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5024r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5025r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">rapt</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5026r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo=@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo</span></span> 
+<span class="label"><a  id="x1-5027r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bar=@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bar</span></span> 
+<span class="label"><a  id="x1-5028r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">some-state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">foo</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bar</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))]</span></span></pre>
+   
+<!--l. 175--><p class="noindent" >(In this example, use is made of <code class="lstinline"><span style="color:#000000">++rapt</span></code>. <code class="lstinline"><span style="color:#000000">++rapt</span></code> is a
+monadic scry binding gate (<a  id="x1-5029"></a> <a href="#cite.0@Levan2023b"><code>~mastyr-bottec</code></a>, 2023c).)
+</p><!--l. 178--><p class="indent" >   Here, a <code class="lstinline"><span style="color:#000000">++seer</span></code> is the type of programs that scry:
+</p>
+   <!--l. 180-->
+   <pre class="lstlisting" id="listing-79"><span class="label"><a  id="x1-5030r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">seer</span></span> 
+<span class="label"><a  id="x1-5031r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">r=mold</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=mold</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5032r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5033r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5034r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%scry</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=path</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">k=</span><span 
+class="ec-lmtt-9">$-</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))]</span></span> 
+<span class="label"><a  id="x1-5035r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+   
+<!--l. 189--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">++seer</span></code> scry system is intentionally incompatible with
+the current <code class="lstinline"><span style="color:#000000">.^</span></code> dotket scry system. We believe that <code class="lstinline"><span style="color:#000000">++seer</span></code>
+degrades ergonomics only slightly. In the initial introduction,
+we shall provide a wrapper library which accepts an agent
+written in the <code class="lstinline"><span style="color:#000000">++seer</span></code> style and produces an agent that scries
+in the <code class="lstinline"><span style="color:#000000">.^</span></code> dotket style.
+</p><!--l. 191--><p class="indent" >   The current reference implementation of Seer is available
+at urbit/urbit <a  id="x1-5036"></a> <a href="#cite.0@Levan2023"><code>~mastyr-bottec</code></a> (2023a). A more complete
+example is available at <a  id="x1-5037"></a> <a href="#cite.0@Levan2023a"><code>~mastyr-bottec</code></a> (2023b).
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a  id="x1-60003.2"></a>Move-Based Scry Interface</h4>
+<!--l. 195--><p class="noindent" >A Gall agent will be able to emit a new kind of move,
+in addition to all the moves it can emit now, that asks
+Gall to perform a scry request on the agent’s behalf.
+When Gall processes this move, it will perform the scry
+request and convert the result of the scry into a response
+move that will be delivered back into the agent in
+a later activation of the Gall vane, in accordance with
+the normal move processing order that Gall and Arvo
+use. Thus an agent could emit a list of moves such as
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">poke-1</span><span style="color:#000000"> </span><span style="color:#000000">scry-A</span><span style="color:#000000"> </span><span style="color:#000000">poke-2</span><span style="color:#000000"> </span><span style="color:#000000">scry-B</span><span style="color:#000000"> </span><span style="color:#000000">poke-3</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code> and Gall
+will handle all of those moves in the same order as if they
+were all pokes, i. e. the kernel will not introduce any
+exceptions to its normal move processing order for scry
+request moves.
+</p><!--l. 197--><p class="indent" >   This proposal is less developed than the Seer proposal, and
+thus no code examples can be provided, and no reference
+implementation exists at the time of writing.
+</p><!--l. 200--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-70004"></a>Conclusion</h3>
+<!--l. 202--><p class="noindent" >There is a general consensus among Urbit core
+developers that a new move-based scry interface is
+better suited as the lowest layer of the scry system
+than the Seer monadic interface. The fact that Seer or
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a  id="x1-7001f7"></a>  could
+be implemented on top of moves (but not necessarily the other
+way around) militates in favor of moves at the lowest layer.
+Another beneﬁt of this arrangement is that by making
+all scries asynchronous, the same interface can be used
+for both local and remote scries (since remote scries are
+                                                
+                                                
+always asynchronous). Such an abstraction over local vs.
+remote scry calls removes what would otherwise be an
+unavoidable branch point in userspace I/O code. It also
+matches the rest of Gall’s interprocess communication
+model, which does not distinguish between local and
+remote. A strong argument can be made that this is
+also the most “grug-brained” option, which is not to be
+undervalued.
+</p><!--l. 204--><p class="indent" >   There remain concerns about application development
+patterns if <code class="lstinline"><span style="color:#000000">.^</span></code> dotket is removed. Losing synchronous read
+access to other parts of the system potentially reduces the
+ergonomic wins of a naturally growing transaction across
+applications. This can be implemented in a way that is almost
+synchronous for local scries, and in particular it is still possible
+to perform multiple scry requests at the same system
+snapshot, meaning the requesting agent will see a consistent
+view of the system without any tearing.
+</p><!--l. 206--><p class="indent" >   Gall will also need to run the <code class="lstinline"><span style="color:#000000">++on-peek</span></code> arm of a
+Gall agent in the Seer monad, i. e. that arm will return
+either <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%done</span><span style="color:#000000"> </span><span style="color:#000000">scry-result</span><span style="color:#000000">]</span></code> to indicate it’s done or
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%scry</span><span style="color:#000000"> </span><span style="color:#000000">scry-request-path</span><span style="color:#000000"> </span><span style="color:#000000">callback</span><span style="color:#000000">]</span></code> to ask Gall to
+perform a scry request, in which case Gall performs the scry,
+injects the result into the callback gate, and repeats,
+until a <code class="lstinline"><span style="color:#000000">%done</span></code> is returned. This should not be a direct
+problem, but betokens complexity creeping into the Gall
+interface.
+</p><!--l. 208--><p class="indent" >   Because of these concerns with the proposed move-based
+replacement for <code class="lstinline"><span style="color:#000000">.^</span></code> dotket, we will ﬁrst add it as a new
+feature alongside <code class="lstinline"><span style="color:#000000">.^</span></code> dotket before committing to removing
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket. In this way, if the application patterns end
+up suﬀering inordinately, <code class="lstinline"><span style="color:#000000">.^</span></code> dotket may be retained.
+That being said, the current primary plan is to deprecate
+<code class="lstinline"><span style="color:#000000">.^</span></code> dotket once move-based scrying has been veriﬁed as
+providing a suﬃciently good application model. This is a
+conservative, incremental approach that will not break any
+existing code and lets us try out the new style in production
+applications before committing to the removal of Nock 12.
+ <img 
+src="ustj-logo-.png" alt="PIC"  
+width="337" height="337"  />
+                                                
+                                                
+</p>
+   <h3 class="sectionHead"><a  id="x1-8000"></a>References</h3>
+<!--l. 212--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Levan2023b" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@Levan2023b"></a><code>~mastyr-bottec</code>, Matthew Levan
+   (2023a)
+   “/lib/seer”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/urbit/urbit/blob/uip/seer/pkg/arvo/lib/seer.hoon" class="url" >https://github.com/urbit/urbit/blob/uip/seer/pkg/arvo/lib/seer.hoon</a>
+   (visited
+   on
+   ~2024.1.11).
+   </p></dd><dt id="X0-Levan2023" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@Levan2023"></a>—   (2023b)
+   “Seer:
+   A
+   Monadic
+   Scry
+   Interface
+   #6842”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/urbit/urbit/pull/6842" class="url" >https://github.com/urbit/urbit/pull/6842</a>
+   (visited
+   on
+   ~2024.1.11).
+   </p></dd><dt id="X0-Levan2023a" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@Levan2023a"></a>—   (2023c)
+   “Seer:
+   A
+   Monadic
+                                                
+                                                
+   Scry
+   Interface
+   Examples”.
+   <span class="small-caps">url</span>:
+   <a href="https://gist.github.com/matthew-levan/8772f204749748e7d72cc5d298eeeb03" class="url" >https://gist.github.com/matthew-levan/8772f204749748e7d72cc5d298eeeb03</a>
+   (visited
+   on
+   ~2024.1.11).
+   </p></dd><dt id="X0-Yarvin2006" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@Yarvin2006"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2006)
+   “U,
+   a
+   small
+   model”.
+   <span class="small-caps">url</span>:
+   <a href="http://lambda-the-ultimate.org/node/1269" class="url" >http://lambda-the-ultimate.org/node/1269</a>
+   (visited
+   on
+   ~2024.3.8).
+   </p></dd><dt id="X0-Yarvin2010" class="thebibliography">
+</dt><dd 
+id="bib-5" class="thebibliography">
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@Yarvin2010"></a>—   (2010)
+   “Urbit:
+   Functional
+   Programming
+   from
+   Scratch”.
+   <span class="small-caps">url</span>:
+   <a href="https://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html" class="url" >https://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.11).
+   </p></dd><dt id="X0-UIP-0116" class="thebibliography">
+</dt><dd 
+id="bib-6" class="thebibliography">
+                                                
+                                                
+   <!--l. 212--><p class="noindent" ><a  id="cite.0@UIP-0116"></a><code>~wicdev-wisryt</code>, Philip
+   C.
+   Monk,
+   Ted Blackman <code>~rovnys-ricfer</code>,
+   and
+   Scott Wilson <code>~midden-fabler</code>
+   (2023)
+   “<span 
+class="ec-lmcsc-10">uip-0116</span>:
+   Arvo
+   Ticks.
+   Pin
+   Arvo’s
+   scry
+   handler
+   to
+   a
+   move
+   tick”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0116.md" class="url" >https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0116.md</a>
+   (visited
+   on
+   ~2024.1.25).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 54--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">The idea of using a pattern like scrying to introduce a value into</span>
+  <span 
+class="ec-lmr-8">a referentially transparent namespace predates Urbit itself; cf. </span><a 
+ id="x2-2002"></a>
+  <span 
+class="ec-lmr-8">~sorreg-namtyv (2006).</span><a href="#x1-2001f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 58--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">The scry namespace, in brief, is a collection of immutable values</span>
+  <span 
+class="ec-lmr-8">“bound</span><span 
+class="ec-lmr-8">” by convention at ﬁxed endpoints. The scry namespace is deﬁned</span>
+  <span 
+class="ec-lmr-8">by a unique path for each resource. A representative scry path would</span>
+  <span 
+class="ec-lmr-8">have the entries /host/rift/life/vane/request-type/revision-number/desk</span><br 
+class="newline" /><span 
+class="ec-lmr-8">/ﬁle-path/mark.</span><a href="#x1-3001f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 92--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">A scry gate that always blocks is trivially legitimate, since it</span>
+  <span 
+class="ec-lmr-8">never gives any answers, much less answers that diﬀer from those of</span>
+  <span 
+class="ec-lmr-8">another scry gate.</span><a href="#x1-3002f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 95--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">Up to some known concerns that are addressed by Arvo Ticks </span><a 
+ id="x5-3005"></a>
+  <a 
+href="mss.html#cite.0@UIP-0116"><span 
+class="ec-lmcsc-10x-x-80">uip-0116</span></a><span 
+class="ec-lmr-8">.</span><a href="#x1-3004f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 113--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">Some complexity is introduced in the runtime when jetting the</span>
+  <span 
+class="ec-lmr-8">metacircular interpreter.</span><a href="#x1-3012f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 131--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">Note that it’s still acceptable for that gate to be called from</span>
+  <span 
+class="ec-lmr-8">Mock code, or even nested Mock code, that had previously performed</span>
+  <span 
+class="ec-lmr-8">scry requests that were not referentially transparent: raw Nock is</span>
+  <span 
+class="ec-lmr-8">context-free, so no matter how the </span><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> <span 
+class="ec-lmr-8">cell was</span>
+  <span 
+class="ec-lmr-8">created, the result of its evaluation is still pure.</span><a href="#x1-5001f6">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 202--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">Or at least an opt-in form of Mock, rather than it being the</span>
+  <span 
+class="ec-lmr-8">global default as it is now.</span><a href="#x1-7001f7">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
