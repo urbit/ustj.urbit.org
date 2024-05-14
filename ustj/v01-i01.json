@@ -4,33 +4,33 @@
   "content": [
     {
       "author": ["rovnys-ricfer"],
-      "title": "After the Whitepaper",
+      "title": "Eight Years After the Whitepaper",
       "pdf": "/ustj/v01-i01/mss0.pdf",
       "html": "/ustj/v01-i01/mss0.html"
     },
     {
-      "author": ["rovnys-ricfer", "fodwyt-ragful"],
-      "title": "The Stakes of Scrying"
+      "author": ["rovnys-ricfer", "fodwyt-ragful", "mastyr-bottec"],
+      "title": "The Stakes of Scrying:  .^ dotket and the Seer Proposal"
     },
     {
       "author": ["nomryg-nilref"],
-      "title": "Inductive Testing"
+      "title": "A Philosophy of (Inductive) Testing"
     },
     {
       "author": ["rovnys-ricfer", "wicdev-wisryt"],
-      "title": "Static & Dynamic Libs"
+      "title": "A Solution to Static vs. Dynamic Linking"
     },
     {
       "author": ["mopfel-winrux"],
-      "title": "Urbit IPC Interfaces"
+      "title": "What Agreement Hath Mars with Earth?  An Exploration of Urbit's IPC Interfaces"
     },
     {
       "author": ["lagrev-nocfep"],
-      "title": "Floating-Point Determinism"
+      "title": "The Desert of the Reals:  Floating-Point Arithmetic on Deterministic Systems"
     },
     {
       "author": ["dozreg-toplud"],
-      "title": "UrWasm"
+      "title": "The urwasm WebAssembly Interpreter Suite on Urbit"
     }
   ],
   "theme": {
