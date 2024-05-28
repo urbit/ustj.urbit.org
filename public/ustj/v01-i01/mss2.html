@@ -1,0 +1,1758 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>A Philosophy of (Inductive) Testing</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css">
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">A Philosophy of (Inductive)
+Testing</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">Jack Fox</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~nomryg-nilref</code></span>
+<br />         <span 
+class="ec-lmbx-12">FoxyLabs</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 40--><p class="noindent" ><span 
+class="ec-lmr-9">Testing, including unit testing, forms a critical step</span>
+     <span 
+class="ec-lmr-9">in software development. This article explores the</span>
+     <span 
+class="ec-lmr-9">philosophy and practice of testing in the context</span>
+     <span 
+class="ec-lmr-9">of  Hoon  and  Urbit  development,  particularly</span>
+     <span 
+class="ec-lmr-9">as  motivated  by  the  development  of  urQL  and</span>
+     <span 
+class="ec-lmr-9">Obelisk.  Inductive  testing  provides  an  eﬃcient</span>
+     <span 
+class="ec-lmr-9">yet  complete  basis  for  verifying  code  behavior.</span>
+     <span 
+class="ec-lmr-9">Principles and best practices are suggested, as well</span>
+     <span 
+class="ec-lmr-9">as a practical example of testing in Hoon.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-30002" id="QQ2-1-3">Testing Frameworks</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-40003" id="QQ2-1-4">“Unit” Testing</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-50004" id="QQ2-1-8">Proof by Induction</a></span>
+<br />     <span class="subsectionToc" >4.1 <a href="#x1-60004.1" id="QQ2-1-10">The First Cartesian Explosion</a></span>
+<br />     <span class="subsectionToc" >4.2 <a href="#x1-70004.2" id="QQ2-1-12">The Second Cartesian Explosion</a></span>
+<br />    <span class="sectionToc" >5 <a href="#x1-80005" id="QQ2-1-13">Testing Failure</a></span>
+<br />    <span class="sectionToc" >6 <a href="#x1-90006" id="QQ2-1-17">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-10000" id="QQ2-1-18">References</a></span>
+   </div>
+<!--l. 50--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 52--><p class="noindent" >What should I test? The short answer is, “Everything”. If you
+don’t test it, it doesn’t work.
+</p><!--l. 54--><p class="indent" >   However, <span 
+class="ec-lmri-10">everything </span>raises more questions than it
+answers. Such questions fall into two categories, what and
+how.
+</p><!--l. 56--><p class="indent" >   No one writes non-trivial software without testing, even if
+you come to believe that “if it builds, it works”. The ﬁrst time
+you ran your software was a test. Chances are, you ran
+individual components to see if those worked. Why not take
+the extra few minutes to record those tests and results? With
+practice you will get smart about eﬃciently recording your
+throw-away tests. And after you read this I hope you will have
+a new appreciation of why it is worth the extra time to record
+your tests.
+</p><!--l. 58--><p class="noindent" >
+</p>
+                                                
+                                                
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-30002"></a>Testing Frameworks</h3>
+<!--l. 60--><p class="noindent" >Use what is useful and don’t get hung-up on a particular
+framework or methodology. Record tests as you develop. You
+may think this slows down your development. That’s not
+necessarily a bad thing. You will move forward with conﬁdence
+that the last thing you worked on really works and you will
+ﬁnd yourself thinking through your speciﬁcation at a deeper
+level. This is important in a world of mostly incomplete and
+nebulous specs. What I am driving at is a cousin to test-driven
+development.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-3001f1"></a> 
+Think of it as real-time test development.
+</p><!--l. 62--><p class="indent" >   Your test suite has two important non-obvious functions,
+as regression tests (OK, this one should be obvious) and
+as part of your speciﬁcation. If an existing test starts
+failing, carefully consider Chesterton’s fence (<a  id="x1-3003"></a> Wikipedia
+(2024a)) before taking the easy road and removing the
+test.
+</p><!--l. 64--><p class="indent" >   Regression tests are important not just to prevent
+unexpectedly breaking functionality, but to allow you to
+refactor with conﬁdence. Great software is the result of
+constant refactoring.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-40003"></a>“Unit” Testing</h3>
+<!--l. 68--><p class="noindent" >Descending from the hypothetical to the practical, every
+practical programming language comes with a unit
+testing environment. Hoon supplies <code class="lstinline"><span style="color:#000000">/lib/test</span></code> on
+the <code class="lstinline"><span style="color:#000000">%base</span></code> desk, paired with the <code class="lstinline"><span style="color:#000000">/ted/test</span></code> thread;
+the /lib ﬁle should be copied to your development
+desk.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-4001f2"></a> 
+The rest of this article assumes a working knowledge of
+<code class="lstinline"><span style="color:#000000">/lib/test</span></code>.
+                                                
+                                                
+</p><!--l. 70--><p class="indent" >   Don’t get hung up on unit testing dogma. A unit is whatever
+you want it to be. As a subject-oriented programming
+language, Hoon does not support private properties and
+functions: every arm and core in your software is accessible for
+testing. Generally a unit is some self-contained level of
+functionality, either from the programmer’s or the user’s point
+of view.
+</p><!--l. 72--><p class="indent" >   Listing <a href="#x1-4003r1">1<!--tex4ht:ref: lst:inttest --></a>  depicts a more thorough unit test for working
+with a Gall agent. (Some would prefer to call this an
+<span 
+class="ec-lmri-10">integration test</span>.) Given that level of granularity, we can
+proceed to test the evolution of a database over time (Listing
+<a href="#x1-4017r2">2<!--tex4ht:ref: lst:dbtime --></a> ). The test is a bit more complex, but the principle holds
+constant: test a unit of functionality.
+</p>
+   <!--l. 74-->
+                                                
+                                                
+<!--l. 80--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-4003r1"></a>
+<a  id="x1-4004"></a>
+<figcaption class="caption" ><span class="id">Listing 1: </span><span  
+class="content">Agent-level test</span></figcaption><!--tex4ht:label?: x1-4003r3 --><pre class="lstlisting" id="listing-5"><span class="label"><a  id="x1-4005r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-4006r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Build</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">an</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">example</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">bowl</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">manually</span></span> 
+<span class="label"><a  id="x1-4007r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl</span></span> 
+<span class="label"><a  id="x1-4008r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now=@da</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-4009r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl:gall</span></span> 
+<span class="label"><a  id="x1-4010r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">(</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">our</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">src</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">dap</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">sap</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">)</span></span> 
+<span class="label"><a  id="x1-4011r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%obelisk</span></span><span style="color:#000000"> </span><span 
+class="ec-lmr-9">path</span><span style="color:#000000"><span 
+class="ec-lmr-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">limo</span></span><span style="color:#000000"> </span><span 
+class="ec-lmr-9">path</span><span style="color:#000000"><span 
+class="ec-lmr-9">/test</span><span 
+class="ec-lmr-9">−agent</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">)]</span></span> 
+<span class="label"><a  id="x1-4012r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmri-9">wex</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">sup</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">sky</span></span><span style="color:#404040"><span 
+class="ec-lmri-9">)</span></span> 
+<span class="label"><a  id="x1-4013r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">]</span></span> 
+<span class="label"><a  id="x1-4014r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmri-9">act</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">eny</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">now</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmri-9">byk</span></span><span style="color:#404040"><span 
+class="ec-lmri-9">)</span></span> 
+<span class="label"><a  id="x1-4015r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">run</span></span><span style="color:#000000"> </span><span 
+class="ec-lmr-9">@uvJ</span><span style="color:#000000"><span 
+class="ec-lmr-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">shax</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">run</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">~zod</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">%base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-9">ud+run</span></span><span style="color:#000000"><span 
+class="ec-lmr-9">]]</span></span> 
+<span class="label"><a  id="x1-4016r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmbx-9">==</span></span></pre>
+                                                
+                                                
+   </figure>
+   <!--l. 95-->
+                                                
+                                                
+<!--l. 103--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-4017r2"></a>
+<a  id="x1-4018"></a>
+<figcaption class="caption" ><span class="id">Listing 2:
+    </span><span  
+class="content">Testing
+    database
+    evolution
+    over
+    time</span></figcaption><!--tex4ht:label?: x1-4017r3 --><pre class="lstlisting" id="listing-6"><span class="label"><a  id="x1-4019r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-time-insert-gt-schema</span></span> 
+<span class="label"><a  id="x1-4020r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=|</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">run=@ud</span></span> 
+<span class="label"><a  id="x1-4021r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mov1</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span> 
+<span class="label"><a  id="x1-4022r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2000.1.1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4023r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%obelisk-action</span></span> 
+<span class="label"><a  id="x1-4024r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%tape-create-db</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">CREATE</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">DATABASE</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-4025r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4026r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4027r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mov2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span> 
+<span class="label"><a  id="x1-4028r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2000.1.2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4029r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%obelisk-action</span></span> 
+<span class="label"><a  id="x1-4030r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%tape</span></span> 
+<span class="label"><a  id="x1-4031r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%db1</span></span> 
+<span class="label"><a  id="x1-4032r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">CREATE</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">TABLE</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1..my-table</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">@t</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">PRIMARY</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">KEY</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a  id="x1-4033r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">AS</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">OF</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2023.7.9..22.35.35..7e90</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span> 
+<span class="label"><a  id="x1-4034r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4035r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4036r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mov3</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span> 
+<span class="label"><a  id="x1-4037r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-poke</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">agent</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2023.7.9..22.35.35..7e90</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4038r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%obelisk-action</span></span> 
+<span class="label"><a  id="x1-4039r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%tape</span></span> 
+<span class="label"><a  id="x1-4040r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%db1</span></span> 
+<span class="label"><a  id="x1-4041r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">INSERT</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">INTO</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1..my-table</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">VALUES</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">cord</span><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a  id="x1-4042r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">AS</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">OF</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2023.7.9..22.35.36..7e90</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span> 
+<span class="label"><a  id="x1-4043r25"></a><span 
+class="ec-lmr-5">25</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4044r26"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">=state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-save:agent</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4045r27"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">;:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">weld</span></span> 
+<span class="label"><a  id="x1-4046r28"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-4047r29"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%results</span></span> 
+<span class="label"><a  id="x1-4048r30"></a><span 
+class="ec-lmr-5">30</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%result-da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">data</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">time</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2023.7.9..22.35.36..7e90</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-4049r31"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%result-ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">row</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">count</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span> 
+<span class="label"><a  id="x1-4050r32"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4051r33"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-&#x003E;+&#x003E;+&#x003E;.mov3</span></span> 
+<span class="label"><a  id="x1-4052r34"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-4053r35"></a><span 
+class="ec-lmr-5">35</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db-time-insert-tbl</span></span> 
+<span class="label"><a  id="x1-4054r36"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">databases.state</span></span> 
+<span class="label"><a  id="x1-4055r37"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">weld</span></span></pre>
+                                                
+                                                
+   </figure>
+<!--l. 143--><p class="indent" >   Under the hood, the Obelisk engine calls out to the urQL
+parser to create <span 
+class="ec-lmcsc-10">ast </span>commands from the user-created scripts.
+The AS OF clause overrides the time passed in the bowl.
+Finally we weld together two results and check them against
+what we expect. The ﬁrst check, <code class="lstinline"><span style="color:#000000">++expect-eq</span></code>, is of the
+metadata returned by the last command. The second check is
+the ﬁnal database state after the evolution.
+</p><!--l. 145--><p class="indent" >   Unit testing purism insists on speciﬁcally tailoring each
+test to one speciﬁc case of potential failure. This approach
+tends to be pedantic and frequently we pragmatically sneak in
+multiple independent tests in one test bundle, as in Listing <a href="#x1-4056r3">3<!--tex4ht:ref: lst:bundle --></a> .
+<code class="lstinline"><span style="color:#000000">++test-alter-index-1</span></code> is not an atomic unit test but
+tests several qualities together. Values like whitespace and
+mixed-case labels are tedious to exhaustively test and
+well-suited to property based testing software like <code class="lstinline"><span style="color:#000000">%quiz</span></code> (see
+below).
+</p>
+   <!--l. 147-->
+                                                
+                                                
+<!--l. 156--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-4056r3"></a>
+<a  id="x1-4057"></a>
+<figcaption class="caption" ><span class="id">Listing 3:
+    </span><span  
+class="content">Multiple
+    tests
+    bundled
+    together
+    in
+    one
+    testing
+    arm</span></figcaption><!--tex4ht:label?: x1-4056r3 --><pre class="lstlisting" id="listing-10"><span class="label"><a  id="x1-4058r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">common</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">things</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">to</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">test</span></span> 
+<span class="label"><a  id="x1-4059r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">1)</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">basic</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">command</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">works</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">producing</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">AST</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">object</span></span> 
+<span class="label"><a  id="x1-4060r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">2)</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">multiple</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">ASTs</span></span> 
+<span class="label"><a  id="x1-4061r4"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">3)</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">all</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">keywords</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">are</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">case</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">ambivalent</span></span> 
+<span class="label"><a  id="x1-4062r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">4)</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">all</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">names</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">follow</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">rules</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">for</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">faces</span></span> 
+<span class="label"><a  id="x1-4063r6"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">5)</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">all</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">qualifier</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">combinations</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">work</span></span> 
+<span class="label"><a  id="x1-4064r7"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-4065r8"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">alter</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">index</span></span> 
+<span class="label"><a  id="x1-4066r9"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-4067r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">tests</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">1</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">,</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">2</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">,</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">3</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">,</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">5</span></span> 
+<span class="label"><a  id="x1-4068r11"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">extra</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">whitespace</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">characters</span></span> 
+<span class="label"><a  id="x1-4069r12"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">multiple</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">command</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">script:</span></span> 
+<span class="label"><a  id="x1-4070r13"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">alter</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">index...</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">db.ns.index</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">db.ns.table</span></span> 
+<span class="label"><a  id="x1-4071r14"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">columns</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">action</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%disable</span></span> 
+<span class="label"><a  id="x1-4072r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">alter</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">index</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">db..index</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">db..table</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">one</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">column</span></span> 
+<span class="label"><a  id="x1-4073r16"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">action</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%rebuild</span></span> 
+<span class="label"><a  id="x1-4074r17"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-alter-index-1</span></span> 
+<span class="label"><a  id="x1-4075r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected1</span></span> 
+<span class="label"><a  id="x1-4076r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%alter-index</span></span> 
+<span class="label"><a  id="x1-4077r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%qualified-object</span></span> 
+<span class="label"><a  id="x1-4078r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">database=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4079r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">namespace=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ns</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">my-index</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4080r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4081r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%qualified-object</span></span> 
+<span class="label"><a  id="x1-4082r25"></a><span 
+class="ec-lmr-5">25</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">database=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4083r26"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">namespace=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ns</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">table</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4084r27"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4085r28"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ordered-column</span></span> 
+<span class="label"><a  id="x1-4086r29"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4087r30"></a><span 
+class="ec-lmr-5">30</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">is-ascending=%.y</span></span> 
+<span class="label"><a  id="x1-4088r31"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4089r32"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ordered-column</span></span> 
+<span class="label"><a  id="x1-4090r33"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col2</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4091r34"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">is-ascending=%.n</span></span> 
+<span class="label"><a  id="x1-4092r35"></a><span 
+class="ec-lmr-5">35</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4093r36"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ordered-column</span></span> 
+<span class="label"><a  id="x1-4094r37"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col3</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4095r38"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">is-ascending=%.y</span></span> 
+<span class="label"><a  id="x1-4096r39"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4097r40"></a><span 
+class="ec-lmr-5">40</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%disable</span></span> 
+<span class="label"><a  id="x1-4098r41"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+   <!--l. 199-->
+                                                
+                                                
+<!--l. 209--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<figcaption class="caption" ><span class="id">4cAp0x1-4098r3:
+    </span><span  
+class="content">Listing <a href="#x1-4056r3">3<!--tex4ht:ref: lst:bundle --></a>
+    continued</span></figcaption><!--tex4ht:label?: x1-4098r3 --><pre class="lstlisting" id="listing-11"><span class="label"><a  id="x1-4099r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected2</span></span> 
+<span class="label"><a  id="x1-4100r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%alter-index</span></span> 
+<span class="label"><a  id="x1-4101r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%qualified-object</span></span> 
+<span class="label"><a  id="x1-4102r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">database=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4103r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">namespace=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">dbo</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">my-index</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4104r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4105r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%qualified-object</span></span> 
+<span class="label"><a  id="x1-4106r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">database=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4107r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">namespace=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">dbo</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">table</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4108r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4109r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ordered-column</span></span> 
+<span class="label"><a  id="x1-4110r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">name=</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-4111r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">is-ascending=%.y</span></span> 
+<span class="label"><a  id="x1-4112r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4113r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%rebuild</span></span> 
+<span class="label"><a  id="x1-4114r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-4115r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-4116r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-4117r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">parse:parse</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">default-database</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4118r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">aLter</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0d</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">INdEX\09db.ns.my-index</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">On</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db.ns.table</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a  id="x1-4119r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">asc</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col2\0a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">desc</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dIsable</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0a;\0a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">aLter</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0d</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a  id="x1-4120r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">INdEX\09db..my-index</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">On</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db..table</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">asc</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">\0a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">rEBuild</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span></pre>
+                                                
+                                                
+   </figure>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-50004"></a>Proof by Induction</h3>
+<!--l. 236--><p class="noindent" >We were intentionally dismissive of testing methodologies above
+because they are mere conventions. There is however some
+actual theory we can leverage in ﬁguring out what and how to
+test.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-5001f3"></a> 
+</p><!--l. 238--><p class="indent" >   Peano arithmetic is a better lay programmer’s introduction
+to proof by induction. There exists (or perhaps <span 
+class="ec-lmri-10">does not exist</span>) a
+special concept, zero. Playing fast and loose with classical logic,
+“ex nihil sequitur quodlibet”, from nothing (more commonly a
+falsehood, or a contradiction) follows everything (i.e.
+anything).<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-5003f4"></a> 
+Zero is not only an integer; rather, in terms of
+Nock-based programming, <code class="lstinline"><span style="color:#000000">~</span></code> is not only the beginning of
+counting,<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-5004f5"></a> 
+but the nothing of every inductive type, most importantly
+trees and lists. In speaking to programmers, Peano tells us
+there is a universal nothing <code class="lstinline"><span style="color:#000000">~</span></code> and there is a function called
+successor \(\textrm {Succ}\), which produces some next thing from a previous
+                                                
+                                                
+thing (or lack of thing). Applying \(\textrm {Succ}\) to nothing, \(\textrm {Succ}(0)\), gives us the
+ﬁrst thing. Applying \(\textrm {Succ}\) to the ﬁrst thing, \(\textrm {Succ}(\textrm {Succ}(0))\), gives us the second
+thing, and so on.
+</p><!--l. 240--><p class="indent" >   Induction appears in unexpected places—think zero-length
+strings, which do not appear to involve <code class="lstinline"><span style="color:#000000">~</span></code> at all. For instance,
+the Hoon type unit is also an inductive type: it is literally
+either nothing or something. Knowing now what to look for,
+see where you can ﬁnd induction in your own code.
+</p><!--l. 242--><p class="indent" >   What does induction have to do with testing, however? For
+inductive types—and simple functions over inductive types—the
+software author only has to prove, or test, two cases: the case
+for zero and the case for the successor value after zero. For
+example, Listing <a href="#x1-5008r4">4<!--tex4ht:ref: lst:sequent --></a>  depicts tests for a gate over an inductive
+type (list) in /lib/seq (<a  id="x1-5006"></a> <a href="#cite.0@FoxSequent">jackfoxy/sequent</a>, currently distributed
+via %yard (<a  id="x1-5007"></a> <a href="#cite.0@UrbitYard">urbit/yard</a>)).
+</p>
+   <!--l. 244-->
+                                                
+                                                
+<!--l. 249--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-5008r4"></a>
+<a  id="x1-5009"></a>
+<figcaption class="caption" ><span class="id">Listing 4: </span><span  
+class="content">Sequent tests</span></figcaption><!--tex4ht:label?: x1-5008r4 --><pre class="lstlisting" id="listing-15"><span class="label"><a  id="x1-5010r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-5011r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+contains</span></span> 
+<span class="label"><a  id="x1-5012r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-contains-00</span></span> 
+<span class="label"><a  id="x1-5013r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-5014r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.n</span></span> 
+<span class="label"><a  id="x1-5015r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">contains</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">yep</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5016r7"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-contains-01</span></span> 
+<span class="label"><a  id="x1-5017r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-5018r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.y</span></span> 
+<span class="label"><a  id="x1-5019r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">contains</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1)</span></span> 
+<span class="label"><a  id="x1-5020r11"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-contains-example-00</span></span> 
+<span class="label"><a  id="x1-5021r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-5022r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.y</span></span> 
+<span class="label"><a  id="x1-5023r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">contains</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">tape</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">nope</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">yep</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">yep</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+                                                
+                                                
+   </figure>
+<!--l. 266--><p class="indent" >   “Hey”, you say—“that’s more than two tests.” That’s
+right: two is the bare minimum of required tests, and
+only applies to the simplest units of inductive testing. In
+this case the ﬁrst two tests suﬃce, but minimal tests
+frequently make for unhelpful documentation examples. We
+heartily recommend providing interesting examples in
+your documentation and including those examples in
+your test suite. You don’t want users to struggle with
+examples that don’t work, or worse, don’t even build.
+More tests don’t hurt anything; the computer doesn’t get
+tired.
+</p><!--l. 268--><p class="indent" >   Another reason for additional tests is taking a page
+out of “white box” or “gray box” testing. If you know
+that there is special logic for the ﬁrst successor case, you
+need to test the ﬁrst case independently as well as a
+subsequent successor. If you are the programmer and the
+tester you should approach all of your testing from this
+perspective. You might even see how to make your program
+simpler.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a  id="x1-60004.1"></a>The First Cartesian Explosion</h4>
+<!--l. 272--><p class="noindent" >Through the mathematics of currying programmatic functions,
+we can have input arguments of multiple inductive
+types.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-6001f6"></a> 
+This results in the minimum number of tests being the
+number of inductive input elements squared, starting with
+all elements set to <code class="lstinline"><span style="color:#000000">~</span></code> and so forth. Listing <a href="#x1-6002r5">5<!--tex4ht:ref: lst:single --></a>  depicts a
+series of tests for the ++append gate subject to this \(n^2\)
+explosion.
+</p>
+   <!--l. 274-->
+                                                
+                                                
+<!--l. 279--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-6002r5"></a>
+<a  id="x1-6003"></a>
+<figcaption class="caption" ><span class="id">Listing 5:                      </span><span  
+class="content">Multiple                      single
+tests</span></figcaption><!--tex4ht:label?: x1-6002r4.1 --><pre class="lstlisting" id="listing-17"><span class="label"><a  id="x1-6004r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-6005r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+append</span></span> 
+<span class="label"><a  id="x1-6006r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-append-00</span></span> 
+<span class="label"><a  id="x1-6007r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-6008r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-6009r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">append</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6010r7"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-append-01</span></span> 
+<span class="label"><a  id="x1-6011r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-6012r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1]</span></span> 
+<span class="label"><a  id="x1-6013r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">append</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6014r11"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-append-02</span></span> 
+<span class="label"><a  id="x1-6015r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-6016r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1]</span></span> 
+<span class="label"><a  id="x1-6017r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">append</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1])</span></span> 
+<span class="label"><a  id="x1-6018r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-append-03</span></span> 
+<span class="label"><a  id="x1-6019r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-eq</span></span> 
+<span class="label"><a  id="x1-6020r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span> 
+<span class="label"><a  id="x1-6021r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">append</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2])</span></span></pre>
+                                                
+                                                
+   </figure>
+<!--l. 300--><p class="indent" >   In this situation, the required number of tests may grow
+exponentially but in most practical cases remains a relatively
+small ﬁnite number.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a  id="x1-70004.2"></a>The Second Cartesian Explosion</h4>
+<!--l. 304--><p class="noindent" >Input argument interactions are not the only source of
+combinatorial explosion in testing. Imagine that your function
+(gate) is a black box. You start submitting random input to
+ﬁgure out what the underlying algorithm is. However, it turns
+out that you discover that there is not one consistent
+algorithm for all inputs. Some values or ranges of values
+behave diﬀerently from others. (Unexpected <span 
+class="ec-lmcsc-10">utf</span>-8 whitespace
+characters are notorious for revealing head-scratching bugs—so
+imagine all possible inputs over complex <span 
+class="ec-lmcsc-10">xml</span>.) You could
+model this behavior as multiple inductive types making for an
+even bigger cartesian explosion of inputs to test. It is no longer
+practical to construct all the tests required by our theory. The
+number is still ﬁnite, but impractically large. What is to be
+done?
+</p><!--l. 306--><p class="indent" >   There is no general solution. Complete code coverage with
+tests is a start, inductively testing over each clause in a unit.
+This is time-consuming and requires thinking deeply about the
+code and its structure.
+</p><!--l. 308--><p class="indent" >   Another approach is to favor so-called edge case testing, in
+which you test the boundaries of the input space. This is a
+good idea, but it is not a complete solution. It is not always
+clear what the edge is, and it is not always clear that the
+edge is the same for all inductive types. In the case of
+testing a string function, should an edge be the empty
+string, a string with one character, or a string with two
+characters?
+</p><!--l. 310--><p class="indent" >   An automated testing solution called property-based
+testing may be applicable in these cases. The idea of
+property-based testing is to develop and instantiate invariant
+properties of the code and let software generate random
+                                                
+                                                
+inputs. The software runs the random inputs and tests the
+outputs against the invariant properties. An architecture for
+this approach was originally developed for Haskell and has
+since ported to many other languages, including Hoon. <code class="lstinline"><span style="color:#000000">%quiz</span></code>
+is a well-documented Hoon implementation (<a  id="x1-7001"></a> <a href="#cite.0@Hjort2023">hjorthjort/quiz</a>).
+Once again, this solution requires some deep thinking about
+the code and its speciﬁcation.
+</p><!--l. 312--><p class="indent" >   From our experience with the F\(^\sharp \) implementation of
+property-based testing, we expect that you will need to boost
+the number of random input permutations beyond the default
+of 100 to get the kind of coverage that is “reasonably”
+exhaustive. We found 10,000 to be frequently adequate. (Since
+the inputs are randomly generated each run, however, a
+property test of production code may fail when nothing has
+changed. Then think about how to explain to your boss that
+your tests are not deterministic.)
+</p><!--l. 314--><p class="indent" >   Lastly, whenever you ﬁx a bona ﬁde production bug
+(or one that a framework like <code class="lstinline"><span style="color:#000000">%quiz</span></code> discovered), add a
+test case to address that circumstance. This not only
+provides the standard for when the bug has been ﬁxed, but
+protects against regressing to the prior behavior (thus, a
+“regression test”). Congratulations, you have just reﬁned your
+speciﬁcation.
+</p><!--l. 316--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a  id="x1-80005"></a>Testing Failure</h3>
+<!--l. 318--><p class="noindent" >In our experience failure modes are the most overlooked part
+of sofware development. It starts with passing insuﬃcient, or
+no information from the programmed points of failure. So even
+before testing failure modes make sure you distinguish (i.e.
+make unique) each message from every point of failure and
+include any and all relevant information available for
+debugging (cf. Listing <a href="#x1-8001r6">6<!--tex4ht:ref: lst:dup --></a> ).
+</p>
+   <!--l. 320-->
+                                                
+                                                
+<!--l. 325--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-8001r6"></a>
+<a  id="x1-8002"></a>
+<figcaption class="caption" ><span class="id">Listing 6:       </span><span  
+class="content">Error       message       for       duplicate
+key</span></figcaption><!--tex4ht:label?: x1-8001r5 --><pre class="lstlisting" id="listing-20"><span class="label"><a  id="x1-8003r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">~|</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cannot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">duplicate</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">key:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">{</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003C;row-key&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">}</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+                                                
+                                                
+   </figure>
+<!--l. 329--><p class="indent" >
+                                                
+                                                
+</p><!--l. 330--><p class="indent" >   The standard <code class="lstinline"><span style="color:#000000">/lib/test</span></code> library, as of this writing, can
+test for failure but not for an expected message. A modiﬁed
+testing arm (Listing <a href="#x1-8004r7">7<!--tex4ht:ref: lst:error --></a> ) can be included in a testing thread to
+facilitate this kind of testing. Listing <a href="#x1-8030r8">8<!--tex4ht:ref: lst:urql --></a>  shows a test for an
+expected error message in the Obelisk database engine which
+uses this functionality to verify that the correct error message
+is raised on crash.
+</p>
+   <!--l. 332-->
+                                                
+                                                
+<!--l. 337--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-8004r7"></a>
+<a  id="x1-8005"></a>
+<figcaption class="caption" ><span class="id">Listing 7:        </span><span  
+class="content">Testing        for        expected        error
+message</span></figcaption><!--tex4ht:label?: x1-8004r5 --><pre class="lstlisting" id="listing-22"><span class="label"><a  id="x1-8006r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-8007r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+expect-fail-message</span></span> 
+<span class="label"><a  id="x1-8008r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-fail-message</span></span> 
+<span class="label"><a  id="x1-8009r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">msg=@t</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">trap</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)]</span></span> 
+<span class="label"><a  id="x1-8010r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tang</span></span> 
+<span class="label"><a  id="x1-8011r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">mule</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8012r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-.b</span></span> 
+<span class="label"><a  id="x1-8013r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%|</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|</span><span 
+class="ec-lmtk-10x-x-90">^</span></span> 
+<span class="label"><a  id="x1-8014r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=tang</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">flatten</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+.b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8015r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">^</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">find</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">trip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">msg</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tang</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span> 
+<span class="label"><a  id="x1-8016r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-8017r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">error</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">message</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">not</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">found</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8018r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">flatten</span></span> 
+<span class="label"><a  id="x1-8019r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tang=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tank</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8020r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=|</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">res=tape</span></span> 
+<span class="label"><a  id="x1-8021r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">tape</span></span> 
+<span class="label"><a  id="x1-8022r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tang</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">res</span></span> 
+<span class="label"><a  id="x1-8023r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">$</span></span> 
+<span class="label"><a  id="x1-8024r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tang</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t.tang</span></span> 
+<span class="label"><a  id="x1-8025r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">res</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">weld</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ram</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">re</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">i.tang</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">res</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8026r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-8027r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">--</span></span> 
+<span class="label"><a  id="x1-8028r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">expected</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">failure</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">succeeded</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8029r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+   <!--l. 364-->
+                                                
+                                                
+<!--l. 369--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-8030r8"></a>
+<a  id="x1-8031"></a>
+<figcaption class="caption" ><span class="id">Listing 8:           </span><span  
+class="content">Obelisk           database           engine
+tests</span></figcaption><!--tex4ht:label?: x1-8030r5 --><pre class="lstlisting" id="listing-23"><span class="label"><a  id="x1-8032r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-8033r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">fail</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">on</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">dup</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">rows</span></span> 
+<span class="label"><a  id="x1-8034r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">test-fail-insert-dup-rows</span></span> 
+<span class="label"><a  id="x1-8035r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=|</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">run=@ud</span></span> 
+<span class="label"><a  id="x1-8036r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">my-insert</span></span> 
+<span class="label"><a  id="x1-8037r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">INSERT</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">INTO</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1..my-table</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">col1,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col2,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">col3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a  id="x1-8038r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">VALUES</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">cord</span><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">,</span><span 
+class="ec-lmtt-9">~zod,20</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">Default</span><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">,Default,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span> 
+<span class="label"><a  id="x1-8039r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">expect-fail-message</span></span> 
+<span class="label"><a  id="x1-8040r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cannot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">duplicate</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">key:</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span> 
+<span class="label"><a  id="x1-8041r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">process-cmds</span></span> 
+<span class="label"><a  id="x1-8042r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gen3-dbs</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">&#x003C;-</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">key</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ts1-lmtti10-x-x-90">&#x0027;</span><span 
+class="ec-lmtti-10x-x-90">cord</span><span 
+class="ts1-lmtti10-x-x-90">&#x0027;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">already</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">exists</span></span> 
+<span class="label"><a  id="x1-8043r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">bowl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">run</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~2031.1.1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-8044r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">parse:parse</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">default-database</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">db1</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">my-insert</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+                                                
+                                                
+   </figure>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a  id="x1-90006"></a>Conclusion</h3>
+<!--l. 387--><p class="noindent" >Keep the following principles in mind when producing and
+evaluating code as a software developer.
+</p><!--l. 389--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-9002x1">
+     <!--l. 390--><p class="noindent" >Strive  to  make  the  collection  of  units  of  testing
+     exhaustive, both primitive units of code and units of
+     work from the user perspective.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9004x2">
+     <!--l. 391--><p class="noindent" >Test inductively wherever possible.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9006x3">
+     <!--l. 392--><p class="noindent" >Test from a white or gray box perspective.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9008x4">
+     <!--l. 393--><p class="noindent" >Test the failure modes.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9010x5">
+     <!--l. 394--><p class="noindent" >Test all the examples in your documentation.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9012x6">
+                                                
+                                                
+     <!--l. 395--><p class="noindent" >In a world lacking documentation tests may be the
+     only real speciﬁcation.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a  id="x1-9013f7"></a> 
+     </p></li>
+<li 
+  class="enumerate" id="x1-9016x7">
+     <!--l. 396--><p class="noindent" >Regression  tests  are  the  key  to  refactoring  with
+     conﬁdence. Beautiful code comes from refactoring.
+      <img 
+src="ustj-logo-.png" alt="PIC"  
+ /></p></li></ol>
+<!--l. 401--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-10000"></a>References</h3>
+<!--l. 401--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Beck2023" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@Beck2023"></a>Beck, Kent
+   (2023)
+   “Canon
+   <span class="small-caps">tdd</span>”.
+   <span class="small-caps">url</span>:
+   <a href="https://tidyfirst.substack.com/p/canon-tdd" class="url" >https://tidyﬁrst.substack.com/p/canon-tdd</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-Hjort2023" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+                                                
+                                                
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@Hjort2023"></a><code>~bithex-topnym</code>, Rikard Hjort
+   (2023)
+   “Quiz:
+   A
+   randomized
+   property
+   testing
+   library
+   for
+   Urbit”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/hjorthjort/quiz" class="url" >https://github.com/hjorthjort/quiz</a>
+   (visited
+   on
+   ~2024.2.7).
+   </p></dd><dt id="X0-Feathers2005" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@Feathers2005"></a>Feathers, Michael C.
+   (2005).
+   <span 
+class="ec-lmri-10">Working</span>
+   <span 
+class="ec-lmri-10">Eﬀectively</span>
+   <span 
+class="ec-lmri-10">with</span>
+   <span 
+class="ec-lmri-10">Legacy</span>
+   <span 
+class="ec-lmri-10">Code</span>.
+   Prentice
+   Hall.
+   <span class="small-caps">isbn</span>:
+   978-0-13-117705-5.
+   </p></dd><dt id="X0-Davis2022" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@Davis2022"></a><code>~lagrev-nocfep</code>, N. E. Davis
+   (2022)
+   “Writing
+   Robust
+   Hoon:
+   A
+   Guide
+                                                
+                                                
+   to
+   Urbit
+   Unit
+   Testing”.
+   <span class="small-caps">url</span>:
+   <a href="https://medium.com/dcspark/writing-robust-hoon-a-guide-to-urbit-unit-testing-82b2631fe20a" class="url" >https://medium.com/dcspark/writing-robust-hoon-a-guide-to-urbit-unit-testing-82b2631fe20a</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-FoxSequent" class="thebibliography">
+</dt><dd 
+id="bib-5" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@FoxSequent"></a><code>~nomryg-nilref</code>, Jack Fox
+   (2023)
+   “Sequent:
+   A
+   library
+   of
+   Hoon
+   list
+   functions
+   for
+   mortal
+   developers”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/jackfoxy/sequent" class="url" >https://github.com/jackfoxy/sequent</a>
+   (visited
+   on
+   ~2024.2.7).
+   </p></dd><dt id="X0-Yarvin2006" class="thebibliography">
+</dt><dd 
+id="bib-6" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@Yarvin2006"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2006)
+   “U,
+   a
+   small
+   model”.
+   <span class="small-caps">url</span>:
+                                                
+                                                
+   <a href="http://urbit.sourceforge.net/u.txt" class="url" >http://urbit.sourceforge.net/u.txt</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-WikipediaChesterton" class="thebibliography">
+</dt><dd 
+id="bib-7" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@WikipediaChesterton"></a>Wikipedia
+   (2024a)
+   “G.
+   K.
+   Chesterton,
+   Chesterton’s
+   Fence”.
+   <span class="small-caps">url</span>:
+   <a href="https://en.wikipedia.org/wiki/G._K._Chesterton" class="url" >https://en.wikipedia.org/wiki/G._K._Chesterton</a>
+   (visited
+   on
+   ~2024.2.7).
+   </p></dd><dt id="X0-WikipediaInduction" class="thebibliography">
+</dt><dd 
+id="bib-8" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@WikipediaInduction"></a>—   (2024b)
+   “Mathematical
+   Induction”.
+   <span class="small-caps">url</span>:
+   <a href="https://en.wikipedia.org/wiki/Mathematical_induction" class="url" >https://en.wikipedia.org/wiki/Mathematical_induction</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-UrbitYard" class="thebibliography">
+</dt><dd 
+id="bib-9" class="thebibliography">
+   <!--l. 401--><p class="noindent" ><a  id="cite.0@UrbitYard"></a>“Yard:
+   A
+   Developer
+   Commons”
+   (2023).
+   <span class="small-caps">url</span>:
+                                                
+                                                
+   <a href="https://github.com/urbit/yard" class="url" >https://github.com/urbit/yard</a>
+   (visited
+   on
+   ~2024.2.7).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 60--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><a 
+ id="x2-3002"></a> <span 
+class="ec-lmr-8">Beck (2023) summarizes the principles of </span><span 
+class="ec-lmcsc-10x-x-80">tdd</span><span 
+class="ec-lmr-8">.</span><a href="#x1-3001f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 68--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><a 
+ id="x3-4002"></a> <span 
+class="ec-lmr-8">~lagrev-nocfep (2022) discusses this procedure in detail.</span><a href="#x1-4001f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 236--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><a 
+ id="x4-5002"></a> <span 
+class="ec-lmr-8">Wikipedia (2024b) provides a modestly technical exposition of</span>
+  <span 
+class="ec-lmr-8">mathematical induction. You can skip it because we will explain it</span>
+  <span 
+class="ec-lmr-8">non-rigorously for lay programmers. We also quibble about the inclusion</span>
+  <span 
+class="ec-lmr-8">of zero as a natural number. While old school maths started the natural</span>
+  <span 
+class="ec-lmr-8">numbers with </span><span 
+class="ec-lmr-8">“1</span><span 
+class="ec-lmr-8">”, but computer science has since infected maths. (Have</span>
+  <span 
+class="ec-lmr-8">you ever seen zero of anything? No</span><span 
+class="ec-lmr-8">—it is not natural at all.) Zero is a very,</span>
+  <span 
+class="ec-lmr-8">very special number. It’s an abstraction that does not map to anything in</span>
+  <span 
+class="ec-lmr-8">the physical world.</span><a href="#x1-5001f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 238--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">The </span><span 
+class="ec-lmr-8">“principle of explosion</span><span 
+class="ec-lmr-8">” rigorously follows from use of</span>
+  <span 
+class="ec-lmr-8">disjunctive syllogisms. Here, we jocosely indicate that by proceeding</span>
+  <span 
+class="ec-lmr-8">from zero inductively we can demonstrate desired properties of</span>
+  <span 
+class="ec-lmr-8">testing.</span><a href="#x1-5003f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 238--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">Yarvin opted to invert true (as 0) and false (as 1) (</span><a 
+ id="x6-5005"></a> <span 
+class="ec-lmr-8">~sorreg-namtyv,</span>
+  <span 
+class="ec-lmr-8">2006), meaning that Nock loobeans do not align inductively with other</span>
+  <span 
+class="ec-lmr-8">inductive types.</span><a href="#x1-5004f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 272--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">While most programming languages handle multiple function</span>
+  <span 
+class="ec-lmr-8">inputs via currying, Hoon gates always accept a single noun, which can</span>
+  <span 
+class="ec-lmr-8">be a cell. So in this case the currying is not even theoretical.</span><a href="#x1-6001f6">⤴</a></p></div>
+      
+
+
+  <div class="footnote-text">
+  <!--l. 395--><p class="noindent" ><span class="footnote-mark"><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">Cf. the deﬁnition by </span><a 
+ id="x8-9014"></a> <span 
+class="ec-lmr-8">Feathers, p. xvi that </span><span 
+class="ec-lmr-8">“legacy code is simply</span>
+  <span 
+class="ec-lmr-8">code without tests.</span><span 
+class="ec-lmr-8">” The entire text may thus be commended as a</span>
+  <span 
+class="ec-lmr-8">thorough guide to testing despite its name.</span><a href="#x1-9013f7">⤴</a></p></div> 
+
+</body> 
+</html>
+                                                
+
+
