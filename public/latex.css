@@ -766,6 +766,23 @@ a {
   }
 }
 
+.lstlisting {
+  position: realtive;
+}
+
+.lstlisting .label {
+  margin-left: -1em;
+  position: absolute;
+}
+
+.ec-lmr-5 {
+  font-family: linux libertine o;
+  /* font-size: 80%; */
+  opacity: 0.5;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
 .ec-lmcsc-10 {
   font-variant: small-caps;
@@ -1026,7 +1043,7 @@ div.gather-star {text-align:center;}
 .rotatebox{display: inline-block;}
 .small-caps{font-variant: small-caps;}
 pre.listings{white-space: pre-wrap; margin-top:0.5em; margin-bottom:0.5em; }
-.lstlisting .label{margin-right:0.5em; }
+/* .lstlisting .label{margin-right:0.5em; } */
 pre.lstlisting{white-space: pre-wrap; margin-top:0.5em; margin-bottom:0.5em; }
 pre.lstinputlisting{ white-space: pre-wrap; }
 .lstinputlisting .label{margin-right:0.5em;}
