@@ -8,7 +8,7 @@ export default function Article({ issue, article }) {
   const [height, setHeight] = React.useState("0px");
 
   const onLoad = () => {
-    setHeight(ref.current.contentWindow.document.body.scrollHeight + "px");
+    setHeight(ref.current.contentWindow.document.body?.scrollHeight + "px");
   };
 
   useEffect(onLoad, [ref]);
