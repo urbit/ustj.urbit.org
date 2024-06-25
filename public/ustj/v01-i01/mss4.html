@@ -1,0 +1,689 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>What Agreement Hath Mars With Earth?
+An Exploration of Urbit’s IPC Interfaces</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css" /> 
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">What Agreement Hath Mars With Earth?<br />
+An Exploration of Urbit’s
+IPC Interfaces</h2>
+<div class="author" ><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~mopfel-winrux</code></span>
+<br />  <span 
+class="ec-lmbx-12">NativePlanet</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 40--><p class="noindent" ><span 
+class="ec-lmr-9">The                                                 idealistic</span>
+     <span 
+class="ec-lmr-9">Maxwellian principles of a system built on Nock</span>
+     <span 
+class="ec-lmr-9">are somewhat at odds with the evolved and tangled</span>
+     <span 
+class="ec-lmr-9">nature  of  legacy  software  ecosystems.  In  order</span>
+     <span 
+class="ec-lmr-9">to  facilitate  practical  computing,  Urbit  presents</span>
+     <span 
+class="ec-lmr-9">several interfaces for communication with external</span>
+     <span 
+class="ec-lmr-9">(</span><span 
+class="ec-lmr-9">“Earth</span><span 
+class="ec-lmr-9">”)  systems.  Through  a  comprehensive</span>
+     <span 
+class="ec-lmr-9">examination  of  Urbit’s  Arvo  kernel  and  Vere</span>
+     <span 
+class="ec-lmr-9">runtime,  alongside  its  high-level  and  low-level</span>
+                                                
+                                                
+     <span 
+class="ec-lmcsc-10x-x-90">ipc  </span><span 
+class="ec-lmr-9">interfaces  (%khan  and  %lick,  respectively),</span>
+     <span 
+class="ec-lmr-9">we  elucidate  the  architectural  mechanisms  that</span>
+     <span 
+class="ec-lmr-9">facilitate  communication  and  control  between</span>
+     <span 
+class="ec-lmr-9">these disparate computing realms. This exposition</span>
+     <span 
+class="ec-lmr-9">aims   to   demystify   Urbit’s   architecture   and</span>
+     <span 
+class="ec-lmr-9">underscore its potential to bridge the gap between</span>
+     <span 
+class="ec-lmr-9">the familiar digital environments of Earth and the</span>
+     <span 
+class="ec-lmr-9">untapped possibilities of Martian computing.</span>
+</p>
+</section>
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-30002" id="QQ2-1-3">Urbit’s Unique Landscape</a></span>
+<br />     <span class="subsectionToc" >2.1 <a href="#x1-40002.1" id="QQ2-1-4">Arvo: The Heart of Martian Computing</a></span>
+<br />     <span class="subsectionToc" >2.2 <a href="#x1-50002.2" id="QQ2-1-5">Vere: The Substrate of Martian Technology</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-60003" id="QQ2-1-6">Khan: The High-Level Thread Interface</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-70004" id="QQ2-1-7">conn.c</a></span>
+<br />    <span class="sectionToc" >5 <a href="#x1-80005" id="QQ2-1-8">Lick: The Low-Level IPC Interface</a></span>
+<br />    <span class="sectionToc" >6 <a href="#x1-90006" id="QQ2-1-10">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-10000" id="QQ2-1-11">References</a></span>
+   </div>
+<!--l. 50--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 52--><p class="noindent" >In Urbit’s conception of software, two worlds exist in
+stark contrast: Earth, the familiar domain of established
+software paradigms, bustling with complex and varied digital
+ecosystems; and Mars, the enigmatic realm of Urbit, a system
+as pristine and archaic as the Martian landscape itself.
+This article will explore how Earth software establishes
+communication with Martian code.
+                                                
+                                                
+</p><!--l. 56--><p class="indent" >   Unlike Earth, where code is a tapestry of evolution and
+patchwork, Mars aims to present a regime of functional-only
+idealism built on Nock, the “Maxwell’s laws of software”.
+Urbit envisions a world in which software exists as a
+Maxwellian construct deﬁned by a small number of
+axioms (<a  id="x1-2001"></a> <code>~sorreg-namtyv</code>, 2013). Urbit code is purely
+functional-as-in-language, and should be untouched and
+unaltered by the non-Maxwellian intricacies that characterize
+Earth’s digital environments. Underlying this sequestration
+lies a profound awareness by the “Martians” that there exist
+diverse forms of computing with which their system must
+nevertheless engage. Mars accommodates these external
+entities by allowing them to interact in the Martian <span 
+class="ec-lmri-10">lingua</span>
+<span 
+class="ec-lmri-10">franca </span>of Nock nouns.
+</p><!--l. 59--><p class="indent" >   In the original public explanation of Urbit, <a  id="x1-2002"></a> <code>~sorreg-namtyv</code>
+explicitly charges,
+     </p><blockquote class="quote">
+     <!--l. 62--><p class="noindent" >The           general           structure           of
+     cross-planet computation is that Earth always
+     calls Mars; Mars never calls Earth. The latter
+     would be quite impossible, since Earth code is
+     non-Maxwellian. There is only one way for a
+     Maxwellian computer to run non-Maxwellian
+     code: in a Maxwellian emulator.</p></blockquote>
+<!--l. 64--><p class="noindent" >However, this pristine discipline has never been strictly adhered
+to for any real Urbit implementation. Urbit has long provided
+two kernel-level vanes (which one may think of as microkernel
+modules) for interfacing with Earth’s <span 
+class="ec-lmcsc-10">http </span>Web services,
+%eyre (the server) and %iris (the client). One can even make a
+reasonably strong argument that Urbit running as Nock on a
+virtual machine speciﬁcally breaks the convention to some
+extent.
+</p><!--l. 67--><p class="indent" >   This article brieﬂy explains Urbit’s architecture, focusing
+on Arvo (Urbit’s kernel) and Vere (Urbit’s runtime VM).
+Following this, we explain three core parts of the Urbit OS
+interface: %khan, conn.c and %lick. These serve as distinct
+                                                
+                                                
+conduits between the terrestrial and the Martian, facilitating
+not just interaction but a nuanced form of command and
+control of the entire system. This exposition aims to demystify
+the architecture of Urbit and bridge the gap between Earth’s
+established software paradigms and the Martian vision of
+computation.
+</p><!--l. 70--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-30002"></a>Urbit’s Unique Landscape</h3>
+<!--l. 72--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a  id="x1-40002.1"></a>Arvo: The Heart of Martian Computing</h4>
+<!--l. 74--><p class="noindent" >The Arvo kernel (also referred to as “Urbit OS”) represents a
+paradigm shift in operating system design. Unlike traditional
+operating systems that operate on preemptive multitasking
+and complex event networks, Arvo is a purely functional
+operating system, characterized by its deterministic nature
+and compact size. The entire Urbit stack is about 80,000 lines
+of code, with Arvo itself comprising around 2,000 lines. This
+small codebase is intentional, reﬂecting a philosophy that
+system administration complexity is directly proportional to
+code size.
+</p><!--l. 76--><p class="indent" >   Arvo’s unique architecture avoids what is referred to as
+“event spaghetti” by maintaining a clear causal chain for every
+computation (<a  id="x1-4001"></a> <code>~sorreg-namtyv</code> et al., 2016). Each chain begins
+with a Unix I/O event and progresses through a series of steps
+until the computation completes successfully or fails.
+This deterministic nature allows for a high degree of
+predictability, a stark contrast to most Earth-based operating
+systems.
+</p><!--l. 78--><p class="indent" >   The kernel’s design as a “purely functional operating
+system”—or, more accurately if idiosyncratically, an “operating
+function”—underscores its uniqueness. Arvo operates on the
+principle that the current state is a pure function of its event
+                                                
+                                                
+log, a record of every action ever performed. This determinism
+is a signiﬁcant deviation from the normal situation that
+obtains on Earth, wherein operating systems allow for
+arbitrary programmatic alteration of global variables aﬀecting
+other programs.
+</p><!--l. 80--><p class="indent" >   Arvo innovatively handles non-determinism by refusing to
+log non-completed events. The system, in essence, behaves
+like a stateful packet transceiver—events are processed,
+but there is of course no guarantee of any particular
+event successfully completing. This pattern mirrors the
+behavior of packet dropping in networking. Arvo’s approach
+to handling non-determinism is unique and aligns with
+Urbit’s overall philosophy of simplicity and determinism.
+Additionally, because Arvo runs on a VM (Vere), it can obtain
+non-deterministic information, such as stack traces from
+inﬁnite loops, through the interpreter beneath it injecting
+events.
+</p><!--l. 82--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a  id="x1-50002.2"></a>Vere: The Substrate of Martian Technology</h4>
+<!--l. 84--><p class="noindent" >Vere, the runtime of Urbit, plays a critical role in actualizing
+the Martian computing model on Earth-based hardware. As
+the Nock interpreter written in C, Vere is intricately
+optimized to run Arvo, ensuring seamless translation of
+its deterministic operations into practical execution on
+conventional systems.
+</p><!--l. 86--><p class="indent" >   Vere is architecturally split into two distinct parts:
+the king (the Earth interface, more or less) and the serf
+(the Mars substrate for Nock and Arvo). The king
+component is responsible for handling vane I/O and
+managing the eﬀects on and from Unix. The serf provisions
+the Arvo virtual machine (VM) and related services.
+This partition allows for a clear delineation of tasks
+within the Vere runtime, enhancing its eﬃciency and
+                                                
+                                                
+robustness.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-5001f1"></a> 
+</p><!--l. 88--><p class="indent" >   Communication between the king and serf is achieved via
+an inter-process communication (<span 
+class="ec-lmcsc-10">ipc</span>) port. This <span 
+class="ec-lmcsc-10">ipc</span>
+mechanism facilitates a dialogue between the two components,
+ensuring that the king can eﬀectively manage external
+interactions while the serf maintains the integrity of the Arvo
+VM.
+</p><!--l. 90--><p class="indent" >   Formally, Nock (and thus Urbit) is functional-as-in-language
+and free of side eﬀects. In practice, the <code class="lstinline"><span style="color:#000000">%hint</span></code> opcode 11 in
+Nock is used to pass some noun to the interpreter. The
+interpreter can then choose a higher order action to take based
+on this value, whether I/O, memory management, or other
+side eﬀects. This allows for the king to pass hints to the serf
+which in turn produces eﬀects on Earth (sends a network
+packet, retrieves keyboard input, etc.). This bridging of the
+Earth/Mars gap allows for vanes to interact outside of
+Mars.
+</p><!--l. 92--><p class="indent" >   Event processing is key to Vere’s functionality. Events from
+the Unix environment are passed to Vere, which then
+translates and injects them into Arvo. This mechanism
+demonstrates a profound integration between Vere and Arvo,
+where Vere possesses direct knowledge of Arvo’s state.
+Notably, Vere can “scry” or query Arvo’s state without
+altering it, retrieving information as needed. This capability
+allows Vere to maintain the integrity of Arvo’s deterministic
+model while enabling dynamic interaction with the outside
+world.
+</p><!--l. 94--><p class="indent" >   Urbit’s runtime operation is eﬀected by using Unix as its
+<span 
+class="ec-lmcsc-10">bios</span>. By leveraging the robust, widely-used Unix system,
+Vere ensures that Urbit can run on a broad range of
+hardware platforms, eﬀectively making Urbit’s Martian
+technology accessible and operable in Earth’s diverse
+computing environments. This strategic use of Unix not
+only provides the necessary I/O and optimizations for
+Arvo but also ensures that Urbit’s advanced and unique
+software architecture can function in tandem with the
+                                                
+                                                
+existing, established hardware and software ecosystems of
+Earth.
+</p><!--l. 96--><p class="indent" >   Moreover, Vere’s design allows it to inject events into Arvo,
+a feature crucial for maintaining the ﬂuid communication and
+interaction between the Urbit system and its underlying
+hardware and software infrastructure. This bidirectional
+communication channel ensures that Arvo can respond to
+external stimuli while remaining true to its functional and
+deterministic nature. Such events, from Arvo’s perspective, are
+simply incidental injections to the event loop.
+</p><!--l. 98--><p class="indent" >   Thus, Vere serves as more than just a bridge between
+Martian technology and Earthly hardware; it is a ﬁnely tuned
+conduit, optimized to uphold and facilitate the unique
+computational paradigm that Arvo embodies.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-60003"></a>Khan: The High-Level Thread Interface</h3>
+<!--l. 103--><p class="noindent" >The %khan vane functions as a high-level thread interface for
+managing both internal and external communications within
+the Urbit ecosystem. %khan is designed to eﬃciently handle
+complex I/O operations, employing an I/O monad coupled
+with an exception monad. This approach allows %khan to
+manage complex I/O tasks while robustly handling potential
+failures.
+</p><!--l. 105--><p class="indent" >   %khan’s core design revolves around the use of ‘threads’,
+which are monadic functions designed to handle arguments
+and produce results. Threads are optimized for I/O
+operations, leveraging the I/O monad for structured and
+eﬃcient task handling. The exception monad further ensures
+robust management of potential failures and unexpected
+events. An Arvo thread is impermanent and may fail
+unexpectedly; it usually relies on some process external to
+Arvo with unknown existence or reliability. In most of its
+intermediate states, it expects only a small number of events
+(usually one), so if the thread receives anything it does not
+expect, it fails. Running threads are also not upgradable
+and fail across code upgrades. Threads are fragile but
+                                                
+                                                
+well-suited for their use case in managing such tenuous I/O
+operations.
+</p><!--l. 108--><p class="indent" >   The %khan vane was conceived as a way
+to control Urbit ships from the exterior using
+threads.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-6001f2"></a> 
+%khan’s conception evolved a fair bit from
+proposal to implementation. In practice, %khan is
+essentially an interface wrapper for %spider-based
+threads,<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-6002f3"></a> 
+which produces the topsy-turvy situation in which a vane
+relies on a piece of userspace infrastructure to function
+correctly. %khan allows for pre-written threads that allow for
+easy hosting and maintenance to be bundled and distributed,
+helping both hosting companies and self-hosters to manage
+Urbit instances eﬃciently.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-70004"></a>conn.c</h3>
+<!--l. 113--><p class="noindent" >The conn.c driver in Vere<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-7001f4"></a> 
+forms part of the king process. It exposes a <a href="https://en.wikipedia.org/wiki/Unix_domain_socket" >Unix domain
+socket</a> at /path/to/pier /.urb/conn.sock for sending and
+receiving data from external processes.
+</p><!--l. 115--><p class="indent" >   conn.c’s functionality, particularly its ability to dispatch
+messages and handle various types of requests, is critical for
+the command of Urbit’s control plane. It serves as a way for
+Unix processes to receive insights about what is happening on
+Urbit. conn.c also allows for %khan and Vere generally to
+inject raw kernel moves (events, if successful) into the
+                                                
+                                                
+system.
+</p><!--l. 117--><p class="indent" >   From a technical perspective, conn.c accepts newt-encoded
+<code class="lstinline"><span style="color:#000000">++jam</span></code>med nouns (deﬁned below) which take the form
+</p><!--l. 118-->
+   <pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-7002r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">request-id</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">command</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">arguments</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   
+<!--l. 121--><p class="noindent" >Newt encoding is a way of communicating nouns as single
+data objects in an unambiguous format.
+</p>
+   <!--l. 124-->
+   <pre class="lstlisting" id="listing-4"><span class="label"><a  id="x1-7003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">V.BBBB.JJJJ.JJJJ...</span></span></pre>
+   
+<!--l. 127--><p class="noindent" >where V is the version (currently 0); B is the size of the
+<code class="lstinline"><span style="color:#000000">++jam</span></code>med noun in bytes (little-endian unary); and J is the
+<code class="lstinline"><span style="color:#000000">++jam</span></code>med noun (little-endian). This structure allows for a
+variety of commands to be executed, including:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-7005x1">
+     <!--l. 131--><p class="noindent" >%ovum, the injection of raw kernel moves;
+     </p></li>
+<li 
+  class="enumerate" id="x1-7007x2">
+     <!--l. 132--><p class="noindent" >%fyrd, a direct shortcut to %khan commands;
+     </p></li>
+<li 
+  class="enumerate" id="x1-7009x3">
+     <!--l. 133--><p class="noindent" >%urth, runtime subcommands like %pack or %meld;
+     </p></li>
+<li 
+  class="enumerate" id="x1-7011x4">
+     <!--l. 134--><p class="noindent" >%peek, namespace scry requests into Arvo; and
+                                                
+                                                
+     </p></li>
+<li 
+  class="enumerate" id="x1-7013x5">
+     <!--l. 135--><p class="noindent" >%peel, emulated namespace scry requests into Vere.</p></li></ol>
+<!--l. 137--><p class="noindent" >A valid conn.c command produces a newt-encoded <code class="lstinline"><span style="color:#000000">++jam</span></code>med
+noun with type <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">request-id</span><span style="color:#000000"> </span><span style="color:#000000">output</span><span style="color:#000000">]</span></code>, where: </p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 140--><p class="noindent" >request-id matches the input request-id; and
+     </p></li>
+     <li class="itemize">
+     <!--l. 141--><p class="noindent" >output depends on the command.</p></li></ul>
+<!--l. 143--><p class="noindent" >An invalid conn.c command produces a newt-encoded <code class="lstinline"><span style="color:#000000">++jam</span></code>med
+noun with type [0 %bail error-code error-string].
+</p>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a  id="x1-80005"></a>Lick: The Low-Level IPC Interface</h3>
+<!--l. 149--><p class="noindent" >Although also dealing with interprocess communication, the
+%lick vane (<a  id="x1-8001"></a> <code>~mopfel-winrux</code>, 2023) was designed for a very
+diﬀerent use-case than %khan: to allow external processes, in
+particular hardware drivers, to intercommunicate with Urbit.
+%lick focuses on creating a generic noun interface over Unix
+domain sockets.
+</p><!--l. 151--><p class="indent" >   %lick manages <span 
+class="ec-lmcsc-10">ipc </span>ports and the communication between
+Urbit applications and <span 
+class="ec-lmcsc-10">posix </span>applications via these ports.
+Other vanes and applications request %lick to open an <span 
+class="ec-lmcsc-10">ipc</span>
+port, notify it when something is connected or disconnected,
+and transfer data between itself and the Unix application.
+%lick works by opening a Unix socket for a particular process,
+which allows serialized <span 
+class="ec-lmcsc-10">ipc </span>communications. These involve a
+<code class="lstinline"><span style="color:#000000">++jam</span></code>med noun so the receiving process needs to know how
+to communicate in nouns. The <span 
+class="ec-lmcsc-10">ipc </span>ports texttt%lick creates
+are Unix domain sockets (AF_UNIX address family) of type
+                                                
+                                                
+SOCK_STREAM. Connections are made via ﬁles in a
+directory under the pier, .urb/dev.
+</p><!--l. 153--><p class="indent" >   The process on the host OS must therefore strip the ﬁrst 5
+bytes, <code class="lstinline"><span style="color:#000000">++cue</span></code> (unjam) the <code class="lstinline"><span style="color:#000000">++jam</span></code>med noun, check the mark,
+and (most likely) convert the noun into a native data
+structure.
+</p><!--l. 155--><p class="indent" >   To understand what %lick is doing, we need to brieﬂy
+examine Unix’s <span 
+class="ec-lmcsc-10">ipc </span>model. <span 
+class="ec-lmcsc-10">ipc </span>(“interprocess communication”)
+describes any way that two processes in an operating system’s
+shared context have to communicate with each other. %lick
+focuses on Unix domain sockets, which are merely ﬁle-like
+communication endpoints.
+</p><!--l. 157--><p class="indent" >   For instance, a valid use of %lick would use cards to
+communicate (Listing <a href="#x1-8002r1">1<!--tex4ht:ref: lst:lick-cards --></a> ). Outbound moves are speciﬁed as
+<code class="lstinline"><span style="color:#000000">%spit</span></code>.
+</p>
+   <!--l. 159-->
+                                                
+                                                
+<!--l. 164--><p class="indent" >   </p><figure class="float" 
+>
+                                                
+                                                
+<a  id="x1-8002r1"></a>
+<a  id="x1-8003"></a>
+<figcaption class="caption" ><span class="id">Listing 1:                </span><span  
+class="content">Usage                of                Lick
+cards.</span></figcaption><!--tex4ht:label?: x1-8002r5 --><pre class="lstlisting" id="listing-14"><span class="label"><a  id="x1-8004r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">init</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%l</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%spin</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/control</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8005r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-arvo</span></span> 
+<span class="label"><a  id="x1-8006r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=sign-arvo</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8007r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sign-arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">on-arvo:def</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sign-arvo</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8008r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%lick</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%soak</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8009r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mark.sign-arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8010r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%connect</span></span> 
+<span class="label"><a  id="x1-8011r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:_</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span> 
+<span class="label"><a  id="x1-8012r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%l</span></span> 
+<span class="label"><a  id="x1-8013r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/control</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%init</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">area.state</span></span> 
+<span class="label"><a  id="x1-8014r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-8015r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-8016r13"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">send-state</span></span> 
+<span class="label"><a  id="x1-8017r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=state</span></span> 
+<span class="label"><a  id="x1-8018r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">card:agent:gall</span></span> 
+<span class="label"><a  id="x1-8019r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%l</span></span> 
+<span class="label"><a  id="x1-8020r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/control</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%state</span></span> 
+<span class="label"><a  id="x1-8021r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slick:state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">face.state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">food.state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">live.state</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8022r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+<!--l. 186--><p class="indent" >   %lick’s vane deﬁnition is even simpler than %khan’s: it has
+no ++abet nested-core pattern and primarily communicates
+to a unix-duct provided in its state. The <code class="lstinline"><span style="color:#000000">+$owner</span></code> is a
+<code class="lstinline"><span style="color:#000000">+$duct</span></code> to handle the return <code class="lstinline"><span style="color:#000000">%soak</span></code>.
+</p><!--l. 188--><p class="indent" >   Arvo will send three types of <code class="lstinline"><span style="color:#000000">%soak</span></code>s to an open %lick
+port. These <code class="lstinline"><span style="color:#000000">%soak</span></code>s may be one of:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-8024x1">
+     <!--l. 191--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%connect</span></code> when the ﬁrst connection is established
+     on the Earth-side <span 
+class="ec-lmcsc-10">ipc </span>port;
+     </p></li>
+<li 
+  class="enumerate" id="x1-8026x2">
+     <!--l. 192--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%disconnect</span></code> when the last connection is broken
+     on the Earth-side <span 
+class="ec-lmcsc-10">ipc </span>port; or
+     </p></li>
+<li 
+  class="enumerate" id="x1-8028x3">
+     <!--l. 193--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%error</span></code> when an error occurs.</p></li></ol>
+<!--l. 195--><p class="noindent" >%lick also will send a <code class="lstinline"><span style="color:#000000">%disconnect</span></code> <code class="lstinline"><span style="color:#000000">%soak</span></code> to every agent when
+Vere is started.
+</p><!--l. 198--><p class="indent" >   Gall needs to wrap <code class="lstinline"><span style="color:#000000">%soak</span></code> and <code class="lstinline"><span style="color:#000000">%spit</span></code> to route properly
+(see e. g. <code class="lstinline"><span style="color:#000000">++ap-generic-take</span></code>). This permits multiple
+agents to share sockets with the same name while still
+organizing an agent’s sockets by a unique path.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a  id="x1-90006"></a>Conclusion</h3>
+<!--l. 204--><p class="noindent" >This exposition of Urbit’s <span 
+class="ec-lmcsc-10">ipc </span>interfaces, in particular
+%khan, conn.c, and %lick, has sought to cast light upon
+architectural innovations that distinguish Urbit from
+                                                
+                                                
+traditional computing paradigms. These mechanisms permit
+Vere to balance Arvo’s demand for pristine determinism
+against the host Unix OS’s many competing software
+interfaces and tools. While Urbit itself obviously relies deeply
+on these, following this pattern in other systems could
+lead to a redeﬁnition of how digital ecosystems interact.
+ <img 
+src="ustj-logo-.png" alt="PIC"  
+ />
+</p><!--l. 208--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-10000"></a>References</h3>
+<!--l. 208--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-UIP-0101" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 208--><p class="noindent" ><a  id="cite.0@UIP-0101"></a><code>~mopfel-winrux</code>
+   (2023)
+   “<span 
+class="ec-lmcsc-10">uip</span>-0101:
+   %lick.
+   An
+   <span 
+class="ec-lmcsc-10">ipc</span>
+   Vane”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0101.md" class="url" >https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0101.md</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Yarvin2010" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 208--><p class="noindent" ><a  id="cite.0@Yarvin2010"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2010)
+   “Urbit:
+   functional
+   programming
+                                                
+                                                
+   from
+   scratch”.
+   <span class="small-caps">url</span>:
+   <a href="http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html" class="url" >http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Nock4K" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 208--><p class="noindent" ><a  id="cite.0@Nock4K"></a>—   (2013)
+   “Nock
+   4K”.
+   <span class="small-caps">url</span>:
+   <a href="https://docs.urbit.org/language/nock/reference/definition" class="url" >https://docs.urbit.org/language/nock/reference/deﬁnition</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt id="X0-Whitepaper" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 208--><p class="noindent" ><a  id="cite.0@Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   et al.
+   (2016).
+   <span 
+class="ec-lmri-10">Urbit:</span>
+   <span 
+class="ec-lmri-10">A</span>
+   <span 
+class="ec-lmri-10">Solid-State</span>
+   <span 
+class="ec-lmri-10">Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a href="https://media.urbit.org/whitepaper.pdf" class="url" >https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 86--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">The Ares project, in development, seeks to cleanly replace the</span>
+  <span 
+class="ec-lmr-8">serf process, a contingency enabled by this division of responsibility.</span><a href="#x1-5001f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 108--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">%khan was originally called the “control plane” after the</span>
+  <span 
+class="ec-lmr-8">network routing distinction between the control plane and the data</span>
+  <span 
+class="ec-lmr-8">plane.</span><a href="#x1-6001f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 108--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">%spider is a %gall agent to manage transient thread-level</span>
+  <span 
+class="ec-lmr-8">operations.</span><a href="#x1-6002f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 113--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><a 
+href="https://github.com/urbit/vere/blob/develop/pkg/vere/io/conn.c" ><span 
+class="ec-lmr-8">vere/io/conn.c</span></a><a href="#x1-7001f4">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
