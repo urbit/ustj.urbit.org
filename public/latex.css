@@ -754,6 +754,10 @@ p img {
   display: inline;
 }
 
+img.full {
+  height: auto;
+}
+
 a {
   scroll-margin-top: 3rem;
   scroll-margin-bottom: 3rem;
