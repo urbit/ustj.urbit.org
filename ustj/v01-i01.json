@@ -40,7 +40,9 @@
     },
     {
       "author": ["dozreg-toplud"],
-      "title": "The urwasm WebAssembly Interpreter Suite on Urbit"
+      "title": "The urwasm WebAssembly Interpreter Suite on Urbit",
+      "pdf": "/ustj/v01-i01/mss6.pdf",
+      "html": "/ustj/v01-i01/mss6.html"
     }
   ],
   "theme": {

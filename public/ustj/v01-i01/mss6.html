@@ -1,0 +1,906 @@
+<!DOCTYPE html> 
+<html lang='en' xml:lang='en'> 
+<head><title>The urwasm WebAssembly Interpreter Suite on Urbit</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link rel="stylesheet" type="text/css" href="/latex.css" /> 
+<meta content='mss.tex' name='src' /> 
+</head><body>
+   <div class='maketitle'>
+                                                
+                                                
+                                                
+                                                
+
+<h2 class='titleHead'>The urwasm WebAssembly
+Interpreter Suite on Urbit</h2>
+<div class='author'><span class='ec-lmbx-12'>K. Afonin ~dozreg-toplud</span>
+<br />              <span class='ec-lmbx-12'> </span></div><br />
+<div class='date'></div>
+   </div>
+   <section class='abstract' role='doc-abstract'> 
+<h3 class='abstracttitle'>
+<span class='ec-lmbx-9'>Abstract</span>
+</h3>
+     <!-- l. 41 --><p class='noindent'><span class='ec-lmr-9'>WebAssembly   is   a   low-level   language   for   a
+     </span><span class='ec-lmr-9'>portable   virtual   machine.   Wasm   is   designed
+     </span><span class='ec-lmr-9'>to  be  a  compilation  target  for  a  variety  of
+     </span><span class='ec-lmr-9'>programming languages and its design is hardware
+     </span><span class='ec-lmr-9'>independent  and  relatively  simple,  making  its
+     </span><span class='ec-lmr-9'>support ubiquitous in modern browsers. Its simple
+     </span><span class='ec-lmr-9'>design  made  it  a  perfect  first  candidate  for  a
+     </span><span class='ec-lmr-9'>first  emulator  of  an  conventional  computational
+     </span><span class='ec-lmr-9'>system  on  a  novel  functional  computer:  Urbit.
+     </span><span class='ec-lmr-9'>In  this  paper  I  discuss  the  current  state  of  the
+     </span><span class='ec-lmr-9'>urwasm project and some technical details, as well
+     </span><span class='ec-lmr-9'>as describe the strategy to jet the interpreter of a
+     </span><span class='ec-lmr-9'>state machine in a functional environment.</span>
+                                                
+                                                
+</p>
+</section>
+   <h3 class='likesectionHead' id='contents'><a id='x1-1000'></a>Contents</h3>
+   <div class='tableofcontents'>
+    <span class='sectionToc'>1 <a href='#introduction' id='QQ2-1-2'>Introduction</a></span>
+<br />    <span class='sectionToc'>2 <a href='#urbitnative-wasm-interpreter-implementation' id='QQ2-1-3'>Urbit-Native Wasm Interpreter Implementation</a></span>
+<br />    <span class='sectionToc'>3 <a href='#the-webassembly-vm-and-determinism' id='QQ2-1-5'>The WebAssembly VM and Determinism</a></span>
+<br />    <span class='sectionToc'>4 <a href='#examples-of-urwasm-programs' id='QQ2-1-6'>Examples of urwasm Programs</a></span>
+<br />    <span class='sectionToc'>5 <a href='#jetting' id='QQ2-1-7'>Jetting</a></span>
+<br />     <span class='subsectionToc'>5.1 <a href='#bespoke-wasm-interpreter-that-operates-on-nouns' id='QQ2-1-12'>Bespoke Wasm interpreter that operates on nouns</a></span>
+<br />     <span class='subsectionToc'>5.2 <a href='#serializationdeserialization-in-the-jet' id='QQ2-1-13'>Serialization/deserialization in the jet</a></span>
+<br />     <span class='subsectionToc'>5.3 <a href='#serializationdeserialization-in-hoon' id='QQ2-1-14'>Serialization/deserialization in Hoon</a></span>
+<br />     <span class='subsectionToc'>5.4 <a href='#higher-level-interpreter-function' id='QQ2-1-15'>Higher level interpreter function</a></span>
+<br />    <span class='sectionToc'>6 <a href='#lia-interpreter' id='QQ2-1-16'>Lia Interpreter</a></span>
+<br />     <span class='subsectionToc'>6.1 <a href='#caching-of-store' id='QQ2-1-21'>Caching of store</a></span>
+<br />    <span class='sectionToc'>7 <a href='#next-steps' id='QQ2-1-22'>Next Steps</a></span>
+<br />    <span class='sectionToc'>8 <a href='#conclusion' id='QQ2-1-23'>Conclusion</a></span>
+<br />    <span class='sectionToc'><a href='#references' id='QQ2-1-24'>References</a></span>
+   </div>
+<!-- l. 51 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='introduction'><span class='titlemark'>1   </span> <a id='x1-20001'></a>Introduction</h3>
+<!-- l. 53 --><p class='noindent'>
+     </p><blockquote class='quote'>
+     <!-- l. 54 --><p class='noindent'>… Martian code is so perfect that it cannot be
+     contaminated, even in this sticky environment.
+     The           general           structure           of
+     cross-planet computation is that Earth always
+     calls Mars; Mars never calls Earth. The latter
+     would be quite impossible, since Earth code is
+                                                
+                                                
+     non-Maxwellian. There is only one way for a
+     Maxwellian computer to run non-Maxwellian
+     code:  in  a  Maxwellian  emulator.  Any  direct
+     invocation  is  an  implementation  error  by
+     definition. Thus, Mars remains completely pure
+     and Martian, even while glued firmly to Earth.
+     (<a id='x1-2001'></a> ~sorreg-namtyv, 2010)</p></blockquote>
+<!-- l. 58 --><p class='noindent'>The Urbit computer is specified as a Nock interpreter and a
+storage of an event log, represented as a list of nouns (<a id='x1-2002'></a>
+~sorreg-namtyv et al., 2016). Nock is a Lisp-like typeless
+functional language with a tiny specification (<a id='x1-2003'></a> ~sorreg-namtyv,
+2013), which defines a function <code class='lstinline'><span style='color:#000000'>nock(sub, fol)</span></code>, where
+subject <code class='lstinline'><span style='color:#000000'>sub</span></code> and formula <code class='lstinline'><span style='color:#000000'>fol</span></code> are both nouns: binary trees of
+unsigned integers with an arbitrary length, or “S-expressions
+without an S”. The state of the Urbit computer is thus defined
+as <code class='lstinline'><span style='color:#000000'>nock(epic, [2 [0 3] [0 2]])</span></code>, where <code class='lstinline'><span style='color:#000000'>epic</span></code> is the
+event log.
+</p><!-- l. 60 --><p class='indent'>   This environment may seem quite limiting at first glance,
+but by feeding proper events to this computer (via the
+Hoon-to-Nock compiler, the Arvo OS written in Hoon, etc.)
+we can create a personal server used by thousands of people
+today, which can host Web applications and communicate
+with other Urbit computers.
+</p><!-- l. 62 --><p class='indent'>   If we desire to run conventional (“Earth”) programs on
+Urbit, we would have to build an interpreter in Nock that
+would evaluate the imported code within Urbit. WebAssembly
+(Wasm) is an excellent candidate language for having an
+interpreter in Nock:
+</p><!-- l. 64 --><p class='indent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-2005x1'>Wasm is a low-level language, supported by many
+     languages as a compilation target;
+     </li>
+<li class='enumerate' id='x1-2007x2'>Wasm’s                    specification                    is
+     small and hardware-independent when compared to
+     other alternatives;
+     </li>
+<li class='enumerate' id='x1-2009x3'>Wasm is widely used in browsers as well as in other
+     contexts, creating an incentive for developers to add
+     Wasm support in their projects.</li></ol>
+<!-- l. 70 --><p class='noindent'>For these reasons, we set out to build a Wasm interpreter
+native to Urbit (Quodss/urwasm). As of writing, the project
+consists of the following components:
+</p><!-- l. 73 --><p class='indent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-2011x1'>A parser from wasm binary format to a Nock noun;
+     </li>
+<li class='enumerate' id='x1-2013x2'>An interpreter, which fully satisfies the Wasm Core
+     Specification  from  the  latest  published  version  (<a id='x1-2014'></a>
+     Rossberg  and  the  WebAssembly  Working  Group,
+     2024);
+     </li>
+<li class='enumerate' id='x1-2016x3'>A  parser  from  wat  text  format  to  a  Nock  noun,
+     implemented  by  calling  a  Wasm  module  with  a
+     wat2wasm parser and then feeding the result to the
+     binary parser. This parser serves as a testing method
+     and is very slow with the interpreter being unjetted.</li></ol>
+<!-- l. 79 --><p class='indent'>   This article first describes the implementation of the
+interpreter in urwasm. It then lays out a strategy for
+                                                
+                                                
+efficiently jetting the interpreter. It closes by discussing the
+need for an interpreter of Language for Invocation of Assembly
+(Lia) to encapsulate the Wasm interpreter. A sketch of the
+specification of Lia language and <code class='lstinline'><span style='color:#000000'>++lia</span></code> interpreter is
+provided.
+</p><!-- l. 82 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='urbitnative-wasm-interpreter-implementation'><span class='titlemark'>2   </span> <a id='x1-30002'></a>Urbit-Native Wasm Interpreter Implementation</h3>
+<!-- l. 84 --><p class='noindent'>The strategy for interpreting Wasm expressions was to model
+each instruction as a function
+</p><!-- l. 86 --><p class='indent'>
+</p>
+   <div class='math-display'>
+<img alt='local- state → local-state,
+' class='math-display' src='mss0x.png' /></div>
+<!-- l. 90 --><p class='noindent'>where local-state is a noun which describes the state of
+the interpreter at any point during the computation:
+stack and local values, linear memory, and so forth. An
+expression is a list of instructions, and can be modeled as a
+composition of all instructions in the list, which also makes it
+a function from local-state to local-state. Most of the Wasm
+instructions were implemented as Hoon gates with that type,
+while five instructions (<code class='lstinline'><span style='color:#000000'>call</span></code>, <code class='lstinline'><span style='color:#000000'>call_indirect</span></code>, <code class='lstinline'><span style='color:#000000'>block</span></code>,
+<code class='lstinline'><span style='color:#000000'>loop</span></code>, and <code class='lstinline'><span style='color:#000000'>eval</span></code>) were treated directly in the evaluation
+loop.
+</p><!-- l. 94 --><p class='indent'>   The evaluation loop consists mainly of two functions:
+<code class='lstinline'><span style='color:#000000'>++eval</span></code> and <code class='lstinline'><span style='color:#000000'>++apply</span></code>. <code class='lstinline'><span style='color:#000000'>++eval</span></code> takes an expression and a
+<code class='lstinline'><span style='color:#000000'>local-state</span></code> to produce a <code class='lstinline'><span style='color:#000000'>local-state</span></code>. It pops an
+                                                
+                                                
+instruction from the expression and applies it to the local
+state with <code class='lstinline'><span style='color:#000000'>++apply</span></code>, stopping if it reaches the end of the list
+or if an instruction triggered execution flow navigation. For
+example, the <code class='lstinline'><span style='color:#000000'>return</span></code> instruction causes <code class='lstinline'><span style='color:#000000'>++eval</span></code> to stop
+applying the rest of the instructions and return the local state
+as is, with the branching coordinate contained in the local
+state.
+</p><!-- l. 96 --><p class='indent'>   The <code class='lstinline'><span style='color:#000000'>++apply</span></code> gate takes an instruction and <code class='lstinline'><span style='color:#000000'>local-state</span></code>,
+returning <code class='lstinline'><span style='color:#000000'>local-state</span></code>. While for most instructions it finds
+an appropriate gate <code class='lstinline'><span style='color:#000000'>$-(local-state local-state)</span></code> and
+applies it to the given local state, in the case of the five
+instructions listed above it instead calls <code class='lstinline'><span style='color:#000000'>++eval</span></code> on the body
+of those instructions. Thus stack frames are divided not with a
+label value, as in the formal specification of Wasm, but with
+the depth of mutual recursion of <code class='lstinline'><span style='color:#000000'>++eval</span></code> (Figure <a href='#x1-3001r1'>1a<!-- tex4ht:ref: fig:uw-eval  --></a> ) and
+<code class='lstinline'><span style='color:#000000'>++apply</span></code> (Figure <a href='#x1-3002r2'>1b<!-- tex4ht:ref: fig:uw-apply  --></a> ).
+</p>
+   <figure class='figure' id='-data-flow-in-the-urwasm-interpreter-'> 
+
+                                                
+                                                
+                                                
+                                                
+<div class='subfigure'>
+  <!-- l. 100 --><p class='noindent'></p><!-- l. 101 --><p class='noindent'><img class="full" alt='PIC' height='202' src='img/uw-eval.png' width='252' /> <a id='x1-3001r1'></a></p>
+<div class='caption'><span class='id'><span class='ec-lmr-9'>(a) </span></span><span class='content'><span class='ec-lmr-9'>++eval data flow.</span>
+</span></div>                                                </div>
+<br class='newline' />  <br class='newline' />  <br class='newline' /><div class='subfigure'>
+  <!-- l. 106 --><p class='noindent'></p><!-- l. 107 --><p class='noindent'><img class="full" alt='PIC' height='120' src='img/uw-apply.png' width='252' /> <a id='x1-3002r2'></a></p>
+<div class='caption'><span class='id'><span class='ec-lmr-9'>(b)  </span></span><span class='content'><span class='ec-lmr-9'>++apply  data  flow.  Some  details  like  entering/exiting
+</span><span class='ec-lmr-9'>frames are elided.</span>
+</span></div>                                                </div>
+<a id='x1-3003r1'></a>
+<a id='x1-3004'></a>
+<div class='caption'><span class='id'>Figure 1: </span><span class='content'>Data flow in the urwasm interpreter.
+</span></div>
+                                                
+                                                
+   </figure>
+<!-- l. 115 --><p class='indent'>   The gates above are internal; the outside caller will typically
+interact via two other gates, <code class='lstinline'><span style='color:#000000'>++prep</span></code> and <code class='lstinline'><span style='color:#000000'>++invoke</span></code>. <code class='lstinline'><span style='color:#000000'>++prep</span></code>
+instantiates the module: it loads the data segments into the
+linear memory, instantiates global values, and runs a start
+function if specified. The product of this gate is either
+<code class='lstinline'><span style='color:#000000'>global-state</span></code>, which describes the state of the Wasm
+module in between function invocations, or a block on an
+unresolved import, or a crash or “trap” in WebAssembly
+terms.
+</p><!-- l. 117 --><p class='indent'>   <code class='lstinline'><span style='color:#000000'>++invoke</span></code> takes a name of an exported function, input
+values with type annotation and <code class='lstinline'><span style='color:#000000'>global-state</span></code>. It
+performs a typecheck on the supplied values and calls
+an appropriate function. The result (as with <code class='lstinline'><span style='color:#000000'>++prep</span></code>)
+either succeeds with output values and updated state, or
+blocks/traps.
+</p>
+   <h3 class='sectionHead' id='the-webassembly-vm-and-determinism'><span class='titlemark'>3   </span> <a id='x1-40003'></a>The WebAssembly VM and Determinism</h3>
+<!-- l. 122 --><p class='noindent'>The state of an Urbit computer, as already mentioned above,
+is a pure function of its stream of events with the lifecycle
+function defined in Nock. No information other than
+the event log may impact the computation of this state,
+including the hardware on which the interpreter runs or the
+implementation details of the interpreter. For a Wasm
+interpreter in Nock to be practical it needs to be paired with
+some fast implementation of the Wasm interpreter in
+another language, and the equivalence of both algorithms
+must to be confirmed. In this way, the Urbit computer
+can be a practical personal server without violating its
+simple definition: the code of functions in Nock must be
+sufficient for an Urbit programmer to reason about the
+system.
+</p><!-- l. 124 --><p class='indent'>   This demand of equivalence, however, poses some difficulties.
+Some instructions of Wasm are defined non-deterministically.
+For example, the <code class='lstinline'><span style='color:#000000'>memory.grow</span></code> instruction can return -1 and
+not increase the length of the linear memory even if the
+                                                
+                                                
+maximum size of the memory described in the module file is
+not exceeded. The choice is left to the embedder, which can
+opt to keep the size of the memory buffer based on its
+resources.
+</p><!-- l. 126 --><p class='indent'>   In addition, some numerical operators return a set
+of values; that is, a Wasm VM could return any value
+from that set. This typically happens with floating-point
+operators when they are given a NaN value, with the set
+being defined by the value being a canonical NaN or
+not.<span class='footnote-mark'><a href='#fn1x0'><sup class='textsuperscript'>1</sup></a></span><a id='x1-4001f1'></a>
+Some numerical operators return an empty set of values. In
+other words, their behaviour is set to be undefined for certain
+inputs, and those operators are described as partial. This can
+happen, for example, with the <code class='lstinline'><span style='color:#000000'>idiv_N</span></code> operator when the
+second operand is equal to zero. The behaviour of Wasm VM
+is undefined in this case.
+</p><!-- l. 128 --><p class='indent'>   Therefore, the Wasm interpreter in <code class='lstinline'><span style='color:#000000'>urwasm</span></code> describes
+a deterministic Wasm machine, limited to a subset of
+behaviors:
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-4004x1'>If  an  empty  set  of  values  must  be  returned,  the
+     interpreter “traps”: it returns a deterministic error
+     as a result, similar to <code class='lstinline'><span style='color:#000000'>++mink</span></code>;
+     </li>
+<li class='enumerate' id='x1-4006x2'>If a set of values must be returned, then a single
+     result  from  that  set  is  returned.  The  choice  is
+     particular  to  each  operator,  but  typically,  if  the
+     set  was  a  union  of  sets  that  depend  on  multiple
+     input parameters, then the choice was made from
+     the  set  given  by  the  first  parameter.  (Refer  to
+     <code class='lstinline'><span style='color:#000000'>/lib/op-def</span></code> for more information.)
+                                                
+                                                
+     </li>
+<li class='enumerate' id='x1-4008x3'><code class='lstinline'><span style='color:#000000'>memory.grow</span></code>  and   similar   instructions   always
+     attempt to grow the buffer when the limits in the
+     module file permit.</li></ol>
+   <h3 class='sectionHead' id='examples-of-urwasm-programs'><span class='titlemark'>4   </span> <a id='x1-50004'></a>Examples of urwasm Programs</h3>
+<!-- l. 139 --><p class='noindent'>Some simple programs are included in the test suite. Most of
+them involve only numerical operations, while one of them
+calls a Wasm program compiled from Rust source which flips
+the order of characters in the string. Evaluation of this
+function requires multiple Wasm function invocations in order
+to e.g. allocate memory for the input string, and interaction
+with the global-state to read from and write to linear
+memory.
+</p><!-- l. 141 --><p class='indent'>   When Rust source is compiled, the compiler produces
+JavaScript code which takes care of low-level handling of the
+state of Wasm runtime. In the case of Wasm interpreter in
+Hoon, JS code was manually translated to Hoon.
+</p><!-- l. 144 --><p class='indent'>   In addition, some other programs were run successfully.
+WebAssembly text format parsing in urwasm is implemented
+by composing the wat2wasm parser from the wat Rust crate
+with a binary parser in Hoon. Another example was presented
+at the Urbit Assembly in October 2023: an algorithm
+to simplify debts between a group of people, using the
+FlowGraph Dinic algorithm for maximum flow computation
+from the <code class='lstinline'><span style='color:#000000'>contest_algorithms</span></code> Rust crate (<a id='x1-5001'></a> ~dozreg-toplud
+et al., 2023).
+</p><!-- l. 146 --><p class='indent'>   These cited examples highlight the incredible inefficiency of
+the interpreter: it takes about a second to flip a string with 27
+characters, and about a minute to parse a small Wasm
+binary with compiled wat2wasm. While there is most
+likely room for improvement, the Hoon code serves first
+and foremost as a formal specification of a deterministic
+Wasm VM, translated from the mix of pseudocode and
+mathematical formulas to a tightly-specified language. This
+                                                
+                                                
+specification would then serve for the verification of jet
+correctness.
+</p><!-- l. 149 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='jetting'><span class='titlemark'>5   </span> <a id='x1-60005'></a>Jetting</h3>
+<!-- l. 151 --><p class='noindent'>To jet the interpreter, the gate written in Hoon must be
+paired with a code in C that must be extensionally equivalent
+to the Hoon code. In that sense function definition in Hoon
+would act as a formal mathematical specification of what
+the interpreter returns, while C code would act as the
+actual implementation of Wasm runtime by arriving to the
+same conclusion as Hoon code but faster. The purpose of
+the Hoon specification is then to provide a test bed for
+verifying correctness of the interpreter, either by testing or
+formal analysis of both programs via e.g. the K verification
+framework (cf. runtimeverification/ knock, <a id='x1-6001'></a> ~bithex-topnym
+(2023)).
+</p><!-- l. 153 --><p class='indent'>   Since Wasm is a portable language for a state machine,
+each invocation of a function from a Wasm module would
+either return a successful result with returned values and an
+updated state, or some flavor of failure (trap or blocking on
+unresolved external request, e.g. function call of an imported
+function). This gives us several possible strategies for
+jetting:
+</p><!-- l. 155 --><p class='indent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-6003x1'>Have a bespoke Wasm interpreter in C that operates
+     on nouns, and jet invoke gate.
+     </li>
+<li class='enumerate' id='x1-6005x2'>Use  an  established  Wasm  runtime  in  C,  and
+                                                
+                                                
+     add  serializer/deserializer  to  the  jet,  to  convert
+     Hoon  representation  of  the  module  state  to  a
+     representation in C and vice versa, and jet invoke
+     gate.
+     </li>
+<li class='enumerate' id='x1-6007x3'>Use  an  established  Wasm  runtime  in  C,  and  add
+     serializer/deserializer to the Hoon specification, and
+     use a representation of state close to the one in C as
+     input and output in Hoon invoke gate, and jet invoke
+     gate.
+     </li>
+<li class='enumerate' id='x1-6009x4'>Don’t jet the <code class='lstinline'><span style='color:#000000'>++invoke</span></code> gate at all. Instead, have
+     a  higher  level  function  that  executes  a  series  of
+     operations  on  a  module  and  doesn’t  return  the
+     entirety of Wasm module state. Hoon specification
+     of this function would use the Wasm interpreter in
+     Hoon, and the jetting code in C would use Wasm
+     runtime in C.</li></ol>
+<!-- l. 162 --><p class='noindent'>But first, why do we have to have access to the state in the
+first place?
+</p>
+   <!-- l. 165 -->
+                                                
+                                                
+<!-- l. 171 --><p class='indent'>   </p><figure class='float' id='-caption-'>
+                                                
+                                                
+<a id='x1-6010r1'></a>
+<a id='x1-6011'></a>
+<figcaption class='caption'><span class='id'>Listing 1:
+    </span><span class='content'>Rust
+    function
+    to
+    reverse
+    the
+    order
+    of
+    characters
+    in
+    a
+    string
+    using
+    Wasm.</span></figcaption><!-- tex4ht:label?: x1-6010r5  --><pre class='lstlisting' id='listing-42'><span class='label'><a id='x1-6012r1'></a></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>use</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>wasm_bindgen::prelude::*;</span> 
+</span><span class='label'><a id='x1-6013r2'></a></span> 
+<span class='label'><a id='x1-6014r3'></a></span><span style='color:#000000'><span class='ec-lmtti-10x-x-90'>#[</span></span><span style='color:#000000'><span class='ec-lmtti-10x-x-90'>wasm_bindgen</span></span><span style='color:#000000'><span class='ec-lmtti-10x-x-90'>]</span></span> 
+<span class='label'><a id='x1-6015r4'></a></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>pub</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>fn</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>process(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>input</span></span><span style='color:#000000'><span class='ec-lmtt-9'>:</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>String</span></span><span style='color:#000000'><span class='ec-lmtt-9'>)</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>-&gt;</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>String</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>{</span> 
+</span><span class='label'><a id='x1-6016r5'></a><span class='ec-lmr-5'>5</span></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>let</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>output_string:</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>String</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>=</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>input</span></span><span style='color:#000000'><span class='ec-lmtt-9'>.</span></span><span style='color:#000000'><span class='ec-lmtt-9'>chars</span></span><span style='color:#000000'><span class='ec-lmtt-9'>()</span></span><span style='color:#000000'><span class='ec-lmtt-9'>.</span></span><span style='color:#000000'><span class='ec-lmtt-9'>rev</span></span><span style='color:#000000'><span class='ec-lmtt-9'>()</span></span><span style='color:#000000'><span class='ec-lmtt-9'>.</span></span><span style='color:#000000'><span class='ec-lmtt-9'>collect</span></span><span style='color:#000000'><span class='ec-lmtt-9'>()</span></span><span style='color:#000000'><span class='ec-lmtt-9'>;</span></span> 
+<span class='label'><a id='x1-6017r6'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>output_string</span> 
+</span><span class='label'><a id='x1-6018r7'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>}</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 181 --><p class='indent'>   Even for a simple source code the generated Wasm code
+might require multiple function invocations to get a desired
+result. Consider a Rust function that flips the characters in a
+given string (Listing <a href='#x1-6010r1'>1<!-- tex4ht:ref: lst:rust  --></a> ). After compiling this function to
+Wasm, you would get a module with five exported functions:
+<code class='lstinline'><span style='color:#000000'>process</span></code> itself, <code class='lstinline'><span style='color:#000000'>add_to_stack_pointer</span></code>, <code class='lstinline'><span style='color:#000000'>malloc</span></code>,
+<code class='lstinline'><span style='color:#000000'>realloc</span></code> and <code class='lstinline'><span style='color:#000000'>free</span></code>. The call of the compiled function in JS
+would look like:
+</p>
+   <!-- l. 183 -->
+                                                
+                                                
+<!-- l. 189 --><p class='indent'>   </p><figure class='float' id='-caption-1'>
+                                                
+                                                
+<a id='x1-6019r2'></a>
+<a id='x1-6020'></a>
+<figcaption class='caption'><span class='id'>Listing 2:
+    </span><span class='content'>JavaScript
+    function
+    to
+    reverse
+    the
+    order
+    of
+    characters
+    in
+    a
+    string
+    using
+    Wasm.
+    Compare
+    Listing <a href='#x1-6010r1'>1<!-- tex4ht:ref: lst:rust  --></a>
+    .</span></figcaption><!-- tex4ht:label?: x1-6019r5  --><pre class='lstlisting' id='listing-48'><span class='label'><a id='x1-6021r1'></a></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>export</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>function</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>process(input) </span><span class='ec-lmtt-9'>{</span> 
+</span><span class='label'><a id='x1-6022r2'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>let </span><span class='ec-lmtt-9'>deferred2_0;</span> 
+</span><span class='label'><a id='x1-6023r3'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>let </span><span class='ec-lmtt-9'>deferred2_1;</span> 
+</span><span class='label'><a id='x1-6024r4'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>try </span><span class='ec-lmtt-9'>{</span> 
+</span><span class='label'><a id='x1-6025r5'></a><span class='ec-lmr-5'>5</span></span><span style='color:#000000'>    <span class='ec-lmtt-9'>const </span><span class='ec-lmtt-9'>retptr </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>wasm.__wbindgen_add_to_stack_pointer(-16);</span> 
+</span><span class='label'><a id='x1-6026r6'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>const </span><span class='ec-lmtt-9'>ptr0 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>passStringToWasm0(input, </span><span class='ec-lmtt-9'>wasm.__wbindgen_malloc, </span><span class='ec-lmtt-9'>wasm.__wbindgen_realloc);</span> 
+</span><span class='label'><a id='x1-6027r7'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>const </span><span class='ec-lmtt-9'>len0 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>WASM_VECTOR_LEN;</span> 
+</span><span class='label'><a id='x1-6028r8'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>wasm.process(retptr, </span><span class='ec-lmtt-9'>ptr0, </span><span class='ec-lmtt-9'>len0);</span> 
+</span><span class='label'><a id='x1-6029r9'></a></span><span style='color:#000000'>    </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>var</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>r0 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>getInt32Memory0()[retptr </span><span class='ec-lmtt-9'>/ </span><span class='ec-lmtt-9'>4 </span><span class='ec-lmtt-9'>+ </span><span class='ec-lmtt-9'>0];</span> 
+</span><span class='label'><a id='x1-6030r10'></a><span class='ec-lmr-5'>10</span></span><span style='color:#000000'>    </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>var</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>r1 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>getInt32Memory0()[retptr </span><span class='ec-lmtt-9'>/ </span><span class='ec-lmtt-9'>4 </span><span class='ec-lmtt-9'>+ </span><span class='ec-lmtt-9'>1];</span> 
+</span><span class='label'><a id='x1-6031r11'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>deferred2_0 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>r0;</span> 
+</span><span class='label'><a id='x1-6032r12'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>deferred2_1 </span><span class='ec-lmtt-9'>= </span><span class='ec-lmtt-9'>r1;</span> 
+</span><span class='label'><a id='x1-6033r13'></a></span><span style='color:#000000'>    </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>return</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>getStringFromWasm0(r0, </span><span class='ec-lmtt-9'>r1);</span> 
+</span><span class='label'><a id='x1-6034r14'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>} </span><span class='ec-lmtt-9'>finally </span><span class='ec-lmtt-9'>{</span> 
+</span><span class='label'><a id='x1-6035r15'></a><span class='ec-lmr-5'>15</span></span><span style='color:#000000'>    <span class='ec-lmtt-9'>wasm.__wbindgen_add_to_stack_pointer(16);</span> 
+</span><span class='label'><a id='x1-6036r16'></a></span><span style='color:#000000'>    <span class='ec-lmtt-9'>wasm.__wbindgen_free(deferred2_0, </span><span class='ec-lmtt-9'>deferred2_1, </span><span class='ec-lmtt-9'>1);</span> 
+</span><span class='label'><a id='x1-6037r17'></a></span><span style='color:#000000'>  <span class='ec-lmtt-9'>}</span> 
+</span><span class='label'><a id='x1-6038r18'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>}</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 210 --><p class='noindent'>Multiple invocations are necessary, some with the arguments
+received from outputs of other invoked functions. Having the
+access to the state of the module is thus crucial for any
+practical interpreter. In addition, we may have to read
+data from the state and save it as a noun, in order to
+perform I/O on that piece of information, since Arvo may
+only send effects when the computation of a given event
+has finalized. While jets could in theory perform system
+calls during their evaluation, doing so is considered a
+gross violation of jetting mechanism: jets as functions are
+supposed to be as pure as possible, to imitate their Nock
+definitions.
+</p><!-- l. 213 --><p class='indent'>   Let us review our options.
+</p>
+   <h4 class='subsectionHead' id='bespoke-wasm-interpreter-that-operates-on-nouns'><span class='titlemark'>5.1   </span> <a id='x1-70005.1'></a>Bespoke Wasm interpreter that operates on
+nouns</h4>
+<!-- l. 217 --><p class='noindent'>Maybe this is the perfect option in the long term, but this
+option is unfeasible in the short to medium term due to
+the required development time. In addition, it would
+require speculative kinds of optimizations added to a Nock
+interpreter that do not yet exist, such as “data jets”,
+when a noun is represented in a way that allows certain
+operations faster to be performed faster. (For example,
+the Nock runtime could have a list of bytes (list @D)
+represented as a byte array in its memory, with some jetted
+functions configured to operate on that kind of nouns more
+efficiently.)
+</p><!-- l. 219 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead' id='serializationdeserialization-in-the-jet'><span class='titlemark'>5.2   </span> <a id='x1-80005.2'></a>Serialization/deserialization in the jet</h4>
+<!-- l. 221 --><p class='noindent'>The next solution is to add serializer and deserializer functions
+to the jet of the <code class='lstinline'><span style='color:#000000'>++invoke</span></code> arm, which would convert
+the noun representation of the state of the module to a
+                                                
+                                                
+representation legible to the jetting interpreter before
+evaluating the invoked function, and convert it back into a
+noun when the computation is finished. However, having to
+translate the state between two models twice for each
+function invocation would impose a lot of computational
+overhead.
+</p><!-- l. 223 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead' id='serializationdeserialization-in-hoon'><span class='titlemark'>5.3   </span> <a id='x1-90005.3'></a>Serialization/deserialization in Hoon</h4>
+<!-- l. 225 --><p class='noindent'>A less obvious variation is to put the de/serializer in the Hoon
+code of <code class='lstinline'><span style='color:#000000'>++invoke</span></code>, and have the jetted gate take and
+return module state in the same representation as in the
+Wasm interpreter in C. The jet would then operate on
+the given state directly, without having to translate the
+state of the interpreter. Here the problem is that the
+implementation strategy leaks into the formal specification,
+making Hoon code jet-dependent. Replacement of the jetting
+Wasm runtime, including in the case of switching from
+Vere to Ares, would make us have to change the Hoon
+code, which I find to be antithetical to the Urbit project
+itself.
+</p><!-- l. 227 --><p class='indent'>   In addition, current model of jetting in both Vere and Ares
+requires that the core produced by the jetted arm is left
+read-only, without modification, so the output of the jet
+function cannot overwrite the core’s sample. That would
+require the interpreter to copy the entire state of the module
+and operate on that, which creates prohibitive overhead
+for memory-heavy computations, like running a Linux
+VM.
+</p><!-- l. 229 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead' id='higher-level-interpreter-function'><span class='titlemark'>5.4   </span> <a id='x1-100005.4'></a>Higher level interpreter function</h4>
+<!-- l. 231 --><p class='noindent'>This strategy would involve writing a function that takes a
+Wasm module, a list of operations to be performed and
+                                                
+                                                
+some other parameters, and then jetting this function. No
+intermediate state would be returned, saving us from having
+to convert it between different representations. However, a
+practical jet implementation would have to cache the
+intermediate state of the interpreter between Arvo events,
+otherwise it would have to reevaluate the operations each time
+the jetted function encounters a block on an unresolved
+import, or if the caller appended new operations to the list to
+interact with the module.
+</p><!-- l. 234 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='lia-interpreter'><span class='titlemark'>6   </span> <a id='x1-110006'></a>Lia Interpreter</h3>
+<!-- l. 236 --><p class='noindent'>Let’s return to our example with string flipping in Rust.
+How would our hypothetical higher-level function run
+the program? Ignoring imports for now, consider this
+gate:
+</p>
+   <!-- l. 238 -->
+<pre class='lstlisting' id='listing-51'><span class='label'><a id='x1-11001r1'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>++</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>lia</span> 
+</span><span class='label'><a id='x1-11002r2'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>|=</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>[module=octs </span><span class='ec-lmtt-9'>actions=(list </span><span class='ec-lmtt-9'>action)]</span> 
+</span><span class='label'><a id='x1-11003r3'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>^-</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>$% </span> <span class='ec-lmtt-9'>[%0 </span><span class='ec-lmtt-9'>out=(list </span><span class='ec-lmtt-9'>value)]</span> 
+</span><span class='label'><a id='x1-11004r4'></a></span><span style='color:#000000'>        <span class='ec-lmtt-9'>[%2 </span><span class='ec-lmtt-9'>~]</span> 
+</span><span class='label'><a id='x1-11005r5'></a><span class='ec-lmr-5'>5</span></span><span style='color:#000000'>    <span class='ec-lmtt-9'>==</span> 
+</span><span class='label'><a id='x1-11006r6'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>::</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>(...)</span></span></pre>
+<!-- l. 247 --><p class='indent'>   This gate accepts a binary file of a Wasm module and a list
+of actions to be performed, and returns either a list of values
+in the event of successful resolution, or an error. A value here
+is either a WebAssembly numerical value or a slice of the
+linear memory called octs in homage to Hoon. To flip a string,
+we would pass it the module file obtained from the Rust
+compiler and a list of actions obtained from parsing this code
+(ignoring realloc for simplicity), as shown in Listing <a href='#x1-11007r3'>3<!-- tex4ht:ref: lst:lia  --></a>
+.
+</p>
+   <!-- l. 249 -->
+                                                
+                                                
+<!-- l. 255 --><p class='indent'>   </p><figure class='float' id='-caption-2'>
+                                                
+                                                
+<a id='x1-11007r3'></a>
+<a id='x1-11008'></a>
+<figcaption class='caption'><span class='id'>Listing 3:
+    </span><span class='content'>Lia
+    function
+    to
+    reverse
+    the
+    order
+    of
+    characters
+    in
+    a
+    string
+    using
+    Wasm.
+    Compare
+    Listings <a href='#x1-6010r1'>1<!-- tex4ht:ref: lst:rust  --></a>
+    and
+    <a href='#x1-6019r2'>2<!-- tex4ht:ref: lst:js  --></a>
+    .</span></figcaption><!-- tex4ht:label?: x1-11007r6  --><pre class='lstlisting' id='listing-52'><span class='label'><a id='x1-11009r1'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>Lia </span><span class='ec-lmtt-9'>(Language </span><span class='ec-lmtt-9'>for </span><span class='ec-lmtt-9'>Invocation </span><span class='ec-lmtt-9'>of </span><span class='ec-lmtt-9'>Assembly) </span><span class='ec-lmtt-9'>scripting</span> 
+</span><span class='label'><a id='x1-11010r2'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span><span style='color:#000000'>   <span class='ec-lmtt-9'>language</span> 
+</span><span class='label'><a id='x1-11011r3'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>"add_to_stack_pointer", </span><span class='ec-lmtt-9'>"malloc" </span><span class='ec-lmtt-9'>and </span><span class='ec-lmtt-9'>"process"</span> 
+</span><span class='label'><a id='x1-11012r4'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>are </span><span class='ec-lmtt-9'>functions </span><span class='ec-lmtt-9'>exported </span><span class='ec-lmtt-9'>by </span><span class='ec-lmtt-9'>the </span><span class='ec-lmtt-9'>wasm </span><span class='ec-lmtt-9'>module </span><span class='ec-lmtt-9'>from </span><span class='ec-lmtt-9'>Rust</span> 
+</span><span class='label'><a id='x1-11013r5'></a><span class='ec-lmr-5'>5</span></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>example </span><span class='ec-lmtt-9'>above</span> 
+</span><span class='label'><a id='x1-11014r6'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>#</span></span> 
+<span class='label'><a id='x1-11015r7'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>string0</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>"Hello </span><span class='ec-lmtt-9'>world".to_octs</span> 
+</span><span class='label'><a id='x1-11016r8'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>retptr</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>__wbindgen_add_to_stack_pointer(-16)</span> 
+</span><span class='label'><a id='x1-11017r9'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>ptr0</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>__wbindgen_malloc(string0.len, </span><span class='ec-lmtt-9'>1)</span> 
+</span><span class='label'><a id='x1-11018r10'></a><span class='ec-lmr-5'>10</span></span><span style='color:#000000'><span class='ec-lmtt-9'>memory.write</span></span><span style='color:#000000'><span class='ec-lmtt-9'>(</span></span><span style='color:#000000'><span class='ec-lmtt-9'>string0,</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>ptr0)</span> 
+</span><span class='label'><a id='x1-11019r11'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>process</span></span><span style='color:#000000'><span class='ec-lmtt-9'>(</span></span><span style='color:#000000'><span class='ec-lmtt-9'>retptr,</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>ptr0, </span><span class='ec-lmtt-9'>len0)</span> 
+</span><span class='label'><a id='x1-11020r12'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>i32</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>r0</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>memory.read(retptr, </span><span class='ec-lmtt-9'>4)</span> 
+</span><span class='label'><a id='x1-11021r13'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>i32</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>r1</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>memory.read(retptr+4, </span><span class='ec-lmtt-9'>4)</span> 
+</span><span class='label'><a id='x1-11022r14'></a></span><span style='color:#000000'><span class='ec-lmtt-9'>return</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>memory.read(r0, </span><span class='ec-lmtt-9'>r1)</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 272 --><p class='indent'>   This code is written in Language for Invocation of
+Assembly (Lia for short). We imagine this language to have a
+very small specification: its only purpose is to describe
+sequences of actions to be performed with a Wasm module.
+These include function invocation and memory reads and
+writes, as well as variable declarations, for loops and
+conditionals for expressivity.
+</p><!-- l. 274 --><p class='indent'>   Listing <a href='#x1-11007r3'>3<!-- tex4ht:ref: lst:lia  --></a>  above is essentially identical to the JS example
+in Listing <a href='#x1-6019r2'>2<!-- tex4ht:ref: lst:js  --></a> . Ideally, Lia will be generated by the compiler
+itself, just like the JS code was also generated, with
+placeholders for input values, where the caller could insert
+their parameters.
+</p><!-- l. 276 --><p class='indent'>   A jet of <code class='lstinline'><span style='color:#000000'>++lia</span></code> would have to perform the same operations
+but with an interpreter in C. However, considering the tiny
+specification for Lia, we do not foresee implementing
+the algorithm identically in both Hoon and C to be a
+challenge.
+</p><!-- l. 278 --><p class='indent'>   The Lia interpreter as described has been non-interactive;
+it takes a module and a list of actions and returns a result.
+But the WebAssembly module can and should be interactive:
+we want to invoke a function, perform some I/O based on the
+result, then invoke a function again etc. In addition, the
+module might contain imported functions, which we wish to
+resolve to provide I/O to the Wasm program.
+</p><!-- l. 280 --><p class='indent'>   Interacting with an instantiated module in the case of
+<code class='lstinline'><span style='color:#000000'>++invoke</span></code> jetting is straightforward: the state of the module
+is a noun, and to interact with the state we would call various
+jetted gates that invoke functions and perform I/O on the
+store. Handling import function calls is also straightforward:
+<code class='lstinline'><span style='color:#000000'>++invoke</span></code> might return a blocked result with the name
+of the imported function, which is then resolved in the
+embedding context, modifying state of the module if
+necessary. How would the same be achieved in a stateless
+fashion?
+</p>
+   <!-- l. 282 -->
+                                                
+                                                
+<!-- l. 288 --><p class='indent'>   </p><figure class='float' id='-caption-3'>
+                                                
+                                                
+<a id='x1-11023r4'></a>
+<a id='x1-11024'></a>
+<figcaption class='caption'><span class='id'>Listing 4:
+    </span><span class='content'>Upgraded
+    ++lia
+    arm.</span></figcaption><!-- tex4ht:label?: x1-11023r6  --><pre class='lstlisting' id='listing-56'><span class='label'><a id='x1-11025r1'></a></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>++</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>lia</span> 
+</span><span class='label'><a id='x1-11026r2'></a></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>|=</span></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>$:</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>module=octs</span> 
+</span><span class='label'><a id='x1-11027r3'></a></span><span style='color:#000000'>          <span class='ec-lmtt-9'>actions=(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>action)</span> 
+</span><span class='label'><a id='x1-11028r4'></a></span><span style='color:#000000'>          <span class='ec-lmtt-9'>shop=(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>value))</span> 
+</span><span class='label'><a id='x1-11029r5'></a><span class='ec-lmr-5'>5</span></span><span style='color:#000000'>          <span class='ec-lmtt-9'>ext-func=(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>map</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>(pair</span> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>cord</span></span><span style='color:#000000'> </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>cord</span></span><span style='color:#000000'><span class='ec-lmtt-9'>)</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>action))</span> 
+</span><span class='label'><a id='x1-11030r6'></a></span><span style='color:#000000'>          <span class='ec-lmtt-9'>diff=(each </span><span class='ec-lmtt-9'>(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>action) </span><span class='ec-lmtt-9'>(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>value))</span> 
+</span><span class='label'><a id='x1-11031r7'></a></span><span style='color:#000000'>      </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>==</span></span> 
+<span class='label'><a id='x1-11032r8'></a></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>^-</span></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>$%</span></span><span style='color:#000000'>  <span class='ec-lmtt-9'>[%0 </span><span class='ec-lmtt-9'>out=(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>value)]</span> 
+</span><span class='label'><a id='x1-11033r9'></a></span><span style='color:#000000'>          <span class='ec-lmtt-9'>[%1 </span><span class='ec-lmtt-9'>name=path </span><span class='ec-lmtt-9'>args=(</span></span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>list</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>value)]</span> 
+</span><span class='label'><a id='x1-11034r10'></a><span class='ec-lmr-5'>10</span></span><span style='color:#000000'>          <span class='ec-lmtt-9'>[%2 </span><span class='ec-lmtt-9'>~]</span> 
+</span><span class='label'><a id='x1-11035r11'></a></span><span style='color:#000000'>      </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>==</span></span> 
+<span class='label'><a id='x1-11036r12'></a></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>=&gt;</span></span> 
+<span class='label'><a id='x1-11037r13'></a></span><span style='color:#000000'>    </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>?:</span></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtk-10x-x-90'>?=</span></span><span style='color:#000000'><span class='ec-lmtt-9'>(</span></span><span style='color:#000000'><span class='ec-lmtt-9'>%.y</span></span><span style='color:#000000'> <span class='ec-lmtt-9'>-.diff)</span> 
+</span><span class='label'><a id='x1-11038r14'></a></span><span style='color:#000000'>      <span class='ec-lmtt-9'>.(actions </span><span class='ec-lmtt-9'>(weld </span><span class='ec-lmtt-9'>actions </span><span class='ec-lmtt-9'>p.diff))</span> 
+</span><span class='label'><a id='x1-11039r15'></a><span class='ec-lmr-5'>15</span></span><span style='color:#000000'>    <span class='ec-lmtt-9'>.(shop </span><span class='ec-lmtt-9'>(snoc </span><span class='ec-lmtt-9'>shop </span><span class='ec-lmtt-9'>p.diff))</span> 
+</span><span class='label'><a id='x1-11040r16'></a></span><span style='color:#000000'>  </span><span style='color:#404040'><span class='ec-lmtti-10x-x-90'>::</span></span><span style='color:#404040'>  <span class='ec-lmtti-10x-x-90'>(...)</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 307 --><p class='indent'>   In Listing <a href='#x1-11023r4'>4<!-- tex4ht:ref: lst:lia2  --></a> , we have added details to the block or trap.
+Now the interpreter can return a block with <code class='lstinline'><span style='color:#000000'>%1</span></code>, asking for an
+external reference to be resolved and the result of the
+resolution to be appended to shop. The interpreter now
+takes a list of list of values <code class='lstinline'><span style='color:#000000'>shop</span></code>, which represents the
+resolved Lia imports; <code class='lstinline'><span style='color:#000000'>ext-func</span></code>, which provides definitions
+for imported functions for a given Wasm module; and
+<code class='lstinline'><span style='color:#000000'>diff</span></code>, whose contents are appended to an appropriate
+field.
+</p><!-- l. 309 --><p class='indent'>   Notice the difference between imports in Lia and in Wasm:
+the namespace of the latter is defined with a pair of strings in
+compliance with the formal specification, and the input
+parameters of <code class='lstinline'><span style='color:#000000'>++lia</span></code> contain definitions of the imported
+functions for the Wasm module. Lia imports, on the other
+hand, are bound to a path namespace and are external to
+<code class='lstinline'><span style='color:#000000'>++lia</span></code>.
+</p><!-- l. 311 --><p class='indent'>   In a trivial case the list of actions of a function definition
+in ext-func would contain a single call to a function
+which is external to Lia and is named with <code class='lstinline'><span style='color:#000000'>path</span></code>, not
+<code class='lstinline'><span style='color:#000000'>(pair cord cord)</span></code> like Wasm import functions. In a
+nontrivial case the list of actions could contain multiple
+actions to be performed, e.g. a memory read followed by
+calling a Lia <code class='lstinline'><span style='color:#000000'>import</span></code> function which takes <code class='lstinline'><span style='color:#000000'>octs</span></code>. The purpose
+here is for the <code class='lstinline'><span style='color:#000000'>import</span></code> calls to be able to surface not only
+Wasm values but Lia values like <code class='lstinline'><span style='color:#000000'>octs</span></code>, giving us the richness
+of import calls that we could have with <code class='lstinline'><span style='color:#000000'>++invoke</span></code> jetting
+model without exposing the entirety of the module’s
+state.
+</p>
+   <h4 class='subsectionHead' id='caching-of-store'><span class='titlemark'>6.1   </span> <a id='x1-120006.1'></a>Caching of store</h4>
+<!-- l. 315 --><p class='noindent'>Since Wasm execution is deterministic, then the state of a
+module, whether in Nock or in the jetting environment, is
+referentially transparent with regards to the input parameters
+of Lia. Here <code class='lstinline'><span style='color:#000000'>diff</span></code> appears to be semantically useless, since
+instead of placing changes there we could have placed them
+                                                
+                                                
+directly into a proper field of the sample.
+</p><!-- l. 317 --><p class='indent'>   But <code class='lstinline'><span style='color:#000000'>diff</span></code> is necessary for efficient computations:
+each time <code class='lstinline'><span style='color:#000000'>++lia</span></code> jet computes something with a Wasm
+runtime, it will save a cache of Lia interpreter in the
+jetting environment tagged with a (hash of a) noun
+<code class='lstinline'><span style='color:#000000'>[module actions shop ext-func]</span></code>. If <code class='lstinline'><span style='color:#000000'>++lia</span></code> is
+computed later with the same first four arguments, then the
+jet would first look for a cache, and if it finds one, only
+compute the diff, either injecting results of Lia import
+resolution into a suspended jetting Lia interpreter, or
+performing a list of appended actions. Failing to find a cache,
+jet of <code class='lstinline'><span style='color:#000000'>++lia</span></code> would do the same thing as <code class='lstinline'><span style='color:#000000'>++lia</span></code> in Hoon:
+append the <code class='lstinline'><span style='color:#000000'>diff</span></code> to an appropriate field and run the whole
+thing.
+</p><!-- l. 319 --><p class='indent'>   At the price of having to bother with cache reclamation
+and perhaps slightly longer event log replays we get the
+possibility of running Wasm runtime almost full speed,
+without having to de/serialize nouns to structs and vice versa
+or to copy the state of the Wasm module for every interaction
+with it. In Nock the state of the Wasm module is represented
+lazily with the first four parameters of <code class='lstinline'><span style='color:#000000'>++lia</span></code>, while the
+actual state on which we perform computations exists as a
+cache.
+</p><!-- l. 321 --><p class='indent'>   A typical interaction with <code class='lstinline'><span style='color:#000000'>++lia</span></code> would look like
+this:
+</p><!-- l. 323 --><p class='indent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-12002x1'>Call <code class='lstinline'><span style='color:#000000'>++lia</span></code> for the first time, with an empty diff.
+     </li>
+<li class='enumerate' id='x1-12004x2'>
+     <!-- l. 325 --><p class='noindent'>Lia returns one of:
+         </p><ol class='enumerate2'>
+                                                
+                                                
+<li class='enumerate' id='x1-12006x1'>success <code class='lstinline'><span style='color:#000000'>%0</span></code>;
+         </li>
+<li class='enumerate' id='x1-12008x2'>block <code class='lstinline'><span style='color:#000000'>%1</span></code>; or
+         </li>
+<li class='enumerate' id='x1-12010x3'>failure <code class='lstinline'><span style='color:#000000'>%2</span></code>, which is resolved outside of Lia.</li></ol>
+     </li></ol>
+<!-- l. 333 --><p class='noindent'>The resolution result is placed into <code class='lstinline'><span style='color:#000000'>diff</span></code>, and <code class='lstinline'><span style='color:#000000'>++lia</span></code> is called
+again. Next time that same result must be placed directly to
+shop to get the right cache and avoid recalculating from
+scratch.
+</p><!-- l. 336 --><p class='indent'>   If the result is success, new actions can be put in diff and
+<code class='lstinline'><span style='color:#000000'>++lia</span></code> can be called again to continue interacting with the
+module. After that these new actions must be placed directly
+to actions on subsequent calls of <code class='lstinline'><span style='color:#000000'>++lia</span></code> to get the right
+cache.
+</p><!-- l. 338 --><p class='indent'>   As for the cache reclamation, <code class='lstinline'><span style='color:#000000'>++lia</span></code> could include another
+input parameter hint ignored in Hoon code, that would serve
+as a hint to the jet on how to handle the cache, e.g. for how
+long to keep it in the memory. Dojo generators and Gall
+agents, for example, would likely benefit from different cache
+reclamation strategies.
+</p><!-- l. 341 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='next-steps'><span class='titlemark'>7   </span> <a id='x1-130007'></a>Next Steps</h3>
+<!-- l. 343 --><p class='noindent'>What is the roadmap forward for the urwasm project? The
+first priority is to add unit tests and module validation in
+Hoon. This will allow us to verify the correctness of the
+interpreter and to ensure that the jetting process is successful.
+The next stage will consist of enabling caching in the jet of
+                                                
+                                                
+<code class='lstinline'><span style='color:#000000'>++lia</span></code> and adding a parser from text to <code class='lstinline'><span style='color:#000000'>(list action)</span></code>.
+This will enable us to construct a Lia interpreter in Hoon,
+jetted with the Lia interpreter in C/Rust. This facilitates a
+default Gall agent interface to interact with Lia and enable
+building Gall apps in conventional languages. Finally, we will
+add Wasi support and Lia generation to common Wasm
+compilers in the same way they generate JS wrappers for the
+modules.
+</p><!-- l. 346 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='conclusion'><span class='titlemark'>8   </span> <a id='x1-140008'></a>Conclusion</h3>
+<!-- l. 348 --><p class='noindent'>This paper presents a novel method of modeling state
+machines in Nock and jetting the associated modeling
+algorithm. In this method the state is represented implicitly
+through a list of actions performed on the initialized state of
+the machine, and the state of the jetting emulator of the state
+machine is kept as a cache identified with the list of actions.
+This gives the interpreter full computational speed due to lack
+of overhead caused by translating the state from noun
+representation to the jetting representation and back and by
+the fact that the jetting function is free to edit the state in
+place, as long as it updates the naming tag of the cache.
+ <img alt='PIC' src='ustj-logo-.png' />
+</p><!-- l. 352 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead' id='references'><a id='x1-15000'></a>References</h3>
+<!-- l. 352 --><p class='noindent'>
+   </p><dl class='thebibliography'><dt class='thebibliography' id='X0-Hjort2023'>
+</dt><dd class='thebibliography' id='bib-1'>
+                                                
+                                                
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Hjort2023'></a>~bithex-topnym, Rikard Hjort
+   (2023)
+   “KNock:
+   Nock
+   Semantics
+   in
+   K”.
+   <span class='small-caps'>url</span>:
+   <a class='url' href='https://github.com/runtimeverification/knock'>https://github.com/runtimeverification/knock</a>
+   (visited
+   on
+   ~2024.3.7).
+   </p></dd><dt class='thebibliography' id='X0-Afonin2023'>
+</dt><dd class='thebibliography' id='bib-2'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Afonin2023'></a>~dozreg-toplud, K. Afonin
+   et al.
+   (2023)
+   “UWasm
+   (sic)
+   presentation
+   ~dozreg-toplud”.
+   <span class='small-caps'>url</span>:
+   <a class='url' href='https://www.youtube.com/watch?v=h5V_gX33RiM'>https://www.youtube.com/watch?v=h5V_gX33RiM</a>
+   (visited
+   on
+   ~2024.3.7).
+   </p></dd><dt class='thebibliography' id='X0-Davis2024'>
+</dt><dd class='thebibliography' id='bib-3'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Davis2024'></a>~lagrev-nocfep, N. E. Davis
+   (2024).
+   “The
+   Desert
+   of
+   the
+   Reals:
+   Floating-Point
+   Arithmetic
+                                                
+                                                
+   on
+   Deterministic
+   Systems.”
+   In:
+   <span class='ec-lmri-10'>Urbit
+   </span><span class='ec-lmri-10'>Systems
+   </span><span class='ec-lmri-10'>Technical
+   </span><span class='ec-lmri-10'>Journal</span>
+   1.1,
+   pp. 93–131.
+   </p></dd><dt class='thebibliography' id='X0-Wasm2024'>
+</dt><dd class='thebibliography' id='bib-4'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Wasm2024'></a>Rossberg, Andreas
+   and
+   the
+   WebAssembly
+   Working
+   Group
+   (2024).
+   <span class='ec-lmri-10'>WebAssembly
+   </span><span class='ec-lmri-10'>Core
+   </span><span class='ec-lmri-10'>Specification
+   </span><span class='ec-lmri-10'>(W3C
+   </span><span class='ec-lmri-10'>Working
+   </span><span class='ec-lmri-10'>Draft)</span>.
+   Specification.
+   World
+   Wide
+   Web
+   Consortium
+   (W3C).
+   </p></dd><dt class='thebibliography' id='X0-Yarvin2010'>
+</dt><dd class='thebibliography' id='bib-5'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Yarvin2010'></a>~sorreg-namtyv, Curtis Yarvin
+   (2010)
+   “Urbit:
+   functional
+                                                
+                                                
+   programming
+   from
+   scratch”.
+   <span class='small-caps'>url</span>:
+   <a class='url' href='http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html'>http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt class='thebibliography' id='X0-Nock4K'>
+</dt><dd class='thebibliography' id='bib-6'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Nock4K'></a>—   (2013)
+   “Nock
+   4K”.
+   <span class='small-caps'>url</span>:
+   <a class='url' href='https://docs.urbit.org/language/nock/reference/definition'>https://docs.urbit.org/language/nock/reference/definition</a>
+   (visited
+   on
+   ~2024.2.20).
+   </p></dd><dt class='thebibliography' id='X0-Whitepaper'>
+</dt><dd class='thebibliography' id='bib-7'>
+   <!-- l. 352 --><p class='noindent'><a id='cite.0@Whitepaper'></a>~sorreg-namtyv, Curtis Yarvin
+   et al.
+   (2016).
+   <span class='ec-lmri-10'>Urbit:
+   </span><span class='ec-lmri-10'>A
+   </span><span class='ec-lmri-10'>Solid-State
+   </span><span class='ec-lmri-10'>Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.</p></dd></dl>
+    
+          <div class='footnote-text'>
+  <!-- l. 126 --><p class='indent'>     <span class='footnote-mark'><a id='fn1x0'>   <sup class='textsuperscript'>1</sup></a></span><span class='ec-lmr-8'>Cf. </span><a id='x2-4002'></a> <span class='ec-lmr-8'>~lagrev-nocfep (2024), pp. 93–131 in this issue.</span></p></div>
+
+</body> 
+</html>
