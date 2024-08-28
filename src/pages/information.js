@@ -53,17 +53,17 @@ export default function Information() {
               generally.
             </p>
             <p>
-              Urbit is currently engaged in such endeavors, such as the Ares
-              project to increase data storage and execution speed of Urbit's
-              low-level interpreted language Nock. This issue of USTJ showcases
-              advancements in dynamic linking, floating-point calculation, and
-              memory management systems. We welcome submissions from those
-              engaged in making computing more solid-state.
+              The Urbit community is currently engaged in such endeavors, such
+              as the Neo Urbit project to increase data storage and execution
+              speed of Urbit's low-level interpreted language Nock. USTJ
+              showcases advancements in dynamic linking, floating-point
+              calculation, and memory management systems. We welcome
+              submissions from those engaged in making computing more
+              solid-state.
             </p>
             <p>
               Urbit's network is already fully operational and free to use and
-              build on. Scan the QR code below to boot up your own and give it a
-              spin.
+              build on.
             </p>
           </article>
         </main>
