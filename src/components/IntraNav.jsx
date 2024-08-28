@@ -38,7 +38,7 @@ const sites = [
 ];
 
 const pages = [{ title: "Information", href: "/information" },
-               { title: "Forum", href: "https://journal.urbit.org/forum" }];
+               { title: "Forum", href: "https://journal.urbitsystems.tech/forum" }];
 
 function Dropdown({ className = "", label, items }) {
   const [isOpen, setOpen] = useState(false);
