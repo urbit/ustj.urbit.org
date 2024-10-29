@@ -1,0 +1,448 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>Designing a Permanent Personal Identity:
+The Public Key Infrastructure Idea Maze</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css" /> 
+<meta name="src" content="mss.tex" /> 
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Designing a Permanent Personal Identity:<br />
+The Public Key
+Infrastructure Idea Maze</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">Phillip C. Monk</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~wicdev-wisryt</code></span>
+<br />        <span 
+class="ec-lmbx-12">Tlon Corporation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 41--><p class="noindent" ><span 
+class="ec-lmr-9">Public  key  infrastructures  solve  a  coordination</span>
+     <span 
+class="ec-lmr-9">problem for communicators on a network. Urbit’s</span>
+     <span 
+class="ec-lmcsc-10x-x-90">pki  </span><span 
+class="ec-lmr-9">(Azimuth)  is  designed  to  provide  globally</span>
+     <span 
+class="ec-lmr-9">consistent, permanent, and completely self-owned</span>
+     <span 
+class="ec-lmr-9">identities.  This  post  explores  the  design  choices</span>
+     <span 
+class="ec-lmr-9">that  led  to  Urbit’s  </span><span 
+class="ec-lmcsc-10x-x-90">pki</span><span 
+class="ec-lmr-9">,  including  the  trade-oﬀs</span>
+     <span 
+class="ec-lmr-9">between impermanence and self-attestation, global</span>
+     <span 
+class="ec-lmr-9">consistency,  and  scalability.  Urbit’s  </span><span 
+class="ec-lmcsc-10x-x-90">pki </span><span 
+class="ec-lmr-9">includes</span>
+     <span 
+class="ec-lmr-9">three types of names epitomizing the poles of the</span>
+     <span 
+class="ec-lmr-9">tradeoﬀ trilemma.</span>
+                                                
+                                                
+</p>
+</section>
+<!--l. 50--><p class="indent" >   A public key infrastructure (<span 
+class="ec-lmcsc-10">pki</span>) is a system for binding a
+set of keys to a name. Sometimes a small amount of metadata
+is included. Existing <span 
+class="ec-lmcsc-10">pki</span>s include <span 
+class="ec-lmcsc-10">pgp</span>-style <a href="https://en.wikipedia.org/wiki/Web_of_trust" >“web of trust”</a>, <a href="https://en.wikipedia.org/wiki/Certificate_authority" ><span 
+class="ec-lmcsc-10">ssl</span>
+certiﬁcates</a>, <a href="https://www.zerotier.com/lf-announcement/" >ZeroTier</a>, <a href="https://keybase.io/" >Keybase</a>, <a href="https://openid.net/what-is-openid/" >OpenID</a>, <a href="https://developer.mozilla.org/en-US/docs/Archive/Mozilla/Persona" >Mozilla Persona</a>, and
+<a href="https://developers.google.com/identity" >Login with Google</a>. These take unique approaches to
+the problem and have achieved some degree of success,
+but none provide globally consistent, permanent, and
+completely self-owned identities. In this article, we will
+describe Urbit’s approach to achieving these properties in its
+<span 
+class="ec-lmcsc-10">pki</span>.
+</p><!--l. 63--><p class="indent" >   Urbit’s <span 
+class="ec-lmcsc-10">pki </span>is named “Azimuth” (or occasionally “Urbit
+ID”). Azimuth is Urbit’s identity layer, built as a suite of
+smart contracts on the Ethereum blockchain and several apps
+run locally on your “ship”. (In Urbit, a “name” is often called
+a “ship” or an “address” because we use the metadata in the
+<span 
+class="ec-lmcsc-10">pki </span>to make names routable.) The total data is two 256-bit
+asymmetric keys, a cryptographic suite number (to allow
+changing crypto algorithms), the revision number of the key,
+and the name of a ship that will route for it. This sums to less
+than 128 bytes of data.
+</p><!--l. 70--><p class="indent" >   Each <span 
+class="ec-lmcsc-10">pki </span>trades oﬀ various properties. We chose a
+tripartite system so that appropriate choices can be made for
+diﬀerent use cases. Here, we explore the various properties we
+chose by following a series of binary choices—the idea
+maze.
+</p><!--l. 75--><p class="indent" >   One way to classify <span 
+class="ec-lmcsc-10">pki</span>s is by permanence: either you can
+change your keys or not. If you cannot, then your name is
+impermanent, for no one can keep a set of keys secure forever.
+Even if your opsec never fails, eventually your crypto
+algorithms may be compromised.
+</p><!--l. 80--><p class="indent" >   However, if you sacriﬁce the ability to change your keys,
+you can achieve a very nice property: self-attesting keys. If
+your name is a hash of your public key information, then no
+other source of information is required to verify you are who
+you say you are. This is a useful property since it requires
+no coordination at all. Many things are impermanent,
+especially during development. It also provides a way
+                                                
+                                                
+to try out the network without obtaining a permanent
+address.
+</p><!--l. 88--><p class="indent" >   This is our ﬁrst stop in the idea maze. We call this sort of
+name a “comet”. A comet’s name is the 128-bit hash of its public
+keys.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2f1"></a> 
+</p><!--l. 91--><p class="indent" >   However, Urbit is yours and it’s forever. You shouldn’t
+have to change your name every time you change your keys.
+So, we go back and take the other choice: you must be able to
+change your keys.
+</p><!--l. 95--><p class="indent" >   To change keys, you must sign a message with
+the old keys revoking them and supplying the new
+ones<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-3f2"></a> .
+The question is what happens if the old keys also sign a
+second set of new keys. This could happen if an attacker
+obtained your old keys after the fact. This is important
+because one of the reasons to be able to change your
+keys is to invalidate the old ones so that they have no
+power.
+</p><!--l. 106--><p class="indent" >   We have two options again: the <span 
+class="ec-lmcsc-10">pki </span>may be globally
+consistent or not. To be globally consistent means that if you
+believe a name is bound to a set of keys, then nobody on the
+network will disagree.
+</p><!--l. 110--><p class="indent" >   If you don’t require global consistency, you may sign this
+message and send it to all your neighbors, and they pass it on,
+and hopefully it gets to most of the network quickly. However,
+if one of those ships receives two contradictory versions of this
+message, the only thing it can do is trust the ﬁrst one it heard,
+which may be diﬀerent than what someone else heard. Thus,
+this is pairwise consistent but globally inconsistent. This is
+essentially how the pre-blockchain Ames network worked,
+though key changes were not actually implemented. Because
+                                                
+                                                
+global consistency is a valuable property, we looked at other
+options.
+</p><!--l. 120--><p class="indent" >   For a globally consistent <span 
+class="ec-lmcsc-10">pki </span>that allows you to revoke
+keys, you need to be able to distinguish between two
+cryptographically valid messages to determine which was
+signed ﬁrst. The dual problem could be solved easily — you
+can prove a message is signed after another by including the
+signature of the ﬁrst in the second. This is equivalent to
+reading out a newspaper headline to prove a message was
+recorded after a given day.
+</p><!--l. 128--><p class="indent" >   However, the problem of proving one message was sent
+before any later ones inverts the problem. You can solve this
+with newspapers by placing the message in the text of the
+newspaper. However, while reading a newspaper requires no
+central party, writing one does. For a long time, this sort
+of message was always handled by a central party. <span 
+class="ec-lmcsc-10">ssl</span>
+revocations are managed by a few central parties. When you
+buy property, it’s not suﬃcient to have the previous owner
+sign the title — this must be entered into a central land
+registry. Otherwise, the owner may sell their property to
+multiple people and there would be no way to determine who
+is the new owner. With the land registry, all you need to do is
+ask the registry which sale happened ﬁrst, and that’s the one
+that counts.
+</p><!--l. 141--><p class="indent" >   However, Urbit is yours and it’s forever. Trusting central
+registries jeopardizes both. The keen reader will notice that
+the problem of determining which key rotation happened ﬁrst
+is exactly the double-spend problem that Satoshi solved with
+his proof of work algorithm for Bitcoin. His ﬁrst block
+famously includes a newspaper headline to prove he didn’t
+mine the block before that date. In a beautiful duality, his
+own algorithm proves that he didn’t mine it after that
+date.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-4f3"></a> 
+                                                
+                                                
+</p><!--l. 153--><p class="indent" >   Some argue that blockchain is only good for money. This is
+myopic and is generally based on the experience that its most
+valuable application so far has been money. However,
+blockchain is a cryptographic primitive to do what was
+previously impossible: prove that one message was signed
+before another without a central party. Blockchain was
+discovered by someone trying to create digital money, and he
+needed that primitive, but that doesn’t mean that’s all it’s
+good for.
+</p><!--l. 161--><p class="indent" >   Thus, we store our <span 
+class="ec-lmcsc-10">pki </span>data on a blockchain for our
+second kind of name: planets. A planet is a 32-bit
+address which has key information stored on the
+blockchain.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-7f4"></a> 
+The owner of a planet may broadcast new <span 
+class="ec-lmcsc-10">pki </span>data by adding
+it to the blockchain. Any later messages by the old keys will
+be rejected, and everyone on the network will listen to the
+blockchain for key data. Thus, we have global consistency,
+permanence, and self sovereignty. We know of no other
+solution that can provide these properties.
+</p><!--l. 173--><p class="indent" >   However, while small individually, the aggregate <span 
+class="ec-lmcsc-10">pki </span>data
+for all nodes on the network may become very large. This is
+not an issue for comets because nobody needs to store comet
+keys except for those which they’re talking with, and even
+those can be garbage-collected and re-requested and veriﬁed.
+For planets, there is a canonical set of keys, and somebody
+must store that. There are about 232, or 4 billion planets. If
+the <span 
+class="ec-lmcsc-10">pki </span>data is about 100 bytes for each planet, this is
+about 400 GB of data. This may be more than most
+users wish to store, but it’s small enough that it would
+be very cheap for someone to host this data for many
+users.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-8f5"></a> 
+                                                
+                                                
+</p><!--l. 187--><p class="indent" >   This information is currently stored directly on the
+Ethereum blockchain, but as is well understood in blockchain
+circles this approach will not scale beyond a certain point.
+Many chains are pursuing designs that allow the users of the
+smart contracts to locally store the data associated with the
+contracts they care about and only commit hashes to the
+chain. We expect there to be several viable options for this by
+the time Azimuth’s scaling needs exceed what’s provided
+by Ethereum. This will free us from the cost of hosting
+the <span 
+class="ec-lmcsc-10">pki </span>data on all Ethereum nodes, but the data must
+still be stored somewhere. Any service that could handle
+such a large amount of data would inherently centralize
+the network. Azimuth and Jael make reference to an
+external source of truth for their own and peer’s key
+information, but do not otherwise depend on Ethereum for
+their operation.
+</p><!--l. 197--><p class="indent" >   However, 4 billion is not enough addresses for every device
+on the planet today, much less in a few decades. So, we apply
+our maxim of re-examining our choices at each level for each
+use case. Examining the idea maze above, we cannot use the
+blockchain option for everything since the data is too big.
+However, it’s not actually necessary for each of your devices to
+have its own self-sovereign identity separate from your planet.
+So we choose the option of using a central registry: your own
+planet.
+</p><!--l. 206--><p class="indent" >   We allocate 4 billion “moons” to each of those planets. A
+moon is a 64-bit address whose 32-bit suﬃx is its planet.
+Your planet can easily store the keys for its own moons,
+and anyone who needs to talk to your moons can ask
+you for the keys. This is the sense in which moons are
+true ships: they’re permanent names and you own them
+completely, as long as you own the planet. However, they’re
+not independent ships — their keys can always be revoked by
+their planet.
+</p>
+   <figure class="figure"> 
+
+                                                
+                                                
+<a  id="x1-91"></a>
+                                                
+                                                
+<!--l. 216--><p class="noindent" ><img 
+class="full"
+src="img/trilemma.png" alt="PIC"  
+width="100%" height="100%"  />
+</p>
+<figcaption class="caption" ><span class="id">Figure 1: </span><span  
+class="content">Trilemma of properties for a sane network.</span></figcaption><!--tex4ht:label?: x1-91 -->
+                                                
+                                                
+   </figure>
+<!--l. 221--><p class="indent" >   To create a sane network, we require global consistency for
+all our names (Figure <a href="#x1-91">1<!--tex4ht:ref: fig:trilemma --></a> ). There are three other properties;
+pick any two:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 226--><p class="noindent" >Comets   are   impermanent,   self   sovereign,   and
+     plentiful.
+     </p></li>
+     <li class="itemize">
+     <!--l. 228--><p class="noindent" >Planets  are  permanent,  self  sovereign,  and  not
+     plentiful.
+     </p></li>
+     <li class="itemize">
+     <!--l. 230--><p class="noindent" >Moons  are  permanent,  not  self  sovereign,  and
+     plentiful.</p></li></ul>
+<!--l. 233--><p class="indent" >   Fancifully, comets are wayward celestial bodies that are
+great for testing and miscellaneous low-value things that won’t
+last for long. Planets are where you can build a home
+and shape it into anything you want it to be. People
+can always ﬁnd your planet; it’s not going anywhere.
+Moons are useful for special purposes, like storage,
+heavy industry, and anything else you might want to do
+oﬀ-planet.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-10f6"></a> 
+<img 
+src="ustj-logo-.png" alt="PIC"  
+ />
+                                                
+                                                
+</p>
+   <h3 class="sectionHead"><a  id="x1-1000"></a>References</h3>
+<!--l. 249--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Gigi2019" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Gigi2019"></a>Gigi
+   (2019).
+   <span 
+class="ec-lmri-10">21</span>
+   <span 
+class="ec-lmri-10">Lessons:</span>
+   <span 
+class="ec-lmri-10">What</span>
+   <span 
+class="ec-lmri-10">I’ve</span>
+   <span 
+class="ec-lmri-10">Learned</span>
+   <span 
+class="ec-lmri-10">from</span>
+   <span 
+class="ec-lmri-10">Falling</span>
+   <span 
+class="ec-lmri-10">Down</span>
+   <span 
+class="ec-lmri-10">the</span>
+   <span 
+class="ec-lmri-10">Bitcoin</span>
+   <span 
+class="ec-lmri-10">Rabbit</span>
+   <span 
+class="ec-lmri-10">Hole</span>.
+   Independently
+   published.
+   <span class="small-caps">url</span>:
+   <a href="https://www.amazon.com/gp/product/1697526349/" class="url" >https://www.amazon.com/gp/product/1697526349/</a>
+   (visited
+   on
+   ~2024.3.7).
+   </p></dd><dt id="X0-Gigi2021" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Gigi2021"></a>—   (2021)
+   “Bitcoin
+   is
+   Time”.
+   <span class="small-caps">url</span>:
+   <a href="https://dergigi.com/2021/01/14/bitcoin-is-time/" class="url" >https://dergigi.com/2021/01/14/bitcoin-is-time/</a>
+                                                
+                                                
+   (visited
+   on
+   ~2024.3.7).</p></dd></dl>
+<!--l. 249--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 89--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">We currently limit comets to “sponsors”, particular stars which</span>
+  <span 
+class="ec-lmr-8">are whitelisted to create them. This is a matter of policy and not inherent</span>
+  <span 
+class="ec-lmr-8">to the </span><span 
+class="ec-lmcsc-10x-x-80">pki </span><span 
+class="ec-lmr-8">design.</span><a href="#x1-2f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 100--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">Or the equivalent with a hierarchical key structure. In practice,</span>
+  <span 
+class="ec-lmr-8">you want to have a master key which signs a junior key for everyday use.</span>
+  <span 
+class="ec-lmr-8">You use the master key to rotate the junior key.</span><a href="#x1-3f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 151--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">More strictly: it proves that he didn’t mine it after the</span>
+  <span 
+class="ec-lmr-8">other blocks currently on the Bitcoin blockchain. It only gives</span>
+  <span 
+class="ec-lmr-8">an ordering within the chain, not a literal timestamp. But cf. </span><a 
+ id="x4-5"></a>
+  <span 
+class="ec-lmr-8">Gigi (2019) and particularly </span><a 
+ id="x4-6"></a> <span 
+class="ec-lmr-8">Gigi (2021) on Bitcoin ordering as</span>
+  <span 
+class="ec-lmr-8">time.</span><a href="#x1-4f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 166--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">In addition to planets, there are stars and galaxies. From a </span><span 
+class="ec-lmcsc-10x-x-80">pki</span>
+  <span 
+class="ec-lmr-8">perspective they’re treated exactly like planets, but on the network they</span>
+  <span 
+class="ec-lmr-8">provide infrastructure services like routing.</span><a href="#x1-7f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 184--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">In practice, this will likely be an included service by your</span>
+  <span 
+class="ec-lmr-8">sponsoring star. It should never rise above the capital cost of a 400GB</span>
+  <span 
+class="ec-lmr-8">hard drive.</span><a href="#x1-8f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 245--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">To extend the metaphor, stars are a neighborhood to live</span>
+  <span 
+class="ec-lmr-8">in</span><span 
+class="ec-lmr-8">—they’re easier for other planets to see, so when they want to send you</span>
+  <span 
+class="ec-lmr-8">a message they look for your star ﬁrst. If they don’t even know where</span>
+  <span 
+class="ec-lmr-8">your star is, they can certainly ﬁnd your star’s galaxy, and that will be</span>
+  <span 
+class="ec-lmr-8">enough to locate the star. Of course, if your star is not providing</span>
+  <span 
+class="ec-lmr-8">satisfactory service, you can take your planet and move to another</span>
+  <span 
+class="ec-lmr-8">star.</span><a href="#x1-10f6">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+

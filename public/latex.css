@@ -792,6 +792,11 @@ a {
   font-variant: small-caps;
 }
 
+.ec-lmcsc-10x-x-80 {
+  font-size: 80%;
+  font-variant: small-caps;
+}
+
 /* start css.sty */
 .cmmi-10{font-style: italic;}
 .ec-lmbx-10{ font-weight: bold;}

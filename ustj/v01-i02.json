@@ -1,0 +1,50 @@
+{
+  "issue": "FA2024: Vol. 1, No. 2",
+  "title": "The Journal of Solid-State Computing",
+  "content": [
+    {
+      "author": ["wicdev-wisryt"],
+      "title": "Designing a Permanent Personal Identity: The Public Key Infrastructure Maze",
+      "pdf": "/ustj/v01-i02/mss0-pki.pdf",
+      "html": "/ustj/v01-i02/mss0-pki.html"
+    },
+    {
+      "author": ["sarlev-sarsen"],
+      "title": "On the Utility of Azimuth and Decentralized Identity"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "Typed Revision Control"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "A Note on Subsecond Base-2 Time Intervals"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "Trusting Trust on Mars: Thoughts on Urbit Security"
+    },
+    {
+      "author": ["ritpub-sipsyl", "rovnys-ricfer"],
+      "title": "Urbit Networking: Ad Fontes"
+    },
+    {
+      "author": ["rovnys-ricfer"],
+      "title": "Ford Fusion"
+    },
+    {
+      "author": ["palfun-foslup", "rovnys-ricfer", "master-morzod"],
+      "title": "Eyre HTTP Caching"
+    }
+  ],
+  "theme": {
+    "black": "#141A14",
+    "white": "#FFFFFF",
+    "primary": "#FFF450",
+    "muted": "#B9B13D"
+  },
+  "links": {
+    "cover": "/ustj/v01-i02/cover.png",
+    "shop": "https://ustj.square.site/product/ustj-vol-1-no-2-preorder-/16"
+  }
+}

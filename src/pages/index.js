@@ -90,7 +90,7 @@ function Contents({ issue }) {
 }
 
 export default function Home({ issues }) {
-  const [issue, setIssue] = useState(issues[0]);
+  const [issue, setIssue] = useState(issues[1]);
   const byKey = issues.reduce((res, curr) => {
     const newRes = { ...res };
     newRes[curr.issue] = curr;
@@ -110,7 +110,7 @@ export default function Home({ issues }) {
   return (
     <>
       <Head>
-        <title>UrbitSTJ</title>
+        <title>Urbit Systems Technical Journal</title>
         {/* {Meta(post, false, true)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
