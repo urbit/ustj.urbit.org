@@ -1,0 +1,1547 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>On the Utility of Azimuth and Decentralized Identity</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="mss.css" /> 
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">On the Utility of Azimuth
+and Decentralized Identity</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">Stuart Christoph</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~sarlev-sarsen</code></span>
+<br />        <span 
+class="ec-lmbx-12">~tocwex.syndicate</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 42--><p class="noindent" ><span 
+class="ec-lmr-9">This  article  considers  the  concept  of  identity</span>
+     <span 
+class="ec-lmr-9">within the context of Urbit and its identity layer,</span>
+     <span 
+class="ec-lmr-9">Azimuth.  Comparison  is  made  to  self-sovereign</span>
+     <span 
+class="ec-lmr-9">identity  (</span><span class="small-caps">ssi</span><span 
+class="ec-lmr-9">)  and  decentralized  identity  (</span><span class="small-caps">did</span><span 
+class="ec-lmr-9">)</span>
+     <span 
+class="ec-lmr-9">design principles. We consider how these systems</span>
+     <span 
+class="ec-lmr-9">implement decentralized identity, examining their</span>
+     <span 
+class="ec-lmr-9">technical foundations, practical applications, and</span>
+     <span 
+class="ec-lmr-9">the broader implications for digital self-sovereignty.</span>
+     <span 
+class="ec-lmr-9">Understanding these elements sheds light on the</span>
+     <span 
+class="ec-lmr-9">future of identity in a decentralized world.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />     <span class="subsectionToc" >1.1 <a href="#x1-30001.1" id="QQ2-1-3">Decentralized Identity</a></span>
+<br />     <span class="subsectionToc" >1.2 <a href="#x1-40001.2" id="QQ2-1-4">Defaults Matter</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-50002" id="QQ2-1-5">The Current State of Azimuth</a></span>
+<br />     <span class="subsectionToc" >2.1 <a href="#x1-60002.1" id="QQ2-1-6">Layer 1 IDs on the Ethereum network</a></span>
+<br />     <span class="subsectionToc" >2.2 <a href="#x1-70002.2" id="QQ2-1-7">Layer 2 IDs on the naive rollup</a></span>
+<br />     <span class="subsectionToc" >2.3 <a href="#x1-80002.3" id="QQ2-1-8">When to Use Global Consensus</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-90003" id="QQ2-1-9">Alternative Options for the <span class="small-caps">pki</span></a></span>
+<br />     <span class="subsectionToc" >3.1 <a href="#x1-100003.1" id="QQ2-1-10">Self-Host the <span class="small-caps">pki</span> on %chain</a></span>
+<br />     <span class="subsectionToc" >3.2 <a href="#x1-110003.2" id="QQ2-1-11">Zenith: UrbitChain on Cosmos <span class="small-caps">sdk</span></a></span>
+<br />     <span class="subsectionToc" >3.3 <a href="#x1-120003.3" id="QQ2-1-12">Mayﬂower: A Recolonization Eﬀort</a></span>
+<br />     <span class="subsectionToc" >3.4 <a href="#x1-130003.4" id="QQ2-1-13">Bridge the <span class="small-caps">pki</span> across multiple chains</a></span>
+<br />     <span class="subsectionToc" >3.5 <a href="#x1-140003.5" id="QQ2-1-14">Move the <span class="small-caps">pki</span> to Nockchain</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-150004" id="QQ2-1-15">Other Considerations for Azimuth</a></span>
+<br />     <span class="subsectionToc" >4.1 <a href="#x1-160004.1" id="QQ2-1-16">GroundWire, comets, and Bitcoin Ordinals</a></span>
+<br />     <span class="subsectionToc" >4.2 <a href="#x1-170004.2" id="QQ2-1-17">Illegible subnets</a></span>
+<br />     <span class="subsectionToc" >4.3 <a href="#x1-180004.3" id="QQ2-1-18">Peer-to-peer attestations</a></span>
+<br />     <span class="subsectionToc" >4.4 <a href="#x1-190004.4" id="QQ2-1-19">Self-veriﬁed credentials</a></span>
+<br />    <span class="sectionToc" >5 <a href="#x1-200005" id="QQ2-1-20">Conclusion</a></span>
+<br />    <span class="sectionToc" >6 <a href="#x1-210006" id="QQ2-1-21">Appendix</a></span>
+<br />     <span class="subsectionToc" >6.1 <a href="#x1-220006.1" id="QQ2-1-22">The Path to Self-Sovereign Identity</a></span>
+<br />     <span class="subsectionToc" >6.2 <a href="#x1-230006.2" id="QQ2-1-23">Decentralized Identiﬁers (<span class="small-caps">did</span>s) v1.0</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-24000" id="QQ2-1-24">References</a></span>
+   </div>
+<!--l. 51--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 53--><p class="noindent" >The nature of identity has captivated human attention since
+prehistory. Cave painting self-portraits and handprints reveal
+an early sense of ‘self’ in even the earliest hominids. More
+recently, Descartes’ <span 
+class="ec-lmri-10">cogito, ergo sum </span>laid the groundwork for
+modern philosophy. As we move into the digital age, the
+                                                
+                                                
+concept of ‘identity’ continues to evolve in order to extend into
+online networks.
+</p><!--l. 55--><p class="indent" >   This article considers the concept of identity within
+the context of Urbit and its identity layer, Azimuth.
+We explore how these systems implement decentralized
+identity, examining their technical foundations, practical
+applications, and the broader implications for digital
+self-sovereignty. By understanding these elements, we aim to
+shed light on the future of identity in a decentralized
+world.
+</p><!--l. 57--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.1   </span> <a  id="x1-30001.1"></a>Decentralized Identity</h4>
+<!--l. 59--><p class="noindent" >Urbit isn’t the only project working on the concept of
+decentralized identity. As a starting point, we will examine
+two perspectives on decentralized identity:
+</p><!--l. 61--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-3002x1">
+     <!--l. 62--><p class="noindent" >Self-Sovereign Identity
+     </p></li>
+<li 
+  class="enumerate" id="x1-3004x2">
+     <!--l. 63--><p class="noindent" >Decentralized Identiﬁers</p></li></ol>
+<!--l. 66--><p class="noindent" >Blockchain developer Christopher Allen coined the term
+‘self-sovereign identity’ (<span class="small-caps">ssi</span>) to concretize a notion of digital
+decentralized identity built for individual control and
+self-determination (<a  id="x1-3005"></a> Allen, 2016). He noted that the evolution
+of online identity has passed through eras of centralized
+administrative control, oligarchic federated systems, and
+unfortunately, institutionally captured “user-centric”
+designs. The next era, designated the era of <span class="small-caps">ssi</span>, thankfully
+aims to return us to a more intuitive understanding of
+                                                
+                                                
+digital identity. Allen deﬁned ten key principles for
+<span class="small-caps">ssi</span>:<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-3006f1"></a> 
+</p>
+   <div class="tabular"> <table id="TBL-2" class="tabular" 
+ 
+><colgroup id="TBL-2-1g"><col 
+id="TBL-2-1" /><col 
+id="TBL-2-2" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-2-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-1"  
+class="td11">  •  Existence    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-2"  
+class="td11">  •  Portability      </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-1"  
+class="td11">  •  Control        </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-2"  
+class="td11">  •  Interoperability</td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-1"  
+class="td11">  •  Access         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-2"  
+class="td11">  •  Consent          </td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-1"  
+class="td11">  •  Transparency</td> <td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-2"  
+class="td11">  •  Minimalization</td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-1"  
+class="td11">  •  Persistence   </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-2"  
+class="td11">  •  Protection       </td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-1"  
+class="td11"> </td> </tr></table>            </div>
+<!--l. 87--><p class="indent" >   However, we contend that each of the pre-<span class="small-caps">ssi</span> eras has
+critically pulled us away from the sense of ‘self’ that is vital to
+identity–from the way we experience our identity in the world
+of atoms and the digital experiences which are becoming
+ingrained in our day-to-day lives.
+</p><!--l. 89--><p class="indent" >   Separate from Allen’s principles, <span class="small-caps">w3c</span> has presented a
+standard for Decentralized Identiﬁers (<span class="small-caps">did</span>s). According to
+“Decentralized Identiﬁers (<span class="small-caps">did</span>s) v1.0”, in part (<a  id="x1-3007"></a> World Wide
+Web Consortium, 2022):
+     </p><blockquote class="quote">
+     <!--l. 92--><p class="noindent" >Decentralized  identiﬁers  (<span class="small-caps">did</span>s)  are  a  new
+     type   of   identiﬁer   that   enables   veriﬁable,
+     decentralized digital identity. A <span class="small-caps">did</span> refers to
+     any subject (e. g. a person, organization, thing,
+     data model, abstract entity, etc.) as determined
+     by the controller of the <span class="small-caps">did</span>. …
+     </p><!--l. 94--><p class="noindent" >While  other  parties  might  be  used  to  help
+     enable  the  discovery  of  information  related
+     to  a  <span class="small-caps">did</span>,  the  design  enables  the  controller
+     of  a  <span class="small-caps">did</span>  to  prove  control  over  it  without
+     requiring permission from any other party. <span class="small-caps">did</span>s
+     are <span class="small-caps">uri</span>s that associate a <span class="small-caps">did</span> subject with a
+     <span class="small-caps">did</span> document allowing trustable interactions
+     associated with that subject.</p></blockquote>
+<!--l. 97--><p class="indent" >   While the Urbit project may not traditionally rely on ‘Earth
+standards,’ the <span class="small-caps">did</span> recommendation also deﬁnes ten design
+                                                
+                                                
+goals that are informative for understanding decentralized
+identity.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-3008f2"></a> 
+</p>
+   <div class="tabular"> <table id="TBL-3" class="tabular" 
+ 
+><colgroup id="TBL-3-1g"><col 
+id="TBL-3-1" /><col 
+id="TBL-3-2" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-3-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-1-1"  
+class="td11">  •  Decentralization</td><td  style="white-space:nowrap; text-align:left;" id="TBL-3-1-2"  
+class="td11">  •  Discoverability </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-3-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-2-1"  
+class="td11">  •  Control            </td><td  style="white-space:nowrap; text-align:left;" id="TBL-3-2-2"  
+class="td11">  •  Interoperability</td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-3-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-3-1"  
+class="td11">  •  Privacy             </td><td  style="white-space:nowrap; text-align:left;" id="TBL-3-3-2"  
+class="td11">  •  Portability      </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-3-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-4-1"  
+class="td11">  •  Security            </td><td  style="white-space:nowrap; text-align:left;" id="TBL-3-4-2"  
+class="td11">  •  Simplicity       </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-3-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-5-1"  
+class="td11">  •  Proof-based       </td><td  style="white-space:nowrap; text-align:left;" id="TBL-3-5-2"  
+class="td11">  •  Extensibility    </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-3-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-3-6-1"  
+class="td11">                  </td> </tr></table>                            </div>
+<!--l. 117--><p class="indent" >   We will revisit some of these principles and design goals in
+the context of Azimuth and Urbit, but ﬁrst, a reminder to
+developers: defaults matter.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.2   </span> <a  id="x1-40001.2"></a>Defaults Matter</h4>
+<!--l. 121--><p class="noindent" >As <code>~wicdev-wisryt</code> noted of the public key infrastructure (<span class="small-caps">pki</span>)
+idea maze (see <a  id="x1-4001"></a> <code>~wicdev-wisryt</code> (2024), pp. 1–7 in this
+issue), the long history of <span class="small-caps">pki</span>s largely splits between being
+‘decentralized and unused’ or ‘centralized and easy to
+subject oneself to’. <code>~wicdev-wisryt</code> explored this idea maze
+along the branches of global consistency, permanence, and
+self-ownership, to which we add a fourth branch: sane
+defaults.
+</p><!--l. 123--><p class="indent" >   <span class="small-caps">pgp</span>, <span class="small-caps">gpg</span>, and Web of Trust solutions have existed for
+decades but are used by eﬀectively nobody, and in some sense
+can be dismissed due to a lack of sane defaults. One could
+argue the shortcoming of these systems is a lack of global
+consistency, but in practice global consistency is a necessary
+but not suﬃcient condition for a self-sovereign identity.
+If the system does not also provide sane defaults the
+global consistency remains an illegible mess to the typical
+user. The Web of Trust and similar solutions may be
+glossed over as demonstrably insuﬃcient thanks to this
+shortcoming.
+</p><!--l. 125--><p class="indent" >   If we consider global consistency, permanence, and
+self-ownership as useful goals for the <span class="small-caps">pki</span>, we must recognize
+                                                
+                                                
+that they fail to explain some of the more controversial
+elements of Azimuth’s hierarchical model for a certain
+subset of critics. In fact, alternate conceptions for <span class="small-caps">pki</span>s
+and identity more broadly are being explored by both
+Kinode<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-4002f3"></a> 
+and Pallas.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-4003f4"></a> 
+These projects aim to satisfy each of the three branches but
+take diﬀerent approaches to the concept of sane defaults. So
+why does Urbit’s Azimuth retain a hierarchical address
+space?
+</p><!--l. 127--><p class="indent" >   Aside from being a clean way of naming a ﬁnite address
+space, Azimuth’s hierarchy provides a <span 
+class="ec-lmri-10">sane default </span>for packet
+routing, peer discovery, and third-party service provision. It
+gives users a starting point, and a set of alternatives that are
+tractable. It serves as the crisis moment (‘It’s dangerous to go
+alone! Take this’) before embarking on the journey of
+self-sovereign identity.
+</p><!--l. 129--><p class="indent" >   Some critics frame this structure as ‘digital feudalism’ but
+fail to understand two other elements of the system:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-4005x1">
+     <!--l. 131--><p class="noindent" >The default <span class="small-caps">pki</span> includes a permi<span class="small-caps">ssi</span>onless right to
+     exit, requiring no approval from the network node up
+     the hierarchy from you.
+     </p></li>
+                                                
+                                                
+<li 
+  class="enumerate" id="x1-4007x2">
+     <!--l. 132--><p class="noindent" >Even the hierarchical model is <span 
+class="ec-lmri-10">just a sane default </span>and
+     does not forbid an alternative.</p></li></ol>
+<!--l. 135--><p class="noindent" >While no alternative exists at
+present,<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-4008f5"></a> 
+there is no reason that a particular Urbit ship must exclusively
+ask its sponsor for the addresses of its peers. Nor is there any
+technical restriction on Urbit’s routing packets using a
+diﬀerent model. In summary, <span 
+class="ec-lmri-10">the hierarchy is a sane default in</span>
+<span 
+class="ec-lmri-10">an otherwise inﬁnite game.</span>
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-50002"></a>The Current State of Azimuth</h3>
+<!--l. 140--><p class="noindent" >The need to place the <span class="small-caps">pki</span> on a distributed ledger with
+global consensus and recognize the hierarchical model as
+a sane default is obvious. But what about the current
+address space and its technical implementation? Since
+early 2019, Azimuth has been on hosted on the Ethereum
+blockchain, and in 2022 the contracts were updated to support
+a “naive” Layer 2 rollup. Returning to the principles
+and design goals of <span class="small-caps">ssi</span> and <span class="small-caps">did</span>s, this on-chain presence
+provides beneﬁts such as existence, control, transparency,
+persistence, decentralization, and discoverability. It also
+supports many of the other stated goals, if not satisfying
+them purely through an on-chain presence. Many of these
+principles were either explicitly or implicitly considered with
+both the initial Azimuth contracts (<a  id="x1-5001"></a> <code>~ravmel-ropdyl</code>,
+2019), and the move to supporting the Layer 2 rollup
+(<a  id="x1-5002"></a> <code>~datnut-pollen</code>, 2021). However, the current state of
+Azimuth falls short in terms of providing interoperability and
+extensibility.
+                                                
+                                                
+</p><!--l. 142--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a  id="x1-60002.1"></a>Layer 1 IDs on the Ethereum network</h4>
+<!--l. 144--><p class="noindent" >Azimuth’s deployment on Ethereum was one of the ﬁrst uses
+of the <span class="small-caps">erc</span>-721 standard (<a  id="x1-6001"></a> Entriken et al., 2018). It is
+implemented across two core contracts: Azimuth, which
+holds the registry of identity ownership, and Ecliptic,
+which deﬁnes the business logic for updating the state of
+the registry. To this day, these contracts serve as one of
+the most technically ‘useful’ <span class="small-caps">erc</span>-721s on the Ethereum
+network, powering the peer-to-peer interactions of thousands
+of nodes (also known as urbit ships) in an encrypted
+oﬀ-chain network. As an <span class="small-caps">erc</span>-721, Urbit ID experienced a
+signiﬁcant increase in valuation during the <span class="small-caps">nft</span> boom of 2021,
+with the market cap of address space breaking $2B at its
+peak.
+</p><!--l. 146--><p class="indent" >   However, the core downside of Azimuth’s presence on
+Ethereum should not be understated. In exchange for the
+beneﬁts of <span class="small-caps">nft</span> hype cycles, Urbit users must pay a tax to the
+Ethereum network in the form of gas fees. This interaction can
+be particularly expensive because the original versions of
+Ecliptic required all state transition computations to occur
+on-chain. While this means Azimuth inherits the security
+beneﬁts of Ethereum’s global consensus model, there is a
+contention that it fundamentally extracts value from the Urbit
+network and deposits it into Ethereum in an unnecessary
+exchange.
+</p><!--l. 148--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a  id="x1-70002.2"></a>Layer 2 IDs on the naive rollup</h4>
+<!--l. 150--><p class="noindent" >The transaction costs on Ethereum were so great that, at
+times, it cost over $200 worth of <span class="small-caps">eth</span> just to get on the
+network. For a budding distributed system project, such costs
+can be unbearable. Thus, the solution to the ‘gas crisis’ was
+                                                
+                                                
+introduced (<a  id="x1-7001"></a> <code>~datnut-pollen</code>, 2021): a custom ‘naive’ rollup.
+The key feature of the naive rollup is that, instead of paying
+Ethereum miners (now validators) to verify the state
+transitions of Azimuth, each Urbit node can validate those
+transitions themselves. This again brings us back to the
+idea of sane defaults in a decentralized or distributed
+network.
+</p><!--l. 152--><p class="indent" >   That is, in running one’s Urbit instance, the canonical
+“Azimuth” is nothing more than a sane default. This is
+trivially exempliﬁed by the fact that one could run a fake ship
+network locally and act as any Urbit ID one chose, or even
+deploy an alternative version of Azimuth onto mainnet
+Ethereum. However, because everyone else is likely operating
+on the default version of <code class="lstinline"><span style="color:#000000">/app/azimuth</span></code>, which assumes
+<code class="lstinline"><span style="color:#000000">azimuth.eth</span></code> as The One True <span class="small-caps">pki</span>, any of one’s potential
+peers will discard one’s packets as invalid. The Urbit
+network will ignore an unsignable interloper. Whether or
+not the Urbit network pays the Ethereum network for
+state transition computation, it remains true that Urbit’s
+oﬀ-chain interactions are voluntary and governed by sane
+defaults.
+</p><!--l. 154--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.3   </span> <a  id="x1-80002.3"></a>When to Use Global Consensus</h4>
+<!--l. 156--><p class="noindent" >As noted in <code>~wicdev-wisryt</code>’s piece, blockchains allow users to
+distinguish two cryptographically valid messages, speciﬁcally
+which was signed ﬁrst, without requiring a centralized party.
+Both Layer 1 and Layer 2 implementations rely on this
+aﬀordance. Eﬀectively, they both need the chain to give them
+a timestamp and a signed message to discern key ownership.
+Whether the cosmputation of key rotation is done on-chain
+or client side, anyone within the Urbit network that is
+continuing to use the system defaults will ultimately get the
+correct result for validating a packet’s sender. It is the
+core aﬀordance of timestamped messages for which Urbit
+must pay <span 
+class="ec-lmri-10">some </span>blockchain to have a viable decentralized
+                                                
+                                                
+<span class="small-caps">pki</span>.
+</p><!--l. 158--><p class="indent" >   However, Urbit-side key validation and peer discovery are
+not the only beneﬁts of having the <span class="small-caps">pki</span> on Ethereum. The cost
+of on-chain computation for global consensus is undoubtedly a
+hurdle to low-cost user adoption of Urbit. However, it would
+be a failure of imagination to claim there is no contingent loss
+of beneﬁts. Speciﬁcally, Ethereum is a growing network that is
+building on top of the same <span class="small-caps">erc</span>-721 standard on which
+Urbit ID is deﬁned. Improvements to the capabilities of
+the Ethereum network can enhance the capabilities of
+the Urbit network—<span 
+class="ec-lmri-10">if Urbit maintains, or increases, its</span>
+<span 
+class="ec-lmri-10">legibility to the Ethereum Network</span>. The current naive
+rollup does not achieve this. An L2 Urbit ID, and it’s
+ownership in particular, is functionally illegible to the
+outside world. From the perspective of Ethereum, global
+consistency is compromised, and key rotation is impossible to
+validate.
+</p><!--l. 160--><p class="indent" >   While we could explore the technical details of these two
+systems, instead let’s return to examine the <span class="small-caps">ssi</span> principles and
+<span class="small-caps">did</span> design goals of interoperability and extensibility. In a
+sense, these just mean that you want your identity to work in
+as many places as possible. To be as legible to as many
+systems or stakeholders as is possible.
+</p><!--l. 162--><p class="indent" >   A playful example of this is whether one would trade one’s
+state-issued driver’s license for a high school ID card (<a  id="x1-8001"></a>
+<code>~sarlev-sarsen</code>, 2024). In spite of one’s driver’s license being
+more costly to replace or update, one’s response is almost
+certainly, “No way.&#x0022; A licensee knows intuitively that a
+driver’s license is a more credible and legible identiﬁer than a
+high school ID, in large part due to the authority of the
+centralized issuing authority. Imagine achieving such a level of
+credibility and legibility in a self-sovereign manner. This
+tradeoﬀ is not merely a thought experiment, as dependency on
+centralized identity issuance authorities has real world
+impacts:
+</p><!--l. 164--><p class="indent" >
+     </p><blockquote class="quote">
+                                                
+                                                
+     <!--l. 165--><p class="noindent" >In  the  last  year,  self-sovereign  identity  has
+     also entered the sphere of <span 
+class="ec-lmri-10">international policy</span>.
+     This  has  largely  been  driven  by  the  refugee
+     crisis that has beset Europe, which has resulted
+     in many people lacking a recognized identity
+     due to their ﬂight from the state that issued
+     their credentials. However, it’s a long-standing
+     international problem, as foreign workers have
+     often been abused by the countries they work
+     in due to the lack of state-issued credentials. (<a  id="x1-8002"></a>
+     Allen, 2016)</p></blockquote>
+<!--l. 168--><p class="indent" >   One may reasonably ask at this junction whether, if Urbit
+IDs will form the foundation for self-sovereign digital identity,
+they should be more legible or less legible?
+</p><!--l. 170--><p class="indent" >   While this may run counter to some Urbit purists who
+want to avoid anything related to ‘Earth code,’ the reality for
+the foreseeable future is that interoperability with other
+networks is both desirable and necessary for Urbit’s continued
+survival. With time, as Urbit evolves, it may become the
+most legible system, and the cruft of Earth code will
+fall by the wayside. But that future is still a long way
+oﬀ.
+</p><!--l. 172--><p class="indent" >   Improving legibility, or in other words, protecting the
+interoperability and extensibility of Urbit ID, does not
+imply loyalty to any particular chain. It simply claims
+that increasing legibility to the largest set of networks
+should be included in the objective function of Urbit
+ID.
+</p><!--l. 174--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-90003"></a>Alternative Options for the PKI</h3>
+<!--l. 176--><p class="noindent" >How does Urbit continue to improve the utility of Azimuth?
+While in 2019 the options for hosting the <span class="small-caps">pki</span> were still
+limited, the technology landscape has drastically evolved in
+the intervening years. Several Urbit-related blockchain
+                                                
+                                                
+projects have been proposed and explored recently which bear
+on how the <span class="small-caps">pki</span> could be hosted in the future.
+</p><!--l. 178--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a  id="x1-100003.1"></a>Self-Host the PKI on %chain</h4>
+<!--l. 180--><p class="noindent" >The most ‘philosophically straightforward’ answer would be
+for Urbit to self-host its <span class="small-caps">pki</span>. While this requires further
+technical development, it is conceptually tractable and the
+<code class="lstinline"><span style="color:#000000">%chain</span></code> project, primarily executed by <code>~tiller-tolbus</code> and
+<code>~midsum-salrux</code> as a skunkworks eﬀort, has shown initial
+successes on implementing an Urbit-native blockchain. This
+option could make use of identity-backed consensus models,
+and would be the most direct pathway to the Urbit network
+not having to pay a ‘tax’ to another network for its consensus
+mechanism. In a sense, this is the most ‘independent’ or
+‘self-contained’ option. However, it would likely result in
+decreased capital access and practical legibility to external
+networks.
+</p><!--l. 182--><p class="indent" >   While reasonable minds may diﬀer on the net beneﬁt of
+Urbit’s proximity to the Ethereum network’s capital pools,
+there is no doubt that such proximity has materially impacted
+on address space valuation. This includes the ~$33,000 peak
+for star-level identities. Distancing Urbit ID from Ethereum by
+moving the <span class="small-caps">pki</span> to a self-hosted network would limit the
+opportunity to access this capital by increasing the barriers to
+exchange.
+</p><!--l. 184--><p class="indent" >   Moving the <span class="small-caps">pki</span> in this way would also decrease
+interoperability and extensibility by making it harder for the
+Ethereum network to access and validate data about
+ownership of Urbit IDs. Technically speaking, this constraint
+could be reduced by self-hosted <span class="small-caps">rpc</span> endpoints of <code class="lstinline"><span style="color:#000000">%chain</span></code> or
+Azimuth state that could be accessed over <span class="small-caps">http</span>. However, the
+more prominent issue would be the coordination constraint it
+would generate. If the <span class="small-caps">pki</span> moves, what motivation do
+members of the Ethereum Network have to bother with Urbit
+<span class="small-caps">rpc</span> endpoints instead of just staying within the Ethereum
+                                                
+                                                
+tooling ecosystem?
+</p><!--l. 186--><p class="indent" >   In a world in which Urbit is more powerful and oﬀers a
+compelling, market-legible alternative to the Ethereum virtual
+machine, one can see the draw of a bootstrapped <code class="lstinline"><span style="color:#000000">%chain</span></code>.
+However, the ~$70,000 per year in gas fees that Urbit users
+collectively pay to maintain the <span class="small-caps">pki</span> on Ethereum seems a
+worthwhile exchange for the legibility it aﬀords.
+</p><!--l. 188--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a  id="x1-110003.2"></a>Zenith: UrbitChain on Cosmos SDK</h4>
+<!--l. 190--><p class="noindent" >Moving the <span class="small-caps">pki</span> to a self-hosted, urbit-native solution is not
+the only option should the Urbit network want to reduce its
+dependency on outside networks. One standing proposal,
+Zenith, establishes an oﬀ-Urbit blockchain governed by the
+galaxy-level address space and implemented as its own L2
+Ethereum rollup using the Cosmos <span class="small-caps">sdk</span>.
+</p><!--l. 192--><p class="indent" >   In terms of legibility, this pathway essentially splits the
+diﬀerence. The Cosmos ecosystem is smaller than Ethereum as
+a whole, but comes in second place on metrics for current
+Total Value Locked (<span class="small-caps">tvl</span>) (<a  id="x1-11001"></a> Fernau, 2022). The Cosmos
+ecosystem and <span class="small-caps">sdk</span> could give some of the beneﬁts of a
+self-hosted system. For example, it would reduce the outﬂow
+of capital from the Urbit network, while still achieving
+some interoperability with the external world thanks to
+the aﬀordances granted by Cosmos. Peg zones and the
+Inter-Blockchain Communication (<span class="small-caps">ibc</span>) protocol would enable
+ready access to a network of blockchain networks. These
+networks are likely to have more operational friction for
+capital ﬂows than remaining on L1 Ethereum, but may be a
+valid tradeoﬀ. Additionally, the Zenith proposal makes a nod
+to the opportunity to use the Zenith rollup as a general
+purpose urbit-aware smart contracting platform, including a
+“Scry Oracle Contract” which would enable canonization of
+certain subsets of the scry namespace and create some
+on-chain enforcement mechanisms of the referentially
+transparent nature of the urbit namespace.
+                                                
+                                                
+</p><!--l. 194--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.3   </span> <a  id="x1-120003.3"></a>Mayﬂower: A Recolonization Eﬀort</h4>
+<!--l. 196--><p class="noindent" >Also presented as an option for the future of the Azimuth <span class="small-caps">pki</span>
+is a proposal under the codename “Mayﬂower”. While there is
+currently a directional debate between the Zenith and
+Mayﬂower plans, due to disagreements on implementation and
+design of related non-fungible tokens and governing bodies,
+the Mayﬂower proposal similarly suggests use of an Ethereum
+L2 rollup and visions of future urbit native gas tokens and
+contracts.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-12001f6"></a> 
+The two main distinctions at this time appear to be a
+preference to avoid ‘rolling your own’ rollup and leaning
+towards something like the existing Base rollup and Optimism
+Superchain, plus a focus on ‘rezoning’ urbit address space,
+such that more focused development will occur within the
+readily available ‘digital land’. Proponents of this plan have
+noted that it neither precludes an Urbit-native chain, nor path
+to an Urbit speciﬁc rollup. As of writing, speciﬁc details on
+this plan are outstanding and in active debate. Notably, both
+these proposals aim towards using existing Ethereum
+layer 2 technology, but depending on implementation
+details the portability of identities between L1 and L2 is
+undetermined.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.4   </span> <a  id="x1-130003.4"></a>Bridge the PKI across multiple chains</h4>
+<!--l. 201--><p class="noindent" >As we consider the tradeoﬀs of moving the <span class="small-caps">pki</span>,
+it is worth revisiting our ‘sane defaults’ branch
+in the idea maze. If <code class="lstinline"><span style="color:#000000">azimuth.eth</span></code> and with it
+                                                
+                                                
+<code class="lstinline"><span style="color:#000000">/app/azimuth.hoon</span></code><span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a  id="x1-13001f7"></a>
+are just sane defaults, why not also support some sane
+<span 
+class="ec-lmri-10">alternatives</span>? One of the ﬁnal Urbit precepts reminds us
+that “communities are autonomous” (<a  id="x1-13002"></a> <code>~wicdev-wisryt</code>,
+2020).
+</p><!--l. 203--><p class="indent" >   To this end, we should use Urbit OS as the coordination
+technology to allow users and communities to decide with
+which other networks they desire to maintain legibility. As
+with the current <span class="small-caps">pki</span>’s split between L1 Ethereum and the
+naive rollup, so too could we allow people to move their Urbit
+ID from L1 Ethereum to any other chain with a viable way to
+post signature data.
+</p><!--l. 205--><p class="indent" >   Some may choose to remain on mainnet Ethereum to take advantage
+of features like <span class="small-caps">erc</span>-6551 Token Bound Account (<a  id="x1-13003"></a> Windle et al.,
+2023).<span class="footnote-mark"><a href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a  id="x1-13004f8"></a> 
+Others may want to inscribe their ownership as an Ordinal on
+Bitcoin. Alternatively, Solana oﬀers some beneﬁts for the more
+crypto-degenerate who are looking for speed of trading and
+market volatility to help make their wealth.
+</p><!--l. 207--><p class="indent" >   Considering this path, it is worthwhile to elaborate on how
+the current L2 solution works. The original version of the
+Ethereum contracts held ownership data in the Azimuth
+contracts and business logic in the Ecliptic contracts. In
+2021, these contracts were updated to support two new
+aﬀordances:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 210--><p class="noindent" >Azimuth points sent to the Ethereum deposit address
+     (<code class="lstinline"><span style="color:#000000">0</span><span style="color:#000000">x1111...</span></code>) are assessed by the default Urbit client
+     as being owned on layer 2.
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 211--><p class="noindent" >Ecliptic  posts  <span 
+class="ec-lmri-10">time-stamped  </span>signature  data  to  the
+     Ethereum chain concerning the change of ownership
+     of  a  point  owned  on  layer  2.  The  default  Urbit
+     client   reviews   and   validates   the   state   change
+     before  applying  the  change  to  the  Urbit’s  own
+     <code class="lstinline"><span style="color:#000000">/app/azimuth</span></code>.</p></li></ul>
+<!--l. 215--><p class="indent" >   This mechanism means that these points are still
+cryptographically controlled for purposes of anyone
+running the default Urbit OS or relevant code (namely,
+<code class="lstinline"><span style="color:#000000">/app/eth-watcher</span></code>, <code class="lstinline"><span style="color:#000000">/lib/naive.hoon</span></code>, <code class="lstinline"><span style="color:#000000">/app/azimuth-</span></code>
+<code class="lstinline"><span style="color:#000000">tracker</span></code> and <code class="lstinline"><span style="color:#000000">/app/azimuth</span></code>), and it is easy to imagine how
+this same mechanism could be used to support other chains as
+hosts for portions of the <span class="small-caps">pki</span>:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-13006x1">
+     <!--l. 218--><p class="noindent" >Deﬁne a holding address for the <span class="small-caps">erc</span>-721 on mainnet
+     ethereum for other host chains (i. e. sending the L1
+     <span class="small-caps">nft</span> to <code class="lstinline"><span style="color:#000000">0</span><span style="color:#000000">x2222...</span></code> indicates sending the ownership
+     to Bitcoin).
+     </p></li>
+<li 
+  class="enumerate" id="x1-13008x2">
+     <!--l. 219--><p class="noindent" >Implement a watcher for the subject chain that looks
+     for posted signature data.
+     </p></li>
+<li 
+  class="enumerate" id="x1-13010x3">
+     <!--l. 220--><p class="noindent" >Update and/or add to the relevant Urbit OS code
+     for client side validation of data posted to the new
+     chain.</p></li></ol>
+                                                
+                                                
+<!--l. 223--><p class="noindent" >This approach would increase legibility to other chains, giving
+communities more options for what their members can achieve
+with their Urbit ID.
+</p><!--l. 226--><p class="indent" >   However, as the <span class="small-caps">pki</span> fractures, maintaining global
+consistency becomes increasingly complex. In the above
+model, the primary solution for maintaining this consistency
+becomes that oﬃcial ‘global consensus’ is on mainnet
+Ethereum, while any other alternative is subject only to the
+client side validation. Depending on the aﬀordances of the
+subject chain, the level of eﬀort put into building the
+subsystem, and any cost concerns for network fees on the
+speciﬁc subject chain, the result is likely that <span 
+class="ec-lmri-10">moving to any</span>
+<span 
+class="ec-lmri-10">other chain is a one-way trip</span>. Just as a move to the current
+naive rollup is a one way trip.
+</p><!--l. 228--><p class="indent" >   The biggest reason for this being the case is the question:
+‘what timestamp is the canonical one?’.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.5   </span> <a  id="x1-140003.5"></a>Move the PKI to Nockchain</h4>
+<!--l. 232--><p class="noindent" >While Ethereum has made signiﬁcant progress in interchain
+bridges and L2 rollups since the implementation of the Naive
+rollup, making two-way bridges increasingly possible, they still
+introduce a host of security and consensus questions. They
+also are likely to exacerbate the capital outﬂow concerns of the
+current L1 Ethereum implementation.
+</p><!--l. 234--><p class="indent" >   But if we return to the philosophical perspective, assuming
+we want our identities to be legible to diﬀerent networks, don’t
+we also want to potentially modify that legibility? Just
+as individuals can emigrate between nation-states, it
+seems self-evident that we should be able to move between
+digital networks, bringing our self-sovereign identities with
+us.
+</p><!--l. 236--><p class="indent" >   What is the best way to enable this portability (another
+shared principle/design goal for <span class="small-caps">ssi</span>s/<span class="small-caps">did</span>s) while maintaining
+global consistency? The reader who is familiar with Nockchain
+will anticipate the punchline: zero-knowledge proofs.
+</p><!--l. 238--><p class="indent" >   Using Zorp’s <span class="small-caps">eden</span> and its associated Nock prover (<a  id="x1-14001"></a>
+                                                
+                                                
+<code>~tacryp-socryt</code> et al., 2023), any Urbit instance can prove valid
+computation of any ‘client-side’ Azimuth state change and use
+that proof as the data to post to any given blockchain. It is
+likely that the ‘easiest’ place to do that would be Nockchain.
+However, external legibility may incentivize these proofs to be
+posted elsewhere. An Azimuth contract on a subject chain
+could use the proof of valid Nock computation to assign
+ownership of an Urbit ID crypto-asset native to a given
+address. This could include whatever aﬀordances native
+asset ownership on that chain may bestow to an Urbit
+operator.
+</p><!--l. 240--><p class="indent" >   In the long run, this pathway would likely lead more Urbit
+operators to move their Urbit ID’s primary ‘citizenship’ to
+Nockchain. This would occur without unnecessarily losing
+legibility to other networks, and retains the possibility of
+absorbing external capital into the Urbit network along the
+way.
+</p><!--l. 243--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-150004"></a>Other Considerations for Azimuth</h3>
+<!--l. 245--><p class="noindent" >While Azimuth’s on-chain nature is that of a public key
+infrastructure, a <span class="small-caps">pki</span> alone does not constitute a complete
+identity system. In fact, it is the pairing of Urbit ID with
+Urbit OS that presents the best opportunity to serve as a
+fully-ﬂedged decentralized identity system. Whether we look
+at implementing <span class="small-caps">w3c</span>’s standardized <span class="small-caps">did</span>s, or adhering to the
+principles of <span class="small-caps">ssi</span>s, not everything about Azimuth is, or should
+be, on-chain.
+</p><!--l. 247--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a  id="x1-160004.1"></a>GroundWire, comets, and Bitcoin Ordinals</h4>
+<!--l. 249--><p class="noindent" >An early design consideration of the 21e8 Bitcoin Ordinals
+project (<a  id="x1-16001"></a> Ordinals, 2024) was reportedly to be able to host an
+Azimuth-like <span class="small-caps">pki</span> system, and the desire to tie Urbit’s fortunes
+                                                
+                                                
+more closely to those of Bitcoin persists in segments of
+the Urbit community. A recent debate throughout the
+ecosystem about the Azimuth <span class="small-caps">pki</span>, namely between Zenith and
+Mayﬂower, has instigated a wide-ranging discussion about
+alternative ways of handling identiy across the Urbit network.
+GroundWire proposes to experiment with both new <span class="small-caps">pki</span>
+governance models, and to make use of the comet-level address
+space in a more robust way (<a  id="x1-16002"></a> <code>~hastuc-dibtux</code> et al., 2024).
+Implementation details are still forthcoming, but the initial
+plan is to prototype a Gall agent to support a <span class="small-caps">pki</span> on Bitcoin
+that would allow comets to rotate their keys (updating the
+current ‘self-attestation’ model), and make use of diﬀerent
+non-hierarchical models for routing and peer-discovery.
+Additionally, instead of using the ﬁnite ‘higher level’ address
+space for spam resistance, this proposal would use mechanisms
+like L1 Bitcoin fee costs, or burning and timelocking
+coins.
+</p><!--l. 251--><p class="indent" >   As with the Zenith and Mayﬂower proposals, the
+GroundWire proposal makes statements about the governance
+and fundrasing directions of the Urbit project. These topics
+are out of scope for the focus of this article, but merit ongoing
+discussion in the appropriate forums.
+</p><!--l. 253--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a  id="x1-170004.2"></a>Illegible subnets</h4>
+<!--l. 255--><p class="noindent" >Globally available and transparent chain state greatly
+enhances legibility. Openly available sponsorship hierarchies
+inform unconnected peers about how to reach you, and global
+claims can be used for various purposes. However, not every
+application requires global consensus, and Turing-complete
+smart contracts can lead to the risk of open-ended cost
+overruns. Furthermore, many networks may wish to
+become or remain illegible to the outside world. Private
+access control lists, gossip networks, and packet routing
+mechanisms enable use cases that would not beneﬁt from the
+cost or transparency of on-chain or globally consistent
+                                                
+                                                
+legibility.<span class="footnote-mark"><a href="mss10.html#fn9x0"><sup class="textsuperscript">9</sup></a></span><a  id="x1-17001f9"></a> 
+Urbit’s oﬀ-chain and encrypted peer-to-peer messaging
+aﬀordances open up an intriguing landscape of ‘illegible
+subnets’ while still beneﬁting from associations with speciﬁc
+pseudonymous Urbit identities.
+</p><!--l. 257--><p class="indent" >   The value of illegible subnets also builds on the insight
+that not everything can, or should, be distilled down to
+its lowest common denominator, tokenized, and put on
+the blockchain. The more complex the interaction, the
+more costly the distillation process, and <span 
+class="ec-lmri-10">the more likely</span>
+<span 
+class="ec-lmri-10">there is no consensus to be found around its ‘valuation’</span>.
+Instead of demanding timestamped global consensus in
+all our peer interactions, we must support emergent,
+implied-consensus networks. These networks are governed
+not by immutable chain state but by willing association
+and participation by sovereign peers. Systems where the
+network forms and dissolves on the ﬂy, based on the
+ongoing discovery and reﬁnement of the values of its
+participants.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.3   </span> <a  id="x1-180004.3"></a>Peer-to-peer attestations</h4>
+<!--l. 261--><p class="noindent" >Another aﬀordance that does not require a blockchain is
+peer-to-peer attestation. There are many use cases where the
+privacy and cost beneﬁts of cryptographically veriﬁable
+peer-to-peer attestations are desirable. They can be used
+independently, e. g. “<code>~sarlev-sarsen</code> attests to having
+received a message from <code>~lagrev-nocfep</code> containing a valid
+passcode”, or even in conjunction with global blockchain
+state.
+</p><!--l. 264--><p class="indent" >   For  example,  <code class="lstinline"><span style="color:#000000">%fund</span></code> by
+                                                
+                                                
+<code class="lstinline"><span style="color:#000000">~tocwex.syndicate</span></code>,<span class="footnote-mark"><a href="mss11.html#fn10x0"><sup class="textsuperscript">10</sup></a></span><a  id="x1-18001f10"></a> 
+uses peer-to-peer attestation begin to build a subjective
+reputation graph. An Urbit can hold a signed message from an
+Ethereum wallet attesting contol, e. g. “<code>~sarlev-sarsen</code> controls
+wallet <code class="lstinline"><span style="color:#000000">0</span><span style="color:#000000">x6789...</span></code>”, and can even share this signed message
+with other peers.
+</p>
+   <!--l. 266-->
+<pre class="lstlisting" id="listing-19"><span class="label"><a  id="x1-18002r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">$prof:</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">user</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">profile</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">data</span></span> 
+<span class="label"><a  id="x1-18003r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-18004r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">prof</span></span> 
+<span class="label"><a  id="x1-18005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship-url=@t</span></span> 
+<span class="label"><a  id="x1-18006r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">wallets=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">addr</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sigm</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-18007r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">favorites=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">set</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">flag</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-18008r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-18009r8"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span></pre>
+<!--l. 277--><p class="noindent" > Anyone receiving that attestation can then use it in
+constructing an understanding of the relationships between
+diﬀerent Urbit IDs, oﬀ-chain ﬁnancial promises, on-chain
+transactions, reputation, or other economic activity, without
+it thereby becoming a canonical, globally available
+understanding.
+</p><!--l. 282--><p class="indent" >   Such shared understandings granted by peer-to-peer
+attestations can thus create pockets of privileged information
+networks, and the attendant competitive advantages of a more
+opaque, yet veriﬁable, system.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.4   </span> <a  id="x1-190004.4"></a>Self-veriﬁed credentials</h4>
+<!--l. 286--><p class="noindent" >As <code>~wicdev-wisryt</code> notes, one oﬀshoot of the permanence
+branch of the <span class="small-caps">pki</span> idea maze makes available a mechanism for
+self-attestation. This currently only exists for the portion of
+Azimuth’s address space where comet identities reside. This
+self-attestation is useful for a variety of purposes—cost,
+anonymity, etc.—but doesn’t aﬀord a more long-lasting system
+for self-veriﬁed credentials due to the transient nature of a
+comet identity. It is likely that expanding the capacity for
+self-attestations would be of beneﬁt to the Urbit network. In
+particular, the concept of Veriﬁable Credentials (VC)
+may be worth pursuing (<a  id="x1-19001"></a> World Wide Web Consortium,
+2022).
+                                                
+                                                
+</p><!--l. 288--><p class="indent" >   Urbit ID does not currently have a system of veriﬁable
+credentials, and arguably, the <span class="small-caps">pki</span> aspect of Azimuth
+should never include this. However, it should be reasonably
+straightforward to produce either a VC attestation layer
+utilizing Azimuth or incorporate knowledge of Azimuth into a
+VC solution.
+</p><!--l. 290--><p class="indent" >   One mechanism that could be integrated into an Urbit-native
+VC solution is the Urbit Hierarchical Deterministic (HD)
+Wallet. This is the technology used to secure ownership of an
+Urbit ID point and could satisfy the <span class="small-caps">ssi</span> doctrinal requirement
+that, “an <span class="small-caps">ssi</span> digital wallet should implement open standards
+for portable, self-sovereign veriﬁable credentials and other
+sensitive private data” (<a  id="x1-19002"></a> Preukschat and Reed, 2021).
+Without VC, Urbit does not yet qualify for <span class="small-caps">ssi</span> under this
+deﬁnition.
+</p><!--l. 293--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a  id="x1-200005"></a>Conclusion</h3>
+<!--l. 295--><p class="noindent" >Much work remains to be done on both the on-chain
+implementations and oﬀ-chain aﬀordances of Azimuth and the
+Urbit ID system. Each area of work must be considered
+alongside the eﬀort required for implementation:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 298--><p class="noindent" >Balancing  optionality  in  the  <span class="small-caps">pki</span>  for  end  users
+     against the ongoing maintenance of a more complex
+     codebase.
+     </p></li>
+     <li class="itemize">
+     <!--l. 299--><p class="noindent" >Weighing  legibility  for  external  networks  against
+     measures  that  reduce  capital  outﬂows  from  the
+     network.
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 300--><p class="noindent" >Allocating  development  time  to  adherence  with
+     <span class="small-caps">did</span>,  <span class="small-caps">ssi</span>,  and  VC  standards  against  the  practical
+     usefulness of their implementation.
+     </p></li>
+     <li class="itemize">
+     <!--l. 301--><p class="noindent" >Coordinating   systems   for   illegible   subnets   and
+     peer-to-peer attestations against other features that
+     can be productized and marketed to consumers.</p></li></ul>
+<!--l. 304--><p class="indent" >   Regardless of the speciﬁc focus, Urbit ID and the Azimuth
+address space oﬀer developers a platform to build systems that
+enhance individual sovereignty and provide ﬂexibility in
+creating community networks that control their own legibility
+and interactions.<img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+</p><!--l. 307--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a  id="x1-210006"></a>Appendix</h3>
+<!--l. 309--><p class="noindent" >This appendix serves as a reference for the more complete
+excerpts of referenced articles.
+</p><!--l. 311--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">6.1   </span> <a  id="x1-220006.1"></a>The Path to Self-Sovereign Identity</h4>
+<!--l. 313--><p class="noindent" >The principles of <span class="small-caps">ssi</span> are as follows (“Ten Principles of
+Self-Sovereign Identity,” 26 April 2016), all quoted:
+</p><!--l. 315--><p class="indent" >
+     </p><blockquote class="quote">
+     <!--l. 316--><p class="noindent" >A  number  of  diﬀerent  people  have  written
+     about the principles of identity. Kim Cameron
+     wrote one of the earliest “Laws of Identity”,
+                                                
+                                                
+     while  the  aforementioned  Respect  Network
+     policy and <span class="small-caps">w3c</span> Veriﬁable Claims Task Force
+     <span class="small-caps">faq</span>  oﬀer  additional  perspectives  on  digital
+     identity.  This  section  draws  on  all  of  these
+     ideas to create a group of principles speciﬁc to
+     self-sovereign identity. As with the deﬁnition
+     itself,  consider  these  principles  a  departure
+     point  to  provoke  a  discussion  about  what’s
+     truly important.
+     </p><!--l. 318--><p class="noindent" >These  principles  attempt  to  ensure  the  user
+     control  that’s  at  the  heart  of  self-sovereign
+     identity.  However,  they  also  recognize  that
+     identity   can   be   a   double-edged   sword   —
+     usable   for   both   beneﬁcial   and   maleﬁcent
+     purposes.   Thus,   an   identity   system   must
+     balance  transparency,  fairness,  and  support
+     of   the   commons   with   protection   for   the
+     individual.</p></blockquote>
+<!--l. 321--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-22002x1">
+     <!--l. 322--><p class="noindent" ><strong>Existence</strong>.   <span 
+class="ec-lmri-10">Users   must   have   an   independent</span>
+     <span 
+class="ec-lmri-10">existence. </span>Any  self-sovereign  identity  is  ultimately
+     based  on  the  ineﬀable  “I”  that’s  at  the  heart  of
+     identity. It can never exist wholly in digital form.
+     This must be the kernel of self that is upheld and
+     supported.  A  self-sovereign  identity  simply  makes
+     public and accessible some limited aspects of the “I”
+     that already exists.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22004x2">
+     <!--l. 323--><p class="noindent" ><strong>Control</strong>. <span 
+class="ec-lmri-10">Users must control their identities. </span>Subject
+     to well-understood and secure algorithms that ensure
+     the continued validity of an identity and its claims,
+                                                
+                                                
+     the user is the ultimate authority on their identity.
+     They should always be able to refer to it, update it,
+     or even hide it. They must be able to choose celebrity
+     or privacy as they prefer. This doesn’t mean that a
+     user controls all of the claims on their identity: other
+     users may make claims about a user, but they should
+     not be central to the identity itself.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22006x3">
+     <!--l. 324--><p class="noindent" ><strong>Access</strong>. <span 
+class="ec-lmri-10">Users must have access to their own data.</span>
+     A user must always be able to easily retrieve all the
+     claims and other data within his identity. There must
+     be no hidden data and no gatekeepers. This does
+     not mean that a user can necessarily modify all the
+     claims associated with his identity, but it does mean
+     they should be aware of them. It also does not mean
+     that users have equal access to others’ data, only to
+     their own.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22008x4">
+     <!--l. 325--><p class="noindent" ><strong>Transparency</strong>.  <span 
+class="ec-lmri-10">Systems  and  algorithms  must  be</span>
+     <span 
+class="ec-lmri-10">transparent.  </span>The  systems  used  to  administer  and
+     operate a network of identities must be open, both in
+     how they function and in how they are managed and
+     updated. The algorithms should be free, open-source,
+     well-known, and as independent as possible of any
+     particular  architecture;  anyone  should  be  able  to
+     examine how they work.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22010x5">
+     <!--l. 326--><p class="noindent" ><strong>Persistence</strong>.    <span 
+class="ec-lmri-10">Identities    must    be    long-lived.</span>
+     Preferably, identities should last forever, or at least
+     for as long as the user wishes. Though private keys
+                                                
+                                                
+     might need to be rotated and data might need to
+     be changed, the identity remains. In the fast-moving
+     world of the Internet, this goal may not be entirely
+     reasonable, so at the least identities should last until
+     they’ve been outdated by newer identity systems.
+     This must not contradict a “right to be forgotten”;
+     a  user  should  be  able  to  dispose  of  an  identity  if
+     he wishes and claims should be modiﬁed or removed
+     as appropriate over time. To do this requires a ﬁrm
+     separation between an identity and its claims: they
+     can’t be tied forever.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22012x6">
+     <!--l. 327--><p class="noindent" ><strong>Portability</strong>. <span 
+class="ec-lmri-10">Information and services about identity</span>
+     <span 
+class="ec-lmri-10">must be transportable. </span>Identities must not be held
+     by  a  singular  third-party  entity,  even  if  it’s  a
+     trusted entity that is expected to work in the best
+     interest of the user. The problem is that entities can
+     disappear — and on the Internet, most eventually do.
+     Regimes may change, users may move to diﬀerent
+     jurisdictions.  Transportable  identities  ensure  that
+     the user remains in control of his identity no matter
+     what, and can also improve an identity’s persistence
+     over time.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22014x7">
+     <!--l. 328--><p class="noindent" ><strong>Interoperability</strong>.  <span 
+class="ec-lmri-10">Identities  should  be  as  widely</span>
+     <span 
+class="ec-lmri-10">usable  as  possible.  </span>Identities  are  of  little  value
+     if  they  only  work  in  limited  niches.  The  goal
+     of  a  21st-century  digital  identity  system  is  to
+     make identity information widely available, crossing
+     international boundaries to create global identities,
+     without losing user control. Thanks to persistence
+     and autonomy these widely available identities can
+     then become continually available.
+                                                
+                                                
+     </p></li>
+<li 
+  class="enumerate" id="x1-22016x8">
+     <!--l. 329--><p class="noindent" ><strong>Consent</strong>.  <span 
+class="ec-lmri-10">Users  must  agree  to  the  use  of  their</span>
+     <span 
+class="ec-lmri-10">identity. </span>Any identity system is built around sharing
+     that  identity  and  its  claims,  and  an  interoperable
+     system increases the amount of sharing that occurs.
+     However, sharing of data must only occur with the
+     consent of the user. Though other users such as an
+     employer, a credit bureau, or a friend might present
+     claims,  the  user  must  still  oﬀer  consent  for  them
+     to become valid. Note that this consent might not
+     be  interactive,  but  it  must  still  be  deliberate  and
+     well-understood.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22018x9">
+     <!--l. 330--><p class="noindent" ><strong>Minimalization</strong>.  <span 
+class="ec-lmri-10">Disclosure  of  claims  must  be</span>
+     <span 
+class="ec-lmri-10">minimized. </span>When data is disclosed, that disclosure
+     should   involve   the   minimum   amount   of   data
+     necessary  to  accomplish  the  task  at  hand.  For
+     example, if only a minimum age is called for, then
+     the exact age should not be disclosed, and if only
+     an  age  is  requested,  then  the  more  precise  date
+     of  birth  should  not  be  disclosed.  This  principle
+     can  be  supported  with  selective  disclosure,  range
+     proofs,  and  other  zero-knowledge  techniques,  but
+     non-correlatibility  is  still  a  very  hard  (perhaps
+     impossible)  task;  the  best  we  can  do  is  to  use
+     minimalization to support privacy as best as possible.
+     </p></li>
+<li 
+  class="enumerate" id="x1-22020x10">
+     <!--l. 331--><p class="noindent" ><strong>Protection</strong>. <span 
+class="ec-lmri-10">The rights of users must be protected.</span>
+     When  there  is  a  conﬂict  between  the  needs  of
+     the  identity  network  and  the  rights  of  individual
+     users,  then  the  network  should  err  on  the  side
+                                                
+                                                
+     of   preserving   the   freedoms   and   rights   of   the
+     individuals over the needs of the network. To ensure
+     this,  identity  authentication  must  occur  through
+     independent algorithms that are censorship-resistant
+     and force-resilient and that are run in a decentralized
+     manner.</p></li></ol>
+<!--l. 334--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">6.2   </span> <a  id="x1-230006.2"></a>Decentralized Identiﬁers (<span class="small-caps">did</span>s) v1.0</h4>
+<!--l. 336--><p class="noindent" >The design goals of <span class="small-caps">did</span>s are as follows (Section 1.2, “Version
+1.0 of the <span class="small-caps">w3c</span> Recommendation 19 July 2022”), all quoted:
+</p><!--l. 338--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-23002x1">
+     <!--l. 339--><p class="noindent" ><strong>Decentralization</strong>.  Eliminate  the  requirement  for
+     centralized  authorities  or  single  point  failure  in
+     identiﬁer management, including the registration of
+     globally unique identiﬁers, public veriﬁcation keys,
+     services, and other information.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23004x2">
+     <!--l. 340--><p class="noindent" ><strong>Control</strong>. Give entities, both human and non-human,
+     the power to directly control their digital identiﬁers
+     without the need to rely on external authorities.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23006x3">
+     <!--l. 341--><p class="noindent" ><strong>Privacy</strong>. Enable entities to control the privacy of
+     their information, including minimal, selective, and
+     progressive disclosure of attributes or other data.
+                                                
+                                                
+     </p></li>
+<li 
+  class="enumerate" id="x1-23008x4">
+     <!--l. 342--><p class="noindent" ><strong>Security</strong>. Enable suﬃcient security for requesting
+     parties  to  depend  on  <span class="small-caps">did</span>  documents  for  their
+     required level of assurance.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23010x5">
+     <!--l. 343--><p class="noindent" ><strong>Proof-based</strong>.  Enable  <span class="small-caps">did</span>  controllers  to  provide
+     cryptographic  proof  when  interacting  with  other
+     entities.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23012x6">
+     <!--l. 344--><p class="noindent" ><strong>Discoverability</strong>.  Make  it  possible  for  entities  to
+     discover <span class="small-caps">did</span>s for other entities, to learn more about
+     or interact with those entities.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23014x7">
+     <!--l. 345--><p class="noindent" ><strong>Interoperability</strong>.  Use  interoperable  standards  so
+     <span class="small-caps">did</span> infrastructure can make use of existing tools and
+     software libraries designed for interoperability.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23016x8">
+     <!--l. 346--><p class="noindent" ><strong>Portability</strong>. Be system- and network-independent
+     and enable entities to use their digital identiﬁers with
+     any system that supports <span class="small-caps">did</span>s and <span class="small-caps">did</span> methods.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23018x9">
+                                                
+                                                
+     <!--l. 347--><p class="noindent" ><strong>Simplicity</strong>. Favor a reduced set of simple features
+     to   make   the   technology   easier   to   understand,
+     implement, and deploy.
+     </p></li>
+<li 
+  class="enumerate" id="x1-23020x10">
+     <!--l. 348--><p class="noindent" ><strong>Extensibility</strong>. Where possible, enable extensibility
+     provided it does not greatly hinder interoperability,
+     portability, or simplicity.</p></li></ol>
+<!--l. 353--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-24000"></a>References</h3>
+<!--l. 353--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Allen2016" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Allen2016"></a>Allen, Christopher
+   (2016)
+   “The
+   Path
+   to
+   Self-Sovereign
+   Identity”.
+   <span class="small-caps">url</span>:
+   <a href="https://www.lifewithalacrity.com/article/the-path-to-self-soverereign-identity/" class="url" >https://www.lifewithalacrity.com/article/the-path-to-self-soverereign-identity/</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-Paprocki2021" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+                                                
+                                                
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Paprocki2021"></a><code>~datnut-pollen</code>, Jonathan Paprocki
+   (2021)
+   “The
+   Gang
+   Solves
+   the
+   Gas
+   Crisis”.
+   <span class="small-caps">url</span>:
+   <a href="https://urbit.org/blog/rollups" class="url" >https://urbit.org/blog/rollups</a>.
+   </p></dd><dt id="X0-ERC721" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@ERC721"></a>Entriken, William
+   et al.
+   (2018)
+   “<span class="small-caps">erc</span>-721:
+   Non-Fungible
+   Token
+   Standard”.
+   <span class="small-caps">url</span>:
+   <a href="https://eips.ethereum.org/EIPS/eip-721" class="url" >https://eips.ethereum.org/EIPS/eip-721</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-CosmosTVL" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@CosmosTVL"></a>Fernau, Owen
+   (2022)
+   “Cosmos
+   Ecosystem
+   Quietly
+   Surges
+   to
+   $17B
+   in
+   <span class="small-caps">tvl</span>
+   in
+                                                
+                                                
+   Challenge
+   to
+   Ethereum
+   Layer
+   2s”.
+   <span class="small-caps">url</span>:
+   <a href="https://thedefiant.io/news/markets/cosmos-tvl-surge-ethereum" class="url" >https://thedeﬁant.io/news/markets/cosmos-tvl-surge-ethereum</a>.
+   </p></dd><dt id="X0-Hamilton2024" class="thebibliography">
+</dt><dd 
+id="bib-5" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Hamilton2024"></a><code>~hastuc-dibtux</code>, Liam Fitzgerald
+   et al.
+   (2024)
+   “GroundWire
+   01”.
+   <span class="small-caps">url</span>:
+   <a href="https://straylight.network/groundwire/groundwire-01" class="url" >https://straylight.network/groundwire/groundwire-01</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-Ordinals" class="thebibliography">
+</dt><dd 
+id="bib-6" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Ordinals"></a>Ordinals
+   (2024)
+   “Ordinals
+   Handbook”.
+   <span class="small-caps">url</span>:
+   <a href="https://docs.ordinals.com/" class="url" >https://docs.ordinals.com/</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-Preukschat2021" class="thebibliography">
+</dt><dd 
+id="bib-7" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Preukschat2021"></a>Preukschat, Alex
+   and
+   Drummond Reed
+   (2021).
+                                                
+                                                
+   <span 
+class="ec-lmri-10">Self-Sovereign</span>
+   <span 
+class="ec-lmri-10">Identity:</span>
+   <span 
+class="ec-lmri-10">Decentralized</span>
+   <span 
+class="ec-lmri-10">digital</span>
+   <span 
+class="ec-lmri-10">identity</span>
+   <span 
+class="ec-lmri-10">and</span>
+   <span 
+class="ec-lmri-10">veriﬁable</span>
+   <span 
+class="ec-lmri-10">credentials</span>.
+   Manning
+   Publications.
+   <span class="small-caps">isbn</span>:
+   9781617296598.
+   </p></dd><dt id="X0-WolfePaul2019" class="thebibliography">
+</dt><dd 
+id="bib-8" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@WolfePaul2019"></a><code>~ravmel-ropdyl</code>, Galen Wolfe-Pauly
+   (2019)
+   “Azimuth
+   is
+   On-Chain”.
+   <span class="small-caps">url</span>:
+   <a href="https://urbit.org/blog/azimuth-is-on-chain" class="url" >https://urbit.org/blog/azimuth-is-on-chain</a>.
+   </p></dd><dt id="X0-Sarlev2024" class="thebibliography">
+</dt><dd 
+id="bib-9" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Sarlev2024"></a><code>~sarlev-sarsen</code>, Stuart Cristoph
+   (2024)
+   “Why
+   #l1masterrace
+   is
+   More
+   Than
+   a
+   Meme”.
+   <span class="small-caps">url</span>:
+   <a href="https://sarlev-sarsen.rooftopdao.io/blog/why-l1masterrace-is-more-than-a-meme" class="url" >https://sarlev-sarsen.rooftopdao.io/blog/why-l1masterrace-is-more-than-a-meme</a>.
+   </p></dd><dt id="X0-Zorp2023" class="thebibliography">
+</dt><dd 
+id="bib-10" class="thebibliography">
+                                                
+                                                
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Zorp2023"></a><code>~tacryp-socryt</code>, Logan Allen
+   et al.
+   (2023)
+   “<span class="small-caps">eden</span>
+   -
+   a
+   practical,
+   <span class="small-caps">snark</span>-friendly
+   combinator
+   VM
+   and
+   <span class="small-caps">isa</span>”.
+   <span class="small-caps">url</span>:
+   <a href="https://eprint.iacr.org/2023/1021" class="url" >https://eprint.iacr.org/2023/1021</a>.
+   </p></dd><dt id="X0-UrbitPrecepts" class="thebibliography">
+</dt><dd 
+id="bib-11" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@UrbitPrecepts"></a><code>~wicdev-wisryt</code>, Philip C. Monk
+   (2020)
+   “Urbit
+   Precepts
+   (Discussion)”.
+   <span class="small-caps">url</span>:
+   <a href="https://urbit.org/blog/precepts-discussion" class="url" >https://urbit.org/blog/precepts-discussion</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-Monk2024" class="thebibliography">
+</dt><dd 
+id="bib-12" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@Monk2024"></a>—   (2024).
+   “Designing
+   a
+   Permanent
+   Personal
+   Identity:
+   The
+   Public
+   Key
+                                                
+                                                
+   Infrastructure
+   Idea
+   Maze.”
+   In:
+   <span 
+class="ec-lmri-10">Urbit</span>
+   <span 
+class="ec-lmri-10">Systems</span>
+   <span 
+class="ec-lmri-10">Technical</span>
+   <span 
+class="ec-lmri-10">Journal</span>
+   1.2,
+   pp. 1–7.
+   </p></dd><dt id="X0-EIP6551" class="thebibliography">
+</dt><dd 
+id="bib-13" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@EIP6551"></a>Windle, Jayden
+   et al.
+   (2023)
+   “<span class="small-caps">erc</span>-6551:
+   Non-fungible
+   Token
+   Bound
+   Accounts”.
+   <span class="small-caps">url</span>:
+   <a href="https://eips.ethereum.org/EIPS/eip-6551" class="url" >https://eips.ethereum.org/EIPS/eip-6551</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-W3C2022" class="thebibliography">
+</dt><dd 
+id="bib-14" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@W3C2022"></a>World
+   Wide
+   Web
+   Consortium
+   (2022a)
+   “Decentralized
+   Identiﬁers
+   (<span class="small-caps">did</span>)
+   v1.0:
+   Core
+                                                
+                                                
+   architecture,
+   data
+   model,
+   and
+   representations”.
+   <span class="small-caps">url</span>:
+   <a href="https://www.w3.org/TR/did-core/" class="url" >https://www.w3.org/TR/did-core/</a>
+   (visited
+   on
+   ~2024.8.29).
+   </p></dd><dt id="X0-W3C2022a" class="thebibliography">
+</dt><dd 
+id="bib-15" class="thebibliography">
+   <!--l. 353--><p class="noindent" ><a  id="cite.0@W3C2022a"></a>—   (2022b)
+   “Veriﬁable
+   Credentials
+   Data
+   Model
+   1.1”.
+   <span class="small-caps">url</span>:
+   <a href="https://www.w3.org/TR/vc-data-model/" class="url" >https://www.w3.org/TR/vc-data-model/</a>
+   (visited
+   on
+   ~2024.8.29).</p></dd></dl>
+<!--l. 353--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 67--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">The appendix contains an excerpt deﬁning the principles more</span>
+  <span 
+class="ec-lmr-8">completely.</span><a href="#x1-3006f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 97--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">See the appendix for a more complete excerpt explicating the</span>
+  <span 
+class="ec-lmr-8">design goals</span><a href="#x1-3008f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 125--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">As of writing, Kinode’s .os identity implementation leans</span>
+  <span 
+class="ec-lmr-8">towards allowing users to bring their own identity system, and</span>
+  <span 
+class="ec-lmr-8">handling packet routing by designated and self-declared routing</span>
+  <span 
+class="ec-lmr-8">nodes.</span><a href="#x1-4002f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 125--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">As of writing, Pallas, formerly Plunder, has not implemented an</span>
+  <span 
+class="ec-lmr-8">identity system. In the author’s conversations with developers working on</span>
+  <span 
+class="ec-lmr-8">the project, Pallas aims to be unopinionated about either identity system</span>
+  <span 
+class="ec-lmr-8">or packet routing and peer discovery, instead deferring that role to</span>
+  <span 
+class="ec-lmr-8">projects building on top of the system.</span><a href="#x1-4003f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 136--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">As a last minute addition, we note the “Groundwire” proposal</span>
+  <span 
+class="ec-lmr-8">(by </span><span 
+class="ec-lmr-8">~hastuc-dibtux, </span><span 
+class="ec-lmr-8">~tondes-sitrym, et al.), which was published just</span>
+  <span 
+class="ec-lmr-8">before this issue went to print. Groundwire suggested a project for a Gall</span>
+  <span 
+class="ec-lmr-8">agent enabling usage of Bitcoin and the comet level address space for an</span>
+  <span 
+class="ec-lmr-8">alternative </span><span class="small-caps">pki</span> <span 
+class="ec-lmr-8">without hard-forking Azimuth.</span><a href="#x1-4008f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 196--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">The author of this piece makes no statement about the ﬁnancial</span>
+  <span 
+class="ec-lmr-8">viability of these two options and notes that they both appear to</span>
+  <span 
+class="ec-lmr-8">recognize the illegibility of the way the </span><span class="small-caps">pki</span> <span 
+class="ec-lmr-8">is currently fractured and aim</span>
+  <span 
+class="ec-lmr-8">at rectifying it.</span><a href="#x1-12001f6">⤴</a></p></div>
+      
+
+
+    <div class="footnote-text">
+ <!--l. 201--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">The Jael secrets vane of Urbit OS merely subscribes for the </span><span class="small-caps">pki</span>
+ <span 
+class="ec-lmr-8">state, rather than storing it in Arvo itself.</span><a href="#x1-13001f7">⤴</a></p></div>
+    
+
+
+      <div class="footnote-text">
+  <!--l. 205--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span class="small-caps">erc</span><span 
+class="ec-lmr-8">-6551 implements an interface and registry for smart</span>
+  <span 
+class="ec-lmr-8">contract accounts deterministically controlled by one’s </span><span class="small-caps">erc</span><span 
+class="ec-lmr-8">-721 Urbit</span>
+  <span 
+class="ec-lmr-8">ID.</span><a href="#x1-13004f8">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
