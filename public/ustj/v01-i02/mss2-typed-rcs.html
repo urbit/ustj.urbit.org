@@ -1,0 +1,1369 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>Typed Revision Control</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="mss.css" /> 
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Typed Revision Control</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">N. E. Davis</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~lagrev-nocfep</code></span>
+<br />      <span 
+class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+</section>
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-30002" id="QQ2-1-3">Type in Revision Control Systems</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-40003" id="QQ2-1-4">Clay</a></span>
+<br />     <span class="subsectionToc" >3.1 <a href="#x1-50003.1" id="QQ2-1-5">Revision Control and Marks</a></span>
+<br />     <span class="subsectionToc" >3.2 <a href="#x1-60003.2" id="QQ2-1-6">Desks</a></span>
+<br />     <span class="subsectionToc" >3.3 <a href="#x1-70003.3" id="QQ2-1-8">Runtime</a></span>
+                                                
+                                                
+<br />     <span class="subsectionToc" >3.4 <a href="#x1-80003.4" id="QQ2-1-9">Building Code</a></span>
+<br />     <span class="subsectionToc" >3.5 <a href="#x1-90003.5" id="QQ2-1-10">Shortcomings</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-100004" id="QQ2-1-11">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-11000" id="QQ2-1-12">References</a></span>
+   </div>
+<!--l. 49--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 51--><p class="noindent" >A revision control system<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2001f1"></a> 
+is responsible for tracking the state and history of assets and
+asset changes within a particular continuity. It may also
+manage the production of assets through a build system, as
+used for instance by a continuous integration/continuous
+deployment (CI/CD) workﬂow. Trivially, an <span 
+class="ec-lmcsc-10">rcs </span>is a logical
+ﬁlesystem: a database for managing ﬁles. (Conventional
+<span 
+class="ec-lmcsc-10">rcs</span>s are agnostic to the underlying disk hardware,
+however.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-2002f2"></a> )
+Computer revision control systems have developed from the
+1960s onwards once hard drives permitted ﬁles to be
+stored on tape rather than simply as punchcard ﬁles.
+Succeeding generations have introduced new approaches
+and features, converging more or less on the broad
+functionality today aﬀorded by Git (<a  id="x1-2003"></a> Torvalds, 2005)
+in its elaborated form as a distributed source control
+                                                
+                                                
+system.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-2004f3"></a> 
+Much care has been taken to treat the problem of dependencies
+(e. g. <a  id="x1-2005"></a> Ball et al. (2015)) and eﬃcient user interfaces
+(e. g. GitHub, GitLab, etc.). However, although some modest
+interest has been expressed for a more complete notion of
+type in revision control, no current system known to the
+authors besides Urbit’s Clay fully implements a typed
+revision-controlled ﬁlesystem. In this article, we explore the
+approach of current <span 
+class="ec-lmcsc-10">rcs</span>s and elaborate Clay’s contributions to
+the ongoing task of information management and auditable,
+reproducible source builds.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-30002"></a>Type in Revision Control Systems</h3>
+<!--l. 55--><p class="noindent" >The problem of type in revision control has been of both
+academic and practical interest for decades (<a  id="x1-3001"></a> Perry, 1987).
+Essentially, can ﬁle artifacts be organized and classiﬁed in
+such a way as to make them susceptible of comparison across
+their history? The simplest arrangement which is commonly
+made is to designate a ﬁle as either plaintext or binary. A
+plaintext ﬁle can be updated by specifying the character oﬀset
+and run length to be replaced (an example of a “diﬀ”, or
+diﬀerence between two examples of text; typically these are
+resolved at the line level rather than character level). Plaintext
+ﬁles, whether <span 
+class="ec-lmcsc-10">ascii </span>or some form of <span 
+class="ec-lmcsc-10">utf</span>, are deﬁned by
+a regular format with well-understood and predictable
+symbol widths and oﬀsets. For instance, a little-endian
+representation of the text ’clay’ would be reproduced in
+<span 
+class="ec-lmcsc-10">ascii </span>hexadecimal as 0x7961.6c63 and <span 
+class="ec-lmcsc-10">ascii </span>binary as
+0b111.1001.0110.0001.0110.1100.0110.0011. (In binary,
+each character has a leading zero; that is, each entry is
+seven bits wide plus a 1-bit zero header.) In contrast,
+binary ﬁles (which is a byword for “everything else”)
+                                                
+                                                
+have arbitrary layout and oﬀset; it may be diﬃcult to
+determine how and why to compare two revisions of any given
+ﬁle. Many <span 
+class="ec-lmcsc-10">rcs</span>s simply treat all registered data as byte
+streams.
+</p><!--l. 57--><p class="indent" >   All modern <span 
+class="ec-lmcsc-10">rcs</span>s support plaintext and binary
+representations of ﬁles. Plaintext diﬃng at the level
+of line changes is straightforward; the Hunt–McIlroy
+algorithm is often employed (<a  id="x1-3002"></a> Hunt and McIlroy,
+1976).<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-3003f4"></a> 
+However, the most popular revision control systems (such as
+Subversion and Git) have included only minimal direct
+support for binary diﬀs. Some systems only support storing
+successive ﬁle copies of a binary ﬁle; that is, the diﬀ is the
+entire deletion of the old ﬁle and addition of the new ﬁle
+(e. g. <span 
+class="ec-lmcsc-10">cvs</span>). Other systems may support binary ﬁle diﬀs by
+granular block and oﬀset. Some <span 
+class="ec-lmcsc-10">rcs</span>s support diﬃng particular
+binary ﬁles using a custom automatic merge tool. For
+example, the textconv tool converts each version of the ﬁle to
+a plaintext representation and compares those representations.
+(To show a diﬀ for a changes in a <span 
+class="ec-lmcsc-10">pdf </span>ﬁle, a conﬁgured Git
+instance could compare the text output of pdﬁnfo in each case
+as a proxy. This is generally legible as metadata but does not
+of itself include suﬃcient information to reproduce or reverse
+the intervening changes; the underlying <span 
+class="ec-lmcsc-10">rcs </span>still stores the
+entire binary in its conventional representation.) In any case,
+type beyond ﬁle extension is not generally supported by
+<span 
+class="ec-lmcsc-10">rcs</span>s; they cannot meaningfully merge ﬁles classiﬁed as
+                                                
+                                                
+binary.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-3004f5"></a> 
+</p><!--l. 59--><p class="indent" >   A general-purpose notion of ﬁle type is not isomorphic to
+conventional type in programming language theory. For
+instance, consider a <span 
+class="ec-lmcsc-10">json </span>ﬁle. The following are equivalent as
+<span 
+class="ec-lmcsc-10">json </span>artifacts:
+</p>
+   <!--l. 61-->
+<pre class="lstlisting" id="listing-1"><span class="label"><a  id="x1-3006r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">{</span></span> 
+<span class="label"><a  id="x1-3007r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">name</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Alice</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span> 
+<span class="label"><a  id="x1-3008r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">age</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">30</span></span> 
+<span class="label"><a  id="x1-3009r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">}</span></span></pre>
+   <!--l. 68-->
+<pre class="lstlisting" id="listing-2"><span class="label"><a  id="x1-3010r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">{</span></span> 
+<span class="label"><a  id="x1-3011r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">age</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">30</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span> 
+<span class="label"><a  id="x1-3012r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">name</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Alice</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span> 
+<span class="label"><a  id="x1-3013r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">}</span></span></pre>
+   <!--l. 75-->
+<pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-3014r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">{</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">name</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Alice</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">age</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">30</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">}</span></span></pre>
+<!--l. 79--><p class="indent" >   Indeed, since <span 
+class="ec-lmcsc-10">json </span>is structurally agnostic to syntactic
+whitespace, an inﬁnite number of equivalent ﬁles could be
+constructed. Clearly as plaintext representations, each of these
+diﬀer, yet they are fully equivalent as <span 
+class="ec-lmcsc-10">json </span>artifacts. An <span 
+class="ec-lmcsc-10">rcs</span>
+which can recognize a <span 
+class="ec-lmcsc-10">json </span>input can meaningfully store them
+as equivalent, while an <span 
+class="ec-lmcsc-10">rcs </span>that makes only the trivial
+distinction between plaintext and binary must consider them
+all to be diﬀerent—nonsemantic changes in structure may
+trigger spurious diﬀs in the ﬁle’s history. Furthermore, a
+<span 
+class="ec-lmcsc-10">json</span>-aware <span 
+class="ec-lmcsc-10">rcs </span>could meaningfully merge these ﬁles whereas
+a plaintext/binary <span 
+class="ec-lmcsc-10">rcs </span>could not. Finally, a <span 
+class="ec-lmcsc-10">json</span>-aware <span 
+class="ec-lmcsc-10">rcs</span>
+could yield a diﬀerent plaintext output when asked to produce
+                                                
+                                                
+the ﬁle, as it could normalize the whitespace to a canonical
+form. This may be considered by other systems to be an
+“incorrect” round trip.
+</p><!--l. 81--><p class="indent" >   Thus we must consider two intersecting notions of ﬁle
+type:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-3016x1">
+     <!--l. 83--><p class="noindent" >The ﬁle type as understood by the system, typically
+     based  on  bitwise  reproducibility  (e. g. plaintext,
+     binary).
+     </p></li>
+<li 
+  class="enumerate" id="x1-3018x2">
+     <!--l. 84--><p class="noindent" >The ﬁle type as understood conceptually, typically
+     based   on   structural   relationships   (e. g. <span 
+class="ec-lmcsc-10">json</span>,
+     <span 
+class="ec-lmcsc-10">xml</span>/<span 
+class="ec-lmcsc-10">html</span>, Word docx, etc.).</p></li></ol>
+<!--l. 87--><p class="noindent" >The employment of an intermediate representation allows us
+to track changes to ﬁles and manage their history—state—more
+eﬀectively. Consider the popular JavaScript framework
+React (<a  id="x1-3019"></a> Meta, 2013), aspects of which were developed to
+resolve diﬃculties with slow repainting in browsers (for a
+popular explanation, see <a  id="x1-3020"></a> Baer (2018), chapter 1). React’s
+virtual Document Object Model (<span 
+class="ec-lmcsc-10">dom</span>) system acts as
+an intermediate representation between the actual <span 
+class="ec-lmcsc-10">dom</span>
+and the developer’s code. When a developer updates the
+virtual <span 
+class="ec-lmcsc-10">dom</span>, the framework compares the new virtual
+<span 
+class="ec-lmcsc-10">dom </span>with the previous virtual <span 
+class="ec-lmcsc-10">dom </span>and updates the real
+<span 
+class="ec-lmcsc-10">dom </span>only if necessary. This allows React to optimize the
+rendering process and improve performance. It also means
+that we can consider the structural representation of the
+<span 
+class="ec-lmcsc-10">dom </span>object as an intermediate representation, and the
+production and application of the diﬀ as a type-aware <span 
+class="ec-lmcsc-10">rcs</span>
+operation. Higher-level interfaces like Microsoft Word’s
+“Track Changes” feature (<a  id="x1-3021"></a> Microsoft, 2024) similarly
+resolves diﬀs across text and formatting within a document,
+                                                
+                                                
+an artifact processed from a ﬁle into a user-friendly
+representation. While the “Track Changes” user interface
+is optimized for interactivity, conceptually it is quite
+similar to conventional merge tools from <span 
+class="ec-lmcsc-10">rcs</span>s, and de
+facto resolves the same sorts of diﬀs for its particular ﬁle
+type.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-3022f6"></a> 
+Furthermore, the “Source Code in Database” (<span class="small-caps">scid</span>) approach
+parses all code into a database as an intermediate representation;
+this shares some features with a hypothetical type-aware <span class="small-caps">rcs</span>.
+Thus a signiﬁcant part of managing typed ﬁle data is deciding
+what the input, output, and diﬀs should look like, and the
+remainder is systematic application of these rules to the
+data.
+</p><!--l. 90--><p class="indent" >   Given this frame, consider <a  id="x1-3023"></a> Perry’s taxonomy of version
+control for module interfaces:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-3025x1">
+     <!--l. 93--><p class="noindent" >No version control. Files are simply replaced.
+     </p></li>
+<li 
+  class="enumerate" id="x1-3027x2">
+     <!--l. 94--><p class="noindent" >Basic  version  control.  Files  are  versioned  with  a
+     number, but no diﬀ is applied.
+     </p></li>
+<li 
+  class="enumerate" id="x1-3029x3">
+     <!--l. 95--><p class="noindent" >Strongly-typed version control. Files are resolved at
+     a structural level, such as procedures or arrays, and
+     diﬀs are applied at that level.</p></li></ol>
+                                                
+                                                
+<!--l. 98--><p class="noindent" >In this scheme, contemporary Git-style <span 
+class="ec-lmcsc-10">rcs </span>is a
+“weakly-typed” <span 
+class="ec-lmcsc-10">rcs</span>: the system is aware of versions
+and diﬀs, but typically not below the ﬁle or line
+level.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a  id="x1-3030f7"></a> 
+Perry was concerned with the behavior and representation of
+semantic objects, rather than ﬁles or data:
+     </p><blockquote class="quote">
+     <!--l. 102--><p class="noindent" >Version  equivalence  in  this  type  of  version
+     control
+     mechanism  is  deﬁned  in  terms  of  syntactic
+     equivalence: data objects are equivalent if their
+     types or structures are equivalent; operations
+     and modules are equivalent if their signatures
+     are equivalent. (<a  id="x1-3031"></a> Perry, 1987)</p></blockquote>
+<!--l. 105--><p class="noindent" >Strongly-typed version control requires coupling to the build
+system, since the system must be aware of the structure of the
+data in order to apply diﬀs. (Indeed, <a  id="x1-3032"></a> <code>~rovnys-ricfer</code> (2024),
+pp. 6–7, in <span class="small-caps">ustj</span> vol. 1 iss. 1, pp. 1—46, discussed one solution
+to the linking problem which is well-suited to Urbit’s global
+namespace.)
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-40003"></a>Clay</h3>
+<!--l. 111--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.1   </span> <a  id="x1-50003.1"></a>Revision Control and Marks</h4>
+<!--l. 113--><p class="noindent" >Urbit provides the Clay vane at <code class="lstinline"><span style="color:#000000">/sys/vane/clay</span></code> to manage
+Unix-style ﬁles and source builds (cf. <a  id="x1-5001"></a> <code>~sorreg-namtyv</code> (2016)).
+Clay acts as both the Unix-like ﬁlesystem and the source
+                                                
+                                                
+control vane. While Hoon itself (<code class="lstinline"><span style="color:#000000">/sys/hoon</span></code>) is responsible to
+compile a source noun into a Hoon abstract syntax tree (<span 
+class="ec-lmcsc-10">ast</span>)
+and ultimately into executable Nock, the actual construction
+of source input from ﬁles is delegated to the <code class="lstinline"><span style="color:#000000">++ford</span></code> arm of
+Clay. This build process includes compiling the correct
+import ﬁles (such as libraries and shared structure ﬁles).
+Clay is also tightly coupled to the userspace vane Gall
+since system updates and agent updates both occur via
+Clay.<span class="footnote-mark"><a href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a  id="x1-5002f8"></a> 
+</p><!--l. 115--><p class="indent" >   To motivate how Clay functions as a revision control
+ﬁlesystem, we need to brieﬂy examine some major data
+structures utilized by Clay. At the highest level, ﬁles are
+organized into “desks”, described in previous literature as being
+analogous to Git branches but really more like Git repositories.
+A desk is a self-contained continuity of ﬁles; its state is the
+result of a history of commits. Desks may not include links to
+oﬀ-desk resources. Each desk must expose a few ﬁles at deﬁnite
+paths; primarily <code class="lstinline"><span style="color:#000000">/mar</span></code> for the marks used to read the desk
+contents.<span class="footnote-mark"><a href="mss10.html#fn9x0"><sup class="textsuperscript">9</sup></a></span><a  id="x1-5003f9"></a> 
+</p><!--l. 117--><p class="indent" >   Ultimately, Arvo and Clay deal in nouns. A noun is a binary
+tree of unsigned integers. These may be evaluated as Nock
+formulas or manipulated as data. A noun is formally agnostic
+to the underlying hardware and is almost always accessed via
+some representation path (i. e. as phenomenon). A noun
+serves as a universally legible intermediate representation for
+all data and code.
+</p><!--l. 119--><p class="indent" >   Urbit has an immutable data model; the system state of
+Arvo is the unique result of the events in its history, stored as
+its event log. If a noun changes, it is the result of deﬁnite
+discrete changes to the system state. This yields very
+                                                
+                                                
+nice properties of referential transparency and has some
+ramiﬁcations in library management; see <a  id="x1-5004"></a> <code>~rovnys-ricfer</code> and
+<code>~wicdev-wisryt</code> (2024) for more details.
+</p><!--l. 121--><p class="indent" >   Typically, a noun is altered either directly via
+subject-modifying code (<code class="lstinline"><span style="color:#000000">%~</span></code> censig, <code class="lstinline"><span style="color:#000000">=.</span></code> tisdot) or via a mark
+transformation, on which more later.
+</p><!--l. 123--><p class="indent" >   While conventional ﬁle systems denote ﬁle type primarily
+by ﬁle suﬃx or a cursory search using “magic tests” on the ﬁle
+header, Urbit instead stores all data as a noun accessed via a
+mark. A mark is essentially a representation rule for nouns.
+Marks permit nouns to be stored with more granularity than
+the text/binary dichotomy facilitates, since details of
+conversion are stored as part of the mark.
+</p><!--l. 126--><p class="indent" >   A mark may be considered an executable <span 
+class="ec-lmcsc-10">mime</span>
+type.<span class="footnote-mark"><a href="mss11.html#fn10x0"><sup class="textsuperscript">10</sup></a></span><a  id="x1-5005f10"></a> 
+A mark essentially describes how to map a data representation
+to a noun, and from a noun back out to a data representation.
+This conversion may be trivial (e. g. the binary storage of
+an audio ﬁle) or sophisticated (from a text stream to a
+linked-list <span 
+class="ec-lmcsc-10">utf </span>representation). Data are accessed via a
+particular mark, and the appropriate conversion routine is
+invoked.<span class="footnote-mark"><a href="mss12.html#fn11x0"><sup class="textsuperscript">11</sup></a></span><a  id="x1-5006f11"></a> 
+Clay is capable of searching for transition paths between
+mark representations, and in principle permits conversion
+between all compatible representations (if there were a path
+from Markdown md to rich text rtf to plaintext txt in
+marks, then the conversion is automatically supported by
+Clay).
+     </p><blockquote class="quote">
+     <!--l. 129--><p class="noindent" >A mark is a term (symbol) which is the Urbit
+                                                
+                                                
+     equivalent  of  a  <span 
+class="ec-lmcsc-10">mime  </span>type,  if  <span 
+class="ec-lmcsc-10">mime  </span>types
+     were  names  of  typed  validation  functions.  (<a  id="x1-5007"></a>
+     <code>~sorreg-namtyv</code> et al. (2016), p. 51)</p></blockquote>
+<!--l. 132--><p class="indent" >   Unix ﬁlesystem mounting and committing involves
+synchronizing a desk’s state with a Unix logical representation
+of the ﬁles involved. The actual ﬁle data are imported as
+<code class="lstinline"><span style="color:#000000">%mime</span></code>-typed nouns and then converted to their target mark
+as ﬁle type.
+</p><!--l. 134--><p class="indent" >   Each mark deﬁnes several standard arms:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-5009x1">
+     <!--l. 137--><p class="noindent" ><code class="lstinline"><span style="color:#000000">++grab</span></code> converts from other marks (by arm name)
+     to a given mark.
+     </p></li>
+<li 
+  class="enumerate" id="x1-5011x2">
+     <!--l. 138--><p class="noindent" ><code class="lstinline"><span style="color:#000000">++grow</span></code> converts from the mark to other marks.
+     </p></li>
+<li 
+  class="enumerate" id="x1-5013x3">
+     <!--l. 139--><p class="noindent" ><code class="lstinline"><span style="color:#000000">++grad</span></code> deﬁnes the diﬀs applicators for the mark.</p></li></ol>
+<!--l. 142--><p class="noindent" >Marks do not need to be symmetrical or round-trip. A <span 
+class="ec-lmcsc-10">json</span>
+input may yield an equivalent <span 
+class="ec-lmcsc-10">json </span>output but altered by
+structural whitespace. Clay is also proactive in searching for
+possible mark paths—if an immediate conversion is not
+available, then a mutually available intermediary form may be
+used. To implement a custom ﬁletype, all that is required
+is the production of a suitable mark ﬁle. Conversions
+from the ﬁlesystem require at a minimum a <span 
+class="ec-lmcsc-10">mime </span>mark
+ﬁle, which acts as the global intermediary from the host
+OS.
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.2   </span> <a  id="x1-60003.2"></a>Desks</h4>
+<!--l. 147--><p class="noindent" >A  desk  is  a  ﬁlesystem
+continuity,<span class="footnote-mark"><a href="mss13.html#fn12x0"><sup class="textsuperscript">12</sup></a></span><a  id="x1-6001f12"></a> 
+and represents the main way that data are synchronized between
+Urbit instances (ships). The state of a desk is a history of
+sequential commits, with each commit after the ﬁrst having at
+least one parent commit. Desks are often analogized to Git
+repositories.<span class="footnote-mark"><a href="mss14.html#fn13x0"><sup class="textsuperscript">13</sup></a></span><a  id="x1-6003f13"></a> 
+Each desk must contain suﬃcient internal data—especially
+marks—to produce its own code, given Hoon and the standard
+library (which are always available).
+</p><!--l. 149--><p class="indent" >   Since Clay is a global ﬁlesystem, it has to maintain
+information about both local and remote desks. A local desk’s
+state maintains information about noun data, build and mark
+cache state, userspace app state, various policies, and
+synchronization with the host OS ﬁlesystem.
+</p>
+   <!--l. 151-->
+<a  id="x1-6004r1"></a>
+<a  id="x1-6005"></a>
+<figcaption class="caption" ><span class="id">Listing 1:
+    </span><span  
+class="content">Clay
+    desk
+    types</span></figcaption><!--tex4ht:label?: x1-6004r3.2 --><pre class="lstlisting" id="listing-15"><span class="label"><a  id="x1-6006r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Domestic</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">desk</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">state.</span></span> 
+<span class="label"><a  id="x1-6007r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dojo</span></span> 
+<span class="label"><a  id="x1-6008r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">qyx=cult</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">subscribers</span></span> 
+<span class="label"><a  id="x1-6009r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dom=dome</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">desk</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">state</span></span> 
+<span class="label"><a  id="x1-6010r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">per=regs</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">read</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">perms</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">per</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">path</span></span> 
+<span class="label"><a  id="x1-6011r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pew=regs</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">write</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">perms</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">per</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">path</span></span> 
+<span class="label"><a  id="x1-6012r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">fiz=melt</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">state</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">for</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">mega</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">merges</span></span> 
+<span class="label"><a  id="x1-6013r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6014r9"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Desk</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">state.</span></span> 
+<span class="label"><a  id="x1-6015r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dome</span></span> 
+<span class="label"><a  id="x1-6016r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">let=aeon</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">top</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">id</span></span> 
+<span class="label"><a  id="x1-6017r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">hit=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">aeon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tako</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">versions</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">by</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">id</span></span> 
+<span class="label"><a  id="x1-6018r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">lab=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@tas</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">aeon</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">labels</span></span> 
+<span class="label"><a  id="x1-6019r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tom=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tako</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">norm</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">tomb</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">policies</span></span> 
+<span class="label"><a  id="x1-6020r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">nor=norm</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">default</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">policy</span></span> 
+<span class="label"><a  id="x1-6021r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mim=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mime</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">mime</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">cache</span></span> 
+<span class="label"><a  id="x1-6022r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">fod=flue</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">ford</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">cache</span></span> 
+<span class="label"><a  id="x1-6023r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">wic=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">weft</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">yoki</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">commit-in-waiting</span></span> 
+<span class="label"><a  id="x1-6024r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">liv=zest</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">running</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">agents</span></span> 
+<span class="label"><a  id="x1-6025r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ren=rein</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">force</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">agents</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">on/off</span></span> 
+<span class="label"><a  id="x1-6026r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6027r22"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Support</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">types</span></span> 
+<span class="label"><a  id="x1-6028r23"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mizu</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@u</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tako</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r=rang</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6029r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">new</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">state</span></span> 
+<span class="label"><a  id="x1-6030r25"></a><span 
+class="ec-lmr-5">25</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">rang</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">repository</span></span> 
+<span class="label"><a  id="x1-6031r26"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">$+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">rang</span></span> 
+<span class="label"><a  id="x1-6032r27"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">hut=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tako</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">yaki</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">changes</span></span> 
+<span class="label"><a  id="x1-6033r28"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">lat=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">lobe</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">page</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">data</span></span> 
+<span class="label"><a  id="x1-6034r29"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+<!--l. 184--><p class="indent" >   The keystone structure is hit, which connects a given
+version of the desk (its aeon, which is merely a @ud)
+to the tree of associated commits. These are accessed
+from the “slush pool” of known commits via hut in the
+                                                
+                                                
+Clay’s rang, which is not associated with a particular local
+desk.
+</p><!--l. 187--><p class="indent" >   Much of Clay’s machinery is intended to support noun
+changes propagated as commits, or desk changes. These may
+arise from three sources: a local host OS ﬁlesystem sync, a
+remote desk sync, or an on-Urbit local edit. A commit is a
+snapshot of a set of ﬁles with a list of parent commits and a
+timestamp.
+</p><!--l. 189--><p class="indent" >   Various merge strategies are available to support desk
+updating. Given a commit as a timestamped snapshot of ﬁles,
+how should two conﬂicting histories be reconciled? For
+instance, <code class="lstinline"><span style="color:#000000">%fine</span></code> is a Git-style “fast-forward” for use when
+histories nest but one is “ahead”. <code class="lstinline"><span style="color:#000000">%meet</span></code> combines changes
+as long as the same ﬁle/noun has not been modiﬁed.
+(Several others are available and are described in the system
+documentation.) While Clay has at times supported noun diﬀs
+in commits, it currently simply stores the entire ﬁle at each
+commit.<span class="footnote-mark"><a href="mss15.html#fn14x0"><sup class="textsuperscript">14</sup></a></span><a  id="x1-6035f14"></a> 
+Urbit developers in practice have not encountered diﬃculties
+with desk and commit management due to this limitation at
+the current time, but resolution using mark diﬀs will
+eventually be desirable.
+</p><!--l. 191--><p class="indent" >   Structurally, Clay tracks desk state as a sequential <code class="lstinline"><span style="color:#000000">+$aeon</span></code>
+or <code class="lstinline"><span style="color:#000000">@ud</span></code>, but ﬁles may be arbitrarily accessed using a
+<code class="lstinline"><span style="color:#000000">+$case</span></code>:
+</p>
+   <!--l. 193-->
+<pre class="lstlisting" id="listing-21"><span class="label"><a  id="x1-6036r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">case</span></span> 
+<span class="label"><a  id="x1-6037r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@da</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%da:</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">date</span></span> 
+<span class="label"><a  id="x1-6038r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%tas</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@tas</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%tas:</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">label</span></span> 
+<span class="label"><a  id="x1-6039r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%ud:</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">sequence</span></span> 
+<span class="label"><a  id="x1-6040r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%uv</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@uv</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%uv:</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">hash</span></span> 
+<span class="label"><a  id="x1-6041r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+<!--l. 202--><p class="noindent" >A case resolves into the corresponding <code class="lstinline"><span style="color:#000000">aeon</span></code> via the canonical
+timestamp of the commit; the label map; or the hash of the
+corresponding commit. A userspace system to support
+detailed commit messages, called Story, is available at
+                                                
+                                                
+@urbit/story.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.3   </span> <a  id="x1-70003.3"></a>Runtime</h4>
+<!--l. 207--><p class="noindent" >As a vane of Arvo, Clay lives “on Mars”; that is, it describes a
+logical ﬁlesystem inside of the Urbit ship but does not
+directly map its nouns to physical hardware. The particular
+implementation used to store the total state of Arvo,
+which contains Clay’s state including ﬁle data, depends on
+the runtime. At the time of writing, the Vere runtime
+uses the Lightning Memory-Mapped Database Manager
+(<span 
+class="ec-lmcsc-10">lmdb</span>) which is a B-tree representation for a key-value
+store (<a  id="x1-7001"></a> Chu, 2011). While of practical consequence for
+lookup time and system behavior, the architecture of
+Clay to an Urbit developer is independent of the runtime
+implementation.
+</p><!--l. 209--><p class="indent" >   The <span 
+class="ec-lmcsc-10">posix</span>-compliant host OS supports a ﬁlesystem mirror
+of Clay ﬁles organized by desk. Importantly, while these ﬁles
+can be synced to Clay, they are not the canonical reference for
+each (which lives in <span 
+class="ec-lmcsc-10">lmbd</span>). Clay maintains a “sync duct” with
+the runtime, which upon receipt of a <code class="lstinline"><span style="color:#000000">%dirk</span></code> task produces a
+list of ﬁle changes each way and implements the latest
+changes.<span class="footnote-mark"><a href="mss16.html#fn15x0"><sup class="textsuperscript">15</sup></a></span><a  id="x1-7002f15"></a> 
+</p><!--l. 211--><p class="indent" >   In principle, as we have intimated, an <span 
+class="ec-lmcsc-10">rcs </span>may abstract
+away from the ﬁle as the fundamental artifact being tracked.
+While Clay does not fully commit to this, in a concession to
+its <span 
+class="ec-lmcsc-10">posix</span>-compliant host OS, it gestures towards the
+possibility of conceiving of build sources and artifacts as
+objects (nouns) other than ﬁles. Since Urbit “uniﬁes” nouns
+(that is, it structurally stores only one copy of a noun and
+maintains references to that shared value), repetition of
+critical resources across desks does not lead to ﬁlesystem
+bloat. (See <a  id="x1-7003"></a> <code>~rovnys-ricfer</code> and <code>~wicdev-wisryt</code> (2024) in <span class="small-caps">ustj</span>
+vol. 1 iss. 1, pp. 75—82, for details.)
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.4   </span> <a  id="x1-80003.4"></a>Building Code</h4>
+<!--l. 216--><p class="noindent" >Clay is also directly responsible for building code. Formerly,
+Urbit built code from source ﬁles using the Ford vane. In 2020,
+the core developers realized that integrating the build system
+directly into the <span 
+class="ec-lmcsc-10">rcs </span>solved a number of problems with
+updating the system correctly. Updates to the system should
+be atomic (complete or fail in one transaction); self-contained
+(no implicit dependencies or dependencies on previous
+system states); and ordered (sequenced within the system
+stack). By coupling the build system into the <span 
+class="ec-lmcsc-10">rcs</span>, the
+system can be updated in a single transaction, with the
+build system ensuring that the system is always in a
+consistent state. In a typed <span 
+class="ec-lmcsc-10">rcs</span>, the compiler or build
+system must be always at hand to process diﬀs in artifacts.
+Although of relatively minor consequence to userspace
+application developers, the integration of <code class="lstinline"><span style="color:#000000">++ford</span></code> into Clay
+transforms the system closer into an integrated <span 
+class="ec-lmcsc-10">rcs </span>for generic
+nouns.
+</p><!--l. 218--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">3.5   </span> <a  id="x1-90003.5"></a>Shortcomings</h4>
+<!--l. 220--><p class="noindent" >As currently implemented, Clay presents several wrinkles in
+developer ergonomics. Chief among these is the way that
+marks, as simple type tags, are underspeciﬁed. The original
+philosophy of marks centered on network transmission of
+nouns as tagged data:
+</p><!--l. 222--><p class="indent" >
+     </p><blockquote class="quote">
+     <!--l. 223--><p class="noindent" >Like  a  <span 
+class="ec-lmcsc-10">mime </span>type,  the  mark  is  just  a  label.
+     There is no way to guarantee that the sender
+     and receiver agree on what this label means.
+     A noun which doesn’t normalize to itself is a
+                                                
+                                                
+     packet drop. (<a  id="x1-9001"></a> <code>~sorreg-namtyv</code> et al. (2016), pp.
+     51–52)</p></blockquote>
+<!--l. 226--><p class="noindent" >In practice, diﬀerent Clay desks and diﬀerent Urbit versions
+can have diﬀerent mark processors (and thus diﬀerent
+behvaior for the same tag). No simple version system tracks
+these; there is no global type registry (other than the scry
+namespace), and any given mark is simply identiﬁed by its
+desk and path. Developers have expressed a desire for a more
+robust mark management capability, and solutions have
+ranged from a global type registry (e. g. that proposed by
+<a href="https://www.archetype.computer/" >Archetype</a>) to using paths instead of simple tags for marks. In
+practice as of writing, marks are disambiguated by supplying
+the intended mark with the desk; this may lead to multiple
+diﬀerent implementations of a mark being present on the same
+system, although uniquely identiﬁed by diﬀerent Clay
+paths.
+</p><!--l. 229--><p class="indent" >   The current architecture of Clay (largely in place
+by 2016 except for the uniﬁcation of the former Ford
+vane into Clay in 2020) leads to three ongoing developer
+concerns:<span class="footnote-mark"><a href="mss17.html#fn16x0"><sup class="textsuperscript">16</sup></a></span><a  id="x1-9002f16"></a> 
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-9004x1">
+     <!--l. 234--><p class="noindent" >Implementing <span 
+class="ec-lmcsc-10">rcs </span>behavior at the ﬁle system layer
+     seems to be incorrect for Urbit (that is, too much of
+     a sop to Unix). trying to do revision control at base
+     layer, but ﬁle system is wrong layer (you just want
+     history of actions/tx log rather than full state); see
+      migrev codebases for clay state
+     </p></li>
+<li 
+  class="enumerate" id="x1-9006x2">
+     <!--l. 235--><p class="noindent" >Desks seem to be the wrong abstraction in practice.
+                                                
+                                                
+     The theory of the desk doesn’t account for actual
+     distribution patterns people would like to use; we
+     want one desk but one spot in ﬁle tree is capable of
+     acting as a desk (chroot analysis); overuse of desks
+     makes Urbit not feel as much like a ﬁlesystem you
+     can explore
+     </p></li>
+<li 
+  class="enumerate" id="x1-9008x3">
+     <!--l. 236--><p class="noindent" >The  application  system  (userspace)  and  the  build
+     system           and           ﬁlesystem           should
+     be co-located. Currently, Clay and Gall are deeply
+     entangled but must interact via a somewhat awkward
+     message-passing interface. This leads to a number of
+     ergonomic issues, such as the need to suspend a desk
+     in order to suspend an agent. Employing paths rather
+     than simple tags would lead to a desire to constrain
+     what can exist at certain paths. This relates to the
+     deﬁnition of ﬁles as data structures, and ultimately
+     a noun-maximalist scenario abstracts more towards
+     nouns as database entries rather than “ﬁles”.</p></li></ol>
+<!--l. 239--><p class="indent" >   One possible future for Clay sees it being restricted to
+source and build management, rather than expansion to a
+more fully-featured ﬁlesystem. In this contingency, the
+userspace management vane may take over conventional ﬁle
+storage, as Gall or a successor. This may only implement a
+ﬁlesystem interface for the host OS and external applications
+that “think” in ﬁles, such as web browsers.
+</p><!--l. 241--><p class="indent" >   Alternatively, the build system, <span 
+class="ec-lmcsc-10">rcs</span>, and application
+engine fuse into a single userspace vane, which is a possible
+endpoint of the “shrubbery” project. Mark cores would be
+replaced with simpler conversion rules permitting only
+straightforward type casts between nouns as <code class="lstinline"><span style="color:#000000">$-</span><span style="color:#000000">(</span><span style="color:#000000">from</span><span style="color:#000000"> </span><span style="color:#000000">to</span><span style="color:#000000">)</span></code>
+                                                
+                                                
+gates.<span class="footnote-mark"><a href="mss18.html#fn17x0"><sup class="textsuperscript">17</sup></a></span><a  id="x1-9009f17"></a> 
+</p>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-100004"></a>Conclusion</h3>
+<!--l. 245--><p class="noindent" >In its current instantiation, Clay exhibits some notable
+characteristics as a typed revision control system. It is capable
+of tracking ﬁle changes at a structural level, permitting
+meaningful diﬀs and merges for ﬁles of the same mark. It is
+also capable of converting between marks, permitting a
+more ﬂexible approach to ﬁle type than the conventional
+text/binary dichotomy of Git and other <span 
+class="ec-lmcsc-10">rcs</span>s. However, the
+future of userspace and code building is still in ﬂux and may
+see a reworking of the Clay vane to better suit the needs of
+developers and users.<img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+</p><!--l. 249--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-11000"></a>References</h3>
+<!--l. 249--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Baer2018" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Baer2018"></a>Baer, Eric
+   (2018).
+   <span 
+class="ec-lmri-10">What</span>
+   <span 
+class="ec-lmri-10">React</span>
+   <span 
+class="ec-lmri-10">Is</span>
+   <span 
+class="ec-lmri-10">and</span>
+                                                
+                                                
+   <span 
+class="ec-lmri-10">Why</span>
+   <span 
+class="ec-lmri-10">It</span>
+   <span 
+class="ec-lmri-10">Matters</span>.
+   Sebastopol,
+   CA:
+   O’Reilly
+   Media.
+   <span class="small-caps">url</span>:
+   <a href="https://www.oreilly.com/library/view/what-react-is/9781491996744/ch01.html" class="url" >https://www.oreilly.com/library/view/what-react-is/9781491996744/ch01.html</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Ball2015" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Ball2015"></a>Ball, Thomas
+   et al.
+   (2015).
+   “Beyond
+   Open
+   Source:
+   The
+   TouchDevelop
+   Cloud-based
+   Integrated
+   Development
+   Environment.”
+   In:
+   <span 
+class="ec-lmri-10">2nd</span>
+   <span class="small-caps">acm</span>
+   <span 
+class="ec-lmri-10">International</span>
+   <span 
+class="ec-lmri-10">Conference</span>
+   <span 
+class="ec-lmri-10">on</span>
+   <span 
+class="ec-lmri-10">Mobile</span>
+   <span 
+class="ec-lmri-10">Software</span>
+   <span 
+class="ec-lmri-10">Engineering</span>
+   <span 
+class="ec-lmri-10">and</span>
+   <span 
+class="ec-lmri-10">Systems</span>.
+   <span class="small-caps">url</span>:
+                                                
+                                                
+   <a href="https://ieeexplore.ieee.org/document/7283033" class="url" >https://ieeexplore.ieee.org/document/7283033</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-LMDB" class="thebibliography">
+</dt><dd 
+id="bib-3" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@LMDB"></a>Chu, Howard
+   (2011)
+   “<span 
+class="ec-lmcsc-10">lmdb</span>”.
+   <span class="small-caps">url</span>:
+   <a href="http://www.lmdb.tech/doc/" class="url" >http://www.lmdb.tech/doc/</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Collins2016" class="thebibliography">
+</dt><dd 
+id="bib-4" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Collins2016"></a>Collins-Sussman, Ben,
+   Brian W. Fitzpatrick,
+   and
+   C. Michael Pilato
+   (2016).
+   <span 
+class="ec-lmri-10">Version</span>
+   <span 
+class="ec-lmri-10">Control</span>
+   <span 
+class="ec-lmri-10">with</span>
+   <span 
+class="ec-lmri-10">Subversion</span>.
+   Sebastopol,
+   CA:
+   O’Reilly
+   Media.
+   <span class="small-caps">url</span>:
+   <a href="https://svnbook.red-bean.com/en/1.8/svn.forcvs.binary-and-trans.html" class="url" >https://svnbook.red-bean.com/en/1.8/svn.forcvs.binary-and-trans.html</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Hunt1976" class="thebibliography">
+</dt><dd 
+id="bib-5" class="thebibliography">
+                                                
+                                                
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Hunt1976"></a>Hunt, James W.
+   and
+   M. Douglas McIlroy
+   (1976).
+   <span 
+class="ec-lmri-10">An</span>
+   <span 
+class="ec-lmri-10">Algorithm</span>
+   <span 
+class="ec-lmri-10">for</span>
+   <span 
+class="ec-lmri-10">Diﬀerential</span>
+   <span 
+class="ec-lmri-10">File</span>
+   <span 
+class="ec-lmri-10">Comparison</span>.
+   Computing
+   Science
+   Technical
+   Report
+   41.
+   Bell
+   Laboratories.
+   <span class="small-caps">url</span>:
+   <a href="http://www.cs.dartmouth.edu/~doug/diff.pdf" class="url" >http://www.cs.dartmouth.edu/~doug/diﬀ.pdf</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-React" class="thebibliography">
+</dt><dd 
+id="bib-6" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@React"></a>Meta
+   (2013)
+   “React”.
+   <span class="small-caps">url</span>:
+   <a href="https://react.dev/" class="url" >https://react.dev/</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-MS2024" class="thebibliography">
+</dt><dd 
+id="bib-7" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@MS2024"></a>Microsoft
+   (2024)
+   “Track
+                                                
+                                                
+   changes
+   in
+   Word”.
+   <span class="small-caps">url</span>:
+   <a href="https://support.microsoft.com/en-us/office/track-changes-in-word-197ba630-0f5f-4a8e-9a77-3712475e806a" class="url" >https://support.microsoft.com/en-us/oﬃce/track-changes-in-word-197ba630-0f5f-4a8e-9a77-3712475e806a</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Perry1987" class="thebibliography">
+</dt><dd 
+id="bib-8" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Perry1987"></a>Perry, D. E.
+   (1987).
+   “Version
+   Control
+   in
+   the
+   Inscape
+   Environment.”
+   In:
+   <span 
+class="ec-lmri-10">Proceedings</span>
+   <span 
+class="ec-lmri-10">of</span>
+   <span 
+class="ec-lmri-10">the</span>
+   <span 
+class="ec-lmri-10">9th</span>
+   <span 
+class="ec-lmri-10">International</span>
+   <span 
+class="ec-lmri-10">Conference</span>
+   <span 
+class="ec-lmri-10">on</span>
+   <span 
+class="ec-lmri-10">Software</span>
+   <span 
+class="ec-lmri-10">Engineering</span>,
+   pp. 142–149.
+   <span class="small-caps">url</span>:
+   <a href="https://users.ece.utexas.edu/~perry/work/papers/icse9b.pdf" class="url" >https://users.ece.utexas.edu/~perry/work/papers/icse9b.pdf</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Blackman2024" class="thebibliography">
+</dt><dd 
+id="bib-9" class="thebibliography">
+                                                
+                                                
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Blackman2024"></a><code>~rovnys-ricfer</code>, Ted Blackman
+   (2024).
+   “The
+   State
+   of
+   Urbit:
+   Eight
+   Years
+   After
+   the
+   Whitepaper.”
+   In:
+   <span 
+class="ec-lmri-10">Urbit</span>
+   <span 
+class="ec-lmri-10">Systems</span>
+   <span 
+class="ec-lmri-10">Technical</span>
+   <span 
+class="ec-lmri-10">Journal</span>
+   1.1,
+   pp. 1–46.
+   </p></dd><dt id="X0-Blackman2024a" class="thebibliography">
+</dt><dd 
+id="bib-10" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Blackman2024a"></a><code>~rovnys-ricfer</code>, Ted Blackman
+   and
+   Philip C. Monk <code>~wicdev-wisryt</code>
+   (2024).
+   “A
+   Solution
+   to
+   Static
+   vs.
+   Dynamic
+   Linking.”
+   In:
+   <span 
+class="ec-lmri-10">Urbit</span>
+   <span 
+class="ec-lmri-10">Systems</span>
+   <span 
+class="ec-lmri-10">Technical</span>
+   <span 
+class="ec-lmri-10">Journal</span>
+   1.1,
+   pp. 75–82.
+                                                
+                                                
+   </p></dd><dt id="X0-Yarvin2016" class="thebibliography">
+</dt><dd 
+id="bib-11" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Yarvin2016"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2016)
+   “Toward
+   a
+   New
+   Clay”.
+   <span class="small-caps">url</span>:
+   <a href="https://urbit.org/blog/toward-a-new-clay" class="url" >https://urbit.org/blog/toward-a-new-clay</a>
+   (visited
+   on
+   ~2024.8.12).
+   </p></dd><dt id="X0-Whitepaper" class="thebibliography">
+</dt><dd 
+id="bib-12" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   et al.
+   (2016).
+   <span 
+class="ec-lmri-10">Urbit:</span>
+   <span 
+class="ec-lmri-10">A</span>
+   <span 
+class="ec-lmri-10">Solid-State</span>
+   <span 
+class="ec-lmri-10">Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a href="https://media.urbit.org/whitepaper.pdf" class="url" >https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Torvalds2005" class="thebibliography">
+</dt><dd 
+id="bib-13" class="thebibliography">
+   <!--l. 249--><p class="noindent" ><a  id="cite.0@Torvalds2005"></a>Torvalds, Linus
+   (2005)
+   ““Initial
+   revision
+                                                
+                                                
+   of
+   &#x0022;git&#x0022;,
+   the
+   information
+   manager
+   from
+   hell”
+   (Git)”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/git/git/commit/e83c5163316f89bfbde7d9ab23ca2e25604af290" class="url" >https://github.com/git/git/commit/e83c5163316f89bfbde7d9ab23ca2e25604af290</a>
+   (visited
+   on
+   ~2024.8.12).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 51--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">Also </span><span 
+class="ec-lmr-8">“version control system</span><span 
+class="ec-lmr-8">” (</span><span 
+class="ec-lmcsc-10x-x-80">vcs</span><span 
+class="ec-lmr-8">); </span><span 
+class="ec-lmr-8">“source control system</span><span 
+class="ec-lmr-8">”.</span><a href="#x1-2001f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 51--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">Compare other logical ﬁle systems: network ﬁle systems like</span>
+  <span 
+class="ec-lmr-8">Microsoft Server Message Block (</span><span 
+class="ec-lmcsc-10x-x-80">smb</span><span 
+class="ec-lmr-8">) drives or distributed ﬁle systems</span>
+  <span 
+class="ec-lmr-8">like the Hadoop Distributed File System (</span><span 
+class="ec-lmcsc-10x-x-80">hdfs</span><span 
+class="ec-lmr-8">) or the InterPlanetary</span>
+  <span 
+class="ec-lmr-8">File System (</span><span 
+class="ec-lmcsc-10x-x-80">ipfs</span><span 
+class="ec-lmr-8">).</span><a href="#x1-2002f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 51--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">Notably, Git has seemingly failed to fulﬁll its original promise of</span>
+  <span 
+class="ec-lmr-8">being a fully decentralized </span><span 
+class="ec-lmcsc-10x-x-80">rcs</span><span 
+class="ec-lmr-8">: most users prefer to use the aﬀordances of</span>
+  <span 
+class="ec-lmr-8">centralized Git services such as GitHub or GitLab.</span><a href="#x1-2004f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 57--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">An implementation in Hoon is available at @sigilante/diﬀ.</span><a href="#x1-3003f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 57--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">As always, there are exceptions to the rules. The Git </span><span 
+class="ec-lmcsc-10x-x-80">rcs</span><span 
+class="ec-lmr-8">, for</span>
+  <span 
+class="ec-lmr-8">instance, can use a </span><span 
+class="ec-lmr-8">“binary diﬀ</span><span 
+class="ec-lmr-8">” format on exact preimages. The</span>
+  <span 
+class="ec-lmr-8">Subversion </span><span 
+class="ec-lmcsc-10x-x-80">rcs </span><span 
+class="ec-lmr-8">does provide an elaborated </span><span 
+class="ec-lmcsc-10x-x-80">mime </span><span 
+class="ec-lmr-8">support system, wherein</span>
+  <span 
+class="ec-lmr-8">users can assign each ﬁle a </span><span 
+class="ec-lmcsc-10x-x-80">mime </span><span 
+class="ec-lmr-8">type that Subversion can use in</span>
+  <span 
+class="ec-lmr-8">applying and displaying diﬀs. However, in practice this only results in</span>
+  <span 
+class="ec-lmr-8">the classic text/binary dichotomy with slightly more granularity.</span>
+  <span 
+class="ec-lmr-8">“Subversion treats all ﬁle data as literal byte strings, and ﬁles</span>
+  <span 
+class="ec-lmr-8">are always stored in the repository in an untranslated state” (</span><a 
+ id="x6-3005"></a>
+  <span 
+class="ec-lmr-8">Collins-Sussman, Fitzpatrick, and Pilato (2016), section “Binary Files</span>
+  <span 
+class="ec-lmr-8">and Translation”).</span><a href="#x1-3004f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 88--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">Indeed, one can imagine a Word-aware command-line </span><span 
+class="ec-lmcsc-10x-x-80">rcs </span><span 
+class="ec-lmr-8">that</span>
+  <span 
+class="ec-lmr-8">could meaningfully merge changes to a Word document, rather than</span>
+  <span 
+class="ec-lmr-8">simply storing successive copies of the ﬁle. The OpenDocument ﬁle form</span>
+  <span 
+class="ec-lmr-8">(odt, ods, odg, etc.) consists of </span><span class="small-caps">ZIP</span><span 
+class="ec-lmr-8">-compressed </span><span class="small-caps">xml</span> <span 
+class="ec-lmr-8">ﬁles, which would</span>
+  <span 
+class="ec-lmr-8">be highly amenable to type-aware merge tools at the command</span>
+  <span 
+class="ec-lmr-8">line.</span><a href="#x1-3022f6">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 99--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">Oddly, Perry did not call out weak typing in his enumeration,</span>
+  <span 
+class="ec-lmr-8">although he did address it elsewhere in the article.</span><a href="#x1-3030f7">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 113--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span 
+class="ec-lmr-8">We omit discussion of several other notable properties of Clay as</span>
+  <span 
+class="ec-lmr-8">a single-level store: referential transparency, global addressability, and</span>
+  <span 
+class="ec-lmr-8">event-level persistence, for instance.</span><a href="#x1-5002f8">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
