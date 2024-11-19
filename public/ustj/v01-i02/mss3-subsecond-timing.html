@@ -1,0 +1,424 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>A Note on Subsecond
+Base-2 Time Intervals</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="mss.css" /> 
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">A Note on Subsecond<br />
+Base-2 Time Intervals</h2>
+ <div class="author" ><span 
+class="ec-lmbx-12">N. E. Davis</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~lagrev-nocfep</code></span>
+<br />       <span 
+class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 41--><p class="noindent" ><span 
+class="ec-lmr-9">Urbit  time  provides  for  the  representation  of</span>
+     <span 
+class="ec-lmr-9">subsecond  values  down  to</span>  \(2^{-64}\)  <span 
+class="ec-lmr-9">s.  Such  a  base-two</span>
+     <span 
+class="ec-lmr-9">numbering  system  prompts  the  consideration  of</span>
+     <span 
+class="ec-lmr-9">preﬁxes for subsecond intervals that are analogous</span>
+     <span 
+class="ec-lmr-9">to the </span><span class="small-caps">iec</span> <span 
+class="ec-lmr-9">80000-13 preﬁxes for positive powers of</span>
+     <span 
+class="ec-lmr-9">two, as used in memory sizes. We propose a set of</span>
+     <span 
+class="ec-lmr-9">preﬁxes for subsecond intervals that are similar to</span>
+     <span 
+class="ec-lmr-9">the SI preﬁxes for negative powers of ten, and we</span>
+     <span 
+class="ec-lmr-9">suggest that these preﬁxes be used in Urbit time</span>
+     <span 
+class="ec-lmr-9">representations. We also discuss the relative error</span>
+     <span 
+class="ec-lmr-9">in these preﬁxes compared to the corresponding</span>
+     <span 
+class="ec-lmr-9">negative powers of ten.</span>
+                                                
+                                                
+</p>
+</section>
+<!--l. 48--><p class="indent" >   Urbit time is conventionally a 128-bit
+atom,<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2f1"></a> 
+with the lower 64 bits denoting fractions of a second and the
+upper 64 bits denoting multiples of a second. (That is, 1 s =
+<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">bex</span><span style="color:#000000"> </span><span style="color:#000000">64)</span></code>.)
+</p><!--l. 50--><p class="indent" >   By expanding the atomic form of time (<code class="lstinline"><span style="color:#000000">@dr</span></code>) to the tuple
+form, we can clearly see how each component of the time is
+represented:
+</p>
+   <!--l. 52-->
+<pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-3r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">yell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Treating</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">&#x0022;now</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">&#x0022;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">as</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">an</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">interval.</span></span> 
+<span class="label"><a  id="x1-4r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">d=106.751.991.823.894</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">h=15</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">m=19</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">s=22</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">f=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">xd43</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span></pre>
+<!--l. 57--><p class="indent" >   The last component of the tuple is a list of subsecond
+time intervals; while <code class="lstinline"><span style="color:#000000">now</span></code> does not feign to provide more
+accuracy than \(2^{-16} \,\textrm {s}\), the underlying representation can provide for
+subsecond intervals down to \(2^{-64} \,\textrm {s}\) by including more values in the f
+list.
+</p>
+   <!--l. 59-->
+<pre class="lstlisting" id="listing-5"><span class="label"><a  id="x1-5r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">yell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">@dr</span><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">0x1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">d=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">h=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">m=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">s=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">f=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span></pre>
+<!--l. 64--><p class="indent" >   Subsecond decimal time does not cleanly map to this
+representation, and the resulting hexadecimal values are
+largely opaque to human interpretation:
+</p>
+   <table id="TBL-4" class="tabular" 
+ 
+><colgroup id="TBL-4-1g"><col 
+id="TBL-4-1" /><col 
+id="TBL-4-2" /><col 
+id="TBL-4-3" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-4-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-1-1"  
+class="td11"> <strong>Interval</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-1-2"  
+class="td11"> <strong>Decimal Value</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-1-3"  
+class="td11"> <strong>Hexadecimal Value</strong>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-2-1"  
+class="td11"> \(1 \,\textrm {ms}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-2-2"  
+class="td11"> \(10^{-3} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-2-3"  
+class="td11"> \(\mathtt {0x41.8937.4bc6.a7ef}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-3-1"  
+class="td11"> \(1 \,\textrm {µs}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-3-2"  
+class="td11"> \(10^{-6} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-3-3"  
+class="td11"> \(\mathtt {0x10c6.f7a0.b5ed}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-4-1"  
+class="td11"> \(1 \,\textrm {ns}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-4-2"  
+class="td11"> \(10^{-9} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-4-3"  
+class="td11"> \(\mathtt {0x4.4b82.fa09}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-5-1"  
+class="td11"> \(1 \,\textrm {ps}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-5-2"  
+class="td11"> \(10^{-12} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-5-3"  
+class="td11"> \(\mathtt {0x119.7998}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-6-1"  
+class="td11"> \(1 \,\textrm {fs}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-6-2"  
+class="td11"> \(10^{-15} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-6-3"  
+class="td11"> \(\mathtt {0x480e}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-7-1"  
+class="td11"> \(1 \,\textrm {as}\)         </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-7-2"  
+class="td11"> \(10^{-18} \,\textrm {s}\)               </td><td  style="white-space:nowrap; text-align:left;" id="TBL-4-7-3"  
+class="td11"> \(\mathtt {0x12}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-4-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-4-8-1"  
+class="td11">          </td></tr></table>
+<!--l. 76--><p class="noindent" >Smaller intervals of a second than \(2^{-64}\) cannot be represented in
+native Urbit time relative time <code class="lstinline"><span style="color:#000000">@dr</span></code>.
+                                                
+                                                
+</p><!--l. 79--><p class="indent" >   Urbit time can therefore be more exactly expressed in
+terms of binary fractions of a second rather than decimal
+fractions of a second. However, while <span class="small-caps">iec</span> 80000-13 codiﬁed
+expressions for powers of two that are close to positive powers
+of ten, there are no expressions for powers of two close to
+negative powers of ten. We would like to introduce such a
+scheme for convenience in Urbit time.
+</p>
+   <table id="TBL-6" class="tabular" 
+ 
+><colgroup id="TBL-6-1g"><col 
+id="TBL-6-1" /><col 
+id="TBL-6-2" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-6-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-1-1"  
+class="td11"> <strong>Binary Value</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-1-2"  
+class="td11"> <strong>Hexadecimal Value</strong>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-2-1"  
+class="td11"> \(2^{-10} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-2-2"  
+class="td11"> \(\mathtt {0x40.0000.0000.0000}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-3-1"  
+class="td11"> \(2^{-20} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-3-2"  
+class="td11"> \(\mathtt {0x10.0000.0000.0000}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-4-1"  
+class="td11"> \(2^{-30} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-4-2"  
+class="td11"> \(\mathtt {0x4.0000.0000}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-5-1"  
+class="td11"> \(2^{-40} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-5-2"  
+class="td11"> \(\mathtt {0x100.0000}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-6-1"  
+class="td11"> \(2^{-50} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-6-2"  
+class="td11"> \(\mathtt {0x4000}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-7-1"  
+class="td11"> \(2^{-60} \,\textrm {s}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-6-7-2"  
+class="td11"> \(\mathtt {0x10}\)                   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-6-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-6-8-1"  
+class="td11">                </td></tr></table>
+<!--l. 91--><p class="noindent" >What preﬁxes should we provide? The standard names for the
+positive powers of two that correspond to powers of ten
+are:
+</p>
+   <table id="TBL-8" class="tabular" 
+ 
+><colgroup id="TBL-8-1g"><col 
+id="TBL-8-1" /><col 
+id="TBL-8-2" /><col 
+id="TBL-8-3" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-8-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-1-1"  
+class="td11"> <strong>Binary Value</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-1-2"  
+class="td11"> <strong>Preﬁx</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-1-3"  
+class="td11"> <strong>Approximation</strong>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-2-1"  
+class="td11"> \(2^{10}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-2-2"  
+class="td11"> kibi      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-2-3"  
+class="td11"> \(10^{3}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-3-1"  
+class="td11"> \(2^{20}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-3-2"  
+class="td11"> mebi     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-3-3"  
+class="td11"> \(10^{6}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-4-1"  
+class="td11"> \(2^{30}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-4-2"  
+class="td11"> gibi      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-4-3"  
+class="td11"> \(10^{9}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-5-1"  
+class="td11"> \(2^{40}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-5-2"  
+class="td11"> tebi      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-5-3"  
+class="td11"> \(10^{12}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-6-1"  
+class="td11"> \(2^{50}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-6-2"  
+class="td11"> pebi     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-6-3"  
+class="td11"> \(10^{15}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-7-1"  
+class="td11"> \(2^{60}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-7-2"  
+class="td11"> exbi     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-8-7-3"  
+class="td11"> \(10^{18}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-8-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-8-8-1"  
+class="td11">                </td></tr></table>
+<!--l. 104--><p class="indent" >   This suggests that we should prefer preﬁxes that are
+similar to the standard names for the negative values of two
+but with a diﬀerent last syllable. Following a suggestion
+by <code>~rovyns-ricfer</code> for “-ki-”, we propose the following
+preﬁxes:
+</p>
+   <table id="TBL-11" class="tabular" 
+ 
+><colgroup id="TBL-11-1g"><col 
+id="TBL-11-1" /><col 
+id="TBL-11-2" /><col 
+id="TBL-11-3" /><col 
+id="TBL-11-4" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-11-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-1-1"  
+class="td11"> <strong>Binary Value</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-1-2"  
+class="td11"> <strong>Preﬁx</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-1-3"  
+class="td11"> <strong>Symbol</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-1-4"  
+class="td11"> <strong>Approximation</strong>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-2-1"  
+class="td11"> \(2^{-10}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-2-2"  
+class="td11"> miki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-2-3"  
+class="td11"> mi          </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-2-4"  
+class="td11"> \(10^{-3}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-3-1"  
+class="td11"> \(2^{-20}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-3-2"  
+class="td11"> muki    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-3-3"  
+class="td11"> µi or ui   </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-3-4"  
+class="td11"> \(10^{-6}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-4-1"  
+class="td11"> \(2^{-30}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-4-2"  
+class="td11"> naki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-4-3"  
+class="td11"> ni           </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-4-4"  
+class="td11"> \(10^{-9}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-5-1"  
+class="td11"> \(2^{-40}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-5-2"  
+class="td11"> piki      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-5-3"  
+class="td11"> pi           </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-5-4"  
+class="td11"> \(10^{-12}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-6-1"  
+class="td11"> \(2^{-50}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-6-2"  
+class="td11"> feki      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-6-3"  
+class="td11"> ﬁ           </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-6-4"  
+class="td11"> \(10^{-15}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-7-1"  
+class="td11"> \(2^{-60}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-7-2"  
+class="td11"> akki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-7-3"  
+class="td11"> ai           </td><td  style="white-space:nowrap; text-align:left;" id="TBL-11-7-4"  
+class="td11"> \(10^{-18}\)                </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-11-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-11-8-1"  
+class="td11">                </td></tr></table>
+<!--l. 116--><p class="indent" >   As occurs with memory values denominated in kibi, mebi,
+gibi, etc., it will be important to keep in mind the relative
+error in such time expressions. We can compare these binary
+magnitudes roughly to decimal magnitudes and calculate the
+resulting error, much as we do with the SI preﬁxes for positive
+values of ten and two:
+</p>
+                                                
+                                                
+   <table id="TBL-14" class="tabular" 
+ 
+><colgroup id="TBL-14-1g"><col 
+id="TBL-14-1" /><col 
+id="TBL-14-2" /><col 
+id="TBL-14-3" /><col 
+id="TBL-14-4" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-14-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-1-1"  
+class="td11"> <strong>Binary Value</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-1-2"  
+class="td11"> <strong>Preﬁx</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-1-3"  
+class="td11"> <strong>Approximation</strong>  </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-1-4"  
+class="td11"> <strong>Error</strong>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-2-1"  
+class="td11"> \(2^{-10}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-2-2"  
+class="td11"> miki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-2-3"  
+class="td11"> \(10^{-3}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-2-4"  
+class="td11"> 2.4%     </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-3-1"  
+class="td11"> \(2^{-20}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-3-2"  
+class="td11"> muki    </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-3-3"  
+class="td11"> \(10^{-6}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-3-4"  
+class="td11"> 4.9%     </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-4-1"  
+class="td11"> \(2^{-30}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-4-2"  
+class="td11"> naki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-4-3"  
+class="td11"> \(10^{-9}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-4-4"  
+class="td11"> 7.4%     </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-5-1"  
+class="td11"> \(2^{-40}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-5-2"  
+class="td11"> piki      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-5-3"  
+class="td11"> \(10^{-12}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-5-4"  
+class="td11"> 9.9%     </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-6-1"  
+class="td11"> \(2^{-50}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-6-2"  
+class="td11"> feki      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-6-3"  
+class="td11"> \(10^{-15}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-6-4"  
+class="td11"> 12.6%   </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-7-1"  
+class="td11"> \(2^{-60}\)              </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-7-2"  
+class="td11"> akki     </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-7-3"  
+class="td11"> \(10^{-18}\)                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-14-7-4"  
+class="td11"> 12.5%<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span>  </td>
+   </tr><tr  
+ style="vertical-align:baseline;" id="TBL-14-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-14-8-1"  
+class="td11">                </td></tr></table>                                       <a  id="x1-7f2"></a>
+<!--l. 128--><p class="indent" >   We trust that the current ability to express subsecond
+intervals in Urbit time will continue to prove useful, and
+furthermore that the proposed preﬁxes will promote legibility
+and accuracy. <img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+</p><!--l. 132--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 48--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">Time can actually be an arbitrarily sized atom, but</span> \(2^{64} \,	extrm {s} pprox 58 	imes 10^{9} \,	extrm {a}\)<span 
+class="ec-lmr-8">; most</span>
+  <span 
+class="ec-lmr-8">discussions of noncosmological time will not involve such large</span>
+  <span 
+class="ec-lmr-8">intervals.</span><a href="#x1-2f1">⤴</a></p></div>
+      
+
+
+                                                              <div class="footnote-text">
+                                                           <!--l. 126--><p class="indent" >   <span class="footnote-mark"><a 
+ id="fn2x0">  <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">This is due to truncation error; it “should” be 15%.</span><a href="#x1-7f2">⤴</a></p></div>
+                                                              
+
+</body> 
+</html>
+                                                
+
+
