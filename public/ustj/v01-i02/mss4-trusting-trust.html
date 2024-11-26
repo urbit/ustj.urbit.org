@@ -1,0 +1,786 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>Trusting Trust on Mars:
+Thoughts on Urbit Security</title> 
+<meta  charset="utf-8" />
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="/latex.css" />
+<meta name="src" content="mss.tex" />
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head><body
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Trusting Trust on Mars:<br />
+Thoughts on Urbit Security</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">N. E. Davis</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~lagrev-nocfep</code></span>
+<br />      <span 
+class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 40--><p class="noindent" ><span 
+class="ec-lmr-9">Via Ken Thompson’s classic reﬂections on compiler</span>
+     <span 
+class="ec-lmr-9">safety  and  the  injection  of  </span><span 
+class="ec-lmr-9">“undetectable</span><span 
+class="ec-lmr-9">”  and</span>
+     <span 
+class="ec-lmr-9">irreversible   malicious   bugs   into   binaries,   we</span>
+     <span 
+class="ec-lmr-9">analyze  aspects  of  the  security  of  Urbit  as  a</span>
+     <span 
+class="ec-lmr-9">two-level executable system, i. e.</span><span 
+class="ec-lmr-9"> as a virtualized</span>
+     <span 
+class="ec-lmr-9">machine running on an execution layer.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-30002" id="QQ2-1-3">Nock Quines</a></span>
+<br />    <span class="sectionToc" >3 <a href="#x1-40003" id="QQ2-1-4">A Learning Compiler</a></span>
+<br />    <span class="sectionToc" >4 <a href="#x1-50004" id="QQ2-1-7">Attacks in Urbit</a></span>
+<br />     <span class="subsectionToc" >4.1 <a href="#x1-60004.1" id="QQ2-1-8">Malicious source</a></span>
+<br />     <span class="subsectionToc" >4.2 <a href="#x1-70004.2" id="QQ2-1-9">Signature falsiﬁcation</a></span>
+<br />     <span class="subsectionToc" >4.3 <a href="#x1-100004.3" id="QQ2-1-12">Compromised compiler</a></span>
+<br />    <span class="sectionToc" >5 <a href="#x1-110005" id="QQ2-1-13">Attacks in the Runtime</a></span>
+<br />    <span class="sectionToc" >6 <a href="#x1-150006" id="QQ2-1-17">Conclusion</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-16000" id="QQ2-1-18">References</a></span>
+   </div>
+<!--l. 49--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Introduction</h3>
+<!--l. 51--><p class="noindent" >Ken Thompson’s famous 1983 Turing Award lecture,
+“Reﬂections on Trusting Trust” (<a  id="x1-2001"></a> Thompson, 1984), concisely
+illustrated a fundamental diﬃculty with reposing conﬁdence in
+any software stack one has not built oneself from assembler
+code. He postulated a compiler which had been modiﬁed to
+match a particular pattern and inject malicious code
+(such as a login backdoor or privilege escalation) into any
+program it produced; and a more insidious scenario in
+which the compiler knows to change its own source upon
+compilation to perpetuate the backdoor attack forwards. His
+exposition proceeded from the production of a quine, to
+a learning compiler, to the malicious “trusting trust”
+attack. The (non)solution Thompson proposed as epitome,
+“you can’t trust code that you did not totally create
+yourself,” was cold comfort to the computer security
+                                                
+                                                
+expert.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2002f1"></a> 
+</p><!--l. 53--><p class="indent" >   Each component of the trusting trust attack can be
+demonstrated in Nock or Hoon and to some extent realized in
+Arvo. Countermeasures and implications for the overall
+security of the Urbit stack are also considered.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-30002"></a>Nock Quines</h3>
+<!--l. 57--><p class="noindent" >A quine is an example of a code program that produces its
+own source; it is a ﬁxed point of its syntax and execution.
+Some languages make this relatively straightforward,
+particularly those with rich string syntax. As Wikipedia
+states, “quines are possible in any Turing-complete
+programming language, as a direct consequence of Kleene’s
+recursion theorem”; an older version of the same page
+emphasizes the utility of the ability to output a computable
+string.
+</p><!--l. 59--><p class="indent" >   Nock operates by applying a formula against a subject.
+The subject–formula pair is reduced by the ﬁrst matching
+pattern from the left. A strict quine has no input, however, for
+Nock a formula is a partial function that must be evaluated
+against a subject. We must reconcile the subject as a context
+but not an input, as it were. A proper Nock quine therefore
+includes both, and replication of the subject–formula pair
+should be a requirement for a true quine.
+</p><!--l. 61--><p class="indent" >   The trivial Nock quine is simply an address replication using the Nock
+0 operator.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-3001f2"></a> 
+</p><!--l. 62-->
+                                                
+                                                
+<pre class="lstlisting" id="listing-1"><span class="label"><a  id="x1-3002r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span></pre>
+<!--l. 65--><p class="noindent" >Indeed, this suggests a family of quines built on tree
+structure replication; <code>~pinhul-radlyr</code> suggested the
+following:<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a  id="x1-3003f3"></a> 
+</p>
+   <!--l. 68-->
+<pre class="lstlisting" id="listing-2"><span class="label"><a  id="x1-3004r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]]]]</span></span></pre>
+<!--l. 72--><p class="noindent" >and the recursive generalization is straightforward.
+Following <a  id="x1-3005"></a> Thompson, we consider such a quine to be
+a “compiler” in that it produces a program from a
+program.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a  id="x1-3006f4"></a> 
+</p>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a  id="x1-40003"></a>A Learning Compiler</h3>
+<!--l. 77--><p class="noindent" >Thompson proceeds from the notion of a quine to constructing
+a learning compiler, or a compiler that can modify the source
+of its successor in such a way as to extend the semantics of the
+language.
+</p><!--l. 81--><p class="indent" >   Although raw Nock is extremely uncommon in practice on
+Urbit, it is slightly more common to manipulate vase-mode
+values of Hoon and rather frequent to modify the Hoon
+compiler itself (at least in kernel development). A modiﬁed
+Hoon compiler (let us call it “+(Hoon)”) is capable of
+perpetuating language changes forward into the nouns
+resulting from source. A simple example is adding an
+additional rune or altering the behavior of the parser (in
+<code class="lstinline"><span style="color:#000000">++vast</span></code>) or <span class="small-caps">ast</span> Nock compiler (in <code class="lstinline"><span style="color:#000000">++mint:ut</span></code>). Given
+access to one’s <code class="lstinline"><span style="color:#000000">%base</span></code> desk, the possible modiﬁcations are
+endless (Listing <a href="#x1-4001r1">1<!--tex4ht:ref: fig:pattern --></a> ).
+                                                
+                                                
+</p>
+   <!--l. 83-->
+<a  id="x1-4001r1"></a>
+<a  id="x1-4002"></a>
+<figcaption class="caption" ><span class="id">Listing 1:
+    </span><span  
+class="content">A
+    simple
+    example
+    of
+    pattern-detecting
+    adaptive
+    code
+    in
+    Hoon
+    and
+    Nock.</span></figcaption><!--tex4ht:label?: x1-4001r3 --><pre class="lstlisting" id="listing-6"><span class="label"><a  id="x1-4003r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Hoon</span></span> 
+<span class="label"><a  id="x1-4004r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4])</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4005r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Nock</span></span> 
+<span class="label"><a  id="x1-4006r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span></pre>
+<!--l. 92--><p class="indent" >   Given control of a compiler, <a  id="x1-4007"></a> Thompson then proceeds to
+spring the trap: “a simple modiﬁcation to the compiler that
+will deliberately miscompile source whenever a particular
+pattern is matched” (p. 763). That is, all code descended
+from the compromised compiler in his example may be
+considered contaminated by a self-perpetuating Trojan
+horse.
+</p><!--l. 94--><p class="indent" >   Urbit does not directly distribute Nock code as executable
+nouns today. Any practical attacks based on Nock would require
+distributing the malicious Nock code as data or inducing a Hoon
+compiler to produce the malicious Nock code inadvertently.
+Such compromised code would then have to executed against
+an appropriate subject to produce the desired malicious
+consequence.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a  id="x1-4008f5"></a> 
+</p><!--l. 96--><p class="indent" >   Critically for Urbit, the Hoon compiler at any one state
+of the kernel is used to produce the next state. “Live”
+                                                
+                                                
+code is not sent over the network: one sends source ﬁles
+which are then compiled locally into executable Nock
+nouns. Given such a compromised compiler, “no amount
+of source-level veriﬁcation or scrutiny will protect you
+from using untrusted code” (<span 
+class="ec-lmri-10">ibid.</span>). The trusting trust
+attack is complete and the system has been fundamentally
+compromised.
+</p><!--l. 98--><p class="indent" >   Another relatively unexplored avenue is to have Nock
+formula manipulate the rules themselves. Typically, Nock rules
+are treated as constants, and Hoon code that utilizes them
+often simply speciﬁes them as such for legibility. This
+is not necessary, however, and changing the rules this
+way is straightforward in raw Nock, if a little diﬃcult to
+conceptualize (a Hoon example is provided in Listing <a href="#x1-4009r2">2<!--tex4ht:ref: fig:rules --></a>
+). (This is salient in iterated cycles, a subject–formula
+pair yielding the next subject for subsequent formula
+evaluation.)
+</p>
+   <!--l. 100-->
+<a  id="x1-4009r2"></a>
+<a  id="x1-4010"></a>
+<figcaption class="caption" ><span class="id">Listing 2:
+    </span><span  
+class="content">Hoon
+    which
+    can
+    modify
+    the
+    rules
+    of
+    supplied
+    Nock
+    formulae
+    arbitrarily.
+    For
+    simplicity,
+    lists
+    are
+    used
+    when
+    in
+                                                
+                                                
+    practice
+    it
+    would
+    be
+    done
+    in
+    cells
+    and
+    tuples.</span></figcaption><!--tex4ht:label?: x1-4009r3 --><pre class="lstlisting" id="listing-7"><span class="label"><a  id="x1-4011r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-4012r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=|</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4013r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">flop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4014r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">$</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t.a,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">i.a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">i.a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span></pre>
+   <h3 class="sectionHead"><span class="titlemark">4   </span> <a  id="x1-50004"></a>Attacks in Urbit</h3>
+<!--l. 112--><p class="noindent" >Nock and Hoon are homoiconic: code and data share the same
+representation. This facilitates code distribution over Urbit’s
+Ames network, wherein code is transmitted as a raw jammed
+noun (nominally in Hoon) and then built using local mark
+conversion, parsing, and compiler routines. The local ship
+controls its own build process rather than accepting unknown
+Nock nouns, permitting the source code to be inspected
+(often in abbreviated form by comparing “desk hashes” or
+hashes of the contents of a distributed branch) prior to
+installation.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a  id="x1-5001f6"></a> 
+This suggests at least three diﬀerent programmatic attack
+vectors for an Urbit ship:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-5003x1">
+     <!--l. 115--><p class="noindent" >Malicious source.
+     </p></li>
+<li 
+  class="enumerate" id="x1-5005x2">
+     <!--l. 116--><p class="noindent" >False signatures.
+                                                
+                                                
+     </p></li>
+<li 
+  class="enumerate" id="x1-5007x3">
+     <!--l. 117--><p class="noindent" >Compromised compiler.</p></li></ol>
+<!--l. 120--><p class="noindent" >Each of these could be perpetrated by the last two: the idea of
+a compromised compiler trumps all bets for a program, and
+thus prompted Thompson’s initial reﬂections.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1   </span> <a  id="x1-60004.1"></a>Malicious source</h4>
+<!--l. 125--><p class="noindent" >The most straightforward way to compromise a system is to
+simply send code that compromises a system in a particular
+way and induce the target to execute that code. As Urbit code
+distribution is permissionless, the practical barriers to this
+are social and habitual: most users prefer to treat the
+Urbit network as a high-trust society, and most users do
+not store high-value data (such as wallet keys) on their
+Urbit ship. However, by representing code as valid, an
+attacker can execute at least on zero-day exploit against a
+target.
+</p><!--l. 127--><p class="indent" >   Furthermore, userspace code distribution does not
+have permission to modify the <code class="lstinline"><span style="color:#000000">%base</span></code> desk on which
+the kernel resides. Permission elevation would not be
+necessary for an attack, however; malicious code could
+sidestep the per-desk sandbox mechanism by simply
+directly issuing cards to Clay to modify <code class="lstinline"><span style="color:#000000">%base</span></code>’s <code class="lstinline"><span style="color:#000000">/sys</span></code>
+ﬁles.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a  id="x1-6001f7"></a> 
+Such would be easy to identify in program source, but
+would require some diligence on the part of users to hedge
+against.
+</p><!--l. 129--><p class="indent" >   Using a social trust mechanism to convince a user to utilize
+a bad <code class="lstinline"><span style="color:#000000">|ota</span></code> source is by far the simplest mechanism,
+                                                
+                                                
+however.
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.2   </span> <a  id="x1-70004.2"></a>Signature falsiﬁcation</h4>
+<!--l. 133--><p class="noindent" >A noun hash is a cryptographic hash of a noun. Speciﬁcally,
+the <span class="small-caps">sha</span>-256 <code class="lstinline"><span style="color:#000000">++shax</span></code> of an atom is typically used, or for cell
+structures the noun is ﬁrst <code class="lstinline"><span style="color:#000000">++jam</span></code>med into an atom before a
+<span class="small-caps">sha</span>-128 <code class="lstinline"><span style="color:#000000">++shaf</span></code> is applied. Noun hashes are used extensively
+in Arvo and the vanes to identify values in caches and to
+compare nouns for equality.
+</p><!--l. 136--><p class="indent" >   In principle, signature falsiﬁcation could lead to invalid
+cache retrievals, e. g. invoking a malicious gate instead of the
+intended one. In practice, userspace code does not have any
+direct access to the Arvo caches, meaning that while
+signatures could be falsiﬁed, this would require a kernel-level
+or runtime-level compromise of the system.
+</p>
+<!--l. 138--><p class="noindent" ><span class="paragraphHead"><a  id="x1-8000"></a><span 
+class="ec-lmbx-10">Ames packet signature falsiﬁcation</span></span>
+   Over the wire, there are two signiﬁcant kinds of risky false
+signatures: signed Ames packet or faked desks. An Ames
+communication takes place as a message is decomposed into
+1 kB or smaller packets, each of which is sequentially
+numbered and signed. All packets are signed using <span class="small-caps">sha</span>-256
+encryption.<span class="footnote-mark"><a href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a  id="x1-8001f8"></a> 
+On the other end, the packets are received in a queue before
+being reassembled into the original message. We consider three
+diﬀerent signature attacks:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-8003x1">
+                                                
+                                                
+     <!--l. 142--><p class="noindent" >Falsifying  a  packet  signature.  To  simply  falsify  a
+     signature, one would have to falsify the private key
+     of the sender, which is a signiﬁcant cryptographic
+     challenge.
+     </p></li>
+<li 
+  class="enumerate" id="x1-8005x2">
+     <!--l. 143--><p class="noindent" >Spooﬁng a packet signature. A locally compromised
+     runtime  could  inject  a  spurious  packet  matching
+     some  hypothetical  external  ship.  This  attack  is
+     of  commensurate  diﬃculty  to  a  simply  falsiﬁed
+     signature.
+     </p></li>
+<li 
+  class="enumerate" id="x1-8007x3">
+     <!--l. 144--><p class="noindent" >Permitting a false signature. A compromised Ames
+     vane could maliciously permit a message with a false
+     signature, perhaps activated by the signature itself.
+     This scenario seems the most tractable for a hacker
+     to exploit.</p></li></ol>
+<!--l. 147--><p class="indent" >   In practice, packet reassembly takes place in the runtime,
+which introduces another attack surface for these Ames packet
+signature falsiﬁcation attacks.
+</p>
+<!--l. 149--><p class="noindent" ><span class="paragraphHead"><a  id="x1-9000"></a><span 
+class="ec-lmbx-10">Desk (Clay) signature falsiﬁcation</span></span>
+   A desk hash, used as an informal
+check,<span class="footnote-mark"><a href="mss10.html#fn9x0"><sup class="textsuperscript">9</sup></a></span><a  id="x1-9001f9"></a> 
+is a signature from the contents of the desk.
+</p><!--l. 152--><p class="indent" >   We may dismiss the problem of directly producing a
+malicious source desk that hashes to the same value as a
+highly nontrivial expenditure of compute resources. In
+addition, should such an attack come into currency, the hash
+algorithm could easily be traded for a more complicated and
+                                                
+                                                
+secure one. For a zero-day exploit utilizing the distribution of
+a compromised desk, prior art suggests that on the order of \(2^{63.1}\)
+<span class="small-caps">sha</span> operations would be required to construct a collision
+(<a  id="x1-9002"></a> Stevens et al., 2017). (Successfully execution would
+then require that the malicious desk actually contains
+malicious code, which further complicates the problem
+space.)
+</p><!--l. 154--><p class="indent" >   As with the Ames packet signature falsiﬁcation, it is more
+likely for malicious desk distribution to succeed via a
+special-cased desk than by a hash collission. This has an
+inception problem, of course, since the <code class="lstinline"><span style="color:#000000">%base</span></code> desk must be
+likewise modiﬁed (or the threshold attack described below
+used).
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">4.3   </span> <a  id="x1-100004.3"></a>Compromised compiler</h4>
+<!--l. 160--><p class="noindent" >As with pattern-matching examples in the exposition, simple
+or complex pattern-matching to inject and perpetuate
+malicious code is a possibility given a Turing-complete
+language and execution platform. Hoon is of course no
+exception, so a compromised compiler may alter any outer
+cores in the current system state and any future nouns
+produced by the suspected compiler.
+</p><!--l. 162--><p class="indent" >   Source is of course amenable to inspection, but the
+trusting trust attack is complete once the compiler is
+compromised. Thus a compromised compiler is a local problem
+more than a network-wide risk. The most sensible detection
+mechanism is to continue rigorous use of hashes to identify
+nouns and their source uniquely.
+</p><!--l. 165--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a  id="x1-110005"></a>Attacks in the Runtime</h3>
+<!--l. 167--><p class="noindent" >The runtime operates as the computation substrate for Arvo
+and could execute arbitrary malicious code if compromised.
+Nock is an interpreted language which is evaluated on some
+                                                
+                                                
+particular virtual machine layer. As of this writing, there are
+many Nock interpreters <span 
+class="ec-lmbx-10">Nock2023</span> but only two fully
+instrumented Nock runtimes, Vere and Sword (née Ares). Vere
+is written in C and utilizes a few third-party libraries
+statically linked into the binary, such as libuv. Sword is
+composed in Rust and similarly statically links its modules.
+Per the concerns raised by Thompson about a program
+produced by a compromised compiler, the runtime could
+in principle be modiﬁed to run malicious code either
+independently of the Arvo instance or in response to side
+eﬀects induced by the Arvo instance.
+</p><!--l. 169--><p class="indent" >   The colloquial wisdom among the Urbit developer
+community is that if one loses administrative control of one’s
+box (the machine executing the Urbit process), one is already
+pwned.<span class="footnote-mark"><a href="mss11.html#fn10x0"><sup class="textsuperscript">10</sup></a></span><a  id="x1-11001f10"></a> 
+This is saliently illustrated by the Trusting Trust compiler
+issue, but of course there are less subtle and more
+</p><!--l. 172--><p class="indent" >   By inducing a user to install a compromised Urbit runtime,
+an attacker can achieve full control over a user’s ship and
+its computation, perhaps without the user being aware.
+Three major components of the runtime could be used to
+compromise an Arvo instance:
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-11003x1">
+     <!--l. 175--><p class="noindent" >Nock evaluation.
+     </p></li>
+<li 
+  class="enumerate" id="x1-11005x2">
+     <!--l. 176--><p class="noindent" >Cache poisoning.
+     </p></li>
+                                                
+                                                
+<li 
+  class="enumerate" id="x1-11007x3">
+     <!--l. 177--><p class="noindent" >Hint pollution.</p></li></ol>
+<!--l. 180--><p class="noindent" ><span class="paragraphHead"><a  id="x1-12000"></a><span 
+class="ec-lmbx-10">Nock evaluation.</span></span>
+   Nock evaluation in the runtime takes place as some form of
+bytecode evaluation, rather than evaluating the pure
+Nock formula. (Subject-knowledge analysis (<span class="small-caps">ska</span>) further
+complicates the relationship of on-chip evaluation to the
+source Nock.) Nock evaluation could be matched for speciﬁc
+patterns and malicious code executed, or simply
+</p>
+<!--l. 182--><p class="noindent" ><span class="paragraphHead"><a  id="x1-13000"></a><span 
+class="ec-lmbx-10">Cache poisoning.</span></span>
+   Like Arvo, the runtime uses caches and the event log
+extensively to hasten referentially transparent evaluation. We
+consider two examples, of many possibilities, in which
+cache poisoning could be used to compromise an Arvo
+instance.
+</p><!--l. 184--><p class="indent" >   The ﬁrst is to compromise the jet state in event playback.
+(This is a form of “hint pollution.”) Jets formally do “nothing”
+in Arvo and are used as a way of creating impure side eﬀects
+for the Arvo operating function. A compromised jet hint
+would be a Turing-complete compromise, and incorrect
+matching of an event playback could result in any possible side
+eﬀect which the runtime can achieve on the host OS. The
+user may not be aware of any malicious code execution.
+Furthermore, due to the way that Vere’s jet dashboard
+matches code, a registered noun can have its associated jet
+hint removed in the Hoon source but still be invoked due to
+noun matching; this is a leaky convention that could lead to
+jet pollution.
+</p><!--l. 186--><p class="indent" >   The second is to simply poison known caches such
+as the remote scry cache. Malicious code could thus be
+emitted to a subscriber <span 
+class="ec-lmri-10">without the host even being aware</span>
+<span 
+class="ec-lmri-10">of the poisoned cache value</span>. Another upcoming cache
+susceptible to poisoning is the fastboot cache used to supply
+compiled nouns in the process of bootstrapping a new ship.
+                                                
+                                                
+Finally, as explicit caching in Arvo is gradually replace with
+persistent memoization in the runtime, the runtime and its
+distribution mechanism will need to be provisioned with
+security assurances for users.
+</p>
+<!--l. 188--><p class="noindent" ><span class="paragraphHead"><a  id="x1-14000"></a><span 
+class="ec-lmbx-10">Hint pollution.</span></span>
+   There is a particular threshold attack which we must
+consider in detail: the injection of a Nock Eleven ﬂag (with no
+Hoon side eﬀects, rather evocative of C #pragmas but not the
+same) that nevertheless triggers malicious code execution or
+exﬁltration of sensitive information from the running
+Arvo instance. A hint is a noun that is used to guide the
+evaluation of a Nock formula. The compromise can be in the
+runtime but the trigger in this case comes from the Arvo
+side.
+</p><!--l. 190--><p class="indent" >   The most salient attack vector on an Urbit ship, of course,
+is to compromise the cryptography: emit the Azimuth private
+key or enough information for an observer to deduce the key.
+Several of the foregoing techniques, jointly or separately, could
+be used to achieve this.
+</p><!--l. 192--><p class="indent" >   In general, of course, the solution is to be paranoid about
+one’s runtime and one’s Arvo; if either is discovered to be
+compromised, it is high time to replace the one and breach the
+other.
+</p><!--l. 194--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a  id="x1-150006"></a>Conclusion</h3>
+<!--l. 196--><p class="noindent" >As Urbit moves towards automated update processes, such as
+acquiring and booting into new runtimes directly, secure
+control over the stack—including the build—will assume new
+prominence. We hope these reﬂections will spur more
+careful consideration of the dangers inherent in running
+and securing not only Urbit but in fact any computing
+stack. Fortunately, even at the current time aggressive
+                                                
+                                                
+checking of Urbit (including building one’s own runtime
+binary and checking various hashes proactively) can and
+should make the likelihood of a trusting trust attack as
+low as possible, since each check in the process makes it
+increasingly more diﬃcult to propagate malicious code
+from previous steps correctly. Such aﬀordances should
+be propagated into the end-user experience as soon as
+feasible.<img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+</p><!--l. 200--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-16000"></a>References</h3>
+<!--l. 200--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Stevens2017" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 200--><p class="noindent" ><a  id="cite.0@Stevens2017"></a>Stevens, Marc
+   et al.
+   (2017).
+   <span 
+class="ec-lmri-10">The</span>
+   <span 
+class="ec-lmri-10">First</span>
+   <span 
+class="ec-lmri-10">Collision</span>
+   <span 
+class="ec-lmri-10">for</span>
+   <span 
+class="ec-lmri-10">Full</span>
+   <span class="small-caps">sha</span><span 
+class="ec-lmri-10">-1</span>.
+   Tech. rep.
+   Google
+   Research.
+   <span class="small-caps">url</span>:
+   <a href="https://web.archive.org/web/20180515222208/http://shattered.io/static/shattered.pdf" class="url" >https://web.archive.org/web/20180515222208/http://shattered.io/static/shattered.pdf</a>
+   (visited
+   on
+   ~2024.8.12).
+                                                
+                                                
+   </p></dd><dt id="X0-Thompson1984" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 200--><p class="noindent" ><a  id="cite.0@Thompson1984"></a>Thompson, Ken
+   (1984).
+   “Reﬂections
+   on
+   Trusting
+   Trust.”
+   In:
+   <span 
+class="ec-lmri-10">Communications</span>
+   <span 
+class="ec-lmri-10">of</span>
+   <span 
+class="ec-lmri-10">the</span>
+   <span class="small-caps">acm</span>
+   27.8,
+   pp. 761–763.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1145/358198.358210" >10.1145/358198.358210</a>.</p></dd></dl>
+<!--l. 200--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 51--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">Indeed, Forth has been employed as a clean bootstrap platform</span>
+  <span 
+class="ec-lmr-8">since it can be implemented straightforwardly in machine language on</span>
+  <span 
+class="ec-lmr-8">many target embedded architectures. This is more for pragmatism than</span>
+  <span 
+class="ec-lmr-8">security, but the possibility of employing this as a strict security measure</span>
+  <span 
+class="ec-lmr-8">exists.</span><a href="#x1-2002f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 61--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">I am indebted to </span><span 
+class="ec-lmr-8">~dozreg-toplud for ﬁrst bringing this simple</span>
+  <span 
+class="ec-lmr-8">quine to my attention.</span><a href="#x1-3001f2">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 66--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><a 
+href="https://github.com/jpt4/icfp2024code/blob/main/quine.rkt" class="url" ><span 
+class="ec-lmr-8">https://github</span><span 
+class="cmmi-8">.</span><span 
+class="ec-lmr-8">com/jpt4/icfp2024code/blob/main/quine</span><span 
+class="cmmi-8">.</span><span 
+class="ec-lmr-8">rkt</span></a><a href="#x1-3003f3">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 73--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">Further articles of interest on producing quines have been</span>
+  <span 
+class="ec-lmr-8">provided by </span><a 
+href="http://www.madore.org/~david/computers/quine.html" ><span 
+class="ec-lmr-8">David Madore</span></a> <span 
+class="ec-lmr-8">and </span><a 
+href="https://erichokanson.me/category/quine-programs/" ><span 
+class="ec-lmr-8">Eric Hokanson</span></a><span 
+class="ec-lmr-8">.</span><a href="#x1-3006f4">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 94--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">Since a Nock formula is a partial function, Hoon should be</span>
+  <span 
+class="ec-lmr-8">considered as a hypotactic language. That is, each expression is a phrase</span>
+  <span 
+class="ec-lmr-8">subordinated to its subject. Crossover manipulations between the</span>
+  <span 
+class="ec-lmr-8">subject and formula are thus possible, as long as an iterated cycle of</span>
+  <span 
+class="ec-lmr-8">using a formula against a subject to produce a new subject is</span>
+  <span 
+class="ec-lmr-8">followed.</span><a href="#x1-4008f5">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 112--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">In practice, we observe that the relatively high trust of the Urbit</span>
+  <span 
+class="ec-lmr-8">community has led to the hash being used as a version identiﬁer rather</span>
+  <span 
+class="ec-lmr-8">than a cursory security check.</span><a href="#x1-5001f6">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 127--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">At the time of writing, </span><span 
+class="ec-lmr-8">~hastuc-dibtux pointed out that the</span>
+  <span 
+class="ec-lmr-8">%hood agent itself can be used to directly rewire the source. More</span>
+  <span 
+class="ec-lmr-8">aggressive countermeasures and a permissioning system will be necessary</span>
+  <span 
+class="ec-lmr-8">as Urbit hardens its security model.</span><a href="#x1-6001f7">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 139--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span 
+class="ec-lmr-8">“Every packet sent between ships is encrypted except</span>
+  <span 
+class="ec-lmr-8">for self-signed attestation packets from 128-bit comets</span><span 
+class="ec-lmr-8">” (</span><span 
+class="ec-lmr-8">“Ames</span>
+  <span 
+class="ec-lmr-8">Overview</span><span 
+class="ec-lmr-8">”).</span><a href="#x1-8001f8">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
