@@ -1,0 +1,1239 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>Urbit Networking:
+Ad Fontes</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css" />
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Urbit Networking:<br />
+Ad Fontes</h2>
+<div class="author" ><span 
+class="ec-lmbx-12">Edward Amsden</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~ritpub-sipsyl</code>,</span>
+<br />  <span 
+class="ec-lmbx-12">Ted Blackman</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~rovyns-ricfer</code></span>
+<br />  <span 
+class="ec-lmbx-12">Zorp Corp, Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 40--><p class="noindent" ><span 
+class="ec-lmr-9">The</span>
+     <span 
+class="ec-lmr-9">Ad Fontes proposal was an inﬂuential document</span>
+     <span 
+class="ec-lmr-9">outlining  a  vision  for  how  Urbit  networking</span>
+     <span 
+class="ec-lmr-9">could be made more reliable and solid-state. Its</span>
+     <span 
+class="ec-lmr-9">ideas  have  remained  relevant  as  remote  scry,</span>
+     <span 
+class="ec-lmr-9">directed messaging, and other developments have</span>
+     <span 
+class="ec-lmr-9">advanced  the  state  of  the  Ames  protocol.  This</span>
+     <span 
+class="ec-lmr-9">presentation of </span><span 
+class="ec-lmr-9"><code>~ritpub-sipsyl</code>’s original document</span>
+     <span 
+class="ec-lmr-9">and </span><span 
+class="ec-lmr-9"><code>~rovnys-ricfer</code>’s response provides a historical</span>
+     <span 
+class="ec-lmr-9">perspective  on  the  development  of  the  Urbit</span>
+                                                
+                                                
+     <span 
+class="ec-lmr-9">networking  stack,  and  is  lightly  annotated  to</span>
+     <span 
+class="ec-lmr-9">connect its ideas to current developments. Some</span>
+     <span 
+class="ec-lmr-9">technical details as implemented deviate from the</span>
+     <span 
+class="ec-lmr-9">proposal and response.</span>
+</p>
+</section>
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Ad Fontes</a></span>
+<br />     <span class="subsectionToc" >1.1 <a href="#x1-30001.1" id="QQ2-1-3">In Principio</a></span>
+<br />     <span class="subsectionToc" >1.2 <a href="#x1-40001.2" id="QQ2-1-4">Nunc</a></span>
+<br />     <span class="subsectionToc" >1.3 <a href="#x1-50001.3" id="QQ2-1-5">Observations</a></span>
+<br />     <span class="subsectionToc" >1.4 <a href="#x1-60001.4" id="QQ2-1-6">The Stack</a></span>
+<br />      <span class="subsubsectionToc" >1.4.1 <a href="#x1-70001.4.1" id="QQ2-1-7">Scry resolution</a></span>
+<br />      <span class="subsubsectionToc" >1.4.2 <a href="#x1-80001.4.2" id="QQ2-1-8">Frontier discovery</a></span>
+<br />      <span class="subsubsectionToc" >1.4.3 <a href="#x1-90001.4.3" id="QQ2-1-9">Command layer</a></span>
+<br />     <span class="subsectionToc" >1.5 <a href="#x1-100001.5" id="QQ2-1-10">Routing and discovery, revisited</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-110002" id="QQ2-1-11">Response</a></span>
+<br />     <span class="subsectionToc" >2.1 <a href="#x1-120002.1" id="QQ2-1-12">Layers</a></span>
+<br />     <span class="subsectionToc" >2.2 <a href="#x1-130002.2" id="QQ2-1-13">Layer 1: <span class="small-caps">pki</span></a></span>
+<br />     <span class="subsectionToc" >2.3 <a href="#x1-140002.3" id="QQ2-1-14">Layer 2: Transport</a></span>
+<br />     <span class="subsectionToc" >2.4 <a href="#x1-150002.4" id="QQ2-1-15">Layer 3: Routing</a></span>
+<br />     <span class="subsectionToc" >2.5 <a href="#x1-160002.5" id="QQ2-1-16">Layer 4: Messaging</a></span>
+<br />     <span class="subsectionToc" >2.6 <a href="#x1-170002.6" id="QQ2-1-17">Layer 5: Queries</a></span>
+<br />     <span class="subsectionToc" >2.7 <a href="#x1-180002.7" id="QQ2-1-18">Layer 6: Frontier</a></span>
+<br />      <span class="subsubsectionToc" >2.7.1 <a href="#x1-190002.7.1" id="QQ2-1-19">Layer 6b: Publications</a></span>
+<br />     <span class="subsectionToc" >2.8 <a href="#x1-200002.8" id="QQ2-1-20">Layer 7: Commands</a></span>
+<br />     <span class="subsectionToc" >2.9 <a href="#x1-210002.9" id="QQ2-1-21">Message Protocol – Interest Paths</a></span>
+<br />      <span class="subsubsectionToc" >2.9.1 <a href="#x1-220002.9.1" id="QQ2-1-22">Request Types ($cares)</a></span>
+<br />      <span class="subsubsectionToc" >2.9.2 <a href="#x1-230002.9.2" id="QQ2-1-23">Response Types</a></span>
+<br />      <span class="subsubsectionToc" >2.9.3 <a href="#x1-240002.9.3" id="QQ2-1-24">Remote Scry Motif</a></span>
+<br />      <span class="subsubsectionToc" >2.9.4 <a href="#x1-320002.9.4" id="QQ2-1-32">Fetch at Latest (%pine) Motif</a></span>
+<br />      <span class="subsubsectionToc" >2.9.5 <a href="#x1-350002.9.5" id="QQ2-1-35">Command (%poke) Motif</a></span>
+<br />     <span class="subsectionToc" >2.10 <a href="#x1-390002.10" id="QQ2-1-39">Handshake Motif</a></span>
+<br />     <span class="subsectionToc" >2.11 <a href="#x1-400002.11" id="QQ2-1-40">Routing</a></span>
+<br />      <span class="subsubsectionToc" >2.11.1 <a href="#x1-410002.11.1" id="QQ2-1-41">Keepalive Request</a></span>
+                                                
+                                                
+<br />      <span class="subsubsectionToc" >2.11.2 <a href="#x1-420002.11.2" id="QQ2-1-42">Keepalive Response (Direct)</a></span>
+<br />      <span class="subsubsectionToc" >2.11.3 <a href="#x1-430002.11.3" id="QQ2-1-43">Keepalive Response (Relayed)</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-44000" id="QQ2-1-44">References</a></span>
+   </div>
+<!--l. 49--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Ad Fontes</h3>
+<!--l. 51--><p class="noindent" ><span 
+class="ec-lmri-10">The original Ad Fontes proposal was produced by </span><span 
+class="ec-lmri-10"><code>~ritpub-sipsyl</code></span>
+<span 
+class="ec-lmri-10">on </span><span 
+class="ec-lmri-10">~2022.12.2 and revised through </span><span 
+class="ec-lmri-10">~2022.12.10.</span>
+</p><!--l. 54--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.1   </span> <a  id="x1-30001.1"></a>In Principio</h4>
+<!--l. 56--><p class="noindent" >
+     </p><blockquote class="quote">
+     <!--l. 57--><p class="noindent" >On Mars, <span class="small-caps">sin</span> is taken to an extreme. Logically,
+     Urbit is a single broadcast network – a single
+     big  Ethernet  wire.  Everyone  sees  everyone
+     else’s   packets.   You   don’t   send   a   packet.
+     You  “release”  it.  As  a  matter  of  practical
+     optimization,  of  course,  routing  is  necessary,
+     but  it  is  opaque  to  the  receiver.  If  there
+     is  a  routing  envelope,  it  is  stripped  before
+     processing.
+     </p><!--l. 59--><p class="noindent" >An  easy  way  to  see  this  is  to  compare  an
+     Urbit packet, or card, to an IP packet. An IP
+     packet has a header, which is visible both to
+     the routing infrastructure and the application
+     stack.  The  header,  of  course,  contains  the
+     infamous  source  address.  Urbit  removes  not
+     just the source address, but also the rest of the
+                                                
+                                                
+     header. An Urbit card is all payload – it has
+     no region seen both by receiver and router. (<a  id="x1-3001"></a>
+     <code>~sorreg-namtyv</code>, 2010)</p></blockquote>
+<!--l. 62--><p class="noindent" >
+     </p><blockquote class="quote">
+     <!--l. 63--><p class="noindent" >In the classical stack, a basic result of protocol
+     design  is  that  you  can’t  have  exactly-once
+     message  delivery  .  To  put  it  in  the  terms
+     …  [of]  subsection  3.2:  you  can’t  build  a  bus
+     on  a  network.  With  permanent  networking
+     between solid-state interpreters, this feature is
+     straightforward. Why? Because two uniformly
+     persistent  nodes  can  maintain  a  permanent
+     session
+     </p><!--l. 65--><p class="noindent" >Arvo  deﬁnes  a  typed,  global,  referentially
+     transparent namespace with the Ames network
+     identity  at  the  root  of  the  path.  User-level
+     code  has  an  extended  Nock  operator  that
+     dereferences this namespace and blocks until
+     results are available. So the Hoon programmer
+     can use any data in the Urbit universe as a
+     typed constant. (<a  id="x1-3002"></a> <code>~sorreg-namtyv</code> et al., 2016)</p></blockquote>
+<!--l. 68--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.2   </span> <a  id="x1-40001.2"></a>Nunc</h4>
+<!--l. 70--><p class="noindent" >Today there is Ames. Ames provides a command protocol with
+exactly-once semantics over the wire. Urbit ships can poke
+other ships and expect eventually once, and only once, action
+on the poke provided that at some point in the future
+both hosts are able to communicate. Urbit ships can also
+watch a path (wire) on another ship and receive updates,
+provided the subscription is not kicked. Both commands and
+updates must be acknowledged as a core requirement of the
+                                                
+                                                
+protocol.
+</p><!--l. 72--><p class="indent" >   What does not exist is a viable implementation of
+the typed, global, referentially transparent namespace.
+Neither the interface for application writing, nor the
+implementation of the stack beneath it, support programming
+by binding paths in a namespace and apprising other
+ships of such bindings or permitting them to request such
+bindings.
+</p><!--l. 74--><p class="indent" >   This document is in aid of the eﬀort to implement such an
+interface and networking stack.
+</p><!--l. 76--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.3   </span> <a  id="x1-50001.3"></a>Observations</h4>
+<!--l. 78--><p class="noindent" >
+     </p><blockquote class="quote">
+     <!--l. 79--><p class="noindent" >As  a  matter  of  practical  optimization,  of
+     course, routing is necessary, but it is opaque to
+     the receiver.</p></blockquote>
+<!--l. 82--><p class="noindent" >This is a massively important observation. Arvo should not
+“do routing.” It should not be aware of sources or destinations.
+The runtime may route. Hoon code kept up to date by Arvo
+for the runtime’s use may route. Agents may route. Non-Urbit
+or quasi-Urbit entities on the network may route. Arvo, a
+kelvin-versioned artifact which must not be subject to the
+uncertainty of external technical development, must not
+route.
+</p><!--l. 84--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.4   </span> <a  id="x1-60001.4"></a>The Stack</h4>
+<!--l. 86--><p class="noindent" >From <code>~rovnys-ricfer</code>:
+</p>
+                                                
+                                                
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 89--><p class="noindent" ><span class="small-caps">pki</span>
+     </p></li>
+     <li class="itemize">
+     <!--l. 90--><p class="noindent" >routing and peer discovery
+     </p></li>
+     <li class="itemize">
+     <!--l. 91--><p class="noindent" >transport layer (including packetization)
+     </p></li>
+     <li class="itemize">
+     <!--l. 92--><p class="noindent" >scry resolution layer
+     </p></li>
+     <li class="itemize">
+     <!--l. 93--><p class="noindent" >frontier discovery layer
+     </p></li>
+     <li class="itemize">
+     <!--l. 94--><p class="noindent" >command layer</p></li></ul>
+<!--l. 97--><p class="indent" >   The <span class="small-caps">pki</span> can be treated for now as a solved problem.
+Routing and peer discovery must have presently viable
+implementations, but nothing which is being kelvined should
+constrain future, more Urbit-maximalist implementations from
+creation. Likewise the transport layer. Urbit needs to function
+both now, over various Ethernets, and millenia from now, over
+the Third and Most Glorious Quasiluminal Marterran
+Subspace Transponsive. Packetization is not something that
+should be kelvin versioned. None of these problems cry out for
+an immediate solution, though packetization ought not to
+churn Arvo’s event loop.
+                                                
+                                                
+</p><!--l. 99--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">1.4.1   </span> <a  id="x1-70001.4.1"></a>Scry resolution</h5>
+<!--l. 101--><p class="noindent" >The scry resolution layer is where the rubber meets the road.
+How are paths bound by remote ships resolved to data? The
+only possible way is for some ship (initially the binding
+ship, and later possibly other ships and even non-urbit
+transponders) to communicate the binding. Since bindings are
+irrevocable, we call a particular binding an “oath” and we say
+that a ship will “avow” the oath by taking action to inform
+others of it.
+</p><!--l. 103--><p class="indent" >   A ship has no possible way to force its runtime to do
+anything. Everything depends on the runtime’s operations on
+a given and current state of Arvo. (More of the runtime should
+be written in Hoon, it should be said.) But a ship can advise
+or insist that the runtime take some action. Oaths are
+immutable but may be avowed many times.
+</p><!--l. 105--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">1.4.2   </span> <a  id="x1-80001.4.2"></a>Frontier discovery</h5>
+<!--l. 107--><p class="noindent" >The frontier is, at this point in time, the limit of what is
+knowable. In general we do not know all that is knowable.
+Many ships have bound and even avowed oaths which we have
+not yet heard of, and may never hear of. But we would like to
+be able to reliably discover what oaths our peers will avow to
+us.
+</p><!--l. 109--><p class="indent" >   Unfortunately, there is no way to do this which is optimal
+for all applications. The search for such a mechanism is at the
+root of much of the conceptual and design diﬃculty for Urbit’s
+networking layer.
+</p><!--l. 111--><p class="indent" >   We want low-latency, push-based subscriptions. We want
+low load on large publishers. There is a fundamental tension
+here.
+</p><!--l. 113--><p class="indent" >   The correct approach is to provide an interface for
+applications to implement diﬀerent strategies in this regard.
+No networked application can demand absolute upper bounds
+                                                
+                                                
+on delivery latency and absolute reliability.
+</p><!--l. 115--><p class="indent" >   For example: a chat application might work by eagerly
+broadcasting avowals of new chat messages, and then
+beaconing out reavowals in the interim between new chat
+messages on some conﬁgurable but acceptable latency interval.
+Ten, ﬁfteen, or even thirty seconds of time is not a steep
+penalty to pay for a dropped packet in a chat application. Of
+course, this penalty is only paid if the entire message is
+dropped. If we become aware of a message but we are missing
+some packets for it, we can always request (see below) an
+immediate re-send.
+</p><!--l. 117--><p class="indent" >   A media streaming application, whether for one-to-many
+broadcast or two-way or many-way communication, may never
+reavow a binding, since a binding which is known late is no
+longer relevant.
+</p><!--l. 119--><p class="indent" >   However, there should of course be a way to request a path
+from a ship. Thinking of this in terms of “which path
+exactly must I request?” is incorrect. The information being
+communicated is “I am interested in a (the latest?) path of
+this form”, which information ought to be avowed, as an oath.
+This permits replication and caching of interest information,
+and application-speciﬁc but still not onerous handling of the
+problem of a dead or silent interest.
+</p><!--l. 121--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">1.4.3   </span> <a  id="x1-90001.4.3"></a>Command layer</h5>
+<!--l. 123--><p class="noindent" >The Ames command layer is, from the view of this system, an
+application, if a very general and ubiquitous one. A poke takes
+the form of an oath that you wish to poke another ship with
+some path and data. The command-layer application insists
+on re-avowing pokes on a decaying schedule until they
+are acknowledged. Acknowledgement is, yet again, an
+oath.
+</p><!--l. 125--><p class="noindent" >
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.5   </span> <a  id="x1-100001.5"></a>Routing and discovery, revisited</h4>
+<!--l. 127--><p class="noindent" >Alright then. Urbit is conceptually a broadcast network, but
+we necessarily optimize it by routing. So on what basis to we
+route, and to where?
+</p><!--l. 129--><p class="indent" >   Routing must be a decision taken on registration of
+interest. By what policy we determine interest may vary, but
+it should be informed primarily by avowals of interest by the
+destination. An exception is commands which should be
+routed unless disinterest is avowed.
+</p><!--l. 131--><p class="indent" >   The public Internet is not a broadcast network, and we
+cannot yet communicate over a global network where Urbit
+has its own ethertype and its own routers. Thus we must be
+able to select a set of public IPs to send avowals (our own or
+others) to.
+</p><!--l. 133--><p class="indent" >   For this reason, galaxies already live in <span class="small-caps">dns</span>. Commands
+and registration of interest should by default be routed to
+sponsoring galaxies and be shared with other galaxies.
+Galaxies learn IPs of their sponsored stars by receiving such
+communication. Perhaps the registeration of interest is
+re-avowed on a heartbeat. Similarly, stars learn IPs of
+their planets by receiving registrations of interest. Any
+retransmitted avowal can have several lanes attached in the
+packet header (stripped before oﬀering to Arvo) by which the
+avowing ship can be reached. Commands can be routed to the
+IP of the commanded ship, if known, its sponsor’s IP, if
+known, or its sponsor’s sponsor’s IP. More general oaths are
+checked against registered interest (which may be expired if
+not re-avowed) and sent along known lanes to interested
+ships.
+</p><!--l. 135--><p class="indent" >   (In an Urbit maximalist future, <span class="small-caps">bgp</span>-type protocols
+between Urbit-aware routers will likely permit link-shaped
+routing of such avowals as well as sponsorship-shaped routing,
+which can reasonably exist now.)
+</p><!--l. 137--><p class="indent" >   Local networks, by contrast, generally permit and even
+depend on broadcast behavior. The Address Resolution
+Protocol is fundamental to the operation of local IP subnets
+over lower-layer networks. A packet is broadcast which
+requests a <span class="small-caps">mac</span> address for an IP, and provides a <span class="small-caps">mac</span>
+                                                
+                                                
+address to reply to. At higher layers this is replicated.
+Peer discovery for local networks at the OS layer (<span class="small-caps">dhcp</span>,
+zeroconf networking), shared-hardware layer (printers and
+screens) and application layer (media) rely on on broadcast
+announcements which receive addressed replies. Commands
+and interest registrations could be broadcast on local
+networks to discover peers either directly, or via Urbit-aware
+routers.
+</p><!--l. 139--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-110002"></a>Response</h3>
+<!--l. 141--><p class="noindent" ><span 
+class="ec-lmri-10">This appendix is a response by </span><span 
+class="ec-lmri-10"><code>~rovyns-ricfer</code> to the original</span>
+<span 
+class="ec-lmri-10">document on </span><span 
+class="ec-lmri-10">~2022.12.10 and revised through </span><span 
+class="ec-lmri-10">~2023.1.10.</span>
+</p><!--l. 144--><p class="indent" >   <code>~ritpub-sipsyl</code> wrote up the philosophy for an Urbit
+networking paradigm that could be used to realize several
+diﬀerent dreams:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 147--><p class="noindent" >universal referential transparency
+     </p></li>
+     <li class="itemize">
+     <!--l. 148--><p class="noindent" >transport agnosticism
+     </p></li>
+     <li class="itemize">
+     <!--l. 149--><p class="noindent" >global broadcast
+     </p></li>
+     <li class="itemize">
+     <!--l. 150--><p class="noindent" >a “narrow waist” that expresses networking in terms
+     of a small number of primitives that compose well
+                                                
+                                                
+     </p></li>
+     <li class="itemize">
+     <!--l. 151--><p class="noindent" >layering, to reduce the dimensionality of the problem</p></li></ul>
+<!--l. 154--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.1   </span> <a  id="x1-120002.1"></a>Layers</h4>
+<!--l. 156--><p class="noindent" >The main layers are:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 159--><p class="noindent" ><span class="small-caps">pki</span>
+     </p></li>
+     <li class="itemize">
+     <!--l. 160--><p class="noindent" >Transport
+     </p></li>
+     <li class="itemize">
+     <!--l. 161--><p class="noindent" >Routing
+     </p></li>
+     <li class="itemize">
+     <!--l. 162--><p class="noindent" >Messaging
+     </p></li>
+     <li class="itemize">
+     <!--l. 163--><p class="noindent" >Queries
+     </p></li>
+     <li class="itemize">
+     <!--l. 164--><p class="noindent" >Frontier
+     </p></li>
+     <li class="itemize">
+     <!--l. 165--><p class="noindent" >Commands</p></li></ul>
+                                                
+                                                
+<!--l. 168--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.2   </span> <a  id="x1-130002.2"></a>Layer 1: PKI</h4>
+<!--l. 170--><p class="noindent" >The <span class="small-caps">pki</span> establishes identities, keys, and sponsorship
+information. The <span class="small-caps">pki</span> is already factored out well into
+Azimuth. This document does not propose any changes to
+that.
+</p><!--l. 172--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.3   </span> <a  id="x1-140002.3"></a>Layer 2: Transport</h4>
+<!--l. 174--><p class="noindent" >The transport layer is concerned with packetization,
+transmission control, congestion control, and packet-level
+authentication. The messaging layer deﬁnes the set of
+messages, i. e. which nouns can be emitted and received by
+Arvo as semantically meaningful units of information.
+</p><!--l. 176--><p class="indent" >   All higher layers should be agnostic to the transport layer.
+This means they can’t know anything about the transport
+layer – things like how a message is broken into packets, how
+those packets are authenticated, and how congestion control
+and transmission control are deﬁned.
+</p><!--l. 178--><p class="indent" >   A user or an application should be able to conﬁgure a ship
+to use multiple transports. A ship could even use diﬀerent
+transports for diﬀerent subtrees of the scry namespace. This
+conﬁguration can be thought of as a “scry resolution
+layer” – someone should be able to mirror any part of
+the Urbit namespace on <span class="small-caps">ipfs</span>, torrents, i2p, Tor, an S3
+server, other Urbit ships, or a <span class="small-caps">usb</span> drive, and as long
+as the requesting ship has the corresponding plugin for
+that transport protocol, it should be able to access the
+data.
+</p><!--l. 180--><p class="indent" >   The default transport layer should be a <span class="small-caps">udp</span>-based
+protocol that looks a lot like the current Ames and Fine
+protocols: 1kB of data per packet, with some kind of packet
+forgery prevention to protect against denial of service
+                                                
+                                                
+attacks.
+</p><!--l. 182--><p class="indent" >   One diﬀerence between the proposed default transport and
+Urbit’s current packet-level protocol is that the proposd
+transport will include “advisory” packets, i. e. packets whose
+emission does not imply its sender Arvo knows the packet was
+sent. Advisory acks could be used to indicate that the
+receiving Vere has heard the packet, without implying
+that its Arvo has heard it – this will enable incoming
+message fragment packets to be acked immediately without
+waiting for a disk write. In contrast, message-level acks
+do imply the receiving Arvo ingested and processed the
+message.
+</p><!--l. 184--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.4   </span> <a  id="x1-150002.4"></a>Layer 3: Routing</h4>
+<!--l. 186--><p class="noindent" >The basic idea of the routing layer is that each ship maintains
+a set of other ships with whom it’s currently trying to interact,
+and the routing layer attempts to ﬁnd the most direct
+connection possible with each of those ships.
+</p><!--l. 188--><p class="indent" >   Routing can be transport-dependent. The scry conﬁguration
+system that allows for diﬀerent transports to be used
+for diﬀerent subtrees applies to routing-related requests
+too.
+</p><!--l. 190--><p class="indent" >   The default transport will use symmetric routing
+with keepalives. For each ship that my ship is trying to
+communicate with, my ship’s routing system will send a
+keepalive packet every 25 seconds. This keepalive request
+packet will go down the receiving ship’s sponsorship hierarchy,
+and the response packet will retrace the same path through
+the network in the opposite direction.
+</p><!--l. 192--><p class="indent" >   If my ship does not receive the keepalive response within a
+short window of time (perhaps a few seconds), it will send
+another keepalive, this time through the ship’s sponsor’s last
+known location. If that does not yield a prompt response, my
+ship sends a keepalive to the sponsor’s sponsor’s last known
+location, with this chain terminating in the sponsoring
+                                                
+                                                
+galaxy.
+</p><!--l. 194--><p class="indent" >   Keepalive responses contain a list of transport addresses
+that can be used to reach the responder ship. This list will
+generally include addresses of the sponsorship hierarchy,
+appended by relays later in the response chain.
+</p><!--l. 196--><p class="indent" >   (Aside: [Do we want] push-based reconnect? or do we not
+need that explicit query for sponsee address? Implicit is more
+eﬃcient and maybe simpler.)
+</p><!--l. 198--><p class="indent" >   Arvo itself will not maintain an up-to-date list of
+transport-level addresses for each of its peers. Instead, oﬀ-loop
+code (i. e. part of Urbit whose state is not persisted as part of
+the Arvo core and whose execution does not occur within
+Arvo’s event loop) will be responsible for maintaining those
+addresses. For sovereignty reasons, it’s good for these
+systems to occasionally inform Arvo of the known direct
+addresses for other ships, but that can be done every few
+minuteswithout hitting the event loop on every state
+update.
+</p><!--l. 200--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.5   </span> <a  id="x1-160002.5"></a>Layer 4: Messaging</h4>
+<!--l. 202--><p class="noindent" >The message layer is the “narrow waist” between the diﬀerent
+parts of the system. Every message is simply an <code class="lstinline"><span style="color:#000000">$oath</span></code>: a
+signed pair of <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">path</span><span style="color:#000000"> </span><span style="color:#000000">noun</span><span style="color:#000000">]</span></code> representing a scry binding – the
+path is permanently bound to that noun, and the signature
+attests to this permanence.
+</p><!--l. 204--><p class="indent" >   An oath is quite general – it could mean many diﬀerent
+things. The higher layers of the system build conventions into
+the namespace for interpreting oaths whose paths ﬁt certain
+patterns.
+</p><!--l. 206--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.6   </span> <a  id="x1-170002.6"></a>Layer 5: Queries</h4>
+<!--l. 208--><p class="noindent" >The query layer establishes a convention for how one scry
+                                                
+                                                
+binding can be interpreted as a request to download the value
+bound to a diﬀerent scry path on another ship. This is a
+“remote scry protocol”. The fundamental interaction consists
+of a subscriber ship emitting an oath representing a scry
+request for the value at a fully qualiﬁed path, then receiving a
+response oath from another ship that contains the requested
+scry binding.
+</p><!--l. 210--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.7   </span> <a  id="x1-180002.7"></a>Layer 6: Frontier</h4>
+<!--l. 212--><p class="noindent" >The frontier layer extends the query layer to express a
+request for the latest value at a path – this can’t be a
+fully qualiﬁed scry path, since that implies a concrete
+<code class="lstinline"><span style="color:#000000">$case</span></code> (revision number or date). Instead, the path in
+such a request has a wildcard character in place of a
+<code class="lstinline"><span style="color:#000000">$case</span></code>, indicating the request is a <code class="lstinline"><span style="color:#000000">%pine</span></code>, which can be
+resolved by any binding whose path matches the path in the
+request.
+</p><!--l. 214--><p class="indent" >   The ship receiving the <code class="lstinline"><span style="color:#000000">%pine</span></code> will respond with the latest
+binding it has that matches the request. Note that for
+ephemerally bound oaths, such as requesting a piece of data
+from a Gall agent at the latest date, this operation must be
+atomic. Breaking it up into two requests (the ﬁrst to retrieve
+the case, the second to grab the value at the path with that
+case) will fail unless both requests are performed on the same
+Arvo state.
+</p><!--l. 216--><p class="indent" >   A <code class="lstinline"><span style="color:#000000">%pine</span></code> should only be used when the last case
+is unknown. Otherwise, a request with a concrete case
+should be used. This increases the degree of eﬀective
+referential transparency in the networking – since everything
+is an oath in this system, everything is at least trivially
+referentially transparent, but it’s good for the referential
+transparency to be pervasive at every layer, rather than
+merely trivial. Making more of the requests referentially
+transparent yields a more stable, cacheable, analyzable
+system.
+                                                
+                                                
+</p><!--l. 218--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.7.1   </span> <a  id="x1-190002.7.1"></a>Layer 6b: Publications</h5>
+<!--l. 220--><p class="noindent" >A further layer on top of queries and <code class="lstinline"><span style="color:#000000">%pine</span></code> is publications. A
+publication is solid-state, meaning it traces a sequence of scry
+bindings across the namespace, with an incrementing numeric
+case for each update.
+</p><!--l. 222--><p class="indent" >   On initial subscription, a subscriber emits a <code class="lstinline"><span style="color:#000000">%pine</span></code> to
+request the latest rock. Once it has the rock at revision \(n\), it
+scries for wave \(n+1\) – not as a <code class="lstinline"><span style="color:#000000">%pine</span></code>, but as a scry request.
+</p><!--l. 224--><p class="indent" >   The publisher responds in one of three ways to this
+request: with a scry response if it has the data, with a <code class="lstinline"><span style="color:#000000">%nigh</span></code>
+response if it doesn’t have the data yet, or with a <code class="lstinline"><span style="color:#000000">%yore</span></code>
+response if it deleted the data. A <code class="lstinline"><span style="color:#000000">%yore</span></code> or <code class="lstinline"><span style="color:#000000">%nigh</span></code> response
+would bind a path including the original path, but the
+publisher’s current dateas the oﬃcial <code class="lstinline"><span style="color:#000000">$case</span></code>.
+</p><!--l. 226--><p class="indent" >   If the subscriber hears a scry response, it requests the next
+wave, n+2. If it hears a <code class="lstinline"><span style="color:#000000">%nigh</span></code> response, it re-sends the
+request 25 seconds later. This request should be “sticky”, so
+that if the publisher binds the requested path within 25
+seconds of hearing the request, it will immediately route the
+new binding to the subscriber.
+</p><!--l. 228--><p class="indent" >   If the subscriber hears a <code class="lstinline"><span style="color:#000000">%yore</span></code> response, that means it
+has fallen behind the publisher, which has deleted the wave it
+asked for. The subscriber falls back to a <code class="lstinline"><span style="color:#000000">%pine</span></code> for the latest
+rock, just like in initial subscription.
+</p><!--l. 230--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.8   </span> <a  id="x1-200002.8"></a>Layer 7: Commands</h4>
+<!--l. 232--><p class="noindent" >A command consists of an oath broadcasting a command from
+the emitting ship to another ship, followed by an oath from
+the other ship broadcasting the ack, which is either empty,
+indicating the receiver performed the command, or a
+<code class="lstinline"><span style="color:#000000">$tang</span></code> error message describing why the command was not
+                                                
+                                                
+performed.
+</p><!--l. 234--><p class="indent" >   Each command is sent on a “ﬂow”, identiﬁed by a number
+called a <code class="lstinline"><span style="color:#000000">$bone</span></code>. Within a ﬂow, commands are delivered
+to the receiving application in order, with exactly-once
+delivery at the application level unless one of the two ships
+breaches.
+</p><!--l. 236--><p class="indent" >   The transport and routing layers need to know this is a
+command, so that it can be routed to the receiver despite the
+receiver not having ﬁrst emitted an interest oath – every
+ship is considered to have implicitly registered interest in
+commands to it.
+</p><!--l. 238--><p class="indent" >   Note that this design would allow commands to use
+the same encryption scheme as other broadcasts. This
+would likely mean the kernel would use a cryptographic
+ratchet to maintain a secure channel between publisher and
+subscriber, which the publisher would use to send the
+subscriber the symmetric keys used to encrypt and decrypt
+various subpaths within the namespace it’s publishing.
+Since commands will just be one kind of scry binding,
+they could reuse this key distribution system for forward
+secrecy.
+</p><!--l. 240--><p class="indent" >   (Aside: Which ratchet makes the most sense – double
+ratchet?)
+</p><!--l. 242--><p class="indent" >   This design also suggests that in the default transport, the
+receiver of the command would be the ship performing
+congestion control, which is more polite than the present
+situation, which is the reverse. All large messages will be
+pulled, rather than pushed, including commands, giving the
+ship ingesting the data control over how it obtains the data
+and at what rate. Only the ﬁrst packet of a command will
+be pushed, to notify the receiver the command can be
+pulled.
+</p><!--l. 244--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.9   </span> <a  id="x1-210002.9"></a>Message Protocol – Interest Paths</h4>
+<!--l. 246--><p class="noindent" >Paths of a certain format are recognized by Vere as “interest
+                                                
+                                                
+paths”, which register interest (or disinterest) in the value
+bound to another path. These paths all use <code class="lstinline"><span style="color:#000000">%a</span></code> as their
+<code class="lstinline"><span style="color:#000000">$vane</span></code>, representing the Ames vane.
+</p><!--l. 248--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.9.1   </span> <a  id="x1-220002.9.1"></a>Request Types ($cares)</h5>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 251--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%a</span></code>: fetch a value at a fully qualiﬁed path (remote
+     scry)
+     </p></li>
+     <li class="itemize">
+     <!--l. 252--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%b</span></code>: fetch the latest value (<code class="lstinline"><span style="color:#000000">%pine</span></code>)
+     </p></li>
+     <li class="itemize">
+     <!--l. 253--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%c</span></code>: send command (<code class="lstinline"><span style="color:#000000">%poke</span></code>)</p></li></ul>
+<!--l. 256--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.9.2   </span> <a  id="x1-230002.9.2"></a>Response Types</h5>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!--l. 259--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%d</span></code>: poke ack
+     </p></li>
+     <li class="itemize">
+     <!--l. 260--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%z</span></code>: metadata about whether a path is bound and
+     available</p></li></ul>
+                                                
+                                                
+<!--l. 263--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.9.3   </span> <a  id="x1-240002.9.3"></a>Remote Scry Motif</h5>
+<!--l. 265--><p class="noindent" >The remote scry motif implements a remote query at a fully
+qualiﬁed path. It is primarily a request/response system where
+a request for the value at a path yields a single formal
+response containing the requested value. This motif also
+includes advisory responses that the publisher can emit as a
+courtesy if it is not sending the formal response at this
+time.
+</p>
+<!--l. 267--><p class="noindent" ><span class="paragraphHead"><a  id="x1-25000"></a><span 
+class="ec-lmbx-10">Request</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 269-->
+<pre class="lstlisting" id="listing-30"><span class="label"><a  id="x1-25001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/1/2/a/a/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/base/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-25002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0026;</span></span></pre>
+<!--l. 274--><p class="indent" >   The value bound to a scry request path is a ﬂag indicating
+interest if yes, or disinterest if no. Disinterest can be used to
+cancel a previous request.
+</p>
+<!--l. 276--><p class="noindent" ><span class="paragraphHead"><a  id="x1-26000"></a><span 
+class="ec-lmbx-10">Positive Response (Permanent, Value is Present)</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 278-->
+<pre class="lstlisting" id="listing-31"><span class="label"><a  id="x1-26001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-26002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">::</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">141</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">k\0a...</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+<!--l. 283--><p class="indent" >   The value in any permanent response is a
+<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">mark</span><span style="color:#000000"> </span><span style="color:#000000">noun</span><span style="color:#000000">])</span></code>.
+                                                
+                                                
+</p>
+<!--l. 285--><p class="noindent" ><span class="paragraphHead"><a  id="x1-27000"></a><span 
+class="ec-lmbx-10">Negative Response (Permanent, Value Is Absent)</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 287-->
+<pre class="lstlisting" id="listing-33"><span class="label"><a  id="x1-27001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base/nonexistent/hoon</span></span> 
+<span class="label"><a  id="x1-27002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span></pre>
+<!--l. 292--><p class="indent" >   A permanent negative response binds the requested path
+directly to a null value.
+</p>
+<!--l. 294--><p class="noindent" ><span class="paragraphHead"><a  id="x1-28000"></a><span 
+class="ec-lmbx-10">Blocked Responses</span></span>
+   <br 
+class="newline" />
+</p><!--l. 296--><p class="indent" >   A blocked response represents a refusal to answer the scry
+request. Any blocked response binds a temporary path to a
+value indicating the kind of refusal. The path is bound at the
+current date with a <code class="lstinline"><span style="color:#000000">%z</span></code> care, and it includes the original scry
+request path as the spur.
+</p>
+<!--l. 298--><p class="noindent" ><span class="paragraphHead"><a  id="x1-29000"></a><span 
+class="ec-lmbx-10">Deleted</span></span>
+   <br 
+class="newline" />
+</p><!--l. 300--><p class="indent" >   This response is emitted if the publisher has deleted the
+value at this path.
+</p>
+   <!--l. 302-->
+<pre class="lstlisting" id="listing-35"><span class="label"><a  id="x1-29001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-29002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%yore</span></span></pre>
+                                                
+                                                
+<!--l. 307--><p class="noindent" ><span class="paragraphHead"><a  id="x1-30000"></a><span 
+class="ec-lmbx-10">Not Yet Bound</span></span>
+   <br 
+class="newline" />
+</p><!--l. 309--><p class="indent" >   This response is emitted if the publisher knows it might
+bind the path later, but has not yet bound the path to any
+value. This can happen if the subscriber asks for a Clay ﬁle or
+publication data at a future <code class="lstinline"><span style="color:#000000">$case</span></code>.
+</p>
+   <!--l. 311-->
+<pre class="lstlisting" id="listing-37"><span class="label"><a  id="x1-30001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-30002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%nigh</span></span></pre>
+<!--l. 316--><p class="noindent" ><span class="paragraphHead"><a  id="x1-31000"></a><span 
+class="ec-lmbx-10">General Refusal (Other)</span></span>
+   <br 
+class="newline" />
+</p><!--l. 318--><p class="indent" >   There are other reasons the publisher might not want to
+respond: for example, the request could be malformed, causing
+a crash in the scry handler; or the value might not have
+permissions to be read over the network. This response is a
+catch-all that does not provide any information about why the
+request was denied.
+</p>
+   <!--l. 320-->
+<pre class="lstlisting" id="listing-38"><span class="label"><a  id="x1-31001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-31002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%deny</span></span></pre>
+<!--l. 325--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.9.4   </span> <a  id="x1-320002.9.4"></a>Fetch at Latest (%pine) Motif</h5>
+<!--l. 327--><p class="noindent" >The <code class="lstinline"><span style="color:#000000">%pine</span></code> motif implements a “query at latest” request/response
+ﬂow. The requester asks for the latest value at a scry path
+whose <code class="lstinline"><span style="color:#000000">$case</span></code> (revision number or date) is a wildcard (<code class="lstinline"><span style="color:#000000">?</span></code>). The
+request has a diﬀerent <code class="lstinline"><span style="color:#000000">$care</span></code> to indicate it’s a <code class="lstinline"><span style="color:#000000">%pine</span></code>
+rather than a scry request. The publisher responds with a
+path that matches the request predicate, with the latest
+                                                
+                                                
+response it can, as a direct binding, or a generic blocked
+response.
+</p>
+<!--l. 329--><p class="noindent" ><span class="paragraphHead"><a  id="x1-33000"></a><span 
+class="ec-lmbx-10">Request</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 331-->
+<pre class="lstlisting" id="listing-44"><span class="label"><a  id="x1-33001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/1/2/a/b/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/?</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/base/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-33002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ud</span></span></pre>
+<!--l. 336--><p class="indent" >   The value of a <code class="lstinline"><span style="color:#000000">%pine</span></code> request indicates which kind of
+<code class="lstinline"><span style="color:#000000">$case</span></code> it wants in the response path. A case can be either
+<code class="lstinline"><span style="color:#000000">%ud</span></code> for numeric revision, <code class="lstinline"><span style="color:#000000">%da</span></code> for date, <code class="lstinline"><span style="color:#000000">%tas</span></code> for label, or
+<code class="lstinline"><span style="color:#000000">%uw</span></code> for hash. If the publisher can’t bind a path at the
+requested <code class="lstinline"><span style="color:#000000">$case</span></code> type, it will emit a general refusal block
+response.
+</p>
+<!--l. 338--><p class="noindent" ><span class="paragraphHead"><a  id="x1-34000"></a><span 
+class="ec-lmbx-10">Response</span></span>
+   <br 
+class="newline" />
+</p><!--l. 340--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">%pine</span></code> response message is the same as a scry
+response message. Its path has a concrete case, not a
+wildcard.
+</p>
+   <!--l. 342-->
+<pre class="lstlisting" id="listing-53"><span class="label"><a  id="x1-34001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base/sys/hoon/hoon</span></span> 
+<span class="label"><a  id="x1-34002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">::</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">141</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">k\0a...</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+<!--l. 347--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.9.5   </span> <a  id="x1-350002.9.5"></a>Command (%poke) Motif</h5>
+                                                
+                                                
+<!--l. 349--><p class="noindent" ><span class="paragraphHead"><a  id="x1-36000"></a><span 
+class="ec-lmbx-10">Request</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 351-->
+<pre class="lstlisting" id="listing-54"><span class="label"><a  id="x1-36001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/1/2/a/c/1.234/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/d/1.234</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/36</span></span> 
+<span class="label"><a  id="x1-36002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/g/landscape/chat/my-channel</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%add-post</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">first!!1</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+<!--l. 356--><p class="indent" >   Here 36 is the <code class="lstinline"><span style="color:#000000">$bone</span></code>, i. e. the number of this “ﬂow”
+between the two ships. <code class="lstinline"><span style="color:#000000">1</span><span style="color:#000000">.234</span></code> is the message sequence
+number, which is also the case of the request path. The poke
+request can be thought of as expressing interest in the ack
+message bound by the receiving ship.
+</p>
+<!--l. 358--><p class="noindent" ><span class="paragraphHead"><a  id="x1-37000"></a><span 
+class="ec-lmbx-10">Positive Response (Ack)</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 360-->
+<pre class="lstlisting" id="listing-57"><span class="label"><a  id="x1-37001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/d/1.234/</span><span 
+class="ec-lmtt-9">~rovnys/36</span></span> 
+<span class="label"><a  id="x1-37002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0026;</span></span></pre>
+<!--l. 365--><p class="indent" >   If the receiver performed the command, it emits a
+response on the requested ack path with a value of <code class="lstinline"><span style="color:#000000">&#x0026;</span></code>
+(“yes”).
+                                                
+                                                
+</p>
+<!--l. 369--><p class="noindent" ><span class="paragraphHead"><a  id="x1-38000"></a><span 
+class="ec-lmbx-10">Negative Response (Nack)</span></span>
+   <br 
+class="newline" />
+</p>
+   <!--l. 371-->
+<pre class="lstlisting" id="listing-59"><span class="label"><a  id="x1-38001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~zod/2/3/a/d/1.234/</span><span 
+class="ec-lmtt-9">~rovnys/36</span></span> 
+<span class="label"><a  id="x1-38002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">|</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">chat</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%add-post</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">failure:</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">no</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">permissions</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">this</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">channel</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+<!--l. 376--><p class="indent" >   If the receiver declined to perform the command, it emits
+a response on the requested ack path containing a <code class="lstinline"><span style="color:#000000">|</span></code>
+(“no”) and a <code class="lstinline"><span style="color:#000000">$tang</span></code> datum containing either a stack trace
+or an application-level error message. Note that this is
+not intended as a general-purpose response mechanism,
+i. e. it is an anti-pattern to dispatch on the stack trace
+programmatically.
+</p><!--l. 378--><p class="indent" >   (Aside: Should there be a way to dispatch on the kind of
+error? Userspace devs keep asking for this. We could easily
+make the poke motif a special case of a more general
+request/response motif. That arguably violates <span class="small-caps">cqrs</span>, but it’s
+a very useful pattern, both for errors and for things like
+responding to a command with a ticket number that the
+requester could use later to check in on the status of
+an ongoing async operation that this command kicked
+oﬀ.)
+</p><!--l. 380--><p class="indent" >   (Aside: Should there be an explicit disinterest message
+that can be sent in response to a poke, as an advisory
+scry binding? This could be useful for mitigating DoS
+attacks, and it could even specify an explicit backoﬀ
+interval.)
+</p><!--l. 382--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.10   </span> <a  id="x1-390002.10"></a>Handshake Motif</h4>
+<!--l. 384--><p class="noindent" >Any two ships need to able to negotiate a symmetric key to
+                                                
+                                                
+distribute other symmetric keys that will be used to encrypt
+scry <code class="lstinline"><span style="color:#000000">$spur</span></code>s (the last part of the scry path, after all the
+standardized path elements) and bound values.
+</p><!--l. 386--><p class="indent" >   An encrypted spur looks like <code class="lstinline"><span style="color:#000000">/14/0w2.CESjp.GdASq.</span></code>
+<code class="lstinline"><span style="color:#000000">zpdVc.b4Y1T.JXcY1</span></code>, where <code class="lstinline"><span style="color:#000000">14</span></code> is the number of the key
+used to encrypt the second element of the path, which is the
+result of <code class="lstinline"><span style="color:#000000">jam</span></code>ming (serializing) and then encrypting the
+original spur. Any of the spurs used as examples of remote
+scry and <code class="lstinline"><span style="color:#000000">%pine</span></code> in this document could be replaced by a spur
+of this form without loss of generality. Poke paths are not
+encrypted, only their values.
+</p><!--l. 388--><p class="indent" >   (Aside: Should poke values always be
+<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">key-num</span><span style="color:#000000"> </span><span style="color:#000000">encrypted-value</span><span style="color:#000000">]</span></code> just like encrypted spurs?
+That might be nice, to avoid race conditions between the
+handshake protocol and other pokes.)
+</p><!--l. 390--><p class="indent" >   Since cryptography evolves, it cannot be kelvin versioned.
+Urbit’s handshake protocol should instead have an incrementing
+version number. As of this writing in 2023, modern protocols
+use various kinds of “cryptographic ratchet” to cycle
+keys frequently, providing forward secrecy and sometimes
+other desirable privacy properties. These ratchets often
+involve “ephemeral Diﬃe-Hellman” key exchange and “key
+derivation functions (<span class="small-caps">kdf</span>s)” to limit how far back or
+forward an attacker could see if they crack any single
+key.
+</p><!--l. 392--><p class="indent" >   The network messages to request a symmetric key used to
+encrypt scry <code class="lstinline"><span style="color:#000000">$spur</span></code>s can use the normal <code class="lstinline"><span style="color:#000000">%pine</span></code> and remote
+scry motifs. The <code class="lstinline"><span style="color:#000000">$spur</span></code>s involved in the request itself will be
+encrypted using the latest key negotiated by the handshake
+protocol.
+</p><!--l. 394--><p class="indent" >   Any handshake protocol can be expressed as pokes back
+and forth between the two ships, encrypted using the latest
+known key negotiated by the handshake protocol. So that
+both ships know that a poke relates to a handshake, we could
+reserve bone <code class="lstinline"><span style="color:#000000">0</span></code> for the handshake protocol.
+</p><!--l. 396--><p class="indent" >   The ﬁrst implementation of this networking design will
+likely triage the handshake and use the Diﬃe–Hellman of both
+ships’ static keys as a permanent symmetric key. This does not
+provide forward secrecy, but keeping the handshake protocol
+                                                
+                                                
+orthogonal from the rest of this suite of protocols allows a
+nontrivial handshake protocol to be added later without
+changing the rest of the design.
+</p><!--l. 398--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">2.11   </span> <a  id="x1-400002.11"></a>Routing</h4>
+<!--l. 400--><p class="noindent" >Note that since routing is transport-dependent, there are no
+message-level semantics, other than Arvo emitting oaths to its
+local Vere to indicate interest or disinterest in routing
+messages to a ship.
+                                                
+                                                
+</p>
+   <!--l. 404-->
+<pre class="lstlisting" id="listing-73"><span class="label"><a  id="x1-40001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/1/2/a/a/</span><span 
+class="ec-lmtt-9">~2023.1.10/lane/</span><span 
+class="ec-lmtt-9">~wicdev/5/6</span></span> 
+<span class="label"><a  id="x1-40002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0026;</span></span></pre>
+<!--l. 409--><p class="indent" >   When Vere hears this oath, it is responsible for ﬁnding
+ wicdev using whatever transport protocol is indicated for
+that part of the namespace. The rest of this description
+applies only to the default <span class="small-caps">udp</span> transport.
+</p><!--l. 411--><p class="indent" >   Note: in a certain sense, we don’t strictly need this, since
+other requests could be used to infer interest or disinterest in
+the locations of other ships. The reasons to include it anyway
+are to:
+</p><!--l. 413--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-40004x1">
+     <!--l. 414--><p class="noindent" >ensure orthogonality of routing and other layers; and
+     </p></li>
+<li 
+  class="enumerate" id="x1-40006x2">
+     <!--l. 415--><p class="noindent" >to allow a ship to deliberately ask its Vere to ﬁnd
+     a  peer  for  it,  which  is  useful  for  sovereignty  and
+     network diagnostics.</p></li></ol>
+<!--l. 418--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.11.1   </span> <a  id="x1-410002.11.1"></a>Keepalive Request</h5>
+<!--l. 420--><p class="noindent" >A keepalive request looks like a <code class="lstinline"><span style="color:#000000">%pine</span></code>, generated by Vere,
+with a <code class="lstinline"><span style="color:#000000">%e</span></code> synthetic <code class="lstinline"><span style="color:#000000">$care</span></code> indicating interest in a keepalive
+response:
+</p>
+   <!--l. 422-->
+<pre class="lstlisting" id="listing-77"><span class="label"><a  id="x1-41001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~rovnys/1/2/a/e/</span><span 
+class="ec-lmtt-9">~2023.1.10/</span><span 
+class="ec-lmtt-9">~wicdev/5/6/a/f</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/?/keep</span></span> 
+<span class="label"><a  id="x1-41002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0026;</span></span></pre>
+                                                
+                                                
+<!--l. 427--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.11.2   </span> <a  id="x1-420002.11.2"></a>Keepalive Response (Direct)</h5>
+<!--l. 429--><p class="noindent" >The “direct” (i. e. originated by the target of the keepalive
+request) response to a keepalive request has a path containing
+a <code class="lstinline"><span style="color:#000000">%f</span></code> synthetic <code class="lstinline"><span style="color:#000000">$care</span></code>, at the publisher’s latest date. Its value
+contains a list of IPv4 addresses and <span class="small-caps">udp</span> ports, whose sole
+element is the IP and port of the ship itself, as reported to it
+by its sponsor.
+</p>
+   <!--l. 431-->
+<pre class="lstlisting" id="listing-80"><span class="label"><a  id="x1-42001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~wicdev/5/6/a/f/</span><span 
+class="ec-lmtt-9">~2023.1.11/keep</span></span> 
+<span class="label"><a  id="x1-42002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%udp-ipv4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">.192.168.1.1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.337</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+<!--l. 436--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">2.11.3   </span> <a  id="x1-430002.11.3"></a>Keepalive Response (Relayed)</h5>
+<!--l. 438--><p class="noindent" >If a relay hears a keepalive response, it wraps the result in its
+own address, prepending its own address to the list of lanes
+and including the signature of the wrapped response in its own
+response. The relay address can then be used by the original
+requester to “tighten” the route it uses in later keepalive
+requests.
+</p>
+   <!--l. 440-->
+<pre class="lstlisting" id="listing-81"><span class="label"><a  id="x1-43001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">~dev/7/8/a/g/</span><span 
+class="ec-lmtt-9">~2023.1.12/fore/</span><span 
+class="ec-lmtt-9">~wicdev/5/6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/a/f/</span><span 
+class="ec-lmtt-9">~2023.1.11/keep</span></span> 
+<span class="label"><a  id="x1-43002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%udp-ipv4</span></span> 
+<span class="label"><a  id="x1-43003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">.123.456.789.0</span></span> 
+<span class="label"><a  id="x1-43004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%|</span></span> 
+<span class="label"><a  id="x1-43005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x&#x003C;signature&#x003E;</span></span> 
+<span class="label"><a  id="x1-43006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-43007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%udp-ipv4</span></span> 
+<span class="label"><a  id="x1-43008r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">.192.168.1.1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.337</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-43009r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-43010r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+<!--l. 453--><p class="noindent" ><span 
+class="ec-lmri-10">Ad Fontes has proven inﬂuential on the implementation of the</span>
+<span 
+class="ec-lmri-10">remote scry protocol, %ﬁne, and the directed messaging project</span>
+<span 
+class="ec-lmri-10">of Urbit 410 K.</span><img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+</p><!--l. 458--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-44000"></a>References</h3>
+                                                
+                                                
+<!--l. 458--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-Yarvin2010" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 458--><p class="noindent" ><a  id="cite.0@Yarvin2010"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2010)
+   “Urbit:
+   functional
+   programming
+   from
+   scratch”.
+   <span class="small-caps">url</span>:
+   <a href="http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html" class="url" >http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt id="X0-Whitepaper" class="thebibliography">
+</dt><dd 
+id="bib-2" class="thebibliography">
+   <!--l. 458--><p class="noindent" ><a  id="cite.0@Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   et al.
+   (2016).
+   <span 
+class="ec-lmri-10">Urbit:</span>
+   <span 
+class="ec-lmri-10">A</span>
+   <span 
+class="ec-lmri-10">Solid-State</span>
+   <span 
+class="ec-lmri-10">Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a href="https://media.urbit.org/whitepaper.pdf" class="url" >https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).</p></dd></dl>
+<!--l. 458--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+</body> 
+</html>
+                                                
+
+
