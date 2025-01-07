@@ -40,7 +40,9 @@
     },
     {
       "author": ["rovnys-ricfer"],
-      "title": "Ford Fusion"
+      "title": "Ford Fusion",
+      "pdf": "/ustj/v01-i02/mss6-ford-fusion.pdf",
+      "html": "/ustj/v01-i02/mss6-ford-fusion.html"
     },
     {
       "author": ["palfun-foslup", "rovnys-ricfer", "master-morzod"],
