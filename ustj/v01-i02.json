@@ -46,7 +46,9 @@
     },
     {
       "author": ["palfun-foslup", "rovnys-ricfer", "master-morzod"],
-      "title": "Eyre HTTP Caching"
+      "title": "Eyre HTTP Caching",
+      "pdf": "/ustj/v01-i02/mss7-eyre-caching.pdf",
+      "html": "/ustj/v01-i02/mss7-eyre-caching.html"
     }
   ],
   "theme": {
