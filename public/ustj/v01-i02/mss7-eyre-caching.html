@@ -1,0 +1,638 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en" > 
+<head><title>Eyre HTTP Caching</title> 
+<meta  charset="utf-8" /> 
+<meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" /> 
+<meta name="viewport" content="width=device-width,initial-scale=1" /> 
+<link rel="stylesheet" type="text/css" href="/latex.css" />
+<meta name="src" content="mss.tex" /> 
+<script>window.MathJax = { tex: { tags: "ams", }, }; </script> 
+ <script type="text/javascript" async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>  
+</head><body 
+>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Eyre HTTP Caching</h2>
+              <div class="author" ><span 
+class="ec-lmbx-12">Mark Staarink</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~palfun-foslup</code>,</span>
+<br />              <span 
+class="ec-lmbx-12">Ted Blackman</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~rovyns-ricfer</code>,</span>
+<br />                <span 
+class="ec-lmbx-12">Joe Bryan</span><span 
+class="ec-lmbx-12"> </span><span 
+class="ec-lmbx-12"><code>~master-morzod</code></span>
+<br /><span 
+class="ec-lmbx-12">Tlon Corporation, Urbit Foundation, Urbit Foundation</span></div><br />
+<div class="date" ></div>
+   </div>
+   <section role="doc-abstract" class="abstract"> 
+<h3 class="abstracttitle">
+<span 
+class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!--l. 39--><p class="noindent" ><span 
+class="ec-lmr-9">Eyre  is  the  server  vane  for  the  Urbit  OS,  and</span>
+     <span 
+class="ec-lmr-9">is  responsible  for  handling  all  </span><span class="small-caps">http</span>  <span 
+class="ec-lmr-9">requests.</span>
+     <span 
+class="ec-lmr-9">Eyre supports caching responses to GET requests,</span>
+     <span 
+class="ec-lmr-9">which can improve performance by reducing the</span>
+     <span 
+class="ec-lmr-9">number  of  times  that  the  server  must  generate</span>
+     <span 
+class="ec-lmr-9">a  response  from  scratch.  This  historical  report</span>
+     <span 
+class="ec-lmr-9">and response were published as advisory gists on</span>
+     <span 
+class="ec-lmr-9">GitHub,  and  encapsulate  design  decisions  that</span>
+     <span 
+class="ec-lmr-9">have  gone  into  modifying  and  improving  Eyre’s</span>
+     <span 
+class="ec-lmr-9">caching performance.</span>
+</p>
+</section>
+                                                
+                                                
+   <h3 class="likesectionHead"><a  id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+    <span class="sectionToc" >1 <a href="#x1-20001" id="QQ2-1-2">Improving Eyre <span class="small-caps">http</span> Caching</a></span>
+<br />     <span class="subsectionToc" >1.1 <a href="#x1-30001.1" id="QQ2-1-3">Introduction</a></span>
+<br />     <span class="subsectionToc" >1.2 <a href="#x1-40001.2" id="QQ2-1-4">Approaches to Improving Performance</a></span>
+<br />     <span class="subsectionToc" >1.3 <a href="#x1-50001.3" id="QQ2-1-5">Kinds of Content</a></span>
+<br />     <span class="subsectionToc" >1.4 <a href="#x1-60001.4" id="QQ2-1-6">Sources of Content</a></span>
+<br />     <span class="subsectionToc" >1.5 <a href="#x1-70001.5" id="QQ2-1-7">Static Publication Cache</a></span>
+<br />      <span class="subsubsectionToc" >1.5.1 <a href="#x1-80001.5.1" id="QQ2-1-8">Authentication</a></span>
+<br />     <span class="subsectionToc" >1.6 <a href="#x1-90001.6" id="QQ2-1-9">Procedural Publication Cache</a></span>
+<br />    <span class="sectionToc" >2 <a href="#x1-100002" id="QQ2-1-10">Further Thoughts</a></span>
+<br />    <span class="sectionToc" ><a href="#x1-11000" id="QQ2-1-11">References</a></span>
+   </div>
+<!--l. 48--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><span class="titlemark">1   </span> <a  id="x1-20001"></a>Improving Eyre HTTP Caching</h3>
+<!--l. 50--><p class="noindent" ><span 
+class="ec-lmri-10">This proposal for Eyre’s </span><span class="small-caps">http</span> <span 
+class="ec-lmri-10">caching mechanism was</span>
+<span 
+class="ec-lmri-10">released by </span><span 
+class="ec-lmri-10"><code>~palfun-foslup</code> on </span><span 
+class="ec-lmri-10">~2022.8.15 and revised through</span>
+<span 
+class="ec-lmri-10">~2022.8.16.</span>
+</p><!--l. 53--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.1   </span> <a  id="x1-30001.1"></a>Introduction</h4>
+<!--l. 55--><p class="noindent" >Urbit’s primary role is to function as a webserver, but it is not
+as fast at that operation as it could be. It would be good if
+Urbit could comfortably serve hundreds or even thousands of
+pageviews per minute. (Benchmarks for the status quo are left
+as an exercise to the reader.)
+</p><!--l. 57--><p class="noindent" >
+</p>
+                                                
+                                                
+   <h4 class="subsectionHead"><span class="titlemark">1.2   </span> <a  id="x1-40001.2"></a>Approaches to Improving Performance</h4>
+<!--l. 59--><p class="noindent" >There are two primary ways in which the scry
+namespace can be utilized to make Eyre more
+performant:<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-4001f1"></a> 
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-4003x1">
+     <!--l. 62--><p class="noindent" ><span 
+class="ec-lmbx-10">Publication cache</span>: Eyre can track a publication
+     cache  with  static,  known-ahead-of-time  responses
+     bound to speciﬁc endpoint paths. Eyre would tell
+     the runtime about these known responses, which the
+     runtime  would  use  to  serve  up  responses  to  GET
+     requests.
+     </p></li>
+<li 
+  class="enumerate" id="x1-4005x2">
+     <!--l. 63--><p class="noindent" ><span 
+class="ec-lmbx-10">Stateless  reads</span>:  The  runtime,  when  receiving  a
+     GET  request,  can  scry  into  Eyre  to  retrieve  a
+     response for it. Eyre might scry into agents to further
+     resolve  the  read.  This  way,  with  GET  requests
+     handled as pure reads, they could theoretically be
+     served in parallel.</p></li></ol>
+<!--l. 66--><p class="indent" >   This document focuses on the publication cache. The latter
+will not deliver performance gains by itself, may actually incur
+a performance hit in the “scry miss” case, and has unanswered
+questions around referential transparency. Some prior art can
+be found in an old draft PR (<a  id="x1-4006"></a> <a href="#cite.0@urbit_urbit_4674">#4674</a>).
+</p><!--l. 68--><p class="indent" >   The publication cache also aligns closely with the
+imagined future of “solid state subscriptions” and the “shrub
+namespace”, wherein new or changed data is explicitly
+published into the namespace.
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.3   </span> <a  id="x1-50001.3"></a>Kinds of Content</h4>
+<!--l. 72--><p class="noindent" >Before talking about the publication cache proper, we must be
+aware of what kinds of content may get served through Eyre.
+We identify three kinds:
+</p><!--l. 74--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-5002x1">
+     <!--l. 75--><p class="noindent" ><span 
+class="ec-lmbx-10">Static  content  </span>is  fully  self-contained  and  only
+     changes when the data within changes; for example:
+     a blog post without comments, or an image.
+     </p></li>
+<li 
+  class="enumerate" id="x1-5004x2">
+     <!--l. 76--><p class="noindent" ><span 
+class="ec-lmbx-10">Dynamic  content </span>changes  based  on  the  current
+     state of an agent (or some other datum); for example:
+     a blog post <span 
+class="ec-lmri-10">with </span>comments or a list of pals.
+     </p></li>
+<li 
+  class="enumerate" id="x1-5006x3">
+     <!--l. 77--><p class="noindent" ><span 
+class="ec-lmbx-10">Procedural content </span>is generated from the request
+     itself.  While  the  response  for  any  given  path
+     may  be  known  ahead  of  time,  it  may  not  be
+     possible to enumerate all the valid paths for which
+     we  have  responses;  for  example:  a  parameterized
+     <code class="lstinline"><span style="color:#000000">/sigil.svg</span></code> endpoint, or a calculator <span class="small-caps">api</span>.</p></li></ol>
+<!--l. 80--><p class="indent" >   Note that for dynamic and procedural content, it may not
+always be possible to publish a known response at all. If the
+response depends on the timestamp of the request in some
+way, a cache entry would be busted before it even got stored.
+We simply ignore this case.
+                                                
+                                                
+</p><!--l. 82--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.4   </span> <a  id="x1-60001.4"></a>Sources of Content</h4>
+<!--l. 84--><p class="noindent" >Brieﬂy, take note that for both dynamic and procedural
+content, Hoon code <span 
+class="ec-lmri-10">must </span>be executed to generate the
+(original) response. Most commonly, this takes the form of a
+Gall userspace agent. In rare cases, generators serve this
+function.
+</p><!--l. 86--><p class="indent" >   For static content (only) can we consider another source:
+Clay, the ﬁle system vane. For things that are already ﬁles, it
+makes sense to stick these in Clay. (Think JavaScript blobs,
+image ﬁles, and other “earth” content.) For data that
+originates within agents, however, in most cases it is
+unergonomic and unsound to store that data in Clay,
+especially if the agent may want to refer back to the data
+later.
+</p><!--l. 88--><p class="indent" >   In practice, both the “dynamic/prodecural response from
+agent” and “static ﬁle from Clay” cases are common, though
+the latter is often handled through Docket’s “glob” system
+instead (for, at this point, largely historical reasons).
+</p><!--l. 90--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.5   </span> <a  id="x1-70001.5"></a>Static Publication Cache</h4>
+<!--l. 92--><p class="noindent" >Accounting for the fact that agent-driven responses are
+already common, and weighing the fact that Eyre does not
+currently have any connection to or dependency on Clay, we
+propose the following model for a publication cache in
+Eyre:
+</p>
+   <!--l. 94-->
+<pre class="lstlisting" id="listing-2"><span class="label"><a  id="x1-7001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">task</span></span> 
+<span class="label"><a  id="x1-7002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">to-cache</span></span> 
+<span class="label"><a  id="x1-7003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">etc...</span></span> 
+<span class="label"><a  id="x1-7004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-7005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-7006r6"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gift</span></span> 
+<span class="label"><a  id="x1-7007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">to-cache</span></span> 
+<span class="label"><a  id="x1-7008r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">etc...</span></span> 
+<span class="label"><a  id="x1-7009r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-7010r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-7011r11"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">to-cache</span></span> 
+<span class="label"><a  id="x1-7012r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%save</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">endpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">data=simple-payload:http</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7013r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%dump</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">endpoint</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7014r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-7015r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-7016r16"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">endpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">exact</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">binding</span></span> 
+<span class="label"><a  id="x1-7017r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">binding</span></span> 
+<span class="label"><a  id="x1-7018r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tail=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@t</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7019r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+<!--l. 116--><p class="indent" >
+     </p><ol  class="enumerate1" >
+                                                
+                                                
+<li 
+  class="enumerate" id="x1-7021x1">
+     <!--l. 117--><p class="noindent" >Eyre gets a new task and gift, <code class="lstinline"><span style="color:#000000">%save</span></code>, which can
+     be used to publish responses for a speciﬁc endpoint
+     (optional site, plus path, plus extension if any) into
+     the cache.
+     </p></li>
+<li 
+  class="enumerate" id="x1-7023x2">
+     <!--l. 118--><p class="noindent" >Eyre  stores  the  cache  within  itself.  Whenever
+     something  gets  added,  it  notiﬁes  the  runtime.
+     On-<code class="lstinline"><span style="color:#000000">%born</span></code>,  it  notiﬁes  the  runtime  of  all  existing
+     entries.
+     </p></li>
+<li 
+  class="enumerate" id="x1-7025x3">
+     <!--l. 119--><p class="noindent" >The   runtime   tracks   the   cache   as   per   Eyre’s
+     notiﬁcations. Whenever it receives a GET request,
+     and an entry for that exact path exists in the cache,
+     it serves the stored response instead of injecting the
+     request as an event.
+     </p></li>
+<li 
+  class="enumerate" id="x1-7027x4">
+     <!--l. 120--><p class="noindent" ><code class="lstinline"><span style="color:#000000">%save</span></code> may  be  used  to  overwrite  existing  entries.
+     <code class="lstinline"><span style="color:#000000">%dump</span></code> may be used to remove existing entries.
+     </p></li>
+<li 
+  class="enumerate" id="x1-7029x5">
+     <!--l. 121--><p class="noindent" >When  resolving  an  incoming  GET  request,  Eyre
+     checks the cache for an exact match. If there is, it
+     serves that. If there is none, it falls back to the regular
+     binding matching that path, if any.</p></li></ol>
+<!--l. 124--><p class="indent" >   This is suﬃcient to let agents publish responses into the
+cache, and keep those updated as the underlying data
+changes.
+                                                
+                                                
+</p><!--l. 126--><p class="indent" >   The “static ﬁle from Clay” case can be implemented using
+the aﬀordances here. To avoid repetition of boilerplate
+patterns regarding this, we might ship a small piece of
+userspace infrastructure, an <code class="lstinline"><span style="color:#000000">/app/file-server</span></code> if you will,
+that is responsible for bindings of this kind.
+</p><!--l. 128--><p class="noindent" >
+</p>
+   <h5 class="subsubsectionHead"><span class="titlemark">1.5.1   </span> <a  id="x1-80001.5.1"></a>Authentication</h5>
+<!--l. 130--><p class="noindent" >The above does not account for authentication, limiting
+cached responses to fully public content. Presently, we do not
+have the aﬀordances needed to handle private content
+properly.
+</p><!--l. 132--><p class="indent" >   But it doesn’t have to be that way. The <code class="lstinline"><span style="color:#000000">%save</span></code> task could
+simply include an <code class="lstinline"><span style="color:#000000">auth=?</span></code> ﬂag alongside the <code class="lstinline"><span style="color:#000000">data</span></code>, indicating
+whether authentication is required or not. The runtime would
+then, where needed, check the incoming request for a valid
+authentication cookie, and either give the response or serve a
+simple 403.
+</p><!--l. 134--><p class="indent" >   … except that the runtime does not presently know how
+to check an incoming request for authentication. And
+making it do so is outside the scope of the grant. The
+changes here aren’t too big though, and in some ways
+similar to the behavior outlined above. (Most likely, just
+Eyre telling the runtime about creation/expiry of session
+identiﬁers, and teaching the runtime how to check for
+its presence in any <code class="lstinline"><span style="color:#000000">Cookie</span></code> headers.) Considering the
+very-nice-to-have nature of support for private endpoints, we
+(read: <code>~palfun-foslup</code>) may oﬀer to implement this in
+the short-term, so that the grant work may make use of
+it.
+</p><!--l. 136--><p class="indent" >   Caching may not seem as relevant for private content, since
+it’s signiﬁcantly less likely to get requested many times a
+minute. But being able to eagerly cache there still provides
+tangible beneﬁts. Urbit-generated web UIs can get served
+faster, and private endpoints stop being surface area for DOS
+attacks.
+                                                
+                                                
+</p><!--l. 138--><p class="noindent" >
+</p>
+   <h4 class="subsectionHead"><span class="titlemark">1.6   </span> <a  id="x1-90001.6"></a>Procedural Publication Cache</h4>
+<!--l. 140--><p class="noindent" >At this point, we have accounted for serving static and
+dynamic content from Eyre, but are not yet able to serve
+procedural content. This requires a slightly diﬀerent
+approach.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a  id="x1-9001f2"></a> 
+</p>
+   <!--l. 142-->
+<pre class="lstlisting" id="listing-12"><span class="label"><a  id="x1-9002r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">to-cache</span></span> 
+<span class="label"><a  id="x1-9003r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%prep</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=binding</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=work</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-9004r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%drop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=binding</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-9005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">etc...</span></span> 
+<span class="label"><a  id="x1-9006r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-9007r6"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-9008r7"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">work</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$-</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">inbound-request</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">simple-payload:http</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-9009r8"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-9010r9"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">action</span></span> 
+<span class="label"><a  id="x1-9011r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%work</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">work</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-9012r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">etc...</span></span> 
+<span class="label"><a  id="x1-9013r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+     <ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-9015x1">
+     <!--l. 158--><p class="noindent" >Eyre gets a new task and gift, <code class="lstinline"><span style="color:#000000">%prep</span></code>, which can be
+     used to publish a response generation function for a
+     speciﬁc binding (optional site, plus top-level path)
+     into the cache.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9017x2">
+     <!--l. 159--><p class="noindent" >In addition to a cache entry, Eyre stores this among
+     the  normal  bindings.  Whenever  a  <code class="lstinline"><span style="color:#000000">%work</span></code> binding
+     gets added, Eyre notiﬁes the runtime.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9019x3">
+                                                
+                                                
+     <!--l. 160--><p class="noindent" >The   runtime   tracks   the   cache   as   per   Eyre’s
+     notiﬁcations. Whenever it receives a GET request, it
+     checks to see if a <code class="lstinline"><span style="color:#000000">%prep</span></code> binding matches. If one does,
+     it runs the gate and serves the generated response,
+     instead of injecting the request as an event.
+     </p></li>
+<li 
+  class="enumerate" id="x1-9021x4">
+     <!--l. 161--><p class="noindent" >When  resolving  an  incoming  GET  request,  Eyre
+     resolves from the bindings as normal.</p></li></ol>
+<!--l. 164--><p class="indent" >   However, an important caveat holds at this point in the
+discussion: how procedural content forces one to bind on
+non-exact paths, in turn forcing the runtime to bind
+resolution. We could reduce the friction here by moving
+Eyre’s funtion to ﬁnd the binding for a given request path
+into /sys/lull or the ivory pill. Alternatively, Eyre just
+publishes one overarching cache resolution function to the
+runtime, instead of letting it implement its own logic.
+Concern with any of these is keeping old copies of the kernel
+around within these functions. Eyre could re-publish the
+function(s) on-upgrade, but might also need agents to do the
+same.
+</p>
+   <h3 class="sectionHead"><span class="titlemark">2   </span> <a  id="x1-100002"></a>Further Thoughts</h3>
+<!--l. 168--><p class="noindent" ><span 
+class="ec-lmri-10">This document is an alternative proposal by </span><span 
+class="ec-lmri-10"><code>~rovyns-ricfer</code> and</span>
+<span 
+class="ec-lmri-10"><code>~master-morzod</code> on </span><span 
+class="ec-lmri-10">~2022.8.16. It particularly emphasizes the</span>
+<span 
+class="ec-lmri-10">role that the bound scry namespace and remote scry play in</span>
+<span 
+class="ec-lmri-10">Urbit’s prioritization of referential transparency.</span>
+</p><!--l. 171--><p class="indent" >   This represents a vision for how <span class="small-caps">http</span> handling in Urbit
+could work in the long-run:
+</p><!--l. 173--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-10002x1">
+                                                
+                                                
+     <!--l. 174--><p class="noindent" >First check if the <span class="small-caps">url</span> is immutable, mapped to a
+     fully qualiﬁed scry path.
+     </p></li>
+<li 
+  class="enumerate" id="x1-10004x2">
+     <!--l. 175--><p class="noindent" >Then check if the <span class="small-caps">url</span> is in a mapping from mutable <span class="small-caps">url</span>
+     to runtime cache value, which is either:
+         </p><ol  class="enumerate2" >
+<li 
+  class="enumerate" id="x1-10006x1">
+         <!--l. 177--><p class="noindent" >an  <span class="small-caps">http</span>  307  temporary  redirect  to  a  fully
+         qualiﬁed scry path, or
+         </p></li>
+<li 
+  class="enumerate" id="x1-10008x2">
+         <!--l. 178--><p class="noindent" >a direct <span class="small-caps">http</span> response value</p></li></ol>
+     </li>
+<li 
+  class="enumerate" id="x1-10010x3">
+     <!--l. 180--><p class="noindent" >If neither of these, then inject the request into Arvo as
+     an event.</p></li></ol>
+<!--l. 183--><p class="indent" >   Most read requests should use the namespace rather than
+directly cached values. This promotes having as much of the
+system as possible built on referential transparency, which
+facilitates scaling. However, if a request would be better served
+without an <span class="small-caps">http</span> redirect (such as a request for a top-level
+webpage where the <span class="small-caps">url</span> should not include a revision number
+or other scry-related details), then an application can ask Eyre
+to serve the response directly (and the runtime can cache
+this value, as long as it invalidates it properly when it
+changes).
+</p><!--l. 185--><p class="indent" >   If we want Eyre to serve a login page without external
+dependencies, for example, it should use the mapping from
+mutable <span class="small-caps">url</span> to direct value – but if it’s ﬁne to put it in Clay,
+then it can redirect to the namespace.
+                                                
+                                                
+</p><!--l. 187--><p class="indent" >   In the future, we’ll want to allow the runtime to handle
+authentication with minimal Arvo activation. This would
+prevent unnecessary events being enqueued – which could be
+used for denial of service attacks – and it also could be used
+to enable access to private scryable data. A user could
+authenticate and retrieve a (potentially mutable) piece of
+scryable data without activating Arvo, or only activating it to
+validate an authentication token.
+</p><!--l. 189--><p class="indent" >   Given this context, the mutable mapping we’re trying to
+implement in this PR could be thought of as a subset of the
+second check here, namely mutable values that map directly to
+<span class="small-caps">http</span> response values stored in Eyre and cached in the
+runtime.
+</p><!--l. 191--><p class="indent" >   Alternatively, we could treat this as the other version of
+the second check, involving a redirect: Eyre could maintain a
+referentially transparent mapping from mutable <span class="small-caps">url</span> to scry
+path, and the runtime could mirror this mapping and also
+have a scry cache that it uses to serve <span class="small-caps">http</span> scry requests after
+the redirects.
+</p><!--l. 193--><p class="indent" >   There are multiple considerations pointing us toward using
+direct <span class="small-caps">http</span> responses for now:
+</p><!--l. 195--><p class="indent" >
+     </p><ol  class="enumerate1" >
+<li 
+  class="enumerate" id="x1-10012x1">
+     <!--l. 196--><p class="noindent" >The ergonomics of Clay:
+         </p><ol  class="enumerate2" >
+<li 
+  class="enumerate" id="x1-10014x1">
+         <!--l. 198--><p class="noindent" >We need a separate desk full of marks for all
+         served ﬁles.
+         </p></li>
+<li 
+  class="enumerate" id="x1-10016x2">
+         <!--l. 199--><p class="noindent" >We need mark conversions from all ﬁletypes to
+         <span class="small-caps">http</span> response.
+                                                
+                                                
+         </p></li>
+<li 
+  class="enumerate" id="x1-10018x3">
+         <!--l. 200--><p class="noindent" >We  need  to  name  each  desk,  with  ad-hoc
+         namespacing.
+         </p></li>
+<li 
+  class="enumerate" id="x1-10020x4">
+         <!--l. 201--><p class="noindent" >We  need  to  establish  tombstoning  policies
+         (“norms”).</p></li></ol>
+     </li>
+<li 
+  class="enumerate" id="x1-10022x2">
+     <!--l. 203--><p class="noindent" >Limitations on the namespace for Gall agents:
+         </p><ol  class="enumerate2" >
+<li 
+  class="enumerate" id="x1-10024x1">
+         <!--l. 205--><p class="noindent" >Only scry at current date.
+         </p></li>
+<li 
+  class="enumerate" id="x1-10026x2">
+         <!--l. 206--><p class="noindent" >No solid-state publications yet.
+         </p></li>
+<li 
+  class="enumerate" id="x1-10028x3">
+         <!--l. 207--><p class="noindent" >Lack of permissioning.</p></li></ol>
+     </li>
+<li 
+  class="enumerate" id="x1-10030x3">
+     <!--l. 209--><p class="noindent" >Desire to have full control over the <span class="small-caps">url</span> shown to a user
+     in a browser.</p></li></ol>
+<!--l. 212--><p class="indent" >   Given all of these concerns, Eyre development should
+prioritize implementing direct responses ﬁrst and the
+subsequent pieces at a later time.<img 
+src="ustj-logo.svg" alt="PIC"  
+ />
+                                                
+                                                
+</p><!--l. 216--><p class="noindent" >
+</p>
+   <h3 class="sectionHead"><a  id="x1-11000"></a>References</h3>
+<!--l. 216--><p class="noindent" >
+   </p><dl class="thebibliography"><dt id="X0-urbit_urbit_4674" class="thebibliography">
+</dt><dd 
+id="bib-1" class="thebibliography">
+   <!--l. 216--><p class="noindent" ><a  id="cite.0@urbit_urbit_4674"></a><code>~palfun-foslup</code>
+   (~2024..)
+   “urbit/urbit
+   #4674:
+   king:
+   scry
+   on
+   GET
+   requests
+   (<span class="small-caps">wip</span>)”.
+   <span class="small-caps">url</span>:
+   <a href="https://github.com/urbit/urbit/pull/4674" class="url" >https://github.com/urbit/urbit/pull/4674</a>
+   (visited
+   on
+   ~2024.9.11).</p></dd></dl>
+<!--l. 216--><p class="indent" >
+                                                
+                                                
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 59--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">Truthfully, there are probably more than two ways, but these</span>
+  <span 
+class="ec-lmr-8">speciﬁc two have highest relevance in Eyre’s recent history.</span><a href="#x1-4001f1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 140--><p class="indent" >     <span class="footnote-mark"><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">The approach outlined in this subsection is still tentative and</span>
+  <span 
+class="ec-lmr-8">under discussion, pending solid state subscriptions becoming more “real”.</span>
+  <span 
+class="ec-lmr-8">Certainly the static publication cache above should be suﬃcient for most</span>
+  <span 
+class="ec-lmr-8">cases.</span><a href="#x1-9001f2">⤴</a></p></div>
+      
+
+</body> 
+</html>
+                                                
+
+
