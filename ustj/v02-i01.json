@@ -1,0 +1,22 @@
+{
+  "issue": "SU2025: Vol. 2, No. 1",
+  "title": "The Journal of Solid-State Computing",
+  "content": [
+    {
+      "author": ["timluc-miptev"],
+      "title": "Nock for Everyday Coders",
+      "pdf": "/ustj/v02-i01/mss0.pdf",
+      "html": "/ustj/v02-i01/mss0.html"
+    },
+  ],
+  "theme": {
+    "black": "#141A14",
+    "white": "#FFFFFF",
+    "primary": "#FFF450",
+    "muted": "#B9B13D"
+  },
+  "links": {
+    "cover": "/ustj/v01-i02/cover.png",
+    "shop": "https://ustj.square.site/product/ustj-vol-2-no-1-preorder-/16"
+  }
+}
