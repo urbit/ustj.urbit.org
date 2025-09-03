@@ -7,6 +7,30 @@
       "title": "Nock for Everyday Coders",
       "pdf": "/ustj/v02-i01/mss0.pdf",
       "html": "/ustj/v02-i01/mss0.html"
+    },
+    {
+      "author": ["niblyx-malnus"],
+      "title": "Deriving Nock Opcodes 6–11"
+    },
+    {
+      "author": ["lacnes"],
+      "title": "Metacircular Virtualization and Practical Nock Interpretation"
+    },
+    {
+      "author": ["mopfel-winrux"],
+      "title": "An Implementation of Nock Combinator Logic in Hardware:  The NockPU Project"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "Notes on Vases"
+    },
+    {
+      "author": ["lagrev-nocfep", "sorreg-namtyv"],
+      "title": "A Documentary History of the Nock Combinator Calculus"
+    },
+    {
+      "author": ["barpub-tarber"],
+      "title": "Conk:  The Permutation Group of Nocks; Ax: An Algebraic Executable Ur-Machine"
     }
   ],
   "theme": {
