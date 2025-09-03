@@ -7,7 +7,7 @@
       "title": "Nock for Everyday Coders",
       "pdf": "/ustj/v02-i01/mss0.pdf",
       "html": "/ustj/v02-i01/mss0.html"
-    },
+    }
   ],
   "theme": {
     "black": "#141A14",
@@ -16,7 +16,7 @@
     "muted": "#B9B13D"
   },
   "links": {
-    "cover": "/ustj/v01-i02/cover.png",
+    "cover": "/ustj/v02-i01/cover.png",
     "shop": "https://ustj.square.site/product/ustj-vol-2-no-1-preorder-/16"
   }
 }
