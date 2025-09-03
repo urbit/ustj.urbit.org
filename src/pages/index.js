@@ -90,7 +90,7 @@ function Contents({ issue }) {
 }
 
 export default function Home({ issues }) {
-  const [issue, setIssue] = useState(issues[1]);
+  const [issue, setIssue] = useState(issues[issues.length - 1]);
   const byKey = issues.reduce((res, curr) => {
     const newRes = { ...res };
     newRes[curr.issue] = curr;
