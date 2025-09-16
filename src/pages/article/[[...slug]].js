@@ -23,7 +23,7 @@ export default function Article({ issue, article }) {
         <title>{article.title} • UrbitSTJ</title>
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
-        <IntraNav />
+        <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 layout">
           <iframe
             ref={ref}
