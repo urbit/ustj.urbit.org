@@ -15,8 +15,10 @@
       "html": "/ustj/v02-i01/mss1.html"
     },
     {
-      "author": ["lacnes       "],
-      "title": "Metacircular Virtualization and Practical Nock Interpretation"
+      "author": ["lacnes"],
+      "title": "Metacircular Virtualization and Practical Nock Interpretation",
+      "pdf": "/ustj/v02-i01/mss2.pdf",
+      "html": "/ustj/v02-i01/mss2.html"
     },
     {
       "author": ["mopfel-winrux"],
