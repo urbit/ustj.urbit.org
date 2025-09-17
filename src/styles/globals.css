@@ -93,6 +93,6 @@ select::-ms-expand {
 }
 
 .author-container {
-  min-width: 13ch;
+  min-width: 16ch;
   display: inline-block;
 }
