@@ -74,7 +74,7 @@ function Contents({ issue }) {
                     )}
                   />
                 </span>
-                <div className="font-mono whitespace-nowrap">
+                <div className="font-mono whitespace-nowrap author-container">
                   {renderAuthors(o.author)}
                 </div>
                 <span>{o.title}</span>

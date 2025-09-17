@@ -91,3 +91,8 @@ select {
 select::-ms-expand {
   display: none;
 }
+
+.author-container {
+  min-width: 13ch;
+  display: inline-block;
+}
