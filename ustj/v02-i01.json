@@ -22,7 +22,9 @@
     },
     {
       "author": ["mopfel-winrux"],
-      "title": "An Implementation of Nock Combinator Logic in Hardware:  The NockPU Project"
+      "title": "An Implementation of Nock Combinator Logic in Hardware:  The NockPU Project",
+      "pdf": "/ustj/v02-i01/mss3.pdf",
+      "html": "/ustj/v02-i01/mss3.html"
     },
     {
       "author": ["lagrev-nocfep"],

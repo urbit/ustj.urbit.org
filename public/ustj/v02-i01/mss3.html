@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+
+<head>
+    <title>An Implementation of Nock Combinator Logic in Hardware:
+        The NockPU Project</title>
+    <meta charset="utf-8" />
+    <meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./latex.css" />
+    <meta name="src" content="mss.tex" />
+    <script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+    <script type="text/javascript" async="async" id="MathJax-script"
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head>
+
+<body>
+    <div class="maketitle">
+
+
+
+
+
+        <h2 class="titleHead">An Implementation of Nock
+            Combinator Logic in
+            Hardware: The NockPU
+            Project</h2>
+        <div class="author"><span class="ec-lmbx-12"><code>~mopfel-winrux</code></span>
+            <br /> <span class="ec-lmbx-12">Native Planet </span><span class="ec-lmbx-12">∙ Southwestern Pool Supply
+                Co.</span>
+        </div><br />
+        <div class="date"></div>
+    </div>
+    <section role="doc-abstract" class="abstract">
+        <h3 class="abstracttitle">
+            <span class="ec-lmbx-9">Abstract</span>
+        </h3>
+        <!--l. 49-->
+        <p class="noindent"><span class="ec-lmr-9">This paper presents the design, implementation,</span>
+            <span class="ec-lmr-9">and evaluation of NockPU, a hardware processor</span>
+            <span class="ec-lmr-9">that directly executes Nock 4K, a minimalist</span>
+            <span class="ec-lmr-9">combinator calculus serving as the foundation</span>
+            <span class="ec-lmr-9">for the Urbit computing platform. The research</span>
+            <span class="ec-lmr-9">demonstrates the feasibility of implementing</span>
+            <span class="ec-lmr-9">all twelve Nock operations in hardware using</span>
+
+
+            <span class="small-caps">fpga</span><span class="ec-lmr-9">-based graph reduction techniques. Key</span>
+            <span class="ec-lmr-9">architectural decisions include a cell-based memory</span>
+            <span class="ec-lmr-9">representation optimized for 64-bit words, stackless</span>
+            <span class="ec-lmr-9">tree traversal using breadcrumb techniques,</span>
+            <span class="ec-lmr-9">and integrated Cheney-style copying garbage</span>
+            <span class="ec-lmr-9">collection. Performance analysis identiﬁes two</span>
+            <span class="ec-lmr-9">primary</span>
+            <span class="ec-lmr-9">challenges: excessive memory consumption due to</span>
+            <span class="ec-lmr-9">intermediate structure creation during reduction,</span>
+            <span class="ec-lmr-9">and computational</span>
+            <span class="ec-lmr-9">complexity arising from the graph transformation</span>
+            <span class="ec-lmr-9">approach required by combinator reduction.</span>
+            <span class="ec-lmr-9">The implemented garbage collector successfully</span>
+            <span class="ec-lmr-9">addresses memory consumption issues, preventing</span>
+            <span class="ec-lmr-9">system crashes during complex computations.</span>
+            <span class="ec-lmr-9">While computational eﬃciency remains</span>
+            <span class="ec-lmr-9">challenging compared to traditional architectures,</span>
+            <span class="ec-lmr-9">the NockPU establishes that hardware Nock</span>
+            <span class="ec-lmr-9">4K implementation is viable and provides a</span>
+            <span class="ec-lmr-9">foundation for specialized functional computation</span>
+            <span class="ec-lmr-9">with advantages in determinism and semantic</span>
+            <span class="ec-lmr-9">clarity.</span>
+        </p>
+    </section>
+
+    <h3 class="likesectionHead"><a id="x1-1000"></a>Contents</h3>
+    <div class="tableofcontents">
+        <span class="sectionToc">1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+        <br /> <span class="subsectionToc">1.1 <a href="#x1-30001.1" id="QQ2-1-3">Related Work and Motivation</a></span>
+        <br /> <span class="subsectionToc">1.2 <a href="#x1-40001.2" id="QQ2-1-4">Project Goals and Approach</a></span>
+        <br /> <span class="sectionToc">2 <a href="#x1-50002" id="QQ2-1-5">Background and Related Work</a></span>
+        <br /> <span class="subsectionToc">2.1 <a href="#x1-60002.1" id="QQ2-1-6">Nock Speciﬁcation and
+                Semantics</a></span>
+        <br /> <span class="subsectionToc">2.2 <a href="#x1-70002.2" id="QQ2-1-7">Digital Hardware Design
+                Fundamentals</a></span>
+        <br /> <span class="subsectionToc">2.3 <a href="#x1-80002.3" id="QQ2-1-8">Existing Hardware Implementations of
+                Functional Languages</a></span>
+        <br /> <span class="subsectionToc">2.4 <a href="#x1-90002.4" id="QQ2-1-9">Stack-based vs. Stackless
+                Architectures</a></span>
+        <br /> <span class="subsectionToc">2.5 <a href="#x1-100002.5" id="QQ2-1-10">Memory Representation Challenges in
+                Functional Computing</a></span>
+        <br /> <span class="sectionToc">3 <a href="#x1-110003" id="QQ2-1-11">NockPU Architecture</a></span>
+
+
+        <br /> <span class="subsectionToc">3.1 <a href="#x1-120003.1" id="QQ2-1-12">System Overview and Design
+                Philosophy</a></span>
+        <br /> <span class="subsectionToc">3.2 <a href="#x1-130003.2" id="QQ2-1-14">Memory Representation
+                Model</a></span>
+        <br /> <span class="subsubsectionToc">3.2.1 <a href="#x1-140003.2.1" id="QQ2-1-15">28-bit Nouns in 64-bit
+                Words</a></span>
+        <br /> <span class="subsubsectionToc">3.2.2 <a href="#x1-150003.2.2" id="QQ2-1-16">Tag Bit
+                Utilization</a></span>
+        <br /> <span class="subsubsectionToc">3.2.3 <a href="#x1-160003.2.3" id="QQ2-1-18">Atom and Cell
+                Representation</a></span>
+        <br /> <span class="subsectionToc">3.3 <a href="#x1-170003.3" id="QQ2-1-19">Stackless Tree Traversal
+                Mechanism</a></span>
+        <br /> <span class="subsubsectionToc">3.3.1 <a href="#x1-180003.3.1" id="QQ2-1-20">Program Pointer and Back
+                Pointer Methodology</a></span>
+        <br /> <span class="subsubsectionToc">3.3.2 <a href="#x1-190003.3.2" id="QQ2-1-21">Breadcrumb Trail
+                Implementation</a></span>
+        <br /> <span class="subsectionToc">3.4 <a href="#x1-200003.4" id="QQ2-1-23">Control Flow Architecture</a></span>
+        <br /> <span class="subsubsectionToc">3.4.1 <a href="#x1-210003.4.1" id="QQ2-1-24">Memory Traversal
+                Control</a></span>
+        <br /> <span class="subsubsectionToc">3.4.2 <a href="#x1-220003.4.2" id="QQ2-1-25">Execute Module</a></span>
+        <br /> <span class="subsubsectionToc">3.4.3 <a href="#x1-230003.4.3" id="QQ2-1-26">Operational
+                Modules</a></span>
+        <br /> <span class="subsubsectionToc">3.4.4 <a href="#x1-240003.4.4" id="QQ2-1-27">Error Handling and System
+                Integrity</a></span>
+        <br /> <span class="subsubsectionToc">3.4.5 <a href="#x1-250003.4.5" id="QQ2-1-28">Garbage Collection
+                Implementation</a></span>
+        <br /> <span class="sectionToc">4 <a href="#x1-260004" id="QQ2-1-29">Implementation Details</a></span>
+        <br /> <span class="subsectionToc">4.1 <a href="#x1-270004.1" id="QQ2-1-30">Hardware Design Process and
+                Tools</a></span>
+        <br /> <span class="subsubsectionToc">4.1.1 <a href="#x1-280004.1.1" id="QQ2-1-31">Verilog
+                Implementation</a></span>
+        <br /> <span class="subsubsectionToc">4.1.2 <a href="#x1-290004.1.2" id="QQ2-1-32">Testing and Veriﬁcation
+                Methodology</a></span>
+        <br /> <span class="subsectionToc">4.2 <a href="#x1-300004.2" id="QQ2-1-33">Nock Operation
+                Implementation</a></span>
+        <br /> <span class="subsubsectionToc">4.2.1 <a href="#x1-310004.2.1" id="QQ2-1-34">Basic Operations (Slot,
+                Constant)</a></span>
+        <br /> <span class="subsubsectionToc">4.2.2 <a href="#x1-340004.2.2" id="QQ2-1-37">Tree Manipulation
+                Operations</a></span>
+        <br /> <span class="subsubsectionToc">4.2.3 <a href="#x1-390004.2.3" id="QQ2-1-43">Conditional Operation
+                Implementation</a></span>
+        <br /> <span class="subsubsectionToc">4.2.4 <a href="#x1-400004.2.4" id="QQ2-1-44">Composition, Push, and Call
+                Operations</a></span>
+        <br /> <span class="subsubsectionToc">4.2.5 <a href="#x1-440004.2.5" id="QQ2-1-48">Edit Operation
+                Implementation</a></span>
+        <br /> <span class="subsubsectionToc">4.2.6 <a href="#x1-450004.2.6" id="QQ2-1-49">Hint Operation
+                Implementation</a></span>
+        <br /> <span class="subsectionToc">4.3 <a href="#x1-460004.3" id="QQ2-1-50">Memory Management</a></span>
+        <br /> <span class="subsubsectionToc">4.3.1 <a href="#x1-470004.3.1" id="QQ2-1-51">Heap Allocation
+                Strategy</a></span>
+        <br /> <span class="subsubsectionToc">4.3.2 <a href="#x1-480004.3.2" id="QQ2-1-52">Memory Access
+                Patterns</a></span>
+        <br /> <span class="sectionToc">5 <a href="#x1-490005" id="QQ2-1-53">Evaluation and Analysis</a></span>
+        <br /> <span class="subsectionToc">5.1 <a href="#x1-500005.1" id="QQ2-1-54">Test Methodology</a></span>
+        <br /> <span class="subsubsectionToc">5.1.1 <a href="#x1-510005.1.1" id="QQ2-1-55">Test Bench Design</a></span>
+        <br /> <span class="subsubsectionToc">5.1.2 <a href="#x1-520005.1.2" id="QQ2-1-56">Operation
+                Veriﬁcation</a></span>
+        <br /> <span class="subsectionToc">5.2 <a href="#x1-530005.2" id="QQ2-1-57">Performance Metrics</a></span>
+        <br /> <span class="subsectionToc">5.3 <a href="#x1-540005.3" id="QQ2-1-59">Limitations and
+                Challenges</a></span>
+        <br /> <span class="subsubsectionToc">5.3.1 <a href="#x1-550005.3.1" id="QQ2-1-60">Memory Consumption
+                Issues</a></span>
+        <br /> <span class="subsubsectionToc">5.3.2 <a href="#x1-560005.3.2" id="QQ2-1-61">Performance
+                Bottlenecks</a></span>
+        <br /> <span class="subsubsectionToc">5.3.3 <a href="#x1-570005.3.3" id="QQ2-1-62">Conditional Operation
+                Overhead</a></span>
+        <br /> <span class="sectionToc">6 <a href="#x1-580006" id="QQ2-1-63">Future Work</a></span>
+        <br /> <span class="subsectionToc">6.1 <a href="#x1-590006.1" id="QQ2-1-64">Arbitrary-size Atom
+                Support</a></span>
+
+
+        <br /> <span class="subsectionToc">6.2 <a href="#x1-600006.2" id="QQ2-1-65">Hardware Jetting Strategy</a></span>
+        <br /> <span class="sectionToc">7 <a href="#x1-610007" id="QQ2-1-66">Discussion and Implications</a></span>
+        <br /> <span class="subsectionToc">7.1 <a href="#x1-620007.1" id="QQ2-1-67">Theoretical Implications for
+                Computer
+                Architecture</a></span>
+        <br /> <span class="subsectionToc">7.2 <a href="#x1-630007.2" id="QQ2-1-68">Practical Applications</a></span>
+        <br /> <span class="subsubsectionToc">7.2.1 <a href="#x1-640007.2.1" id="QQ2-1-69">Low-power
+                Computing</a></span>
+        <br /> <span class="subsubsectionToc">7.2.2 <a href="#x1-650007.2.2" id="QQ2-1-70">Veriﬁable
+                Computing</a></span>
+        <br /> <span class="subsectionToc">7.3 <a href="#x1-660007.3" id="QQ2-1-71">Comparison with Traditional
+                Architectures</a></span>
+        <br /> <span class="sectionToc">8 <a href="#x1-670008" id="QQ2-1-72">Conclusion</a></span>
+        <br /> <span class="sectionToc"><a href="#x1-69000" id="QQ2-1-74">References</a></span>
+    </div>
+
+    <h3 class="sectionHead"><span class="titlemark">1 </span> <a id="x1-20001"></a>Introduction</h3>
+    <!--l. 61-->
+    <p class="noindent">Combinator calculi represent a fundamental approach to
+        computation based on the application and reduction of
+        combinators – operators that compose and transform data
+        without requiring named variables. Nock is a speciﬁc combinator
+        calculus developed as the foundation of Urbit, a clean-slate
+        computing platform. It provides a deterministic, stateless
+        computing environment that trades performance for perfect
+        semantic clarity. While Nock interpreters typically run in
+        software environments (e.g., the C-based Vere interpreter and
+        Rust-based NockVM interpreter for Urbit), little exploration
+        has been done regarding the direct implementation of Nock in
+        hardware.
+    </p><!--l. 63-->
+    <p class="indent"> Implementing Nock in hardware presents unique challenges
+        fundamentally diﬀerent from traditional assembly languages.
+        While conventional processors operate on byte buﬀers stored
+        in linear memory arrays, Nock computation operates on <i>nouns</i>
+        – recursive tree structures that exist as linked data rather
+        than contiguous memory blocks. This fundamental diﬀerence
+        means that traditional hardware architectures, optimized for
+        sequential memory access patterns and ﬁxed-width data types,
+        are poorly suited for the tree traversal and dynamic memory
+        allocation patterns inherent to Nock execution. The challenge
+        lies not merely in implementing the Nock operations
+
+
+        themselves, but in developing memory representations
+        and traversal mechanisms that can eﬃciently handle the
+        recursive, pointer-based data structures that deﬁne Nock’s
+        computational model.
+    </p><!--l. 65-->
+    <p class="indent"> The motivation behind this research was initially quite
+        straightforward: to address skepticism about whether Nock
+        could be eﬀectively implemented in hardware.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">1.1 </span> <a id="x1-30001.1"></a>Related Work and Motivation
+    </h4>
+    <!--l. 69-->
+    <p class="noindent">Hardware implementation of functional languages has
+        historical precedent, with notable examples including the <span class="small-caps">skim</span>
+        (<span class="small-caps">s</span>, <span class="small-caps">k</span>, <span class="small-caps">i</span>
+        reduction
+        machine) developed at Cambridge in the
+        1970s and more recent work on The Reduceron at the
+        University of York. However, these projects have typically
+        focused on more traditional functional programming languages
+        rather than the minimal, axiomatic approach of Nock.
+        Additionally, most prior research has not suﬃciently addressed
+        the challenges of scaling such systems to utilize both on-chip
+        and oﬀ-chip memory eﬀectively.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">1.2 </span> <a id="x1-40001.2"></a>Project Goals and Approach
+    </h4>
+    <!--l. 73-->
+    <p class="noindent">This project aimed to answer several key questions:
+    </p><!--l. 75-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-4002x1">
+            <!--l. 76-->
+            <p class="noindent">How can Nock’s nouns and operations be eﬃciently
+                represented in hardware memory?
+            </p>
+        </li>
+
+
+        <li class="enumerate" id="x1-4004x2">
+            <!--l. 77-->
+            <p class="noindent">What hardware architecture best supports the
+                pattern of execution required by Nock?
+            </p>
+        </li>
+        <li class="enumerate" id="x1-4006x3">
+            <!--l. 78-->
+            <p class="noindent">How can tree traversal be implemented without a
+                stack-based approach?
+            </p>
+        </li>
+        <li class="enumerate" id="x1-4008x4">
+            <!--l. 79-->
+            <p class="noindent">What performance characteristics emerge from a
+                hardware implementation compared to software
+                interpreters?</p>
+        </li>
+    </ol>
+    <!--l. 82-->
+    <p class="noindent">The primary objective was to build a Verilog-based NockPU
+        that could perform all standard Nock operations, thereby
+        demonstrating the feasibility of hardware-based combinator
+        reduction while identifying optimal design patterns for such an
+        implementation.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">2 </span> <a id="x1-50002"></a>Background and Related Work</h3>
+
+    <h4 class="subsectionHead"><span class="titlemark">2.1 </span> <a id="x1-60002.1"></a>Nock Speciﬁcation and
+        Semantics
+    </h4>
+    <!--l. 89-->
+    <p class="noindent">Nock is a minimalist combinator calculus deﬁned by a small
+        set of axiomatic rules (<a id="x1-6001"></a><code>~sorreg-namtyv</code>, 2018). Its speciﬁcation
+        begins with: “A noun is an atom or a cell. An atom is a
+        natural number. A cell is an ordered pair of nouns.&#x0022; The
+        computational core of Nock is expressed through reduction
+        rules that transform nouns based on operator codes. For
+        example, the reduction rule *[a 0 b] performs a slot operation
+
+
+        (tree addressing), while *[a 2 b c] evaluates *[*[a b] *[a c]], and
+        so forth.
+    </p><!--l. 91-->
+    <p class="indent"> Nock’s extreme simplicity makes it an interesting
+        target for hardware implementation. It requires only
+        a handful of operations, has no need for ﬂoating-point
+        arithmetic, and functions in a completely deterministic
+        manner (<a id="x1-6002"></a><code>~sorreg-namtyv</code> et al., 2016). Yet, this same
+        simplicity can lead to computational ineﬃciency when
+        compared to traditional architectures, as Nock requires graph
+        transformations for even basic arithmetic operations.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">2.2 </span> <a id="x1-70002.2"></a>Digital Hardware Design
+        Fundamentals</h4>
+    <!--l. 95-->
+    <p class="noindent">Field-Programmable Gate Arrays (<span class="small-caps">fpga</span>s) allow for
+        reconﬁgurable digital hardware design, making them ideal for
+        prototyping novel processor architectures. Unlike traditional
+        software that executes sequentially, hardware designs in
+        languages like Verilog describe circuits where operations occur
+        in parallel, governed by clock cycles.
+    </p><!--l. 97-->
+    <p class="indent"> The design process involves:
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-7002x1">
+            <!--l. 99-->
+            <p class="noindent">Creating a high-level design using Hardware
+                Description Language (<span class="small-caps">hdl</span>)
+            </p>
+        </li>
+        <li class="enumerate" id="x1-7004x2">
+            <!--l. 100-->
+            <p class="noindent">Building test benches to verify functionality
+            </p>
+        </li>
+        <li class="enumerate" id="x1-7006x3">
+            <!--l. 101-->
+            <p class="noindent">Synthesis (converting <span class="small-caps">hdl</span> to netlist)
+
+
+            </p>
+        </li>
+        <li class="enumerate" id="x1-7008x4">
+            <!--l. 102-->
+            <p class="noindent">Place and Route (mapping netlist to <span class="small-caps">fpga</span> resources)
+            </p>
+        </li>
+        <li class="enumerate" id="x1-7010x5">
+            <!--l. 103-->
+            <p class="noindent">Timing analysis and program ﬁle generation</p>
+        </li>
+    </ol>
+
+    <h4 class="subsectionHead"><span class="titlemark">2.3 </span> <a id="x1-80002.3"></a>Existing Hardware
+        Implementations of Functional
+        Languages</h4>
+    <!--l. 108-->
+    <p class="noindent">Several signiﬁcant projects have attempted to implement
+        functional programming languages directly in hardware:
+    </p><!--l. 110-->
+    <p class="indent"> <strong><span class="small-caps">skim</span> (<span class="small-caps">s</span>, <span
+                class="small-caps">k</span>, <span class="small-caps">i</span> reduction machine)</strong>: Developed by
+        Clarke
+        et al. at Cambridge in the 1970s and 1980s (<a id="x1-8001"></a>Clarke et al.
+        (1980); <a id="x1-8002"></a>Norman, Clarke, and Stoye (1984)), <span class="small-caps">skim</span> implemented
+        combinatory logic directly in hardware. It pioneered many of
+        the techniques for graph reduction that inﬂuenced later
+        work.
+    </p><!--l. 112-->
+    <p class="indent"> <strong>The Reduceron</strong>: More recently, work at the University of
+        York by Naylor and Runciman has produced The Reduceron
+        (<a id="x1-8003"></a>Naylor and Runciman (2008); <a id="x1-8004"></a>Naylor (2009)), an <span
+            class="small-caps">fpga</span>-based
+        graph reduction machine initially designed for executing
+        Haskell programs using basic combinators (<span class="small-caps">s</span>, <span class="small-caps">k</span>,
+        <span class="small-caps">i</span>, <span class="small-caps">b</span>, <span class="small-caps">c</span>).
+        Later versions moved to more complex supercombinator
+        implementations.
+    </p><!--l. 114-->
+    <p class="indent"> While these implementations provide valuable precedent,
+        they diﬀer from the NockPU in several important ways:
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-8006x1">
+            <!--l. 116-->
+            <p class="noindent">They primarily target conventional functional
+                languages rather than a minimal combinator calculus
+                like Nock
+
+
+            </p>
+        </li>
+        <li class="enumerate" id="x1-8008x2">
+            <!--l. 117-->
+            <p class="noindent">They typically employ stack-based reduction
+                strategies
+            </p>
+        </li>
+        <li class="enumerate" id="x1-8010x3">
+            <!--l. 118-->
+            <p class="noindent">They have focused less on scalability across on-chip
+                and oﬀ-chip memory boundaries</p>
+        </li>
+    </ol>
+
+    <h4 class="subsectionHead"><span class="titlemark">2.4 </span> <a id="x1-90002.4"></a>Stack-based vs. Stackless
+        Architectures</h4>
+    <!--l. 123-->
+    <p class="noindent">Traditional approaches to traversing tree structures in
+        hardware often rely on stack-based mechanisms, wherein a
+        stack stores return addresses or intermediate state during
+        traversal. While intuitive, this approach can introduce
+        complexity in hardware implementation and potentially limit
+        parallelism.
+    </p><!--l. 125-->
+    <p class="indent"> The stackless approach, in contrast, embeds navigational
+        information directly within the tree structure itself, allowing
+        for traversal without external stack state. This technique
+        requires careful consideration of how to mark nodes during
+        traversal and how to restore the tree to its original form
+        afterward, but can oﬀer advantages in certain hardware
+        contexts.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">2.5 </span> <a id="x1-100002.5"></a>Memory Representation
+        Challenges in Functional
+        Computing</h4>
+    <!--l. 129-->
+    <p class="noindent">Representing functional data structures eﬃciently in memory
+        presents several challenges. Traditional memory is organized
+        as a linear array of words, while functional data often takes
+
+
+        the form of trees or graphs. Additionally, functional programs
+        frequently create and discard temporary structures during
+        evaluation, necessitating eﬀective memory management
+        strategies.
+    </p><!--l. 131-->
+    <p class="indent"> In hardware implementations, memory access patterns
+        signiﬁcantly impact performance. On-chip memory oﬀers fast
+        access but limited capacity, while oﬀ-chip memory provides
+        greater capacity at the cost of higher latency. Eﬀective design
+        must carefully balance these tradeoﬀs.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">3 </span> <a id="x1-110003"></a>NockPU Architecture</h3>
+
+    <h4 class="subsectionHead"><span class="titlemark">3.1 </span> <a id="x1-120003.1"></a>System Overview and Design
+        Philosophy</h4>
+    <!--l. 137-->
+    <p class="noindent">The NockPU is designed as a specialized processor that
+        directly executes Nock operations in hardware. Its architecture
+        emphasizes several key principles:
+    </p><!--l. 139-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-12002x1">
+            <!--l. 140-->
+            <p class="noindent"><strong>Memory-centric design</strong>:
+                Since combinator reduction is fundamentally about
+                memory manipulation, the architecture prioritizes
+                eﬃcient memory operations.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-12004x2">
+            <!--l. 141-->
+            <p class="noindent"><strong>Deterministic execution</strong>: The system maintains
+                Nock’s deterministic nature, ensuring consistent
+                results for identical inputs.
+
+
+            </p>
+        </li>
+        <li class="enumerate" id="x1-12006x3">
+            <!--l. 142-->
+            <p class="noindent"><strong>Stackless traversal</strong>: Rather than relying on a
+                traditional stack for tree traversal, the NockPU
+                embeds traversal state within the memory structure
+                itself.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-12008x4">
+            <!--l. 143-->
+            <p class="noindent"><strong>Scalability across memory boundaries</strong>: The
+                design accommodates both on-chip and oﬀ-chip
+                memory, allowing for larger computations than could
+                ﬁt in on-chip memory alone.</p>
+        </li>
+    </ol>
+    <!--l. 146-->
+    <p class="noindent">Figure <a href="#x1-12009r1">1<!--tex4ht:ref: fig:nockpu-architecture --></a> illustrates the
+        overall system architecture of the
+        NockPU, showing the interconnections between its major
+        components. The Memory Traversal Unit serves as the
+        central coordinator, managing communication between the
+        execution subsystems and memory hierarchy. The architecture
+        demonstrates a clear separation between control logic,
+        execution units, and memory management, enabling modular
+        design and eﬃcient resource utilization.
+
+
+        <span class="rotatebox" style="transform: rotate(-90deg);">
+    </p>
+    <figure class="figure">
+
+        </span>
+
+
+        <span class="rotatebox" style="transform: rotate(-90deg);"> <a id="x1-12009r1"></a>
+        </span>
+
+
+
+        <span class="rotatebox" style="transform: rotate(-90deg);"> <!--l. 5-->
+            <p class="noindent"><img src="mss0x.png"
+                    alt=" Memory
+ECITxenEMGPrelcqEeMaCavclreuadmerbo&#x0026;eu Bmlitomant Brsteloerogracnyryeollkt
+U((UMCMPcmastddddgmgNEMnMOOnuouooectriiiicucoxeio(O(Oppilllinmcatavspspspsp tx mcemtdppttletnttreseeaaaarekco (u5)10 (ipcipeoosrsttttigmPurmle34))mletolerslpachchchchgUtytu)u)xrxsleri)eeorrnCSoUurnbeistysstem"
+                    width="100%;" height="auto" />
+            </p>
+            <figcaption class="caption"><span class="id">Figure 1: </span><span class="content">NockPU System
+                    Architecture
+                    Overview. The Memory Traversal Unit serves as the central
+                    controller, coordinating between execution modules and memory management components. Specialized
+                    operation blocks handle speciﬁc Nock opcodes,
+                    while the memory subsystem provides cell-based storage
+                    with integrated garbage collection. Bidirectional arrows (solid) indicate control and data ﬂow,
+                    while
+                    one-way
+                    arrows (dashed) show dispatch operations.</span>
+            </figcaption><!--tex4ht:label?: x1-12009r1 -->
+        </span>
+
+
+        <span class="rotatebox" style="transform: rotate(-90deg);">
+    </figure>
+    </span>
+
+
+    <!--l. 151-->
+    <p class="indent"> The execution pipeline ﬂows from the Memory Traversal
+        Unit to specialized operation blocks through the Execute
+        Module, which acts as a dispatcher for diﬀerent Nock
+        opcodes. This design allows each operation type to be
+        optimized independently while maintaining consistent
+        control interfaces. The memory subsystem integrates
+        traditional storage with garbage collection, providing the
+        specialized memory management required for combinator
+        reduction.
+    </p><!--l. 153-->
+    <p class="indent"> The architecture implements explicitly single-threaded
+        execution, consistent with Nock’s deterministic semantics.
+        This design choice ensures that all computations proceed in a
+        predictable, sequential manner, eliminating race conditions
+        and maintaining the mathematical purity that characterizes
+        Nock evaluation.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">3.2 </span> <a id="x1-130003.2"></a>Memory Representation Model
+    </h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">3.2.1 </span> <a id="x1-140003.2.1"></a>28-bit Nouns in 64-bit
+        Words</h5>
+    <!--l. 159-->
+    <p class="noindent">The NockPU represents Nock nouns using a custom memory
+        format. Each memory cell is 64 bits wide, divided as
+        follows:
+    </p>
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 162-->
+            <p class="noindent">8 tag bits (highest bits)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 163-->
+            <p class="noindent">28 bits for the head noun
+
+
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 164-->
+            <p class="noindent">28 bits for the tail noun</p>
+        </li>
+    </ul>
+    <!--l. 167-->
+    <p class="noindent">This representation allows for eﬃcient storage of Nock’s
+        binary tree structure while providing room for necessary
+        metadata. The 28-bit limitation for nouns was chosen based
+        on practical <span class="small-caps">fpga</span> constraints: most commercially available
+        <span class="small-caps">fpga</span>s have at most 256MB of directly accessible on-board
+        memory, making 28-bit addressing suﬃcient while maintaining
+        eﬃcient 64-bit word alignment. This design choice facilitates
+        straightforward scaling across diﬀerent <span class="small-caps">fpga</span> platforms, as the
+        architecture can be trivially adjusted for larger memory
+        conﬁgurations when available, though the architecture
+        includes provisions for handling arbitrarily large atoms
+        through linked representations.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.2.2 </span> <a id="x1-150003.2.2"></a>Tag Bit Utilization
+    </h5>
+    <!--l. 172-->
+    <p class="noindent">Tag bits represent auxiliary metadata embedded within
+        memory words to support architectural features beyond basic
+        data storage. In traditional von Neumann architectures, such
+        metadata is typically maintained in separate control structures
+        or registers. However, the NockPU’s specialized design for
+        combinator reduction necessitates embedding control
+        information directly within the memory representation to
+        enable eﬃcient stackless traversal and cell-based addressing.
+    </p><!--l. 174-->
+    <p class="indent"> The NockPU’s tag bit architecture serves several critical
+        functions essential for hardware-based functional computation.
+        The stackless tree traversal mechanism requires embedding
+        traversal state within memory cells themselves, using
+        dedicated bits to track which branches have been visited
+        during tree navigation. The cell-addressed memory model
+        demands type information to distinguish between atoms and
+        cells at the hardware level. Additionally, execution control bits
+        mark cells requiring evaluation, while reserved bits provide
+        extensibility for future architectural enhancements.
+
+
+    </p><!--l. 176-->
+    <p class="indent"> Table <a href="#x1-15001r1">1<!--tex4ht:ref: tab:tag-bits --></a> provides a complete
+        speciﬁcation
+        of the 8-bit
+        tag ﬁeld structure used in the NockPU’s 64-bit memory
+        words. Each tag bit serves a speciﬁc architectural purpose,
+        from execution control to traversal state management,
+        enabling the processor to maintain the semantic clarity of
+        Nock computation while achieving practical hardware
+        implementation.
+    </p>
+    <div class="table">
+
+
+        <!--l. 178-->
+        <p class="indent"> <a id="x1-15001r1"></a></p>
+        <figure class="float">
+
+
+            <figcaption class="caption"><span class="id">Table 1: </span><span class="content">NockPU Tag Bits Layout
+                    (Bits
+                    63–56)</span></figcaption><!--tex4ht:label?: x1-15001r1 -->
+            <div class="tabular">
+                <table id="TBL-2" class="tabular">
+                    <colgroup id="TBL-2-1g">
+                        <col id="TBL-2-1" />
+                    </colgroup>
+                    <colgroup id="TBL-2-2g">
+                        <col id="TBL-2-2" />
+                    </colgroup>
+                    <colgroup id="TBL-2-3g">
+                        <col id="TBL-2-3" />
+                    </colgroup>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-1-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-1-1" class="td11">
+                            <strong>Bit</strong>
+                        </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-1-2" class="td11">
+                            <strong>Name</strong>
+                        </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-1-3" class="td11"> <!--l. 184-->
+                            <p class="noindent"><strong>Explanation</strong> </p>
+                        </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-2-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-2-1" class="td11"> 63 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-2-2" class="td11"> Execute </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-2-3" class="td11"> <!--l. 186-->
+                            <p class="noindent">Marks cell as requiring execution </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-3-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-3-1" class="td11"> 62 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-3-2" class="td11"> Stack </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-3-3" class="td11"> <!--l. 187-->
+                            <p class="noindent">Contains operation code and operand </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-4-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-4-1" class="td11"> 61 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-4-2" class="td11"> Reserved </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-4-3" class="td11"> <!--l. 188-->
+                            <p class="noindent">Reserved for future extensions </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-5-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-5-1" class="td11">
+                            60 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-5-2" class="td11"> Large Atom </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-5-3" class="td11"> <!--l. 189-->
+                            <p class="noindent">Atom larger than 28 bits </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-6-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-6-1" class="td11"> 59 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-6-2" class="td11"> Head Traversal
+                        </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-6-3" class="td11"> <!--l. 190-->
+                            <p class="noindent">Tracks head traversal state </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-7-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-7-1" class="td11"> 58 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-7-2" class="td11"> Tail Traversal
+                        </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-7-3" class="td11"> <!--l. 191-->
+                            <p class="noindent">Tracks tail traversal state </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-8-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-8-1" class="td11"> 57 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-8-2" class="td11"> Head Tag </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-8-3" class="td11"> <!--l. 192-->
+                            <p class="noindent">Head is atom (0) or cell (1) </p>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-9-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-9-1" class="td11"> 56 </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-2-9-2" class="td11"> Tail Tag </td>
+                        <td style="white-space:normal; text-align:left;" id="TBL-2-9-3" class="td11"> <!--l. 193-->
+                            <p class="noindent">Tail is atom (0) or cell (1) </p>
+                        </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-2-10-">
+                        <td style="white-space:nowrap; text-align:center;" id="TBL-2-10-1" class="td11"> </td>
+                    </tr>
+                </table>
+            </div>
+
+
+        </figure>
+    </div>
+    <!--l. 198-->
+    <p class="noindent"><strong>Example:</strong> The Nock cell [42 43] is represented as a 64-bit
+        word with the following bits:
+    </p>
+    <div class="tabular">
+        <table id="TBL-3" class="tabular">
+            <colgroup id="TBL-3-1g">
+                <col id="TBL-3-1" />
+                <col id="TBL-3-2" />
+            </colgroup>
+            <tr style="vertical-align:baseline;" id="TBL-3-1-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-1-1" class="td11"> Tag bits (63–56): </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-1-2" class="td11"> 00000011<span
+                        class="mathjax-inline">\(_2\)</span> </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-2-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-2-1" class="td11"> </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-2-2" class="td11"> (both head and tail are
+                    atoms)
+                </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-3-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-3-1" class="td11"> Head (55–28): </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-3-2" class="td11"> 0x000002A<span
+                        class="mathjax-inline">\(_2\)</span> </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-4-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-4-1" class="td11"> </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-4-2" class="td11"> (28-bit representation of
+                    42)
+                </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-5-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-5-1" class="td11"> Tail (27–0): </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-5-2" class="td11"> 0x000002B<span
+                        class="mathjax-inline">\(_2\)</span> </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-6-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-6-1" class="td11"> </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-6-2" class="td11"> (28-bit representation of
+                    43)
+                </td>
+            </tr>
+            <tr style="vertical-align:baseline;" id="TBL-3-7-">
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-7-1" class="td11"> Complete word: </td>
+                <td style="white-space:nowrap; text-align:left;" id="TBL-3-7-2" class="td11"> 0x03000002A000002B<span
+                        class="mathjax-inline">\(_2\)</span> </td>
+            </tr>
+        </table>
+    </div>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">3.2.3 </span> <a id="x1-160003.2.3"></a>Atom and Cell
+        Representation</h5>
+    <!--l. 213-->
+    <p class="noindent">In the NockPU memory model, atoms (natural numbers) are
+        represented directly within the 28-bit ﬁelds when possible. For
+        atoms that exceed this limit, the system can use multiple
+        memory cells linked together.
+    </p><!--l. 215-->
+    <p class="indent"> Cells are represented as pointers to other memory
+        locations. When both the head and tail of a cell are direct
+        atoms, they can be stored directly within a single memory
+        word. When either is a cell, the corresponding ﬁeld contains a
+        pointer to another memory location.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">3.3 </span> <a id="x1-170003.3"></a>Stackless Tree Traversal
+        Mechanism</h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">3.3.1 </span> <a id="x1-180003.3.1"></a>Program Pointer and
+        Back Pointer Methodology</h5>
+    <!--l. 221-->
+    <p class="noindent">The NockPU implements a stackless approach to tree traversal
+        (<a id="x1-18001"></a>Burrows, 2009) using two primary pointers:
+    </p><!--l. 223-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+
+
+        <li class="enumerate" id="x1-18003x1">
+            <!--l. 224-->
+            <p class="noindent"><strong>Program Pointer (P)</strong>: Points to the current node
+                being processed
+            </p>
+        </li>
+        <li class="enumerate" id="x1-18005x2">
+            <!--l. 225-->
+            <p class="noindent"><strong>Back Pointer (B)</strong>: Points to the previous node in
+                the traversal</p>
+        </li>
+    </ol>
+    <!--l. 228-->
+    <p class="noindent">Together, these pointers allow the system to navigate the tree
+        structure without requiring a separate stack. The approach
+        fundamentally works by leaving “breadcrumbs&#x0022; in the form of
+        modiﬁed pointers that enable retracing steps back up the tree
+        after descending.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.3.2 </span> <a id="x1-190003.3.2"></a>Breadcrumb Trail
+        Implementation</h5>
+    <!--l. 233-->
+    <p class="noindent">The stackless traversal mechanism operates by temporarily
+        modifying tree pointers to create navigational breadcrumbs, as
+        demonstrated in Figure <a href="#x1-19001r2">2<!--tex4ht:ref: fig:tree-traversal --></a>. This approach
+        eliminates
+        the
+        need for external stack memory while maintaining the
+        ability to navigate complex tree structures during Nock
+        evaluation.
+    </p>
+    <figure class="figure">
+
+
+
+        <a id="x1-19001r2"></a>
+
+
+
+        <!--l. 3-->
+        <p class="noindent"><img src="mss1x.png" alt="ACRC4284C9912hetahetahetaPBCRC4284C9912brtahetahetaPCCRC42428484C9912hetahetahetafoPLP.elooelelailailail.elooeleleailailail.elooelelailailaillloe Iltllddd Dltllddd Rltlldddwgn(oe(mcre(rbeirsoutesantigcdmutckdiaineiﬁbrorlalnened T)dd))riveniega SwBtiratethaedBcrreuamdbcsrumbs
+ h.
+ −→  Normal pointers
+ −−→  Breadcrumb pointers
+
+     Current position (breadcrumb)" width="100%;" height="auto" />
+        </p>
+        <figcaption class="caption"><span class="id">Figure 2: </span><span class="content">Stackless
+                Tree Traversal Sequence demonstrating breadcrumb-based
+                navigation without a traditional call stack. The NockPU
+                implements tree traversal without a stack by modifying
+                pointers to create breadcrumb trails. Sequence: (A) Initial
+                tree state with root and subtrees. (B) Descend into the left
+                subtree leaving breadcrumb. (C) Follow breadcrumb back
+                to root to continue with right.</span></figcaption><!--tex4ht:label?: x1-19001r2 -->
+
+
+    </figure>
+    <!--l. 237-->
+    <p class="indent"> The traversal sequence shown in the ﬁgure illustrates the
+        three-phase operation: initialization, descent with breadcrumb
+        creation, and return via breadcrumb following. In subﬁgure A,
+        the tree exists in its canonical form with normal pointer
+        relationships. Subﬁgure B shows the critical breadcrumb
+        creation phase, where the processor modiﬁes the root cell’s
+        head pointer to store a return path before descending into the
+        left subtree. Subﬁgure C demonstrates the return mechanism,
+        in which the breadcrumb is followed back to the root,
+        restoring the original pointer structure while marking the left
+        subtree as visited.
+    </p><!--l. 239-->
+    <p class="indent"> As the processor traverses the tree, it modiﬁes the memory
+        cells it visits, eﬀectively leaving a trail that can be followed
+        back up. When descending into a subtree, the processor
+        redirects the pointer in the left part of the cell to point to the
+        parent node, from which execution ﬂow just came. This
+        creates a pathway back up the tree.
+    </p><!--l. 241-->
+    <p class="indent"> The tag bits for head and tail traversal (bits 59 and 58)
+        track which branches have been visited, allowing the
+        processor to determine which subtree to explore next during
+        traversal.
+    </p><!--l. 243-->
+    <p class="indent"> This mechanism ensures that:
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-19003x1">
+            <!--l. 245-->
+            <p class="noindent">The processor can always retrace its steps
+            </p>
+        </li>
+        <li class="enumerate" id="x1-19005x2">
+            <!--l. 246-->
+            <p class="noindent">The original tree can be reconstructed after traversal
+            </p>
+        </li>
+        <li class="enumerate" id="x1-19007x3">
+            <!--l. 247-->
+            <p class="noindent">Shared subtrees remain unmodiﬁed, preserving the
+                integrity of the graph</p>
+        </li>
+    </ol>
+
+
+
+    <h4 class="subsectionHead"><span class="titlemark">3.4 </span> <a id="x1-200003.4"></a>Control Flow Architecture
+    </h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">3.4.1 </span> <a id="x1-210003.4.1"></a>Memory Traversal
+        Control</h5>
+    <!--l. 254-->
+    <p class="noindent">The Memory Traversal Unit (<span class="small-caps">mtu</span>) serves as the master
+        controller for the NockPU, orchestrating the overall execution
+        ﬂow. It performs several key functions:
+    </p><!--l. 256-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-21002x1">
+            <!--l. 257-->
+            <p class="noindent">Initiates tree traversal to ﬁnd nodes marked for
+                execution
+            </p>
+        </li>
+        <li class="enumerate" id="x1-21004x2">
+            <!--l. 258-->
+            <p class="noindent">Maintains the program and back pointers
+            </p>
+        </li>
+        <li class="enumerate" id="x1-21006x3">
+            <!--l. 259-->
+            <p class="noindent">Passes control to specialized execution modules when
+                appropriate
+            </p>
+        </li>
+        <li class="enumerate" id="x1-21008x4">
+            <!--l. 260-->
+            <p class="noindent">Coordinates memory access through the memory
+                multiplexer</p>
+        </li>
+    </ol>
+    <!--l. 263-->
+    <p class="noindent">The <span class="small-caps">mtu</span> operates according to a ﬁnite state machine
+        that manages the complex coordination between memory
+        operations, tree traversal, and execution control. The state
+
+
+        machine includes states for memory access initiation, traversal
+        coordination, execution delegation, and result handling.
+        State transitions are triggered by completion signals from
+        subordinate modules, memory operation acknowledgments,
+        and the detection of execution markers within the traversed
+        tree structure. This state-driven approach ensures that all
+        memory operations complete properly before proceeding and
+        that control ﬂow remains deterministic throughout the
+        computation process.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.4.2 </span> <a id="x1-220003.4.2"></a>Execute Module</h5>
+    <!--l. 268-->
+    <p class="noindent">The Execute module handles the reduction of Nock operations
+        when triggered by the <span class="small-caps">mtu</span>. It receives the address and data
+        for a cell marked for execution, performs the appropriate
+        transformation according to the Nock operation code, and
+        returns control to the <span class="small-caps">mtu</span> when complete.
+    </p><!--l. 270-->
+    <p class="indent"> This module contains specialized logic for each Nock
+        operator (0 through 11), implementing their speciﬁc reduction
+        rules. For operators that generate nested executions, the
+        Execute module restructures the memory to reﬂect the
+        transformed computation and marks the relevant cells for
+        future execution.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.4.3 </span> <a id="x1-230003.4.3"></a>Operational Modules
+    </h5>
+    <!--l. 274-->
+    <p class="noindent">In addition to the core Execute module, the NockPU includes
+        several specialized modules for speciﬁc operations:
+    </p>
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 277-->
+            <p class="noindent"><strong>Cell Block</strong>: Handle type checking for the cell
+                operator (opcode 3)
+
+
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 278-->
+            <p class="noindent"><strong>Increment Block</strong>: Implement increment operations
+                (opcode 4)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 279-->
+            <p class="noindent"><strong>Equal Block</strong>: Perform equality comparisons
+                (opcode 5)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 280-->
+            <p class="noindent"><strong>Edit Block</strong>: Handle tree modiﬁcation for the replace
+                operator (opcode 10)</p>
+        </li>
+    </ul>
+    <!--l. 283-->
+    <p class="noindent">These specialized modules allow for more eﬃcient implementation
+        of speciﬁc operations and better utilization of hardware
+        parallelism.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.4.4 </span> <a id="x1-240003.4.4"></a>Error Handling and
+        System Integrity</h5>
+    <!--l. 288-->
+    <p class="noindent">The NockPU includes a comprehensive error detection and
+        reporting system to maintain system integrity during
+        execution. When an error condition is encountered—such as
+        malformed nouns, invalid operation codes, or memory access
+        violations—the system raises an error signal and provides
+        diagnostic information through an error code bus. This
+        approach allows for graceful error handling while maintaining
+        the deterministic nature of Nock execution, ensuring that
+        invalid computations are detected rather than producing
+        undeﬁned results.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">3.4.5 </span> <a id="x1-250003.4.5"></a>Garbage Collection
+        Implementation</h5>
+
+
+    <!--l. 292-->
+    <p class="noindent">The NockPU implements a Cheney-style copying garbage
+        collector based on the algorithm described by <a id="x1-25001"></a>Clark (1976).
+        This implementation addresses the signiﬁcant memory
+        consumption challenges inherent in combinator reduction by
+        reclaiming memory occupied by intermediate structures that
+        are no longer reachable.
+    </p><!--l. 294-->
+    <p class="indent"> The garbage collection process operates as follows:
+    </p><!--l. 296-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-25003x1">
+            <!--l. 297-->
+            <p class="noindent"><strong>Traversal Reset</strong>: Before
+                initiating garbage collection, the system resets any
+                active tree traversal state, ensuring that breadcrumb
+                modiﬁcations are properly unwound and the memory
+                representation returns to its canonical form.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-25005x2">
+            <!--l. 298-->
+            <p class="noindent"><strong>Copying Phase</strong>: Using Cheney’s two-space copying
+                algorithm, reachable nouns
+                are copied from the current memory space to a clean
+                memory partition, with pointer updates maintaining
+                referential integrity.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-25007x3">
+            <!--l. 299-->
+            <p class="noindent"><strong>Space Flip</strong>: Once copying is complete, the roles of
+                the two memory spaces are exchanged, making the
+                compacted space the active working memory.</p>
+        </li>
+    </ol>
+    <!--l. 302-->
+    <p class="noindent">A key advantage of this design is that computation state does
+        not need to be recreated after garbage collection. Since the
+        NockPU’s execution model is based on marking cells for
+        execution rather than maintaining complex execution stacks,
+        the collector can preserve all necessary computational
+
+
+        context during the copying process. This allows garbage
+        collection to occur transparently without requiring expensive
+        state reconstruction. The tradeoﬀ is that the traversal
+        reset process takes some clock cycles, but this approach
+        eliminates the need to maintain extra state during garbage
+        collection.
+    </p><!--l. 305-->
+    <p class="indent"> The copying collector approach is particularly well-suited
+        to the NockPU’s stackless architecture, as it eliminates the
+        need to traverse and update complex stack structures during
+        collection. The collector operates entirely through memory
+        scanning and pointer updating, maintaining compatibility
+        with the breadcrumb-based traversal mechanism used
+        throughout the system.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">4 </span> <a id="x1-260004"></a>Implementation Details</h3>
+
+    <h4 class="subsectionHead"><span class="titlemark">4.1 </span> <a id="x1-270004.1"></a>Hardware Design Process and
+        Tools</h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">4.1.1 </span> <a id="x1-280004.1.1"></a>Verilog Implementation
+    </h5>
+    <!--l. 313-->
+    <p class="noindent">The NockPU was implemented in Verilog, a hardware
+        description language that allows for precise control over the
+        digital circuit design. The implementation follows a modular
+        approach, with separate components for diﬀerent functional
+        aspects of the processor.
+    </p><!--l. 315-->
+    <p class="indent"> Key Verilog modules include: </p>
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 317-->
+            <p class="noindent">Memory Unit (memory_unit.v)
+
+
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 318-->
+            <p class="noindent">Memory Traversal Unit (mem_traversal.v)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 319-->
+            <p class="noindent">Execute Module (execute.v)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 320-->
+            <p class="noindent">Specialized Operation Blocks
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 321-->
+            <p class="noindent">Memory Multiplexer (memory_mux.v)
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 322-->
+            <p class="noindent">Control Multiplexer (control_mux.v)</p>
+        </li>
+    </ul>
+    <!--l. 325-->
+    <p class="noindent">Each module was designed with clear interfaces and tested
+        independently before integration.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.1.2 </span> <a id="x1-290004.1.2"></a>Testing and
+        Veriﬁcation
+        Methodology</h5>
+    <!--l. 330-->
+    <p class="noindent">A comprehensive testing framework was developed to verify
+        the correctness of the NockPU implementation across multiple
+        levels of abstraction:
+    </p><!--l. 332-->
+    <p class="indent"> <strong>End-to-End Testing</strong>: The primary veriﬁcation approach
+        uses an end-to-end test bench (execute_tb) that inputs
+        known Nock formulas and compares the resulting output
+        with a reference Nock interpreter. This approach ensures
+        semantic equivalence between the hardware implementation
+        and established software interpreters, validating that
+        the NockPU produces correct results for complete Nock
+        programs.
+    </p><!--l. 334-->
+    <p class="indent"> <strong>Component-Level Testing</strong>: Individual subsystems are
+        veriﬁed through dedicated test benches: </p>
+
+
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 336-->
+            <p class="noindent">Memory traversal test bench: Veriﬁes the correctness
+                of the stackless tree traversal mechanism, ensuring
+                proper navigation and breadcrumb management
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 337-->
+            <p class="noindent">Memory operations test bench: Validates basic
+                memory read, write, and allocation operations across
+                the bisected memory architecture</p>
+        </li>
+    </ul>
+    <!--l. 340-->
+    <p class="noindent">This modular testing approach allows for isolation of
+        functionality and systematic debugging, enabling veriﬁcation
+        of both individual components and their integration.
+        The test benches provide comprehensive coverage of the
+        processor’s operational modes and edge cases, ensuring robust
+        implementation of the Nock speciﬁcation.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">4.2 </span> <a id="x1-300004.2"></a>Nock Operation Implementation
+    </h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.1 </span> <a id="x1-310004.2.1"></a>Basic Operations
+        (Slot,
+        Constant)</h5>
+    <!--l. 347-->
+    <p class="noindent">The simplest Nock operations are implemented directly within
+        the memory traversal and execution modules:
+
+    </p>
+    <!--l. 349-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-32000"></a><span class="ec-lmbx-10">Slot Operation (*[a 0
+                b])</span></span>
+        Implemented by traversing the subject tree according to
+        the address pattern speciﬁed by b. The implementation uses a
+        bit-wise approach where each bit in the address determines
+        whether to follow the head or tail pointer.
+
+
+
+    </p>
+    <!--l. 351-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-33000"></a><span class="ec-lmbx-10">Constant Operation
+                (*[a
+                1 b])</span></span>
+        Simply returns the constant b regardless of the subject.
+        This is implemented by writing the value of b directly to the
+        result cell.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.2 </span> <a id="x1-340004.2.2"></a>Tree Manipulation
+        Operations</h5>
+    <!--l. 355-->
+    <p class="noindent">Operations that transform the tree structure are implemented
+        through carefully orchestrated memory manipulations:
+
+    </p>
+    <!--l. 357-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-35000"></a><span class="ec-lmbx-10">Evaluation (*[a 2 b
+                c])</span></span>
+        Constructs a new tree representing *[*[a b] *[a c]], marking
+        the appropriate cells for execution. This operation demonstrates
+        the NockPU’s approach to graph transformation, where
+        complex Nock operations are implemented by restructuring
+        memory to reﬂect the semantically equivalent expanded
+        form.
+    </p><!--l. 359-->
+    <p class="indent"> Figure <a href="#x1-35001r3">3<!--tex4ht:ref: fig:memory-transformation --></a> illustrates the
+        memory transformation process for
+        Nock opcode 2, showing how the original nested structure is
+        converted into separate evaluation branches. The transformation
+        allocates new memory cells (addresses 0x09 and 0x0A)
+        to represent the two evaluation paths *[a b] and *[a c],
+        while preserving the original subject data at address
+        0x02. The execute bits (0x80 in the tag ﬁeld) mark the
+        newly created cells for evaluation, allowing the processor
+        to continue the reduction process on the transformed
+        structure.
+    </p>
+    <figure class="figure">
+
+
+
+        <a id="x1-35001r3"></a>
+
+
+        <p class="noindent"><img src="mss2x.png"
+                alt="ACRC4284C9912hetahetahetaPBCRC4284C9912brtahetahetaPCCRC42428484C9912hetahetahetafoPLP.elooelelailailail.elooeleleailailail.elooelelailailaillloe Iltllddd Dltllddd Rltlldddwgn(oe(mcre(rbeirsoutesantigcdmutckdiaineiﬁbrorlalnened T)dd))riveniega SwBtiratethaedBcrreuamdbcsrumbs"
+                width="100%;" height="auto" />
+        </p>
+        <figcaption class="caption"><span class="id">Figure 3: </span><span class="content">Memory transformation for
+                Nock
+                opcode 2
+                (Evaluation) demonstrating the conversion from opcode
+                structure to evaluation branches, showing how *[a 2
+                b c] becomes *[*[a b] *[a c]] through memory graph
+                restructuring.</span></figcaption><!--tex4ht:label?: x1-35001r3 -->
+
+
+    </figure>
+    <!--l. 363-->
+    <p class="indent"> This approach exempliﬁes the NockPU’s philosophy
+        of implementing complex operations through memory
+        restructuring rather than traditional control ﬂow. The
+        deterministic nature of memory allocation ensures consistent
+        behavior, while the tagging system provides the execution
+        control necessary for proper evaluation sequencing.
+
+    </p>
+    <!--l. 365-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-36000"></a><span class="ec-lmbx-10">Cell Testing (*[a 3
+                b])</span></span>
+        Examines whether the result of *[a b] is a cell, returning
+        the appropriate truth value.
+
+    </p>
+    <!--l. 367-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-37000"></a><span class="ec-lmbx-10">Increment (*[a 4
+                b])</span></span>
+        Increments the result of *[a b] by one, using specialized
+        logic.
+
+    </p>
+    <!--l. 369-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-38000"></a><span class="ec-lmbx-10">Equality (*[a 5 b
+                c])</span></span>
+        Compares the results of *[a b] and *[a c] for equality.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.3 </span> <a id="x1-390004.2.3"></a>Conditional Operation
+        Implementation</h5>
+    <!--l. 373-->
+    <p class="noindent">The conditional operation (*[a 6 b c d]) is particularly
+        challenging due to its branching nature. In the NockPU, it is
+        implemented by constructing the equivalent expression
+    </p><!--l. 374-->
+    <pre class="lstlisting" id="listing-1"><span class="label"><a  id="x1-39001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]]</span></span></pre>
+
+    <!--l. 377-->
+    <p class="indent"> directly in memory.
+
+
+    </p><!--l. 379-->
+    <p class="indent"> This approach, while computationally expensive, maintains
+        semantic equivalence with the Nock speciﬁcation and
+        demonstrates how even complex operations can be expressed
+        through graph transformation rather than traditional control
+        ﬂow.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.4 </span> <a id="x1-400004.2.4"></a>Composition, Push, and
+        Call Operations</h5>
+    <!--l. 383-->
+    <p class="noindent">Operations 7, 8, and 9 share a common implementation
+        pattern in the NockPU: they perform graph reduction by
+        writing the equivalent expanded expression directly into
+        memory, then rely on the normal execution order to evaluate
+        the result correctly.
+
+    </p>
+    <!--l. 385-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-41000"></a><span class="ec-lmbx-10">Composition (*[a 7 b
+                c])</span></span>
+        The NockPU writes the graph reduction *[*[a b] c] directly
+        into memory. The normal execution order ensures that *[a b]
+        is evaluated ﬁrst, with its result becoming the subject for the
+        subsequent evaluation of c.
+
+    </p>
+    <!--l. 387-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-42000"></a><span class="ec-lmbx-10">Push (*[a 8 b
+                c])</span></span>
+        Implemented by writing the expansion *[[*[a b] a] c]
+        into memory. The execution system constructs a cell
+        containing both the result of *[a b] and the original subject a,
+        creating the augmented context needed for evaluating
+        c.
+
+    </p>
+    <!--l. 389-->
+    <p class="noindent"><span class="paragraphHead"><a id="x1-43000"></a><span class="ec-lmbx-10">Call (*[a 9 b
+                c])</span></span>
+        Constructs the graph reduction *[*[a c] 2 [0 1] 0 b] in
+        memory. This creates the function call frame structure, with
+
+
+        normal execution order ensuring proper evaluation sequence:
+        ﬁrst *[a c] to obtain the function, then the constructed
+        evaluation context.
+    </p><!--l. 391-->
+    <p class="indent"> This uniﬁed approach eliminates the need for specialized
+        control ﬂow logic in hardware. Instead, the NockPU leverages
+        its graph reduction capabilities and the inherent ordering
+        properties of the traversal mechanism to achieve correct
+        execution semantics for all three operations.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.5 </span> <a id="x1-440004.2.5"></a>Edit Operation
+        Implementation</h5>
+    <!--l. 395-->
+    <p class="noindent">The edit operation (*[a 10 [b c] d]) performs tree modiﬁcation
+        through the specialized Edit Block module. This operation
+        implements the tree editing function #[b *[a c] *[a d]], which
+        modiﬁes the tree structure at address b by replacing the value
+        with the result of *[a c] and continuing evaluation with *[a
+        d].
+    </p><!--l. 397-->
+    <p class="indent"> The Edit Block uses careful pointer manipulation to
+        modify tree structures while preserving shared subtrees and
+        maintaining memory consistency. This operation requires
+        sophisticated address calculation and memory management to
+        ensure that tree modiﬁcations do not corrupt other parts of
+        the computation.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.2.6 </span> <a id="x1-450004.2.6"></a>Hint Operation
+        Implementation</h5>
+    <!--l. 401-->
+    <p class="noindent">The hint operation (*[a 11 [b c] d]) provides optimization
+        opportunities by transforming to *[[*[a c] *[a d]] 0 3]. While
+        semantically equivalent to its expansion, hints in the NockPU
+        architecture are designed to enable hardware-speciﬁc
+        optimizations or jetting.
+    </p><!--l. 403-->
+    <p class="indent"> The current implementation constructs the hint structure
+        in memory and proceeds with standard evaluation. However,
+        the architecture includes provisions for recognizing speciﬁc
+
+
+        hint patterns that could be accelerated through specialized
+        hardware modules or optimized execution paths, representing
+        a key area for future performance improvements.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">4.3 </span> <a id="x1-460004.3"></a>Memory Management</h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">4.3.1 </span> <a id="x1-470004.3.1"></a>Heap Allocation
+        Strategy</h5>
+    <!--l. 409-->
+    <p class="noindent">The NockPU employs a heap-based memory allocation
+        strategy. A free memory chain links together all available
+        memory cells, and operations claim cells from this chain as
+        needed. The free memory pointer (F) tracks the next available
+        cell.
+    </p><!--l. 411-->
+    <p class="indent"> This approach allows for dynamic allocation without
+        requiring complex memory management hardware, albeit at
+        the cost of potential fragmentation over time.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">4.3.2 </span> <a id="x1-480004.3.2"></a>Memory Access Patterns
+    </h5>
+    <!--l. 415-->
+    <p class="noindent">The memory architecture is designed to optimize the prevalent
+        access patterns in Nock execution:
+    </p><!--l. 417-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-48002x1">
+            <!--l. 418-->
+            <p class="noindent"><strong>Cell-Based Memory Model</strong>: Each memory word
+                represents a complete cell containing both head and
+                tail components within the 64-bit word structure.
+                Single atoms are represented as cells [a NIL], where
+                NIL is the maximum direct atom value (28-bits).
+
+
+            </p>
+        </li>
+        <li class="enumerate" id="x1-48004x2">
+            <!--l. 419-->
+            <p class="noindent"><strong>Parallel Memory Operations</strong>: The design allows
+                up to three memory operations per processor cycle:
+                two reads and one write, enabling eﬃcient traversal
+                and manipulation of tree structures.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-48006x3">
+            <!--l. 420-->
+            <p class="noindent"><strong>Memory Management Unit (<span class="small-caps">mmu</span>)</strong>: The
+                NockPU is shielded from oﬀ-chip memory complexity
+                through an <span class="small-caps">mmu</span> that handles the translation
+                between the processor’s cell-based addressing and the
+                underlying memory hierarchy.</p>
+        </li>
+    </ol>
+
+    <h3 class="sectionHead"><span class="titlemark">5 </span> <a id="x1-490005"></a>Evaluation and Analysis</h3>
+    <!--l. 425-->
+    <p class="noindent">The NockPU evaluation encompasses both functional
+        veriﬁcation and performance analysis to assess the viability of
+        hardware-based Nock execution. Testing methodology focuses
+        on semantic equivalence validation through comparison with
+        reference implementations, while performance analysis examines
+        execution characteristics, memory usage patterns, and
+        computational complexity across representative benchmark
+        programs. The evaluation identiﬁes both the capabilities and
+        limitations of the current implementation, providing a
+        foundation for understanding the tradeoﬀs inherent in
+        hardware combinator reduction.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">5.1 </span> <a id="x1-500005.1"></a>Test Methodology</h4>
+
+
+
+    <h5 class="subsubsectionHead"><span class="titlemark">5.1.1 </span> <a id="x1-510005.1.1"></a>Test Bench Design</h5>
+    <!--l. 431-->
+    <p class="noindent">A comprehensive test bench was developed to evaluate the
+        NockPU’s functionality and performance. The test bench
+        allows for loading diﬀerent Nock programs into memory,
+        executing them, and analyzing the results.
+    </p><!--l. 433-->
+    <p class="indent"> The testing framework includes: </p>
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 435-->
+            <p class="noindent">Memory initialization from hex ﬁles
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 436-->
+            <p class="noindent">Execution control and timing
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 437-->
+            <p class="noindent">Result validation
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 438-->
+            <p class="noindent">Performance measurement through cycle counting</p>
+        </li>
+    </ul>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">5.1.2 </span> <a id="x1-520005.1.2"></a>Operation Veriﬁcation
+    </h5>
+    <!--l. 443-->
+    <p class="noindent">Each Nock operation was veriﬁed through speciﬁc test cases
+        designed to exercise diﬀerent aspects of its functionality.
+        Waveform analysis allowed for detailed examination of the
+        processor’s behavior during execution, ensuring correctness
+        and identifying potential optimization opportunities.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">5.2 </span> <a id="x1-530005.2"></a>Performance Metrics</h4>
+
+
+    <!--l. 447-->
+    <p class="noindent">Performance benchmarking of the NockPU was conducted
+        using representative Nock operations that exercise diﬀerent
+        aspects of the hardware architecture. The test conﬁguration
+        utilized a total memory allocation of 2048 words, split equally
+        between active and garbage collection spaces (1024 words
+        each), running at a 50MHz clock frequency. This memory
+        constraint signiﬁcantly impacts performance characteristics
+        due to the frequency of garbage collection cycles required
+        during computation.
+    </p><!--l. 449-->
+    <p class="indent"> The benchmark suite encompasses operations ranging from
+        simple arithmetic to complex recursive functions, providing
+        insight into the computational complexity of hardware-based
+        combinator reduction. Table <a href="#x1-53001r2">2<!--tex4ht:ref: tab:performance-metrics --></a> presents
+        comprehensive
+        performance data for these representative operations,
+        demonstrating the relationship between computational
+        complexity and execution time in the NockPU architecture.
+    </p>
+    <div class="table">
+
+
+        <!--l. 451-->
+        <p class="indent"> <a id="x1-53001r2"></a></p>
+        <figure class="float">
+
+
+            <figcaption class="caption"><span class="id">Table 2: </span><span class="content">NockPU performance
+                    metrics
+                    for 50MHz clock
+                    and 16KB memory</span></figcaption><!--tex4ht:label?: x1-53001r2 -->
+            <!--tex4ht:inline-->
+            <div class="tabular">
+                <table id="TBL-6" class="tabular">
+                    <colgroup id="TBL-6-1g">
+                        <col id="TBL-6-1" />
+                    </colgroup>
+                    <colgroup id="TBL-6-2g">
+                        <col id="TBL-6-2" />
+                    </colgroup>
+                    <colgroup id="TBL-6-3g">
+                        <col id="TBL-6-3" />
+                    </colgroup>
+                    <colgroup id="TBL-6-4g">
+                        <col id="TBL-6-4" />
+                    </colgroup>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-1-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-1-1" class="td11">
+                            <strong>Operation</strong>
+                        </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-1-2" class="td11">
+                            <strong>Input</strong>
+                        </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-1-3" class="td11">
+                            <strong>Cycles</strong>
+                        </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-1-4" class="td11">
+                            <strong>Time</strong>
+                        </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-2-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-2-1" class="td11"> Decrement </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-2-2" class="td11"> n=3 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-2-3" class="td11"> 32,640 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-2-4" class="td11"> 652.8 s </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-3-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-3-1" class="td11"> Decrement </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-3-2" class="td11"> n=10 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-3-3" class="td11"> 110,137 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-3-4" class="td11"> 2.20 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-4-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-4-1" class="td11"> Ackermann </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-4-2" class="td11"> A(1,2) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-4-3" class="td11"> 1,214,348 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-4-4" class="td11"> 24.29 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-5-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-5-1" class="td11"> Ackermann </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-5-2" class="td11"> A(1,3) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-5-3" class="td11"> 1,782,038 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-5-4" class="td11"> 35.64 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-6-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-6-1" class="td11"> Ackermann </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-6-2" class="td11"> A(2,1) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-6-3" class="td11"> 3,266,189 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-6-4" class="td11"> 65.32 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-7-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-7-1" class="td11"> Ackermann </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-7-2" class="td11"> A(2,2) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-7-3" class="td11"> 6,533,725 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-7-4" class="td11"> 130.67 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-8-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-8-1" class="td11"> Equality </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-8-2" class="td11"> *[50 5 [0 1] 0 1]
+                        </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-8-3" class="td11"> 406 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-8-4" class="td11"> 8.12 s </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-9-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-9-1" class="td11"> Equality </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-9-2" class="td11"> *[[99 99] 5 [0 1]
+                            0 1]
+                        </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-9-3" class="td11"> 479 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-9-4" class="td11"> 9.58 s </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-10-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-10-1" class="td11"> Addition </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-10-2" class="td11"> (add 2 2) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-10-3" class="td11"> 116,310 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-10-4" class="td11"> 2.33 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-11-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-11-1" class="td11"> Addition </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-11-2" class="td11"> (add 4 4) </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-11-3" class="td11"> 253,917 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-11-4" class="td11"> 5.08 ms </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-12-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-12-1" class="td11"> Slot </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-12-2" class="td11"> Depth 3 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-12-3" class="td11"> 164 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-12-4" class="td11"> 3.27 s </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-13-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-13-1" class="td11"> Slot </td>
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-13-2" class="td11"> Depth 7 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-13-3" class="td11"> 156 </td>
+                        <td style="white-space:nowrap; text-align:right;" id="TBL-6-13-4" class="td11"> 3.12 s </td>
+                    </tr>
+                    <tr class="hline" style="border-top:1px solid #000">
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                        <td>
+                            <hr />
+                        </td>
+                    </tr>
+                    <tr style="vertical-align:baseline;" id="TBL-6-14-">
+                        <td style="white-space:nowrap; text-align:left;" id="TBL-6-14-1" class="td11"> </td>
+                    </tr>
+                </table>
+            </div>
+
+
+        </figure>
+    </div>
+    <!--l. 488-->
+    <p class="noindent">The benchmark results reveal several key performance
+        characteristics of the NockPU architecture. Simple operations
+        such as equality testing complete in hundreds of cycles, while
+        complex recursive operations like the Ackermann function
+        require millions of cycles due to extensive intermediate
+        structure creation. The 1024-word memory constraint creates
+        a distinctive “step function&#x0022; behavior in the computational
+        complexity analysis: when operations exceed available
+        memory, garbage collection cycles introduce signiﬁcant
+        overhead, causing performance to degrade in discrete steps
+        rather than smooth progression.
+    </p><!--l. 491-->
+    <p class="indent"> This memory-bounded performance proﬁle is particularly
+        evident in recursive operations, where the combination of
+        exponential intermediate structure growth and periodic
+        garbage collection creates compound performance eﬀects. The
+        deterministic nature of the architecture ensures consistent
+        timing for identical operations, but the interplay between
+        memory consumption and collection cycles makes performance
+        prediction dependent on both algorithmic complexity
+        and memory utilization patterns. These characteristics
+        distinguish the NockPU’s performance proﬁle from traditional
+        architectures, where performance typically scales more
+        predictably with computational complexity.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">5.3 </span> <a id="x1-540005.3"></a>Limitations and Challenges
+    </h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">5.3.1 </span> <a id="x1-550005.3.1"></a>Memory Consumption
+        Issues</h5>
+    <!--l. 497-->
+    <p class="noindent">The most signiﬁcant limitation initially encountered was
+        excessive memory consumption due to the creation of
+        intermediate structures during reduction. Early testing
+        revealed that even moderately complex programs would
+
+
+        quickly exhaust available memory without proper memory
+        management.
+    </p><!--l. 499-->
+    <p class="indent"> For instance, a decrement operation on the number 10
+        would crash the system due to memory exhaustion. This
+        limitation led to the implementation of the Cheney-style
+        copying garbage collector described in Section 3.4.5, which
+        successfully addresses these memory management challenges
+        by reclaiming unreachable intermediate structures and
+        maintaining system stability during complex computations.
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">5.3.2 </span> <a id="x1-560005.3.2"></a>Performance
+        Bottlenecks
+    </h5>
+    <!--l. 503-->
+    <p class="noindent">Several performance bottlenecks were identiﬁed:
+    </p><!--l. 505-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-56002x1">
+            <!--l. 506-->
+            <p class="noindent"><strong>Memory Access Latency</strong>: Particularly when using
+                oﬀ-chip memory, which is signiﬁcantly slower than
+                on-chip memory.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-56004x2">
+            <!--l. 507-->
+            <p class="noindent"><strong>Sequential Reduction</strong>: The inherently sequential
+                nature of certain reduction patterns limits
+                parallelism.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-56006x3">
+            <!--l. 508-->
+            <p class="noindent"><strong>Tree Traversal Overhead</strong>: The
+                need to navigate complex tree structures introduces
+                overhead compared to direct operations.</p>
+        </li>
+    </ol>
+
+
+
+    <h5 class="subsubsectionHead"><span class="titlemark">5.3.3 </span> <a id="x1-570005.3.3"></a>Conditional Operation
+        Overhead</h5>
+    <!--l. 513-->
+    <p class="noindent">The implementation of the conditional operation *[a 6 b c
+        d] proved particularly ineﬃcient due to its expression
+        as a complex tree transformation rather than a simple
+        branch. This approach, while semantically pure, introduces
+        signiﬁcant overhead compared to traditional conditional
+        execution.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">6 </span> <a id="x1-580006"></a>Future Work</h3>
+
+    <h4 class="subsectionHead"><span class="titlemark">6.1 </span> <a id="x1-590006.1"></a>Arbitrary-size Atom Support
+    </h4>
+    <!--l. 519-->
+    <p class="noindent">While the current implementation supports 28-bit atoms,
+        supporting arbitrarily large atoms is necessary for full
+        Nock compatibility. The proposed implementation uses a
+        structured approach where large atoms are represented as
+        follows:
+    </p>
+    <ul class="itemize1">
+        <li class="itemize">
+            <!--l. 522-->
+            <p class="noindent"><strong>Header Cell</strong>: The head contains the length of the
+                large atom, while the tail serves as workspace for the
+                interpreter.
+            </p>
+        </li>
+        <li class="itemize">
+            <!--l. 523-->
+            <p class="noindent"><strong>Data Storage</strong>: The address immediately following
+                the header contains the ﬁrst 64 bits of the large atom
+                in little-endian format, with subsequent addresses
+                containing additional 64-bit segments as needed.</p>
+        </li>
+    </ul>
+
+
+    <!--l. 526-->
+    <p class="noindent">This design requires speciﬁc modiﬁcations to atom-manipulating
+        operations:
+    </p><!--l. 529-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-59002x1">
+            <!--l. 530-->
+            <p class="noindent"><strong>Increment Operation</strong>: Must reallocate the entire
+                large atom and perform increment with carry
+                propagation across all 64-bit segments, ensuring
+                proper handling of size changes when carries extend
+                the atom length.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-59004x2">
+            <!--l. 531-->
+            <p class="noindent"><strong>Comparison Operations</strong>:
+                Equality testing must traverse the complete atom
+                representation, comparing both length and all data
+                segments to ensure accurate results.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-59006x3">
+            <!--l. 532-->
+            <p class="noindent"><strong>Garbage Collection</strong>: The existing Cheney-style
+                collector can handle large atoms naturally by copying
+                the header and all associated data segments during
+                the copying phase, with no fundamental changes to
+                the collection algorithm.</p>
+        </li>
+    </ol>
+    <!--l. 535-->
+    <p class="noindent">The memory allocation system remains unchanged, as large
+        atoms are allocated as contiguous blocks following the header
+        cell.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">6.2 </span> <a id="x1-600006.2"></a>Hardware Jetting Strategy
+    </h4>
+
+
+    <!--l. 540-->
+    <p class="noindent">“Jetting&#x0022; refers to the replacement of ineﬃcient Nock code
+        patterns with optimized implementations. A promising
+        approach for hardware jetting involves using a secondary
+        processor that:
+    </p><!--l. 542-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-60002x1">
+            <!--l. 543-->
+            <p class="noindent">Detects speciﬁc patterns in the Nock code
+            </p>
+        </li>
+        <li class="enumerate" id="x1-60004x2">
+            <!--l. 544-->
+            <p class="noindent">Executes optimized hardware implementations
+            </p>
+        </li>
+        <li class="enumerate" id="x1-60006x3">
+            <!--l. 545-->
+            <p class="noindent">Returns results to the main NockPU</p>
+        </li>
+    </ol>
+    <!--l. 548-->
+    <p class="noindent">This hybrid approach could dramatically improve performance
+        for common operations while maintaining semantic equivalence
+        with pure Nock.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">7 </span> <a id="x1-610007"></a>Discussion and Implications</h3>
+
+    <h4 class="subsectionHead"><span class="titlemark">7.1 </span> <a id="x1-620007.1"></a>Theoretical Implications for
+        Computer Architecture</h4>
+    <!--l. 555-->
+    <p class="noindent">The NockPU project provides insights into the relationship
+        between computation models and hardware architecture.
+        Traditional von Neumann architectures are optimized for
+        imperative, state-based computation, while the NockPU
+        represents an approach tailored for functional, stateless
+        computation.
+
+
+    </p><!--l. 557-->
+    <p class="indent"> This work suggests that specialized architectures for
+        speciﬁc computational paradigms may oﬀer advantages over
+        general-purpose solutions in certain contexts. The NockPU’s
+        design choices, such as the stackless traversal mechanism and
+        integrated garbage collection, illustrate how hardware can be
+        adapted to better support the patterns inherent in combinator
+        reduction.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">7.2 </span> <a id="x1-630007.2"></a>Practical Applications</h4>
+
+    <h5 class="subsubsectionHead"><span class="titlemark">7.2.1 </span> <a id="x1-640007.2.1"></a>Low-power Computing
+    </h5>
+    <!--l. 563-->
+    <p class="noindent">The deterministic nature of Nock, combined with the potential
+        power eﬃciency of specialized hardware, suggests applications
+        in low-power computing environments where predictability is
+        valued over raw performance.
+    </p><!--l. 565-->
+    <p class="indent"> Preliminary analysis suggests that a dedicated NockPU
+        could oﬀer signiﬁcant power eﬃciency advantages over
+        general-purpose <span class="small-caps">cpu</span>s running Nock interpreters. The
+        specialized nature of the architecture eliminates much of the
+        overhead associated with general-purpose instruction
+        decoding, branch prediction, and speculative execution.
+        Additionally, the deterministic execution model prevents the
+        power consumption variability that characterizes modern
+        <span class="small-caps">cpu</span>s with dynamic frequency scaling and complex power
+        management.
+    </p><!--l. 567-->
+    <p class="indent"> Future work should include comprehensive power analysis
+        and optimization of the architecture for low-power operation,
+        particularly focusing on minimizing memory access energy
+        and optimizing the garbage collection process for power
+        eﬃciency.
+
+
+
+    </p>
+    <h5 class="subsubsectionHead"><span class="titlemark">7.2.2 </span> <a id="x1-650007.2.2"></a>Veriﬁable Computing
+    </h5>
+    <!--l. 571-->
+    <p class="noindent">The simplicity and determinism of the NockPU architecture
+        could make it easier to formally verify than complex
+        general-purpose <span class="small-caps">cpu</span>s, opening possibilities for applications
+        requiring high assurance of correctness.
+    </p><!--l. 573-->
+    <p class="indent"> The limited instruction set, deterministic execution model,
+        and absence of speculative execution or complex branch
+        prediction reduce the veriﬁcation burden compared to
+        modern processors. Applications in safety-critical systems,
+        cryptographic processing, or environments requiring audit
+        trails could beneﬁt from this simpliﬁed veriﬁcation process.
+        However, the practical deployment of such systems would need
+        to balance the veriﬁcation advantages against the performance
+        limitations inherent in the current implementation.
+
+    </p>
+    <h4 class="subsectionHead"><span class="titlemark">7.3 </span> <a id="x1-660007.3"></a>Comparison with Traditional
+        Architectures</h4>
+    <!--l. 577-->
+    <p class="noindent">When compared to traditional <span class="small-caps">cpu</span> architectures, the NockPU
+        reveals fundamental tradeoﬀs:
+    </p><!--l. 579-->
+    <p class="indent">
+    </p>
+    <ol class="enumerate1">
+        <li class="enumerate" id="x1-66002x1">
+            <!--l. 580-->
+            <p class="noindent"><strong>Performance vs. Simplicity</strong>: The NockPU
+                sacriﬁces raw performance for semantic clarity and
+                simplicity.
+            </p>
+        </li>
+        <li class="enumerate" id="x1-66004x2">
+            <!--l. 581-->
+            <p class="noindent"><strong>Flexibility vs. Specialization</strong>: General-purpose
+                <span class="small-caps">cpu</span>s oﬀer ﬂexibility across computing paradigms,
+                while the NockPU is specialized for combinator
+                reduction.
+
+
+            </p>
+        </li>
+        <li class="enumerate" id="x1-66006x3">
+            <!--l. 582-->
+            <p class="noindent"><strong>Memory Eﬃciency vs. Semantic Purity</strong>: The
+                NockPU’s approach to computation requires more
+                memory operations than optimized imperative code.</p>
+        </li>
+    </ol>
+    <!--l. 585-->
+    <p class="noindent">These tradeoﬀs suggest that the NockPU and similar
+        architectures may ﬁnd their niche in specialized applications
+        rather than general-purpose computing.
+
+    </p>
+    <h3 class="sectionHead"><span class="titlemark">8 </span> <a id="x1-670008"></a>Conclusion</h3>
+    <!--l. 590-->
+    <p class="noindent">The NockPU project has successfully demonstrated the
+        feasibility of implementing the Nock combinator calculus
+        directly in hardware, providing concrete architectural solutions
+        for functional computation while identifying the fundamental
+        challenges inherent to combinator reduction.
+    </p><!--l. 592-->
+    <p class="indent"> This work presents a complete hardware implementation of
+        Nock using established techniques adapted for combinator
+        reduction. The stackless tree traversal mechanism enables
+        eﬃcient navigation of Nock’s recursive tree structures
+        without external stack management. The cell-based memory
+        representation optimizes 64-bit words for Nock’s binary tree
+        structures, with 28-bit nouns and 8 tag bits providing eﬃcient
+        metadata management. The integration of Cheney-style
+        copying garbage collection directly into the processor
+        architecture demonstrates that memory management can be
+        successfully embedded as a hardware feature rather than
+        remaining a software concern.
+    </p><!--l. 594-->
+    <p class="indent"> The research identiﬁes two primary challenges to eﬃcient
+        hardware Nock execution: excessive memory consumption due
+        to intermediate structure creation during combinator
+        reduction, and computational complexity arising from
+        the graph transformation approach required by Nock’s
+        semantic model. The ﬁrst challenge is successfully addressed
+
+
+        through the implemented garbage collector, which prevents
+        system crashes and maintains stability during complex
+        computations. The second remains an area for future
+        optimization.
+    </p><!--l. 596-->
+    <p class="indent"> The implementation demonstrates that all twelve Nock
+        operations can be realized in hardware through graph
+        reduction techniques, establishing a complete foundation for
+        Nock computation. While computational eﬃciency remains
+        challenging, the core architectural approach—particularly the
+        integration of garbage collection and cell-based memory
+        management—provides a viable foundation for specialized
+        functional computation that oﬀers advantages in determinism
+        and semantic clarity over general-purpose architectures.
+        <img src="ustj-logo-.png" alt="PIC" />
+
+    </p>
+    <h3 class="likesectionHead"><a id="x1-68000"></a>Acknowledgments</h3>
+    <!--l. 600-->
+    <p class="noindent">The author would like to thank <code>~master-morzod</code> and
+        <code>~fodwyt-ragful</code> for helping with many technical questions and
+        <code>~mister-todteg</code> for funding this development.
+
+    </p>
+    <h3 class="sectionHead"><a id="x1-69000"></a>References</h3>
+    <!--l. 603-->
+    <p class="noindent">
+    </p>
+    <dl class="thebibliography">
+        <dt id="X0-Burrows2009" class="thebibliography">
+        </dt>
+        <dd id="bib-1" class="thebibliography">
+
+
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Burrows2009"></a>Burrows, E.
+                (2009).
+                “A
+                Combinator
+                Processor.”
+                In:
+                <span class="ec-lmri-10">Part</span>
+                <span class="ec-lmri-10">II</span>
+                <span class="ec-lmri-10">Computer</span>
+                <span class="ec-lmri-10">Science</span>
+                <span class="ec-lmri-10">Tripos</span>.
+            </p>
+        </dd>
+        <dt id="X0-Clark1976" class="thebibliography">
+        </dt>
+        <dd id="bib-2" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Clark1976"></a>Clark, Douglas W.
+                (1976).
+                “An
+                Eﬃcient
+                List-Moving
+                Algorithm
+                Using
+                Constant
+                Workspace.”
+                In:
+                <span class="ec-lmri-10">Communications</span>
+                <span class="ec-lmri-10">of</span>
+                <span class="ec-lmri-10">the</span>
+                <span class="small-caps">acm</span>
+                19.6,
+                pp. 352–354.
+                <span class="small-caps">doi</span>:
+                <a href="https://doi.org/10.1145/360238.360249">10.1145/360238.360249</a>.
+            </p>
+        </dd>
+        <dt id="X0-Clarke1980" class="thebibliography">
+        </dt>
+        <dd id="bib-3" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Clarke1980"></a>Clarke, T. J. W.
+                et al.
+                (1980).
+                “<span class="small-caps">skim</span>—The
+
+
+                S,
+                K,
+                I
+                Reduction
+                Machine.”
+                In:
+                <span class="ec-lmri-10">Proceedings</span>
+                <span class="ec-lmri-10">of</span>
+                <span class="ec-lmri-10">the</span>
+                <span class="ec-lmri-10">1980</span>
+                <span class="small-caps">acm</span>
+                <span class="ec-lmri-10">Conference</span>
+                <span class="ec-lmri-10">on</span>
+                <span class="small-caps">lisp</span>
+                <span class="ec-lmri-10">and</span>
+                <span class="ec-lmri-10">Functional</span>
+                <span class="ec-lmri-10">Programming</span>.
+                New
+                York
+                City,
+                NY:
+                <span class="small-caps">acm</span>,
+                pp. 128–135.
+                <span class="small-caps">doi</span>:
+                <a href="https://doi.org/10.1145/800087.802799">10.1145/800087.802799</a>.
+            </p>
+        </dd>
+        <dt id="X0-Naylor2009" class="thebibliography">
+        </dt>
+        <dd id="bib-4" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Naylor2009"></a>Naylor, Matthew
+                (2009).
+                “Hardware-Assisted
+                and
+                Target-Directed
+                Evaluation
+                of
+                Functional
+                Programs.”
+                PhD thesis.
+                York,
+
+
+                United
+                Kingdom:
+                University
+                of
+                York.
+            </p>
+        </dd>
+        <dt id="X0-Naylor2008" class="thebibliography">
+        </dt>
+        <dd id="bib-5" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Naylor2008"></a>Naylor, Matthew
+                and
+                Colin Runciman
+                (2008).
+                “The
+                Reduceron:
+                Widening
+                the
+                von
+                Neumann
+                Bottleneck
+                for
+                Graph
+                Reduction
+                Using
+                an
+                <span class="small-caps">fpga</span>.”
+                In:
+                <span class="ec-lmri-10">Implementation</span>
+                <span class="ec-lmri-10">and</span>
+                <span class="ec-lmri-10">Application</span>
+                <span class="ec-lmri-10">of</span>
+                <span class="ec-lmri-10">Functional</span>
+                <span class="ec-lmri-10">Languages</span>.
+                Vol. 5083.
+                Lecture
+                Notes
+                in
+                Computer
+                Science.
+
+
+                Springer,
+                pp. 129–146.
+            </p>
+        </dd>
+        <dt id="X0-Norman1984" class="thebibliography">
+        </dt>
+        <dd id="bib-6" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Norman1984"></a>Norman, A. C.,
+                T. J. W. Clarke,
+                and
+                W. R. Stoye
+                (1984).
+                “Some
+                Practical
+                Methods
+                for
+                Rapid
+                Combinator
+                Reduction.”
+                In:
+                <span class="ec-lmri-10">Proceedings</span>
+                <span class="ec-lmri-10">of</span>
+                <span class="ec-lmri-10">the</span>
+                <span class="ec-lmri-10">1984</span>
+                <span class="small-caps">acm</span>
+                <span class="ec-lmri-10">Symposium</span>
+                <span class="ec-lmri-10">on</span>
+                <span class="small-caps">lisp</span>
+                <span class="ec-lmri-10">and</span>
+                <span class="ec-lmri-10">Functional</span>
+                <span class="ec-lmri-10">Programming</span>.
+                New
+                York
+                City,
+                NY:
+                <span class="small-caps">acm</span>,
+                pp. 159–166.
+                <span class="small-caps">doi</span>:
+                <a href="https://doi.org/10.1145/800055.802036">10.1145/800055.802036</a>.
+
+
+            </p>
+        </dd>
+        <dt id="X0-Nock4K" class="thebibliography">
+        </dt>
+        <dd id="bib-7" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Nock4K"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+                (2018)
+                “Nock
+                4K”.
+                <span class="small-caps">url</span>:
+                <a href="https://docs.urbit.org/language/nock/reference/definition"
+                    class="url">https://docs.urbit.org/language/nock/reference/deﬁnition</a>
+                (visited
+                on
+                ~2024.2.20).
+            </p>
+        </dd>
+        <dt id="X0-Whitepaper" class="thebibliography">
+        </dt>
+        <dd id="bib-8" class="thebibliography">
+            <!--l. 603-->
+            <p class="noindent"><a id="cite.0@Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+                et al.
+                (2016).
+                <span class="ec-lmri-10">Urbit:</span>
+                <span class="ec-lmri-10">A</span>
+                <span class="ec-lmri-10">Solid-State</span>
+                <span class="ec-lmri-10">Interpreter</span>.
+                Whitepaper.
+                Tlon
+                Corporation.
+                <span class="small-caps">url</span>:
+                <a href="https://media.urbit.org/whitepaper.pdf" class="url">https://media.urbit.org/whitepaper.pdf</a>
+                (visited
+                on
+                ~2024.1.25).
+            </p>
+        </dd>
+    </dl>
+</body>
+
+</html>
