@@ -1037,8 +1037,9 @@ div.abstract {width:100%;}
 .abstracttitle{text-align:center;margin-bottom:1em;}
 figure.float, div.figure {margin-left: auto; margin-right: auto;}
 figure.figure {text-align:center;}
-figcaption.caption {text-indent:-2em; margin-left:3em; margin-right:1em; text-align:center;}
+figcaption.caption {text-indent:-2em; margin-left:3em; margin-right:1em; text-align:left;}
 figcaption.caption span.id{font-weight: bold; white-space: nowrap; }
+div.caption, figcaption.caption { font-size: 0.9em; }
 p + figcaption, img + figcaption{margin-top: 1em;}
 .abstract{margin:1em;}
 .equation td{text-align:center; }
