@@ -1,0 +1,2793 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+
+<head>
+   <title>Notes on Vases</title>
+   <meta charset="utf-8" />
+   <meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+   <meta name="viewport" content="width=device-width,initial-scale=1" />
+   <link rel="stylesheet" type="text/css" href="/latex.css" />
+   <meta name="src" content="mss.tex" />
+   <script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+   <script type="text/javascript" async="async" id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head>
+
+<body>
+   <div class="maketitle">
+      <h2 class="titleHead">Notes on Vases</h2>
+      <div class="author"><span class="ec-lmbx-12">N. E. Davis</span><span class="ec-lmbx-12"> </span><span
+            class="ec-lmbx-12"><code>~lagrev-nocfep</code></span>
+         <br /> <span class="ec-lmbx-12">Zorp Corp</span>
+      </div><br />
+      <div class="date"></div>
+   </div>
+   <section role="doc-abstract" class="abstract">
+      <h3 class="abstracttitle">
+         <span class="ec-lmbx-9">Abstract</span>
+      </h3>
+      <!--l. 41-->
+      <p class="noindent"><span class="ec-lmr-9">This paper explores the concept of “vases&#x0022; in</span>
+         <span class="ec-lmr-9">the Hoon programming language, an approach</span>
+         <span class="ec-lmr-9">to managing type dynamically in a static</span>
+         <span class="ec-lmr-9">environment. Vases ﬁnd applications throughout</span>
+         <span class="ec-lmr-9">Nock solid-state systems, including compilation,</span>
+         <span class="ec-lmr-9">metaprogramming, and dynamic code evaluation.</span>
+         <span class="ec-lmr-9">We will explore how vases are constructed,</span>
+         <span class="ec-lmr-9">manipulated, and utilized in the context of</span>
+         <span class="ec-lmr-9">Nock and Hoon, providing a foundation for</span>
+         <span class="ec-lmr-9">understanding their role in Urbit’s programming</span>
+         <span class="ec-lmr-9">ecosystem.</span>
+      </p>
+   </section>
+
+
+
+   <h3 class="likesectionHead"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+      <span class="sectionToc">1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+      <br /> <span class="sectionToc">2 <a href="#x1-30002" id="QQ2-1-3">Hoon Compilation in a Nutshell</a></span>
+      <br /> <span class="sectionToc">3 <a href="#x1-60003" id="QQ2-1-6">Vases</a></span>
+      <br /> <span class="subsectionToc">3.1 <a href="#x1-70003.1" id="QQ2-1-7">Hoon Type</a></span>
+      <br /> <span class="subsectionToc">3.2 <a href="#x1-80003.2" id="QQ2-1-8">Producing Vases</a></span>
+      <br /> <span class="subsectionToc">3.3 <a href="#x1-90003.3" id="QQ2-1-9">Eliminating Vases</a></span>
+      <br /> <span class="sectionToc">4 <a href="#x1-100004" id="QQ2-1-10">Vase Algebra</a></span>
+      <br /> <span class="subsectionToc">4.1 <a href="#x1-110004.1" id="QQ2-1-11"><code
+               class="lstinline"><span style="color:#000000">+slop</span></code></a></span>
+      <br /> <span class="subsectionToc">4.2 <a href="#x1-120004.2" id="QQ2-1-12"><code
+               class="lstinline"><span style="color:#000000">+slap</span></code></a></span>
+      <br /> <span class="subsectionToc">4.3 <a href="#x1-130004.3" id="QQ2-1-13">Supplemental Operators</a></span>
+      <br /> <span class="sectionToc">5 <a href="#x1-140005" id="QQ2-1-14">Applications of Vase Mode</a></span>
+      <br /> <span class="subsectionToc">5.1 <a href="#x1-150005.1" id="QQ2-1-15">Type Manipulation</a></span>
+      <br /> <span class="subsectionToc">5.2 <a href="#x1-160005.2" id="QQ2-1-16">Code Evaluation</a></span>
+      <br /> <span class="subsectionToc">5.3 <a href="#x1-170005.3" id="QQ2-1-17">Metacircular Interpretation</a></span>
+      <br /> <span class="subsectionToc">5.4 <a href="#x1-180005.4" id="QQ2-1-18">Persistent Code Artifacts</a></span>
+      <br /> <span class="subsectionToc">5.5 <a href="#x1-190005.5" id="QQ2-1-19">System Upgrades</a></span>
+      <br /> <span class="sectionToc">6 <a href="#x1-200006" id="QQ2-1-20">Beyond the Vase Algebra</a></span>
+      <br /> <span class="subsectionToc">6.1 <a href="#x1-210006.1" id="QQ2-1-21">Comparisons</a></span>
+      <br /> <span class="subsubsectionToc">6.1.1 <a href="#x1-220006.1.1" id="QQ2-1-22">Python/CPython</a></span>
+      <br /> <span class="subsubsectionToc">6.1.2 <a href="#x1-230006.1.2" id="QQ2-1-23">Assembly Language</a></span>
+      <br /> <span class="subsubsectionToc">6.1.3 <a href="#x1-240006.1.3" id="QQ2-1-24">Lisp Quote</a></span>
+      <br /> <span class="subsubsectionToc">6.1.4 <a href="#x1-250006.1.4" id="QQ2-1-25">Haskell Dynamic</a></span>
+      <br /> <span class="subsubsectionToc">6.1.5 <a href="#x1-260006.1.5" id="QQ2-1-26">Untyped Virtual
+            Machines</a></span>
+      <br /> <span class="sectionToc">7 <a href="#x1-270007" id="QQ2-1-27">Conclusion</a></span>
+      <br /> <span class="sectionToc"><a href="#x1-28000" id="QQ2-1-28">References</a></span>
+   </div>
+
+   <h3 class="sectionHead"><span class="titlemark">1 </span> <a id="x1-20001"></a>Introduction</h3>
+   <!--l. 53-->
+   <p class="noindent">Nock is homoiconic and only recognizes natural numbers or
+      “atoms” (nonnegative integers, <span class="mathjax-inline">\(\mathbb {Z}^{*}\)</span>) and pairs or “cells”, as
+      values. Although Nock is untyped, it is desirable to build
+      typed languages targeting this instruction set architecture.
+
+
+   </p><!--l. 55-->
+   <p class="indent"> The Hoon programming language solves this by using a
+      pair of a type description and a noun, or raw Nock value.
+      In some ways like a macro over Nock, Hoon introduces
+      static typing (thus extending from Nock’s exclusive use of
+      natural numbers) and other design patterns convenient to
+      programmers.<span class="footnote-mark"><a href="#fn1x0"><sup
+               class="textsuperscript">1</sup></a></span><a id="x1-2001f1"></a>
+      Most of the time, developers work in “static Hoon”, which
+      maintains guard rails and is easier to reason about. However,
+      a more ﬂexible and powerful modality is available.
+      The type description, or type of the subject, contains
+      information like variable names, variable types, aliases,
+      and the overall structure of the execution environment.
+      Essentially, it acts as a strictly deﬁned metadata reference
+      set for the associated Nock value and its execution
+      environment. We call such a pair of type and value a
+      “vase”.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a
+         id="x1-2003f2"></a>
+      Most commonly used in building code and in manipulating
+      vanes, vases permit the developer to edit the type and the
+      value directly. Essentially, a value can be lifted from a static
+      Hoon context into a dynamic vase context, then reduced back
+      to static Hoon or untyped Nock.
+   </p><!--l. 58-->
+   <p class="indent"> Vase mode, then, describes a design pattern for lifting
+      statically-typed values from their normal compile-time world
+      into a dynamically-typed operating environment, which
+      is then used to produced valid and validated Nock <span class="small-caps">isa</span>
+      code while enforcing the Hoon language type constraints.
+      Vase mode is used in building compilers, interpreters,
+      and code imports. Since code is transmitted as a noun
+      value to be built and executed on the receiver’s side,
+      this also aﬀects hotloading code and system upgrades. A
+      vase algebra describes how to combine the type subject
+      information and the associated value information, as in an
+
+
+      import or a <span class="small-caps">repl</span>. This lets Hoon have human-legible
+      aﬀordances in type and validation, while retaining a simple
+      target <span class="small-caps">isa</span> for execution, code proving, and optimized
+      execution.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a
+         id="x1-2005f3"></a>
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">2 </span> <a id="x1-30002"></a>Hoon Compilation in a Nutshell</h3>
+   <!--l. 62-->
+   <p class="noindent">Before we can really grasp the utility of vase mode, we require
+      a brief diversion into how Hoon code is actually compiled and
+      built into Nock. That is, given a Hoon expression, how do we
+      get it into a form that can be executed by the Nock virtual
+      machine? A number of convenience functions wrap various
+      parts of the Hoon compiler, which primarily consists of <code
+         class="lstinline"><span style="color:#000000">+vast</span></code>
+      and <code class="lstinline"><span style="color:#000000">+ut</span></code>.
+
+   </p>
+   <!--l. 64-->
+   <p class="noindent"><span class="paragraphHead"><a id="x1-4000"></a><span class="ec-lmbx-10">Text</span><span
+            class="ec-lmbx-10">→Nock</span></span>
+      . To evaluate a string containing Hoon directly,
+      one merely needs to <code class="lstinline"><span style="color:#000000">+make</span></code> the <code
+         class="lstinline"><span style="color:#000000">cord</span></code> (text
+      atom).<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a
+         id="x1-4001f4"></a>
+   </p>
+   <!--l. 66-->
+   <pre class="lstlisting" id="listing-7"><span class="label"><a  id="x1-4003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">make</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4004r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span> 
+<span class="label"><a  id="x1-4005r3"></a></span> 
+<span class="label"><a  id="x1-4006r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">make</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">=+</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4007r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span></pre>
+   <!--l. 74-->
+   <p class="noindent">Since <code class="lstinline"><span style="color:#000000">+make</span></code> assumes no subject,
+      all information must be
+      provided in the expression. Furthermore, although not
+      present explicitly, <code class="lstinline"><span style="color:#000000">+make</span></code> utilizes an internal
+      <code class="lstinline"><span style="color:#000000">$type</span></code> of
+      <code class="lstinline"><span style="color:#000000">%noun</span></code>.
+
+
+   </p>
+   <!--l. 77-->
+   <pre class="lstlisting" id="listing-12"><span class="label"><a  id="x1-4008r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">make</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4009r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-4010r3"></a></span> 
+<span class="label"><a  id="x1-4011r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">.*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">make</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">-</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-4012r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span></pre>
+
+   <!--l. 85-->
+   <p class="noindent"><span class="paragraphHead"><a id="x1-5000"></a><span class="ec-lmbx-10">Text</span><span
+            class="ec-lmbx-10">→AST</span><span class="ec-lmbx-10">→Nock</span></span>
+      . The simpliﬁed high-level lifecycle of Hoon code sees it go from
+      text to an abstract syntax tree (<span class="small-caps">ast</span>) and thence to executable
+      Nock.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a
+         id="x1-5001f5"></a>
+   </p><!--l. 87-->
+   <p class="indent"> To convert Hoon text from a <code class="lstinline"><span style="color:#000000">cord</span></code>
+      to an <span class="small-caps">ast</span>, use <code
+         class="lstinline"><span style="color:#000000">+ream</span></code>.
+      The <span class="small-caps">ast</span> is a tree of Hoon expressions marked by rune and
+      components such as wings (lookup names in the subject) and
+      atoms or cells.
+   </p>
+   <!--l. 89-->
+   <pre class="lstlisting" id="listing-15"><span class="label"><a  id="x1-5003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5004r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cncl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%wing</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%add</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5005r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span> 
+<span class="label"><a  id="x1-5006r4"></a></span> 
+<span class="label"><a  id="x1-5007r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">-:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(5)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5008r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%tsgl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cnts</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.y</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5009r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%zpgr</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span></pre>
+   <!--l. 99-->
+   <p class="noindent">A Hoon <span class="small-caps">ast</span> is properly a <code
+         class="lstinline"><span style="color:#000000">$hoon</span></code>, which is a complicated type union
+      over all of the kinds of things that Hoon knows something to be able
+      to be.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a
+         id="x1-5010f6"></a>
+      Sugar runes can be represented simply or reparsed by
+      <code class="lstinline"><span style="color:#000000">+open:ap</span></code> into a more fundamental form. However,
+      at this
+      point no desugaring has taken place; equivalent forms may
+      still have diﬀerent <span class="small-caps">ast</span> representations as <code
+         class="lstinline"><span style="color:#000000">$hoon</span></code>:
+   </p>
+   <!--l. 102-->
+   <pre class="lstlisting" id="listing-19"><span class="label"><a  id="x1-5012r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5013r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%clsg</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5014r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span> 
+<span class="label"><a  id="x1-5015r4"></a></span> 
+<span class="label"><a  id="x1-5016r5"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5017r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cltr</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-5018r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%bust</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%null</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span></pre>
+
+   <!--l. 112-->
+   <p class="noindent">Hoon supplements “pure” values with metadata to establish
+      context for the values and enforce its notion of type.
+
+
+   </p><!--l. 115-->
+   <p class="indent"> Given a reduced Hoon <span class="small-caps">ast</span>, <code
+         class="lstinline"><span style="color:#000000">+mint:ut</span></code> function
+      compiles it into Nock code. <code class="lstinline"><span style="color:#000000">+mint:ut</span></code> parses
+      from a Hoon <span class="small-caps">ast</span> into a pair of the type and the
+      Nock.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a
+         id="x1-5019f7"></a>
+   </p>
+   <!--l. 117-->
+   <pre class="lstlisting" id="listing-22"><span class="label"><a  id="x1-5021r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">mint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ut</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span> 
+<span class="label"><a  id="x1-5022r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]]</span></span></pre>
+
+   <!--l. 122-->
+   <p class="noindent">While there is much to say about <code
+         class="lstinline"><span style="color:#000000">+mint</span></code>, for our purposes we simply
+      note that it operates on each tag in an <span class="small-caps">ast</span> to convert it recursively to
+      <code class="lstinline"><span style="color:#000000">$nock</span></code>.<span class="footnote-mark"><a
+            href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a id="x1-5023f8"></a>
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">3 </span> <a id="x1-60003"></a>Vases</h3>
+   <!--l. 127-->
+   <p class="noindent">A <code class="lstinline"><span style="color:#000000">$vase</span></code> is a pair of <code
+         class="lstinline"><span style="color:#000000">$type</span></code> and value, where <code
+         class="lstinline"><span style="color:#000000">$type</span></code> deﬁnes
+      the Hoon type set and the tail contains the actual data. (Vases
+      could be treated more generally than simply Hoon types, but
+      in practice are used only with Hoon, so the type data
+      structure will become relevant.)
+   </p><!--l. 129-->
+   <p class="indent"> Vases received bare mention in the 2016 Urbit whitepaper
+      (<a id="x1-6001"></a><code>~sorreg-namtyv</code> et al., 2016). They were noted merely
+      as having the property of allowing a statically typed
+      compiler to operate on dynamically typed runtime code—and
+      thus, to reload portions of the kernel from source while
+      running.
+   </p><!--l. 131-->
+   <p class="indent"> However, vases are critically important to practical code
+      composition and execution on Urbit and NockApp as
+      functional-as-in-paradigm execution environments:
+
+
+   </p><!--l. 133-->
+   <p class="indent">
+   </p>
+   <blockquote class="quote">
+      <!--l. 134-->
+      <p class="noindent">Everything about a scope, including name
+         bindings, aliases, and docstrings, is stored
+         in the subject’s type. This allows Hoon’s
+         compilation discipline to be similarly minimal:
+         the compiler is a function from subject type
+         and Hoon source to product type and compiled
+         Nock. Running this Nock against a value of the
+         subject type produces a vase of the result. It’s
+         hard to imagine a more streamlined formalism
+         for compilation. (<a id="x1-6002"></a><code>~rovyns-ricfer</code>, 2019)</p>
+   </blockquote>
+   <!--l. 137-->
+   <p class="noindent">That is, vases enable the end developer to work at a higher
+      level of abstraction than raw typed code and data would itself
+      make straightforward in a statically typed functional
+      programming environment.
+   </p><!--l. 140-->
+   <p class="indent"> Hoon’s type information captures both the set of nouns
+      valid for a particular piece of data and the subject, or
+      environment to which the value has access. For instance, a
+      <code class="lstinline"><span style="color:#000000">%face</span></code> is a lookup index into the subject for a
+      value with an
+      associated name.
+   </p><!--l. 142-->
+   <p class="indent"> Vases are frequently used to compile and execute Hoon
+      code, but are also used to store typed data. Since Nock is
+      ultimately homoiconic, any arbitrary noun may be either
+      executable code or static data. A vase preserves the type
+      information associated with the noun, making it possible to
+      reconstruct it in regular (static) Hoon. For instance, as a
+      security mechanism, “live code” is never transmitted over the
+      wire between machines. Instead, the type and value are
+      sent, and the recipient compiles the noun into executable
+      code.
+   </p><!--l. 144-->
+   <p class="indent"> What vases permit over raw Nock manipulations therefore
+      includes:
+   </p><!--l. 146-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+
+
+      <li class="enumerate" id="x1-6004x1">
+         <!--l. 147-->
+         <p class="noindent">allowing types to be straightforwardly combined
+         </p>
+      </li>
+      <li class="enumerate" id="x1-6006x2">
+         <!--l. 148-->
+         <p class="noindent">permitting code evaluation (Lisp <code
+               class="lstinline"><span style="color:#000000">eval</span></code>)
+         </p>
+      </li>
+      <li class="enumerate" id="x1-6008x3">
+         <!--l. 149-->
+         <p class="noindent">facilitating metacircular interpretation
+         </p>
+      </li>
+      <li class="enumerate" id="x1-6010x4">
+         <!--l. 150-->
+         <p class="noindent">managing persistent code artifacts
+         </p>
+      </li>
+      <li class="enumerate" id="x1-6012x5">
+         <!--l. 151-->
+         <p class="noindent">building and running system upgrades while running
+            live (i.e. hotswapping code)</p>
+      </li>
+   </ol>
+   <!--l. 154-->
+   <p class="noindent">Urbit’s application architecture has a persistent solid-state
+      kernel which runs user applications in a sort of sandbox. They
+      cannot use vase mode directly, but they are built and modiﬁed
+      using vase mode. In particular, library imports and the <span class="small-caps">repl</span>
+      interface both use vase mode extensively.
+   </p><!--l. 157-->
+   <p class="indent"> Likewise, NockApp supplies a kernel wrapping specialized
+      I/O drivers for the executable Nock, produced by Hoon or
+      Jock. Vases are generally used for building code sent as nouns
+      over the wire and in the compilers.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">3.1 </span> <a id="x1-70003.1"></a>Hoon Type</h4>
+   <!--l. 161-->
+   <p class="noindent">The formal deﬁnitions of <code class="lstinline"><span style="color:#000000">$vase</span></code>
+      and <code class="lstinline"><span style="color:#000000">$type</span></code> are as follows:
+
+
+   </p>
+   <!--l. 163-->
+   <pre class="lstlisting" id="listing-32"><span class="label"><a  id="x1-7001r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=type</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">type</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span> 
+<span class="label"><a  id="x1-7003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$?</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span> 
+<span class="label"><a  id="x1-7004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%void</span></span> 
+<span class="label"><a  id="x1-7005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-7006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=term</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=type</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=type</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7008r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%core</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=type</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=coil</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7009r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%face</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">term</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tune</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=type</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7010r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%fork</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">set</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">type</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7011r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%hint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">type</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">note</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=type</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7012r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%hold</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=type</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=hoon</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7013r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 180-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%noun</span></code> is the superset of
+            all nouns.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 181-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%void</span></code> is the empty noun,
+            but won’t occur in results
+            (i.e. a compiler aﬀordance).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 182-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%atom</span></code> spans the set of
+            all atoms.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 183-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%cell</span></code> contains ordered
+            pairs.</p>
+      </li>
+   </ul>
+   <!--l. 186-->
+   <p class="noindent">The other types are more complex:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 190-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%core</span></code> is the descriptor
+            type for a core. Besides the
+            <code class="lstinline"><span style="color:#000000">$type</span></code>, it uses a <code
+               class="lstinline"><span style="color:#000000">$coil</span></code>, which is a tuple of variance
+            information, context, and chapters (limbs).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 191-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%face</span></code> spans the same set
+            as nouns but includes a
+            face.
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 192-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%fork</span></code> is a union, or
+            choice over options.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 193-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%hint</span></code> is an annotation
+            for the compiler (Nock
+            opcode 11).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 194-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">%hold</span></code> types are lazily
+            evaluated, such as a recursive
+            type (like the <code class="lstinline"><span style="color:#000000">+list</span></code> mold builder). </p>
+         <ul class="itemize2">
+            <li class="itemize">
+               <!--l. 196-->
+               <p class="noindent"><code class="lstinline"><span style="color:#000000">%hold</span></code> types are why
+                  the compiler can have
+                  trouble with lists at runtime, such as needing
+                  to distinguish a <code class="lstinline"><span style="color:#000000">lest</span></code> or the <span
+                     class="small-caps">tmi</span> problem with
+                  <code class="lstinline"><span style="color:#000000">+snag</span></code> &#x0026;c.
+               </p>
+            </li>
+            <li class="itemize">
+               <!--l. 197-->
+               <p class="noindent">A <code class="lstinline"><span style="color:#000000">%hold</span></code> type is a
+                  “ﬁnite subtype” of an
+                  inﬁnite type. Hoon doesn’t actually know about
+                  these directly, just in that it can be lazy about
+                  evaluating recursions.
+               </p>
+            </li>
+            <li class="itemize">
+               <!--l. 198-->
+               <p class="noindent">They result from arms in cores because the
+                  <code class="lstinline"><span style="color:#000000">hoon</span></code> of the arm is played against
+                  the core
+                  type as the subject type to get the result. This
+                  permits polymorphism, since the core can be
+                  modiﬁed to have a sample of a diﬀerent type.
+               </p>
+            </li>
+         </ul>
+      </li>
+   </ul>
+   <!--l. 202-->
+   <p class="noindent">
+
+
+   </p>
+   <blockquote class="quote">
+      <!--l. 204-->
+      <p class="noindent">One can “evaluate” a hold by asking the
+         compiler to “play” the hoon against the subject
+         type, meaning to infer what type of value
+         would result from running that hoon against
+         a value of the subject type. For a recursive
+         type, this result type refers to the same hold,
+         usually in one or more of the cases of a <code
+            class="lstinline"><span style="color:#000000">%fork</span></code>.
+         (<code>~rovnys-ricfer</code>, personal communication)</p>
+   </blockquote>
+   <!--l. 207-->
+   <p class="indent"> For instance, let’s evaluate a value of the type <code
+         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">list</span><span style="color:#000000"> </span><span style="color:#000000">@ud</span><span style="color:#000000">)</span></code>
+      using Hoon:
+   </p>
+   <!--l. 209-->
+   <pre class="lstlisting" id="listing-52"><span class="label"><a  id="x1-7014r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span> 
+<span class="label"><a  id="x1-7015r2"></a></span> 
+<span class="label"><a  id="x1-7016r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7017r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span> 
+<span class="label"><a  id="x1-7018r5"></a><span 
+class="ec-lmr-5">5</span></span> 
+<span class="label"><a  id="x1-7019r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-&#x003C;:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7020r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%hold</span></span> 
+<span class="label"><a  id="x1-7021r8"></a></span> 
+<span class="label"><a  id="x1-7022r9"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-&#x003C;:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7023r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%fork</span></span> 
+<span class="label"><a  id="x1-7024r11"></a></span> 
+<span class="label"><a  id="x1-7025r12"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-&#x003E;-:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7026r13"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/@ud</span></span> 
+<span class="label"><a  id="x1-7027r14"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7028r15"></a><span 
+class="ec-lmr-5">15</span></span> 
+<span class="label"><a  id="x1-7029r16"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-&#x003E;+&#x003C;:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-7030r17"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">l=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">l=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 229-->
+   <p class="indent"> (As an aside, while <code class="lstinline"><span style="color:#000000">+vase</span></code> is a
+      reasonable name for a thing
+      and the thing that shapes it, the original term was <code
+         class="lstinline"><span style="color:#000000">+vise</span></code>,
+      which also works in this capacity.)
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">3.2 </span> <a id="x1-80003.2"></a>Producing Vases</h4>
+   <!--l. 233-->
+   <p class="noindent">While vases can be constructed manually, Hoon provides several
+      aﬀordances for producing vases that are less error-prone and
+      more convenient.
+   </p><!--l. 235-->
+   <p class="indent"> The most common way to produce a vase is to use the <code
+         class="lstinline"><span style="color:#000000">!&#x003E;</span></code>
+      zapmic rune. This takes a noun and produces a vase of the
+      raw value and its type.
+   </p>
+   <!--l. 237-->
+   <pre class="lstlisting" id="listing-56"><span class="label"><a  id="x1-8001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3])</span></span> 
+<span class="label"><a  id="x1-8002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span></pre>
+   <!--l. 242-->
+   <p class="noindent">Note that the type is very literal: in this case, it is a
+      three-tuple rather than a list. Hoon’s type inference is quite
+
+
+      literalistic, and this commonly leads to the “too much
+      information” (<span class="small-caps">tmi</span>) problem, in which the type is too speciﬁc
+      to be useful.
+   </p><!--l. 245-->
+   <p class="indent"> In Nock, we are essentially pinning a new variable at the
+      head of our existing formula, then our tail is the actual access
+      by binary tree address.
+   </p>
+   <!--l. 247-->
+   <pre class="lstlisting" id="listing-57"><span class="label"><a  id="x1-8003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">mint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ut</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8004r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span> 
+<span class="label"><a  id="x1-8005r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">=/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8006r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8007r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">10]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">6]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]]]</span></span></pre>
+   <!--l. 255-->
+   <p class="indent"> Now, we may have values which appear identical in their
+      resultant Nock, but which Hoon would enforce diﬀerent type
+      constraints upon, such as a null-terminated tuple of ﬁnite
+      length and a list:
+   </p>
+   <!--l. 257-->
+   <pre class="lstlisting" id="listing-58"><span class="label"><a  id="x1-8008r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">null-terminated</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">tuple</span></span> 
+<span class="label"><a  id="x1-8009r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">compile</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8010r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]]</span></span> 
+<span class="label"><a  id="x1-8011r4"></a></span> 
+<span class="label"><a  id="x1-8012r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">formal</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">list</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">type</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">with</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">deferred</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">evaluation</span></span> 
+<span class="label"><a  id="x1-8013r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">mint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ut</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8014r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=200.245.085</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=1.023</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span> 
+<span class="label"><a  id="x1-8015r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8016r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]]</span></span> 
+<span class="label"><a  id="x1-8017r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]]]</span></span></pre>
+   <!--l. 270-->
+   <p class="indent"> We have to be able to envase and devase a value, which we
+      will write Lisp-style. We also want to be able to combine
+      vases by “slopping” them together. Finally, we need to
+      “slap” an expression we wish to evaluate against a vase.
+      Everything else in vase mode can be built out of these
+      primitives.
+   </p><!--l. 272-->
+   <p class="indent">
+   </p>
+   <blockquote class="quote">
+      <!--l. 273-->
+      <p class="noindent">A vase is a pair of type and data, particularly
+         as used in Nock and related languages.
+         Vase mode, therefore, describes working with
+         such pairs rather than ﬁrst-order typed
+         data. The vase algebra allows types to be
+         straightforwardly combined, permitting code
+         evaluation, facilitating metacircular
+         interpretation, managing persistent code
+         artifacts, and otherwise working at a higher
+
+
+         level of abstraction than raw typed code and
+         data. In this talk, we will examine the role
+         of vases, the vase algebra, and work through
+         several examples of how and why vase mode is
+         useful throughout Nock-based platforms.</p>
+   </blockquote>
+   <!--l. 276-->
+   <p class="noindent">We employ two main tools in Hoon to envase (or make
+      dynamic) and devase (or make static):
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 280-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">!&#x003E;</span></code> zapgar envases,
+            producing a vase from a noun.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 281-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal devases,
+            producing a noun from a vase.</p>
+      </li>
+   </ul>
+   <!--l. 284-->
+   <p class="noindent">There is also a “typed quote” <code
+         class="lstinline"><span style="color:#000000">!;</span></code> zapmic rune, which
+      wraps the product of its second child as the type of the
+      example given as the ﬁrst child. This is not commonly
+      used.
+   </p>
+   <!--l. 287-->
+   <pre class="lstlisting" id="listing-62"><span class="label"><a  id="x1-8018r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*type</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-8019r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">@ux</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+
+   <h4 class="subsectionHead"><span class="titlemark">3.3 </span> <a id="x1-90003.3"></a>Eliminating Vases</h4>
+   <!--l. 294-->
+   <p class="noindent"><code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal devases, which
+      requires you to know what type you
+      expect so that you can match them. This process is less
+      common; while you can trivially ascend from a statically-typed
+      environment to a dynamically-typed one, to enter Hoon’s
+      static layer again is more diﬃcult and you have to know
+      exactly what the type of the result is beforehand. (If
+      the value does not ﬁt the type it claims, we say that
+
+
+      it is an “evil vase“ and cannot process it.) Normally,
+      once you have a vase in the code builder, you will use
+      the vase algebra which we will discuss in a moment to
+      produce static untyped Nock code instead of static Hoon
+      code.
+   </p><!--l. 296-->
+   <p class="indent"> (A quick review of the Urbit kernel code base suggests that
+      most instances of <code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal unsafe vase
+      elimination are
+      either unpacking command-line arguments which have in
+      principle been vetted by the runtime ﬁrst, or handling a
+      received value over the network, presumably from its remote
+      counterpart.)
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">4 </span> <a id="x1-100004"></a>Vase Algebra<span
+         class="footnote-mark"><a href="#fn9x0"><sup class="textsuperscript">9</sup></a></span><a
+         id="x1-10001f9"></a> </h3>
+   <!--l. 300-->
+   <p class="noindent">The essential operators on vases are <code
+         class="lstinline"><span style="color:#000000">+slop</span></code> and <code
+         class="lstinline"><span style="color:#000000">+slap</span></code>.
+      Essentially all other operations can be expressed in terms of
+      these two, but many supplemental operators are supplied with
+      the Hoon compiler for convenience.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1 </span> <a id="x1-110004.1"></a><code
+         class="lstinline"><span style="color:#000000">+slop</span></code></h4>
+   <!--l. 304-->
+   <p class="noindent">If one queries the Hoon <span class="small-caps">repl</span> what the vase of a pair of
+      numbers is, it generates the following description:
+   </p>
+   <!--l. 306-->
+   <pre class="lstlisting" id="listing-68"><span class="label"><a  id="x1-11001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200])</span></span> 
+<span class="label"><a  id="x1-11002r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]]</span></span> 
+<span class="label"><a  id="x1-11003r3"></a></span> 
+<span class="label"><a  id="x1-11004r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-11005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span></pre>
+   <!--l. 314-->
+   <p class="indent"> Let’s suppose that one intends to append a hexadecimal
+      number as a tail. The original vase no longer holds:
+   </p>
+
+
+   <!--l. 316-->
+   <pre class="lstlisting" id="listing-69"><span class="label"><a  id="x1-11006r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x12c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-11007r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">@ux</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">300]]</span></span> 
+<span class="label"><a  id="x1-11008r3"></a></span> 
+<span class="label"><a  id="x1-11009r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">@ux</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x12c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-11010r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x12c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 324-->
+   <p class="noindent">Combining these manually can be done, but it’s rather tedious
+      and error-prone in general. To combine them dynamically one
+      can use the ﬁrst tool of our vase algebra, <code
+         class="lstinline"><span style="color:#000000">+slop</span></code>. <code
+         class="lstinline"><span style="color:#000000">+slop</span></code>
+      combines two vases, which means combining their types and
+      their values consistently.
+   </p><!--l. 327-->
+   <p class="indent"> Here, <code class="lstinline"><span style="color:#000000">+slop</span></code> produces the cell of
+      those two nouns:
+   </p>
+   <!--l. 329-->
+   <pre class="lstlisting" id="listing-73"><span class="label"><a  id="x1-11011r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200])</span></span> 
+<span class="label"><a  id="x1-11012r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]]</span></span> 
+<span class="label"><a  id="x1-11013r3"></a></span> 
+<span class="label"><a  id="x1-11014r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">x12c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-11015r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/@ux</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=300</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-11016r6"></a></span> 
+<span class="label"><a  id="x1-11017r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200])</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(300)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-11018r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[100</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">200]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">300]]</span></span></pre>
+   <!--l. 340-->
+   <p class="noindent"><code class="lstinline"><span style="color:#000000">+slop</span></code> simply combines heads and
+      tails using a <code class="lstinline"><span style="color:#000000">%cell</span></code> head
+      tag:
+   </p>
+   <!--l. 343-->
+   <pre class="lstlisting" id="listing-76"><span class="label"><a  id="x1-11019r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span> 
+<span class="label"><a  id="x1-11020r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">hed=vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tal=vase</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-11021r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span> 
+<span class="label"><a  id="x1-11022r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p.hed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p.tal</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">q.hed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q.tal</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span></pre>
+
+   <h4 class="subsectionHead"><span class="titlemark">4.2 </span> <a id="x1-120004.2"></a><code
+         class="lstinline"><span style="color:#000000">+slap</span></code></h4>
+   <!--l. 352-->
+   <p class="noindent">Chief among our list of reasons to use vases was the ability to
+      dynamically evaluate code at runtime. How do we actually
+      write code to <code class="lstinline"><span style="color:#000000">+slap</span></code> a given Hoon expression
+      against
+      a subject as vase? The <code class="lstinline"><span style="color:#000000">+slap</span></code> operator is the
+      second
+      part of the vase algebra. It takes a Hoon expression and
+      a vase, and produces a new vase of the computational
+      result.
+   </p>
+   <!--l. 354-->
+   <pre class="lstlisting" id="listing-80"><span class="label"><a  id="x1-12001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">slap</span></span> 
+<span class="label"><a  id="x1-12002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">vax=vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gen=hoon</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">vase</span></span> 
+<span class="label"><a  id="x1-12003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gun=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">mint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ut</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p.vax</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%noun</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">gen</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p.gun</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">.*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">q.vax</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q.gun</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+
+
+   <!--l. 361-->
+   <p class="noindent">With that, we can resolve a variable name (or “face”) against
+      a vase:
+   </p>
+   <!--l. 364-->
+   <pre class="lstlisting" id="listing-81"><span class="label"><a  id="x1-12005r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=42</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12006r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/a=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=42</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-12007r3"></a></span> 
+<span class="label"><a  id="x1-12008r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=42</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12009r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=42</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-12010r6"></a></span> 
+<span class="label"><a  id="x1-12011r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=42</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12012r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[42</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">42]]</span></span></pre>
+   <!--l. 375-->
+   <p class="indent"> A much more interesting case arises when we introduce
+      functions to the mix. Since we always need to know about a
+      function to evaluate it, we will henceforth <code
+         class="lstinline"><span style="color:#000000">+slop</span></code> in the
+      Hoon subject including its standard library as <code class="lstinline"><span style="color:#000000">.</span></code>
+      dot.
+      Furthermore, if we don’t have variable names in this
+      example, we can refer to the values by their binary tree
+      addresses, in this case the head of the tail and the tail of the
+      tail.
+   </p>
+   <!--l. 377-->
+   <pre class="lstlisting" id="listing-84"><span class="label"><a  id="x1-12013r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12014r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-12015r3"></a></span> 
+<span class="label"><a  id="x1-12016r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2])</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+7</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-12017r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 385-->
+   <p class="noindent">(It is conventional to <code class="lstinline"><span style="color:#000000">+slop</span></code>
+      new information to the
+      head of the subject because of the binary tree search
+      order.)
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">4.3 </span> <a id="x1-130004.3"></a>Supplemental Operators</h4>
+   <!--l. 390-->
+   <p class="noindent">What else would we like to be able to do, given a subject?
+   </p><!--l. 392-->
+   <p class="indent"> The received wisdom from core developers has been that
+      one can build whichever higher-level operations one needs
+      from <code class="lstinline"><span style="color:#000000">+slap</span></code> and <code
+         class="lstinline"><span style="color:#000000">+slop</span></code>. This seems to be more or less true,
+      but the mechanics of it start to depend very much on your
+      high-level language and its relation to the instruction set
+      architecture it targets. In practice, Hoon provides some
+      supplemental functions for vase mode because we need to
+      handle the stack trace for errors as well as supplying a
+      context for certain out-of-subject references in userspace
+      code.
+
+
+   </p><!--l. 394-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-13002x1">
+         <!--l. 396-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+slam</span></code> is an aﬀordance for
+            easy execution of a Hoon
+            gate or function. Given a gate and its arguments as
+            vases, produce a vase containing the result.
+         </p>
+         <!--l. 398-->
+         <pre class="lstlisting" id="listing-89"><span class="label"><a  id="x1-13003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slam</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b=@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-13004r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@ud</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]]</span></span></pre>
+
+      </li>
+      <li class="enumerate" id="x1-13006x2">
+         <!--l. 403-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+slym</span></code> is an untyped
+            version of <code class="lstinline"><span style="color:#000000">+slam</span></code>. The type of the
+            sample (argument) is ignored, and the type of the
+            resulting vase is determined by the gate alone. This is
+            particularly useful with the “wet” gate system,
+            which is a paradigm of gate-building gates used
+            frequently in Hoon. Coming from a higher-level typed
+            language, there is more than one way to build a
+            Nock gate. Hoon, for instance, uses what are called
+            “dry” and “wet” approaches. (In Jock, all gates are
+            dry.)
+         </p><!--l. 405-->
+         <p class="noindent">Put brieﬂy, a dry gate is essentially a regularly typed
+            gate: function argument types are checked and then
+            inserted into the <span class="small-caps">ast</span> expression, which is built via vases
+            in the conventional way.
+         </p><!--l. 407-->
+         <p class="noindent">In contrast, a wet gate is more like a C-style macro, in
+            which the types are accepted as tentatively passing the
+            necessary checks, then as long as they work the original
+            types are passed back out as appropriate. It’s a way of
+            asking if the Nock formula itself will just work—if it
+            will, then build it and return the associated type
+            we expect. (This is how typed lists are built, for
+            instance.)
+
+
+         </p><!--l. 409-->
+         <p class="noindent">You see wet gates used frequently as gate builders—that
+            is, if you need a gate operating for a particular
+            type, the easiest way to do it is to produce a gate
+            specialized by type. (You can see the dynamism
+            enabled by vases shining through the cracks of this
+            model.)
+         </p>
+      </li>
+      <li class="enumerate" id="x1-13008x3">
+         <!--l. 411-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+slab</span></code> tells us, given a
+            subject, whether a name is
+            present.
+         </p>
+         <!--l. 413-->
+         <pre class="lstlisting" id="listing-93"><span class="label"><a  id="x1-13009r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slab</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%read</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a=5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-13010r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.y</span></span> 
+<span class="label"><a  id="x1-13011r3"></a></span> 
+<span class="label"><a  id="x1-13012r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slab</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%read</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-:!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">b=5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-13013r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%.n</span></span></pre>
+
+      </li>
+      <li class="enumerate" id="x1-13015x4">
+         <!--l. 421-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+text</span></code> Vases are also used
+            for the prettyprinter, since
+            the conversion from raw value to standardized text
+            output requires type information to resolve.
+         </p>
+         <!--l. 423-->
+         <pre class="lstlisting" id="listing-95"><span class="label"><a  id="x1-13016r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">text</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3])</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-13017r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span> 
+<span class="label"><a  id="x1-13018r3"></a></span> 
+<span class="label"><a  id="x1-13019r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">text</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">((</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-13020r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span></pre>
+
+      </li>
+      <li class="enumerate" id="x1-13022x5">
+         <!--l. 431-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+slew</span></code> retrieves the axis
+            of a name in a vase.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-13024x6">
+
+
+         <!--l. 433-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+swat</span></code> doubly defers a
+            <code class="lstinline"><span style="color:#000000">+slap</span></code> operation for certain
+            cases.
+         </p>
+      </li>
+   </ol>
+
+   <h3 class="sectionHead"><span class="titlemark">5 </span> <a id="x1-140005"></a>Applications of Vase Mode</h3>
+
+   <h4 class="subsectionHead"><span class="titlemark">5.1 </span> <a id="x1-150005.1"></a>Type Manipulation</h4>
+   <!--l. 441-->
+   <p class="noindent">Types can be manually constructed as necessary. For
+      example, to manually reconstruct a <code class="lstinline"><span style="color:#000000">list</span></code> from a
+      <code class="lstinline"><span style="color:#000000">lest</span></code>
+      (or non-null <code class="lstinline"><span style="color:#000000">list</span></code>), we can use the <code
+         class="lstinline"><span style="color:#000000">+slop</span></code> operator to
+      combine a vase of the null terminator or empty list with the
+      <code class="lstinline"><span style="color:#000000">lest</span></code>. (This is, of course, equivalent to
+      upcasting back to
+      a <code class="lstinline"><span style="color:#000000">list</span></code>, but the type system doesn’t quite notice
+      this
+      directly as it(@).) Because the collapse from dynamic vase
+      mode to static Hoon code necessarily destroys some type
+      information via the mold in <code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal,
+      variants of this code
+      work.
+   </p>
+   <!--l. 443-->
+   <pre class="lstlisting" id="listing-106"><span class="label"><a  id="x1-15001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5)</span></span> 
+<span class="label"><a  id="x1-15002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-15003r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span> 
+<span class="label"><a  id="x1-15004r4"></a></span> 
+<span class="label"><a  id="x1-15005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5)</span></span> 
+<span class="label"><a  id="x1-15006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!!</span></span> 
+<span class="label"><a  id="x1-15007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-15008r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span> 
+<span class="label"><a  id="x1-15009r9"></a></span> 
+<span class="label"><a  id="x1-15010r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5)</span></span> 
+<span class="label"><a  id="x1-15011r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!!</span></span> 
+<span class="label"><a  id="x1-15012r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-15013r13"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">#t/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=it</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0]]</span></span> 
+<span class="label"><a  id="x1-15014r14"></a></span> 
+<span class="label"><a  id="x1-15015r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5)</span></span> 
+<span class="label"><a  id="x1-15016r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!!</span></span> 
+<span class="label"><a  id="x1-15017r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">((</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">lest</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-15018r18"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5]]</span></span> 
+<span class="label"><a  id="x1-15019r19"></a></span> 
+<span class="label"><a  id="x1-15020r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">gulf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5)</span></span> 
+<span class="label"><a  id="x1-15021r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!!</span></span> 
+<span class="label"><a  id="x1-15022r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">((</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">slop</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">!&#x003E;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-15023r23"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5]</span></span></pre>
+
+   <h4 class="subsectionHead"><span class="titlemark">5.2 </span> <a id="x1-160005.2"></a>Code Evaluation</h4>
+   <!--l. 471-->
+   <p class="noindent">As a practical matter and a safety measure, executable Hoon
+      code is not directly transmitted over the wire. Instead, the
+      type and value are sent, and the recipient compiles the noun
+      into executable code. This is a security measure to prevent
+      arbitrary code execution.
+
+
+   </p><!--l. 473-->
+   <p class="indent"> Thus vases are used in the kernel and in userspace for certain
+      kinds of transmitted code and data operations, including pokes
+      between user agents. In fact, <code>~rovnys-ricfer</code> has produced a
+      minimal working example of a userspace handler using vase
+      mode.<span class="footnote-mark"><a href="#fn10x0"><sup class="textsuperscript">10</sup></a></span><a
+         id="x1-16001f10"></a>
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.3 </span> <a id="x1-170005.3"></a>Metacircular Interpretation
+   </h4>
+   <!--l. 477-->
+   <p class="noindent">Nock is a crash-only language; it has no error handling when
+      run raw. To produce a manageable system, Nock is almost
+      always run in a virtualized mode called <code class="lstinline"><span style="color:#000000">+mock</span></code>.
+      While the
+      main operator of this engine works only on raw untyped Nock,
+      some of the adjuncts do preserve type for subsequent use of
+      the outputs as statically-typed values to be raised back into
+      vases at various points in the compiler. By providing a $roof
+      or reference overlay to the fake Nock 12 opcode, for instance,
+      a Nock runtime can supply a referentially transparent
+      expedient even when the perceptual subject is much more
+      constrained.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.4 </span> <a id="x1-180005.4"></a>Persistent Code Artifacts</h4>
+   <!--l. 481-->
+   <p class="noindent">Urbit’s Arvo kernel and Vere runtime, as well as the NockApp
+      framework with the Sword runtime, aggressively cache vases to
+      expedite code execution. Vases are stored in a map from their
+      hash to the vase itself. This is a performance optimization,
+      since the type information is expensive to compute and
+      the value is expensive to reduce. For instance, Arvo’s
+      <code class="lstinline"><span style="color:#000000">$worm</span></code> cache maps Hoon vases to pairs of type and
+      Nock
+      nouns.
+
+
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.5 </span> <a id="x1-190005.5"></a>System Upgrades</h4>
+   <!--l. 485-->
+   <p class="noindent">A solid-state Nock runtime such as Arvo consists of an event
+      loop over a list of input events to apply to a current state.
+      System upgrades such as kernel updates are supplied and built
+      using vases.
+   </p><!--l. 487-->
+   <p class="indent"> A meta-vase is a <code class="lstinline"><span style="color:#000000">vase</span></code> of a <code
+         class="lstinline"><span style="color:#000000">vase</span></code>, that is, an untyped
+      <code class="lstinline"><span style="color:#000000">vase</span></code>. These can be used to check structural data
+      nesting
+      without enforcing type, for instance. (Urbit types used to be
+      total; that is, on a mismatch they would return their default
+      rather than crashing.)
+   </p><!--l. 489-->
+   <p class="indent"> The vane interface is normally strictly typed, but using a
+      metavase it can punch a hole through the <code class="lstinline"><span style="color:#000000">type</span></code>
+      system.
+      (Before <code class="lstinline"><span style="color:#000000">!&#x003C;</span></code> zapgal was introduced, vase
+      reduction was
+      mediated by a vane passing to the Arvo kernel to get into
+      double vase mode, which Arvo would collapse into one vase
+      mode and hand back.)
+   </p><!--l. 491-->
+   <p class="indent"> Since Urbit is built to handle hot-swapped kernel
+      updating, one interesting complication with vase handling lies
+      in upgrades to the type system itself:
+   </p><!--l. 493-->
+   <p class="indent">
+   </p>
+   <blockquote class="quote">
+      <!--l. 494-->
+      <p class="noindent">Some subtleties regarding
+         types arise when handling <span class="small-caps">ota</span> updates, since
+         they can potentially alter the type system.
+         Put more concretely, the type of type may be
+         updated. In that case, the update is an untyped
+         Nock formula from the perspective of the old
+         kernel, but ordinary typed Hoon code from the
+         perspective of the new kernel. Besides this one
+         detail, the only functionality of the Arvo kernel
+         proper that is untyped are its interactions with
+         the Unix runtime.</p>
+   </blockquote>
+
+
+   <!--l. 497-->
+   <p class="noindent">A Nock runtime can cache known vases aggressively for
+      performance improvement.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">6 </span> <a id="x1-200006"></a>Beyond the Vase Algebra</h3>
+   <!--l. 502-->
+   <p class="noindent">Hoon used to directly expose many of the mechanics of this when ﬁle
+      handles could be produced using a sophisticated but complicated build
+      system.<span class="footnote-mark"><a href="#fn11x0"><sup class="textsuperscript">11</sup></a></span><a
+         id="x1-20001f11"></a>
+      While Hoon still uses vase mode explicitly to import libraries
+      and deliver user agent pokes, these are the only places that a
+      userspace developer would typically encounter them. The vase
+      algebra has largely been restricted to the compiler level in
+      contemporary practice.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">6.1 </span> <a id="x1-210006.1"></a>Comparisons</h4>
+   <!--l. 506-->
+   <p class="noindent">Pairing type and data is a general and generalizable approach.
+      Languages and compilers must, after all, track typed values in
+      some way. How do other languages and systems handle
+      this?
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">6.1.1 </span> <a id="x1-220006.1.1"></a>Python/CPython</h5>
+   <!--l. 510-->
+   <p class="noindent">For instance, in the CPython reference implementation all
+      values are “boxed”, or PyObject structures. This pairing of
+      metadata and value is similar to the way that Hoon vases
+      work, but it is not directly exposed as a ﬁrst-class element of
+      the Python user environment, nor is there an explicit vase
+      algebra (or subject).
+
+
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">6.1.2 </span> <a id="x1-230006.1.2"></a>Assembly Language</h5>
+   <!--l. 514-->
+   <p class="noindent">Typed assembly languages such as <span class="small-caps">tal</span> (<a
+         id="x1-23001"></a>Morrisett et al., 1999)
+      were explored in the late 1990s and early 2000s, with the goal
+      of providing a type-safe assembly language that could be used
+      to write low-level code while still preserving type safety.
+      These researchers recognized that traditional compilation
+      procedures often destroyed type information when it
+      was still useful for veriﬁcation and optimization. Even
+      dependently typed assembly languages have been explored
+      (<a id="x1-23002"></a>Xi and Harper, 2001), conceived as a way of improving
+      bytecode or assembly level performance by permitting the
+      compiler more optimizations than it would naively know
+      enough to implement. A set of rules was deﬁned in order to
+      produce well-formed “type states”, or relationships of
+      type index expressions to actual register contents. This
+      approach oﬀers the expedient of a certifying compiler
+      designed to guarantee type safety. While not constituting a
+      vase algebra, the process of retaining type to produce
+      better target <span class="small-caps">isa</span> code shares a goal with Hoon’s vase
+      mode.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">6.1.3 </span> <a id="x1-240006.1.3"></a>Lisp Quote</h5>
+   <!--l. 518-->
+   <p class="noindent">In Lisp, <code class="lstinline"><span style="color:#000000">&#x0027;</span></code> is used to
+      defer evaluation, or to treat an expression
+      as data which can be introspected and evaluated at will.
+   </p>
+   <!--l. 520-->
+   <pre class="lstlisting" id="listing-115"><span class="label"><a  id="x1-24001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">3</span></span> 
+<span class="label"><a  id="x1-24002r2"></a></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">(+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">(+</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">1</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">2)</span></span></pre>
+
+   <!--l. 525-->
+   <p class="noindent">Without <code class="lstinline"><span style="color:#000000">&#x0027;</span></code>, <code
+         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">+</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">2)</span></code>
+      evaluates to 3. With <code class="lstinline"><span style="color:#000000">&#x0027;</span></code>, it’s a list or
+      S-expression:
+   </p>
+
+
+   <!--l. 528-->
+   <pre class="lstlisting" id="listing-119"><span class="label"><a  id="x1-24003r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">2)</span></span></pre>
+
+   <!--l. 532-->
+   <p class="noindent">This is very similar to the way that Hoon lets you directly
+      construct and manipulate an <span class="small-caps">ast</span>, as with <code
+         class="lstinline"><span style="color:#000000">+ream</span></code>.
+   </p>
+   <!--l. 535-->
+   <pre class="lstlisting" id="listing-121"><span class="label"><a  id="x1-24004r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">define</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">prog</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">(+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2))</span></span> 
+<span class="label"><a  id="x1-24005r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">car</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">prog</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+</span></span> 
+<span class="label"><a  id="x1-24006r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cdr</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">prog</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">(1</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">2)</span></span> 
+<span class="label"><a  id="x1-24007r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">eval</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">prog</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">3</span></span> 
+<span class="label"><a  id="x1-24008r5"></a></span> 
+<span class="label"><a  id="x1-24009r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">eval</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span><span 
+class="ec-lmtt-9">(+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2))</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=&#x003E;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">3</span></span></pre>
+
+   <!--l. 544-->
+   <p class="noindent">This is basically equivalent to Hoon’s <code
+         class="lstinline"><span style="color:#000000">+ream</span></code>, although the
+      Hoon <span class="small-caps">ast</span> is somewhat more regularized and opaque.
+   </p>
+   <!--l. 547-->
+   <pre class="lstlisting" id="listing-123"><span class="label"><a  id="x1-24010r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ream</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2)</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-24011r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cncl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%wing</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%add</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-24012r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span> 
+<span class="label"><a  id="x1-24013r4"></a></span> 
+<span class="label"><a  id="x1-24014r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">!,</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-24015r6"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%cncl</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%wing</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%add</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-24016r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">i=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%sand</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">t=</span><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]]</span></span></pre>
+   <!--l. 557-->
+   <p class="indent"> A vase is a typed value that an <span class="small-caps">ast</span>, like <code
+         class="lstinline"><span style="color:#000000">&#x0027;</span></code> or <code
+         class="lstinline"><span style="color:#000000">+ream</span></code>
+      produces, can be evaluated against. Lisp uses a global or
+      explicit environment, whereas Hoon always lets you supply a
+      subject of your choice, including the “current” subject (with
+      <code class="lstinline"><span style="color:#000000">.</span></code>).
+   </p><!--l. 559-->
+   <p class="indent"> Vase mode is thus a “typed dynamic” system, unlike
+      Lisp’s raw dynamism. (Why not just use <code class="lstinline"><span style="color:#000000">eval</span></code>?
+      Scheme is
+      untyped and error-prone here. Vases add type safety,
+      which in Hoon’s case is used to delimit possible kinds of
+      operations.)
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">6.1.4 </span> <a id="x1-250006.1.4"></a>Haskell Dynamic</h5>
+   <!--l. 563-->
+   <p class="noindent">Haskellers probably immediately think of <code
+         class="lstinline"><span style="color:#000000">Dynamic</span></code>, which is
+      used for injecting values into a dynamically typed value.
+      <code class="lstinline"><span style="color:#000000">Dynamic</span></code> lets you pack values of diﬀerent types
+      into a uniform
+      container and defer type checking until runtime. Like
+      Hoon’s vase mode, <code class="lstinline"><span style="color:#000000">Dynamic</span></code> lets you escape static
+      typing
+      temporarily and deferring type resolution. Whereas in Hoon, a
+
+
+      type–value mismatch is an “evil vase” and results in a runtime
+      crash,<span class="footnote-mark"><a href="#fn12x0"><sup class="textsuperscript">12</sup></a></span><a
+         id="x1-25001f12"></a>
+      <code class="lstinline"><span style="color:#000000">Dynamic</span></code> will result in <code
+         class="lstinline"><span style="color:#000000">Nothing</span></code> if the types don’t match.
+   </p><!--l. 567-->
+   <p class="indent"> Hoon’s vases are in a sense much closer to the metal
+      since they can trivially result in Nock code. Vase mode
+      feels more like a dynamic interpreter or a VM, while
+      <code class="lstinline"><span style="color:#000000">Dynamic</span></code> is more focused on typed payloads for
+      data
+      evaluation.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">6.1.5 </span> <a id="x1-260006.1.5"></a>Untyped Virtual
+      Machines</h5>
+   <!--l. 573-->
+   <p class="noindent">There may even be reason to eschew vases altogether in some
+      cases; Jock does not currently use vases except when
+      interacting with Hoon via a foreign function interface.
+      <a id="x1-26001"></a>Chevalier-Boisvert (2022) argued that untyped virtual
+      machines are more resistant to bit rot than typed virtual
+      machines:
+   </p><!--l. 575-->
+   <p class="indent">
+   </p>
+   <blockquote class="quote">
+      <!--l. 576-->
+      <p class="noindent">An untyped VM design … has to enforce a small
+         set of hard constraints, such as making sure
+         that pointer dereferences respect valid address
+         bounds so that the running program can’t
+         crash the host VM, but it doesn’t really need
+         to care about the types of values or enforcing
+         typing constraints. For performance, it can
+         implement a very barebones <span class="small-caps">jit</span> compiler based
+         on dynamic binary translation, but it doesn’t
+         have to care about optimizing type checks,
+         and it can even allow the running program to
+         manage its own memory and implement its own
+         garbage collector.
+
+
+      </p><!--l. 578-->
+      <p class="noindent">… [T]here’s a strong case to be made that an
+         untyped VM design can easily be much smaller
+         and more minimalistic than a typed VM
+         design. A simpler untyped VM has two major
+         strengths. The ﬁrst is that it doesn’t place
+         as many restrictions on running programs.
+         Programs can implement their own control
+         ﬂow structures, their own GC, or even their
+         own <span class="small-caps">jit</span>. The second is that a smaller, simpler
+         VM is much easier to port, reimplement and
+         maintain. (Chevalier-Boisvert, 2022)</p>
+   </blockquote>
+   <!--l. 581-->
+   <p class="noindent">Nock runtimes do indeed hew to this parsimony, but vases are
+      used particularly in interprocess communication in today’s
+      Urbit kernel and userspace. It is unclear how they could
+      proﬁtably be excised from the system given their global
+      utility.
+   </p><!--l. 584-->
+   <p class="indent"> A ﬁnal interesting question is to think about targeting
+      other <span class="small-caps">isa</span>s. While Hoon itself is closely tied to Nock, no part of
+      the vase algebra (in the abstract) is speciﬁc to Nock except its
+      instantiation as nouns.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">7 </span> <a id="x1-270007"></a>Conclusion</h3>
+   <!--l. 588-->
+   <p class="noindent">Vase mode provides something like a gradual (un)typing
+      pipeline: one proceeds from a static Hoon context, to a
+      dynamic vase mode, to untyped Nock. A vase algebra
+      describes how to combine the type subject information and
+      the associated value information, as in an import or a
+      <span class="small-caps">repl</span>. This lets Hoon have human-legible aﬀordances in
+      metaprogramming and validation, while retaining a simple
+      target <span class="small-caps">isa</span> for execution, code proving, and optimized
+      execution.
+      <img src="ustj-logo-.png" alt="PIC" />
+   </p>
+   <h3 class="sectionHead"><a id="x1-28000"></a>References</h3>
+   <!--l. 592-->
+   <p class="noindent">
+   </p>
+   <dl class="thebibliography">
+      <dt id="X0-Chevalier2022" class="thebibliography">
+      </dt>
+      <dd id="bib-1" class="thebibliography">
+         <!--l. 592-->
+         <p class="noindent"><a id="cite.0@Chevalier2022"></a>Chevalier-Boisvert, Maxime
+            (2022)
+            “Typed
+            vs. Untyped
+            Virtual
+            Machines”.
+            <span class="small-caps">url</span>:
+            <a href="https://pointersgonewild.com/2022/06/08/typed-vs-untyped-virtual-machines/"
+               class="url">https://pointersgonewild.com/2022/06/08/typed-vs-untyped-virtual-machines/</a>
+            (visited
+            on
+            ~2024.7.4).
+         </p>
+      </dd>
+      <dt id="X0-Morrisett1999" class="thebibliography">
+      </dt>
+      <dd id="bib-2" class="thebibliography">
+         <!--l. 592-->
+         <p class="noindent"><a id="cite.0@Morrisett1999"></a>Morrisett, Greg
+            et al.
+            (1999).
+            “<span class="small-caps">tal</span>x86:
+            A
+            Realistic
+            Typed
+            Assembly
+            Language.”
+            In:
+            <span class="ec-lmri-10">Proceedings</span>
+            <span class="ec-lmri-10">of</span>
+            <span class="ec-lmri-10">the</span>
+            <span class="ec-lmri-10">1999</span>
+            <span class="small-caps">acm</span>
+            <span class="small-caps">sigplan</span>
+            <span class="ec-lmri-10">Workshop</span>
+
+
+            <span class="ec-lmri-10">on</span>
+            <span class="ec-lmri-10">Compiler</span>
+            <span class="ec-lmri-10">Support</span>
+            <span class="ec-lmri-10">for</span>
+            <span class="ec-lmri-10">System</span>
+            <span class="ec-lmri-10">Software</span>.
+            <span class="small-caps">acm</span>,
+            pp. 25–35.
+            <span class="small-caps">url</span>:
+            <a href="https://www.cs.cornell.edu/talc/papers/talx86-wcsss.pdf"
+               class="url">https://www.cs.cornell.edu/talc/papers/talx86-wcsss.pdf</a>
+            (visited
+            on
+            ~2024.7.4).
+         </p>
+      </dd>
+      <dt id="X0-Blackman2020" class="thebibliography">
+      </dt>
+      <dd id="bib-3" class="thebibliography">
+         <!--l. 592-->
+         <p class="noindent"><a id="cite.0@Blackman2020"></a><code>~rovyns-ricfer</code>, Ted Blackman
+            (2019)
+            “Why
+            Hoon?”
+            <span class="small-caps">url</span>:
+            <a href="https://urbit.org/blog/why-hoon" class="url">https://urbit.org/blog/why-hoon</a>
+            (visited
+            on
+            ~2025.8.13).
+         </p>
+      </dd>
+      <dt id="X0-Whitepaper" class="thebibliography">
+      </dt>
+      <dd id="bib-4" class="thebibliography">
+         <!--l. 592-->
+         <p class="noindent"><a id="cite.0@Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+            et al.
+            (2016).
+            <span class="ec-lmri-10">Urbit:</span>
+            <span class="ec-lmri-10">A</span>
+            <span class="ec-lmri-10">Solid-State</span>
+            <span class="ec-lmri-10">Interpreter</span>.
+            Whitepaper.
+            Tlon
+            Corporation.
+            <span class="small-caps">url</span>:
+
+
+            <a href="https://media.urbit.org/whitepaper.pdf" class="url">https://media.urbit.org/whitepaper.pdf</a>
+            (visited
+            on
+            ~2024.1.25).
+         </p>
+      </dd>
+      <dt id="X0-Xi2001" class="thebibliography">
+      </dt>
+      <dd id="bib-5" class="thebibliography">
+         <!--l. 592-->
+         <p class="noindent"><a id="cite.0@Xi2001"></a>Xi, Hongwei
+            and
+            Robert Harper
+            (2001).
+            “A
+            Dependently
+            Typed
+            Assembly
+            Language.”
+            In:
+            <span class="ec-lmri-10">Proceedings</span>
+            <span class="ec-lmri-10">of</span>
+            <span class="ec-lmri-10">the</span>
+            <span class="ec-lmri-10">6th</span>
+            <span class="small-caps">acm</span>
+            <span class="small-caps">sigplan</span>
+            <span class="ec-lmri-10">International</span>
+            <span class="ec-lmri-10">Conference</span>
+            <span class="ec-lmri-10">on</span>
+            <span class="ec-lmri-10">Functional</span>
+            <span class="ec-lmri-10">Programming</span>
+            <span class="ec-lmri-10">(</span><span class="small-caps">icfp</span><span class="ec-lmri-10">’01)</span>.
+            <span class="small-caps">acm</span>,
+            pp. 169–180.
+         </p>
+      </dd>
+   </dl>
+
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3><p class="noindent" >
+      <div class="footnote-text">
+  <!--l. 55--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x2-2002x1"></a><a 
+ id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span 
+class="ec-lmr-8">The Jock language does not directly expose vases for utilization,</span>
+  <span 
+class="ec-lmr-8">but does utilize them inside the compiler, written in Hoon.</span><a href="#x1-4003r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 55--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x3-2004x1"></a><a 
+ id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span 
+class="ec-lmr-8">Diﬀerent interpreters and compilers call this pair diﬀerent things.</span>
+  <span 
+class="ec-lmr-8">For instance, CPython calls this a </span><span 
+class="ec-lmr-8">“boxed value</span><span 
+class="ec-lmr-8">” and keeps the value as a</span>
+  <span 
+class="ec-lmr-8">pair of datum and type tag.</span><a href="#x1-4003r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 58--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x4-2006x1"></a><a 
+ id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span 
+class="ec-lmr-8">A vase visualization tool has been produced by </span><span 
+class="ec-lmr-8">~migrev-dolseg,</span>
+  <span 
+class="ec-lmr-8">available at </span><a 
+href="https://hawk.computer" class="url" ><span 
+class="ec-lmr-8">https://hawk</span><span 
+class="cmmi-8">.</span><span 
+class="ec-lmr-8">computer</span></a><span 
+class="ec-lmr-8">.</span><a href="#x1-4003r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 64--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x5-4002x"></a><a 
+ id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span 
+class="ec-lmr-8">Note that Nock instructions are marked as constants with % for</span>
+  <span 
+class="ec-lmr-8">legibility, but the value is simply the associated integer.</span><a href="#x1-4003r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 85--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x6-5002x"></a><a 
+ id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span 
+class="ec-lmr-8">In practice, the text is commonly derived from a ﬁle via the</span>
+  <span 
+class="ec-lmr-8">%hoon mark.</span><a href="#x1-5003r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 100--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x7-5011x"></a><a 
+ id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span 
+class="ec-lmr-8">The relevant code may be found in /sys/hoon.</span><a href="#x1-5012r1">⤴</a></p></div>
+      
+
+
+      <div class="footnote-text">
+  <!--l. 115--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x8-5020x"></a><a 
+ id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span 
+class="ec-lmr-8">One simple approach to understand this part of the Hoon</span>
+  <span 
+class="ec-lmr-8">compiler backend is to look at  </span><a 
+href="https://github.com/urbit/archaeology/blob/6b2ce202207b9bb3f4e65fc1ea9a2fb434396dd4/urb/zod/arvo/hoon.hoon" ><span 
+class="ec-lmr-8">the 2013 Hoon compiler</span></a><span 
+class="ec-lmr-8">, which presents a</span>
+  <span 
+class="ec-lmr-8">relatively uncluttered version.</span><a href="#x1-5021r1">⤴</a></p></div>
+      
+      <div class="footnote-text">
+  <!--l. 123--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x9-5024x"></a><a 
+ id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span 
+class="ec-lmr-8">Nock code is not executed simply in either of the primary</span>
+  <span 
+class="ec-lmr-8">runtimes, Vere or NockVM (f/k/a Sword, n</span><span 
+class="ec-lmr-8">ée Ares). Instead it is</span>
+  <span 
+class="ec-lmr-8">converted into a bytecode for execution.</span></p></div>
+
+      <div class="footnote-text">
+      <span class="footnote-mark"><a 
+ id="x10-10002x4"></a><a 
+ id="fn9x0">   <sup class="textsuperscript">9</sup></a></span><span 
+class="ec-lmr-8">This section beneﬁtted from discussions with </span><span 
+class="ec-lmr-8">~rovnys-ricfer, to</span>
+  <span 
+class="ec-lmr-8">whom I am indebted.</span></div>
+
+        <div class="footnote-text">
+   <!--l. 473--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x11-16002x5.2"></a><a 
+ id="fn10x0">  <sup class="textsuperscript">10</sup></a></span><span 
+class="ec-lmr-8">See his video of </span><span 
+class="ec-lmr-8">~2022.5.10; at the time of press, a copy is</span>
+   <span 
+class="ec-lmr-8">available at </span><br 
+class="newline" /><a 
+href="https://drive.google.com/file/d/10SaE5doCfdeqc2j945t8GvGvexKIBBZq/view" class="url" ><span 
+class="ec-lmr-8">https://drive</span><span 
+class="cmmi-8">.</span><span 
+class="ec-lmr-8">google</span><span 
+class="cmmi-8">.</span><span 
+class="ec-lmr-8">com/file/d/10SaE5doCfdeqc2j945t8GvGvexKIBBZq/view</span></a><span 
+class="ec-lmr-8">.</span></p></div>
+
+        <div class="footnote-text">
+   <!--l. 502--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x12-20002x6"></a><a 
+ id="fn11x0">  <sup class="textsuperscript">11</sup></a></span><span 
+class="ec-lmr-8">To wit, the history of the Ford vane, ca. 2016</span><span 
+class="ec-lmr-8">–2019.</span></p></div>
+
+        <div class="footnote-text">
+   <!--l. 565--><p class="indent" >     <span class="footnote-mark"><a 
+ id="x13-25002x6.1.4"></a><a 
+ id="fn12x0">  <sup class="textsuperscript">12</sup></a></span><span 
+class="ec-lmr-8">Since we are commonly running in an emulated mode, this</span>
+   <span 
+class="ec-lmr-8">doesn’t take down the whole kernel.</span></p></div>
+
+
+</body>
+
+</html>
