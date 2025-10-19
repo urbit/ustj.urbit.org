@@ -40,7 +40,9 @@
     },
     {
       "author": ["barpub-tarber"],
-      "title": "Conk:  The Permutation Group of Nocks; Ax: An Algebraic Executable Ur-Machine"
+      "title": "Conk:  The Permutation Group of Nocks; Ax: An Algebraic Executable Ur-Machine",
+      "pdf": "/ustj/v02-i01/mss6.pdf",
+      "html": "/ustj/v02-i01/mss6.html"
     }
   ],
   "theme": {
