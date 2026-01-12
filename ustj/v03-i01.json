@@ -1,0 +1,38 @@
+{
+  "issue": "WI2026: Vol. 3, No. 1",
+  "title": "The Journal of Solid-State Computing",
+  "content": [
+    {
+      "author": ["rovnys-ricfer","master-morzod","watter-parter","dinleb-rambep","norsyr-torryn","hastuc-dibtux"],
+      "title": "Directed Messaging",
+      "pdf": "/ustj/v03-i01/mss0.pdf",
+      "html": "/ustj/v03-i01/mss0.html"
+    },
+    {
+      "author": ["dozreg-toplud"],
+      "title": "Subject Knowledge Analysis",
+    },
+    {
+      "author": ["hanfel-dovned"],
+      "title": "Groundwire Comet Cryptography",
+    },
+    {
+      "author": ["ticlys-monlun", "lagrev-nocfep"],
+      "title": "Noun Serialization",
+    },
+    {
+      "author": ["nomryg-nilref"],
+      "title": "Obelisk:  Reinventing SQL for Modern Computing",
+    }
+  ],
+  "theme": {
+    "black": "#141A14",
+    "white": "#FFFFFF",
+    "primary": "#FFF450",
+    "muted": "#B9B13D"
+  },
+  "links": {
+    "cover": "/ustj/v03-i01/cover.png",
+    "shop": "https://ustj.square.site/product/ustj-vol-3-no-1/RCNFIZ6NAH74SUZGK3YOWFQP"
+  }
+}

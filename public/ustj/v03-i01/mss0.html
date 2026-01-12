@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+
+<head>
+   <title>Directed Messaging</title>
+   <meta charset="utf-8" />
+   <meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+   <meta name="viewport" content="width=device-width,initial-scale=1" />
+   <link rel="stylesheet" type="text/css" href="/latex.css" />
+   <meta name="src" content="mss.tex" />
+   <script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+   <script type="text/javascript" async="async" id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head>
+
+<body>
+   <div class="maketitle">
+
+
+
+
+
+      <h2 class="titleHead">Directed Messaging</h2>
+      <div class="author"><span class="ec-lmbx-12">Ted Blackman </span><span class="ec-lmbx-12">~rovnys-ricfer,*</span>
+         <br /> <span class="ec-lmbx-12">Joe Bryan </span><span class="ec-lmbx-12">~master-morzod,</span><span
+            class="ec-lmbx-12">†</span>
+         <br /> <span class="ec-lmbx-12">Luke Champine </span><span class="ec-lmbx-12">~watter-parter,*</span>
+         <br /> <span class="ec-lmbx-12">Pyry Kovanen </span><span class="ec-lmbx-12">~dinleb-rambep,</span><span
+            class="ec-lmbx-12">†</span>
+         <br /> <span class="ec-lmbx-12">Jose Cisneros </span><span class="ec-lmbx-12">~norsyr-torryn,</span><span
+            class="ec-lmbx-12">†</span>
+         <br /> <span class="ec-lmbx-12">Liam Fitzgerald </span><span class="ec-lmbx-12">~hastuc-dibtux</span><span
+            class="ec-lmbx-12">‡</span>
+         <br /> <span class="ec-lmbx-12">* Martian Engineering,</span>
+         <br /> <span class="ec-lmbx-12">† Tlon Corporation,</span>
+         <br /> <span class="ec-lmbx-12">‡ Axiomatic Systems</span>
+      </div><br />
+      <div class="date"></div>
+   </div>
+   <section role="doc-abstract" class="abstract">
+      <h3 class="abstracttitle">
+         <span class="ec-lmbx-9">Abstract</span>
+      </h3>
+      <!--l. 67-->
+      <p class="noindent"><span class="ec-lmr-9">Urbit’s networking protocol</span>
+         <span class="ec-lmr-9">was redesigned</span> <span class="ec-lmr-9">achieving</span> <span
+            class="ec-lmr-9">over 100</span><span class="mathjax-inline">\(\times \)</span> <span
+            class="ec-lmr-9">throughput</span>
+         <span class="ec-lmr-9">improvements while implementing content-centric</span>
+         <span class="ec-lmr-9">networking in a production peer-to-peer</span>
+         <span class="ec-lmr-9">system. Unlike address-based routing, all network</span>
+         <span class="ec-lmr-9">operations (queries and commands) are expressed</span>
+
+
+         <span class="ec-lmr-9">as remote namespace reads. Urbit’s immutable scry</span>
+         <span class="ec-lmr-9">namespace enables eﬃcient caching, deterministic</span>
+         <span class="ec-lmr-9">encryption, and stateless publishing, while a</span>
+         <span class="ec-lmr-9">pre-distributed </span><span class="small-caps">pki</span> <span
+            class="ec-lmr-9">eliminates handshake overhead</span>
+         <span class="ec-lmr-9">for</span>
+         <span class="ec-lmr-9">single-roundtrip transactions. Lockstep Streaming,</span>
+         <span class="ec-lmr-9">a novel scale-invariant packet authentication</span>
+         <span class="ec-lmr-9">scheme using binary numeral trees, maintains</span>
+         <span class="ec-lmr-9">authentication integrity across variable </span><span class="small-caps">mtu</span>
+         <span class="ec-lmr-9">sizes</span>
+         <span class="ec-lmr-9">at relay hops. The Lackman traversal pattern</span>
+         <span class="ec-lmr-9">enables constant-space streaming authentication.</span>
+         <span class="ec-lmr-9">Directed</span> <span class="ec-lmr-9">routing simpliﬁes peer discovery and</span>
+         <span class="small-caps">nat</span> <span class="ec-lmr-9">traversal compared to previous approaches,</span>
+         <span class="ec-lmr-9">while source-independent routing minimizes relay</span>
+         <span class="ec-lmr-9">state. Begun in 2023 under the auspices of the</span>
+         <span class="ec-lmr-9">Urbit Foundation and</span> <span class="ec-lmr-9">deployed</span> <span
+            class="ec-lmr-9">in early 2025,</span>
+         <span class="ec-lmr-9">Directed Messaging represents the ﬁrst large-scale</span>
+         <span class="ec-lmr-9">deployment of content-centric networking.</span>
+      </p>
+   </section>
+
+   <h3 class="likesectionHead"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+      <span class="sectionToc">1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+      <br /> <span class="sectionToc">2 <a href="#x1-30002" id="QQ2-1-3">High-Level Protocol Design</a></span>
+      <br /> <span class="subsectionToc">2.1 <a href="#x1-40002.1" id="QQ2-1-4">Request/Response, Namespace
+            Reads</a></span>
+      <br /> <span class="sectionToc">3 <a href="#x1-50003" id="QQ2-1-5">Routing</a></span>
+      <br /> <span class="subsectionToc">3.1 <a href="#x1-60003.1" id="QQ2-1-6">Directed Routing</a></span>
+      <br /> <span class="subsectionToc">3.2 <a href="#x1-70003.2" id="QQ2-1-8">Relaying</a></span>
+      <br /> <span class="subsectionToc">3.3 <a href="#x1-80003.3" id="QQ2-1-9">Peer Discovery</a></span>
+      <br /> <span class="subsectionToc">3.4 <a href="#x1-90003.4" id="QQ2-1-10">Route Tightening</a></span>
+      <br /> <span class="sectionToc">4 <a href="#x1-100004" id="QQ2-1-11">Authentication and Encryption</a></span>
+      <br /> <span class="subsectionToc">4.1 <a href="#x1-110004.1" id="QQ2-1-12">Message Authentication and Encryption
+            Details</a></span>
+      <br /> <span class="subsubsectionToc">4.1.1 <a href="#x1-120004.1.1" id="QQ2-1-13">Overlay Namespaces</a></span>
+      <br /> <span class="subsubsectionToc">4.1.2 <a href="#x1-130004.1.2" id="QQ2-1-14">%publ namespace (unencrypted
+            public)</a></span>
+      <br /> <span class="subsubsectionToc">4.1.3 <a href="#x1-140004.1.3" id="QQ2-1-15">%shut namespace (group
+            encrypted)</a></span>
+      <br /> <span class="subsubsectionToc">4.1.4 <a href="#x1-150004.1.4" id="QQ2-1-16">%chum namespace (1-to-1
+            encrypted)</a></span>
+
+
+      <br /> <span class="subsubsectionToc">4.1.5 <a href="#x1-160004.1.5" id="QQ2-1-17">Other Cryptographic
+            Properties</a></span>
+      <br /> <span class="subsectionToc">4.2 <a href="#x1-170004.2" id="QQ2-1-18">Packet Authentication</a></span>
+      <br /> <span class="subsubsectionToc">4.2.1 <a href="#x1-180004.2.1" id="QQ2-1-21">Arena Allocator</a></span>
+      <br /> <span class="subsubsectionToc">4.2.2 <a href="#x1-220004.2.2" id="QQ2-1-25">Download
+            Checkpointing</a></span>
+      <br /> <span class="subsubsectionToc">4.2.3 <a href="#x1-230004.2.3" id="QQ2-1-26">Download Resumption</a></span>
+      <br /> <span class="sectionToc">5 <a href="#x1-240005" id="QQ2-1-27">Congestion Control</a></span>
+      <br /> <span class="subsectionToc">5.1 <a href="#x1-250005.1" id="QQ2-1-28">Architectural Foundation</a></span>
+      <br /> <span class="subsectionToc">5.2 <a href="#x1-260005.2" id="QQ2-1-29">State Variables</a></span>
+      <br /> <span class="subsectionToc">5.3 <a href="#x1-270005.3" id="QQ2-1-30">Slow Start and Congestion
+            Avoidance</a></span>
+      <br /> <span class="subsectionToc">5.4 <a href="#x1-280005.4" id="QQ2-1-31">Loss Detection and Recovery</a></span>
+      <br /> <span class="subsectionToc">5.5 <a href="#x1-290005.5" id="QQ2-1-32">Round-Trip Time Estimation</a></span>
+      <br /> <span class="subsectionToc">5.6 <a href="#x1-300005.6" id="QQ2-1-33">Selective Request
+            Architecture</a></span>
+      <br /> <span class="subsectionToc">5.7 <a href="#x1-310005.7" id="QQ2-1-34">Request Rate Limiting</a></span>
+      <br /> <span class="subsectionToc">5.8 <a href="#x1-320005.8" id="QQ2-1-35">Per-Peer State Management</a></span>
+      <br /> <span class="subsectionToc">5.9 <a href="#x1-330005.9" id="QQ2-1-36">Initial Window and Probing</a></span>
+      <br /> <span class="subsectionToc">5.10 <a href="#x1-340005.10" id="QQ2-1-37">Comparison with <span
+               class="small-caps">tcp</span> Variants</a></span>
+      <br /> <span class="subsectionToc">5.11 <a href="#x1-350005.11" id="QQ2-1-38">Design Trade-oﬀs</a></span>
+      <br /> <span class="subsectionToc">5.12 <a href="#x1-360005.12" id="QQ2-1-39">Future Enhancements</a></span>
+      <br /> <span class="sectionToc">6 <a href="#x1-370006" id="QQ2-1-40">Integration</a></span>
+      <br /> <span class="subsectionToc">6.1 <a href="#x1-380006.1" id="QQ2-1-41">Ames Flows</a></span>
+      <br /> <span class="sectionToc">7 <a href="#x1-390007" id="QQ2-1-42">Conclusion</a></span>
+      <br /> <span class="sectionToc"><a href="#x1-40000" id="QQ2-1-43">References</a></span>
+   </div>
+
+   <h3 class="sectionHead"><span class="titlemark">1 </span> <a id="x1-20001"></a>Introduction</h3>
+   <!--l. 78-->
+   <p class="noindent">The Directed Messaging project was a fundamental overhaul
+      of Urbit’s networking stack. It rewrote the protocol deﬁnition
+      and the protocol implementation, split between Hoon code inside
+      Arvo (the Urbit overlay OS), and C code in Vere (the Urbit
+      runtime).<span class="footnote-mark"><a href="mss2.html#fn1x0"><sup class="textsuperscript">1</sup></a></span><a
+         id="x1-2001f1"></a>
+
+
+      Directed Messaging addressed several major limitations of
+      Urbit’s previous networking stack: it increased throughput by
+      over 100<span class="mathjax-inline">\(\times \)</span>, improved peer discovery reliability, enabled the
+      scalability of content delivery, and introduced a modular
+      internal architecture that reduced implementation complexity.
+      Directed Messaging is an encrypted, authenticated,
+      peer-to-peer, packet-switched, message-oriented, connectionless,
+      content-centric, transactional network protocol with its own
+      congestion control, transmission control, and packet-level
+      authentication. It was deployed to the Urbit network in early
+      2025.
+   </p><!--l. 81-->
+   <p class="indent"> These improvements were driven by Directed Messaging’s
+      total adherence to a request-response discipline throughout
+      the stack, bundled with heavy use of Urbit’s immutable
+      referentially-transparent global namespace, called the
+      “scry namespace”. Every network message is either a
+      request for data at a “scry path” (Urbit’s equivalent of a
+      <span class="small-caps">url</span>), or an authenticated response that includes the data
+      at that path. This is true at the message layer and the
+      packet layer, and for both reads (queries) and writes
+      (commands).
+   </p><!--l. 83-->
+   <p class="indent"> Before Directed Messaging, the bandwidth Urbit was able
+      to utilize was extremely limited, maxing out in the hundreds
+      of kilobytes per second. It lacked orders of magnitude of
+      performance in order to make eﬀective use of commodity
+      networking hardware, such as on a laptop or cloud instance.
+      With Directed Messaging, Urbit’s networking speed was
+      able to reach over 1 Gibit/s on commodity hardware,
+      suﬃcient for the vast majority of contemporary personal use
+      cases.
+   </p><!--l. 85-->
+   <p class="indent"> Directed Messaging managed to improve throughput while
+      preserving Urbit’s already-good latency performance. For
+      small messages, a network transaction is accomplished in
+      one roundtrip: a command sent one way, followed by an
+      acknowledgment the other way. Due to Urbit’s public key
+      infrastructure (<span class="small-caps">pki</span>) being disseminated to all nodes <span class="ec-lmri-10">a
+         priori</span>
+      from a Byzantine fault-tolerant source (the Ethereum
+      blockchain and a bespoke L2 for economic eﬃciency), no
+      cryptographic handshake is needed for two Urbit nodes (called
+
+
+      “ships” in Urbit lingo) to begin communication – even their
+      ﬁrst exchange is a single roundtrip.
+   </p><!--l. 87-->
+   <p class="indent"> In addition to performance improvements, Directed
+      Messaging scales better by leveraging runtime caching to
+      disseminate data to many clients simultaneously. This strategy
+      is particularly eﬀective within Urbit’s immutable scry
+      namespace. Directed Messaging also introduces a new
+      procedure for peer discovery and routing that is much more
+      reliable and performant than the previous setups. It deals
+      better with <span class="small-caps">nat</span> traversal and with using supernodes as relays
+      more eﬃciently and reliably.
+   </p><!--l. 89-->
+   <p class="indent"> All of this is done by simplifying the basic networking
+      structure to enforce a rigid request-response discipline
+      throughout the entire system. In addition to that, it also
+      places all network messages, including acknowledgments
+      and commands, in addition to responses for queries
+      asking for data, into the referentially transparent scry
+      namespace. This makes Urbit’s entire networking stack
+      a named data networking system, which is also called
+      content-centric networking. As far as the authors know,
+      Directed Messaging is the very ﬁrst production deployment
+      of a content-centric networking protocol, as well as the
+      deployment with the largest number of nodes. Not only
+      that, its content-centricity preserves the immutability of
+      Urbit’s namespace throughout the stack. The immutability
+      is key to the scalability improvements and reliability
+      improvements, and it also helps with single-threaded
+      performance.
+   </p><!--l. 92-->
+   <p class="indent"> Along the way, we designed and implemented a novel
+      scheme for streaming packet authentication. This helps
+      prevent denial-of-service attacks that could forge individual
+      packets and spoof them in order to invalidate a large
+      download. This attack is prevented by authenticating every
+      packet, but unlike the previous version of Urbit’s networking
+      stack, which authenticated each packet with a signature
+      (meaning one signature for every kilobyte of data, which was
+      extremely ineﬃcient), there’s only one signature per message.
+      A Merkelization scheme using binary numeral trees is used to
+      authenticate the packets within that message (<a id="x1-2004"></a>~watter-parter,
+
+
+      2021).
+   </p><!--l. 94-->
+   <p class="indent"> This achieves a property that, to our knowledge, has not
+      been demonstrated in prior packet authentication schemes: the
+      ability to handle a diﬀerent maximum transmission unit
+      (<span class="small-caps">mtu</span>) at each hop in a relay chain without losing packet-level
+      authentication. It is a scale-invariant packet-authentication
+      scheme, and it also has good memory use characteristics, due
+      to a novel algorithm based on the “Lackman” scale-invariant
+      tree-traversal pattern developed by the authors. A relay
+      receiving packets of one size and emitting packets of another
+      size only needs to hold one large packet in memory while
+      streaming (e. g. if receiving 1 kiB packets and sending 16kiB
+      packets, it only needs to store 16 kiB of packet data at a
+      time). It can seamlessly handle any <span class="small-caps">mtu</span> that is one kilobyte,
+      two kilobytes, or any power-of-two number of kilobytes above
+      that, up to 128 MiB.
+   </p><!--l. 96-->
+   <p class="indent"> Another advantage of the Directed Messaging protocol is
+      that much more of the logic can be oﬄoaded from the Urbit
+      operating system, Arvo, into the runtime. This enables
+      decoupling between the formal speciﬁcation, which is written
+      in Nock, and implementation, which is written in C. This is
+      in keeping with the spirit of Urbit’s “jet” system that
+      separates mechanism and policy for code execution. The most
+      straightforward advantage of this decoupling is that each
+      packet can be processed ephemerally, without incurring
+      a disk write as in previous versions of Urbit’s network
+      protocol – that was a severe bottleneck on the maximum
+      throughput. The implementation in the runtime could
+      be swapped out with another implementation written
+      in another language, the congestion control algorithm
+      could be swapped out, and parallelism strategies could
+      readily be employed to increase multicore <span class="small-caps">cpu</span> utilization.
+      The implementation that was deployed contains a major
+      optimization: specialized arena allocators to reduce memory
+      management overhead.
+
+
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">2 </span> <a id="x1-30002"></a>High-Level Protocol Design</h3>
+
+   <h4 class="subsectionHead"><span class="titlemark">2.1 </span> <a id="x1-40002.1"></a>Request/Response, Namespace
+      Reads</h4>
+   <!--l. 104-->
+   <p class="noindent">The protocol design is based oﬀ the idea of a remote
+      namespace read, wherein a “subscriber” ship requests data
+      from a “publisher” ship, and the publisher sends that data as
+      the response. The publisher ship makes the data available over
+      the network by assigning it a path in Urbit’s scry namespace
+      and setting permissions appropriately (permissioning will be
+      described fully in a later section). The subscriber ship,
+      then, can download data from another ship by sending
+      it a request for the data at a path and waiting for the
+      response.
+   </p><!--l. 107-->
+   <p class="indent"> A network roundtrip is conceived of as a request, followed
+      by a response. The request consists of a “scry request”, i. e. a
+      request for data at a scry path. An example scry path is
+      <code class="lstinline"><span style="color:#000000">/~zod/1/2/c/x/~2025.9.22/sys/kelvin</span></code>. A scry path
+      immutably names a datum, in this case the sys.kelvin ﬁle
+      published by ~zod (at rift=1 and life=2), within the %c kernel
+      module (Clay, the revision control system), with request type
+      %x (request ﬁle contents), and with timestamp at the start of
+      the day on September 22, 2025. When a ship receives a scry
+      request over the network, it can respond by sending a
+      “scry response” containing the datum bound to that
+      path.
+   </p><!--l. 109-->
+   <p class="indent"> Over the network, a network request is a single <span class="small-caps">udp</span> packet
+      that encodes a scry path, limited to 384 characters so
+      the request packet always ﬁts into the internet-standard
+      1500-byte <span class="small-caps">mtu</span> (maximum transmission unit). A scry
+      response may consist of a single packet, or multiple packets,
+      depending on the size of the datum bound to that path. If the
+      datum is 1kiB or less, the response is encoded into a single
+      <span class="small-caps">udp</span> packet. Otherwise, the ﬁrst scry response packet
+      contains only the ﬁrst 1kiB of the datum, along with a
+      ﬁxed-width ﬁeld containing the number of bits in the whole
+
+
+      datum.
+   </p><!--l. 111-->
+   <p class="indent"> If the subscriber ship receives a response indicating the
+      datum is multi-packet, it switches modes and begins
+      requesting the remainder of the datum, one kiB at a time.
+      Each request for a kiB of data is itself a fully-ﬂedged
+      namespace read request, where the path in the request
+      contains the path of the whole datum as well as the chunk size
+      being requested (conﬁgured to 1 kiB over the public
+      internet, but this could be increased to any power of
+      2 kiB’s up to 128 MiB, for other environments, such
+      as intra-datacenter). The protocol deﬁnition does not
+      require those fragment requests to be sent in any particular
+      order or according to any particular congestion control
+      algorithm. The current implementation uses a packet-switched
+      variant of the <span class="small-caps">tcp</span> NewReno congestion control algorithm,
+      written in C in Urbit’s runtime, to manage multi-packet
+      reads. The message-level authentication is sent in the ﬁrst
+      response packet. Each subsequent packet is authenticated
+      as being part of that message by using the LockStep
+      streaming authentication scheme, described in a later
+      section.
+   </p><!--l. 113-->
+   <p class="indent"> This remote read ﬂow is a “pure read”: handling a read
+      request does not require the publisher ship to change any
+      persistent state. But a general-purpose network protocol needs
+      to be able to express commands, not just reads. Directed
+      Messaging builds commands out of reads. A command is
+      conceived of as two reads, one in each direction:
+   </p><!--l. 115-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-4002x1">
+         <!--l. 116-->
+         <p class="noindent">The ship sending the command makes the command
+            datum available within its own scry namespace,
+            so the receiving ship has the ability to read the
+            command by sending a remote read request.
+         </p>
+      </li>
+
+
+      <li class="enumerate" id="x1-4004x2">
+         <!--l. 117-->
+         <p class="noindent">The ship that receives the command, after
+            attempting to execute the command, makes the
+            command’s result available within its namespace, so
+            the sending ship has the ability to read the result
+            (hereafter called the “ack”) by sending a remote
+            read request. A result can be success (“ack”) or an
+            error datum (“naxplanation”, named after “nack” for
+            negative acknowledgment).</p>
+      </li>
+   </ol>
+   <!--l. 120-->
+   <p class="indent"> This approach is conceptually clean but immediately
+      presents two practical challenges. The ﬁrst is triggering: how
+      does the receiving ship <span class="ec-lmri-10">know </span>to request the command
+      datum from the sending ship? There are many ships on
+      the network; it would be absurdly impractical to send
+      requests to all of them on the oﬀ-chance that one or two of
+      them have an outstanding command for us. The second
+      challenge is latency: a naive implementation would imply
+      every command requires two network roundtrips, one to
+      remote-read the command and one to remote-read the
+      command’s result (ack or naxplanation). If so, that would be
+      unfortunate, since Urbit’s previous networking required only
+      one roundtrip for a command and ack, in the common
+      case of a small (≤1 kiB) command datum, and unneeded
+      roundtrips are anathema to a good user experience (<a id="x1-4005"></a>Cheshire,
+      1996).
+   </p><!--l. 123-->
+   <p class="indent"> Fortunately, we can solve both problems with one weird
+      trick. We add a “request type” bit to each network request
+      packet indicating whether it is a read or a command, and if it
+      is a command, it includes not only the scry request path, but
+      also a scry response containing the ﬁrst 1 kiB of the command
+      datum. When the receiving ship’s runtime receives the packet,
+      it looks at the ‘request-type’ bit to determine how to handle
+      the packet.
+   </p><!--l. 125-->
+   <p class="indent"> If the incoming request packet is a read, the runtime
+      performs a read request on the Arvo OS by ﬁring its <code
+         class="lstinline"><span style="color:#000000">+peek </span></code>
+      arm, a Nock function that reads from Arvo’s namespace. This
+      read request does not trigger any disk writes and could be run
+      in parallel with other reads and with an Arvo event. The
+
+
+      runtime then encodes the result of this read as a scry response
+      packet and sends it back to the IP and port that sent the
+      request.
+   </p><!--l. 127-->
+   <p class="indent"> If the packet is a command, the runtime injects the packet
+      as a stateful Arvo “event” by ﬁring its <code class="lstinline"><span style="color:#000000">+poke </span></code>
+      arm (a Nock
+      function that sends an event or command for Arvo to process,
+      producing eﬀects and a new Arvo OS with a modiﬁed state).
+      When this event completes, one of the eﬀects it produces can
+      be a scry response packet containing the ack, which the
+      runtime will send back to the IP and port that sent the
+      request.
+   </p><!--l. 129-->
+   <p class="indent"> If the command datum ﬁts within 1 kiB, the entire command
+      is sent in the ﬁrst packet, recapturing the single-roundtrip
+      ﬂow for a command and an ack. Multi-packet commands
+      are downloaded by the commanded ship using the same
+      congestion control as downloading any other potentially large
+      datum – and, importantly, those incremental downloads
+      do not necessarily trigger unnecessarily frequent disk
+      writes.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">3 </span> <a id="x1-50003"></a>Routing</h3>
+
+   <h4 class="subsectionHead"><span class="titlemark">3.1 </span> <a id="x1-60003.1"></a>Directed Routing</h4>
+   <!--l. 137-->
+   <p class="noindent">The Directed Messaging protocol gets its name from its
+      routing scheme, which treats each bidirectional communication
+      between two Urbit ships as directed, like a directed edge in a
+      graph. For each request/response roundtrip, one ship is
+      the requester, and the other is the responder, and that
+      distinction is known at every layer of the system. Making this
+      directionality known to routing enables a routing paradigm
+      where a response packet traces the exact same relay path
+      through the network as the request path, in the reverse order.
+      Previous Urbit networking protocols used the opposite
+      paradigm: “criss-cross routing”, so-called because both request
+      and response could be routed through the destination ship’s
+      “sponsor”, i. e. the supernode ship (“galaxy” root node or
+      “star” infrastructure node) responsible for relaying packets to
+      that ship. In contrast, in directed routing, the request and the
+      response both use the same relay: the responder ship’s
+      sponsor. See Figure <a href="#x1-6004r1">1<!--tex4ht:ref: fig:routing-strategies --></a> for a comparison of the
+      two routing
+      strategies.
+   </p>
+   <figure class="figure">
+      <div class="subfigure">
+         <!--l. 142-->
+         <p class="noindent"></p><!--l. 144-->
+         <p class="noindent"><img src="mss0x0.png" alt="RReeqsupeosntdere’rs’s
+RReSeqpsSuoppenoossnntodserreorr" />
+      </div>
+   </figure>
+
+   <h4 class="subsectionHead"><span class="titlemark">3.2 </span> <a id="x1-70003.2"></a>Relaying</h4>
+   <!--l. 223-->
+   <p class="noindent">Making the directedness of communication legible to
+      relays and Urbit runtimes allows the protocol to be a
+      faithful, if Urbit-speciﬁc, Named Data Networking (<span class="small-caps">ndn</span>)
+      protocol, which had been Urbit’s stated goal since 2010. A
+      Directed Messaging request packet acts as an <span class="small-caps">ndn</span> “interest”
+      packet, and a response packet acts as an <span class="small-caps">ndn</span> “data”
+      packet.
+   </p><!--l. 225-->
+   <p class="indent"> The <span class="small-caps">ndn</span> family of protocols, created by Van Jacobson et al.
+      in the mid-2000s, diﬀers from traditional networking protocols
+      in that an interest packet has no sender address ﬁeld – the
+      identity of the sender of a request is unknown to the network.
+      Instead, a receiver (relay or server) remembers “where” it
+      heard the request from, and sends the response back to
+      that. The notion of “where” varies depending on the
+      layer of the stack the system is operating at: for an IP
+      replacement, a relay would remember the physical interface
+      (e. g. Ethernet port) on which it heard the incoming
+      request. When building on top of IP and <span class="small-caps">udp</span>, as Directed
+      Messaging does, a receiver remembers the IP and port of the
+      sender.
+   </p><!--l. 227-->
+   <p class="indent"> Previous Urbit network protocols still included the sender’s
+      Urbit identity in the request packets, failing to achieve the
+      “source independence” property that deﬁnes <span class="small-caps">ndn</span>. Directed
+      Messaging is completely source-independent for reads, and for
+      commands, it piggybacks a source-independent response onto
+      a source-independent request in such a way that the receiver
+      does know which Urbit address sent the request, but not in a
+      way that requires packet routing to know or use the source
+      Urbit address.
+   </p><!--l. 229-->
+   <p class="indent"> Source independence lets the routing operate fully locally,
+      without reference to or knowledge of anything beyond a single
+      hop away in either direction. This minimizes the data storage
+      and synchronization requirements for nodes, which could
+
+
+      become signiﬁcant at scale.
+   </p><!--l. 231-->
+   <p class="indent"> Source independence entails stateful routing. Directed
+      Messaging adopts <span class="small-caps">ndn</span>’s Pending Interest Table, which stores
+      a mapping from each outstanding request to the IP and port
+      that sent that request. If the request times out (after roughly
+      30 seconds), or the request is satisﬁed by a response, the
+      request is deleted from the table.
+   </p><!--l. 233-->
+   <p class="indent"> Since responses are authenticated down to the packet level,
+      and immutable (meaning no cache invalidation is ever needed,
+      only eviction), it should be straightforward for relays to cache
+      responses, enabling eﬃcient content distribution through the
+      network. At present, each Urbit ship’s runtime has a
+      cache for its own responses, but supernodes (galaxies and
+      stars) do not yet cache responses from their sponsored
+      ships.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">3.3 </span> <a id="x1-80003.3"></a>Peer Discovery</h4>
+   <!--l. 237-->
+   <p class="noindent">Urbit is a peer-to-peer network. Only root nodes (galaxies) list
+      their own IP addresses publicly (on the Ethereum blockchain);
+      all other ships must be discovered on demand. When one
+      ship ﬁrst sends a request to another ship, it generally
+      doesn’t know at what IP and port that ship could be
+      reached, and it also doesn’t know if the ship is reachable
+      directly, or behind a ﬁrewall and only reachable through its
+      sponsor.
+   </p><!--l. 239-->
+   <p class="indent"> The criss-cross routing used in previous Urbit protocols was
+      hard to work with in practice and suﬀered from ineﬃciencies
+      and bugs. Directed Messaging has a simpler approach to peer
+      discovery that is easier to reason about.
+   </p><!--l. 241-->
+   <p class="indent"> The main diﬃculties with criss-cross routing stem from
+      the structure of the internet. Most residential internet
+      connections live behind a ﬁrewall that blocks all unsolicited
+      incoming <span class="small-caps">udp</span> packets. A laptop at home can send an
+      outgoing packet to some destination IP and port, and the
+      router will relay response packets back to the laptop for
+
+
+      some time afterward, usually 30 seconds, as long as those
+      response packets come from that same destination IP and
+      port.
+   </p><!--l. 243-->
+   <p class="indent"> A <span class="small-caps">udp</span>-based peer-to-peer network, then, needs to
+      include not only residential nodes but also nodes on the
+      public internet, not behind ﬁrewalls. These nodes must be
+      discoverable so that residential nodes can ping them every 25
+      seconds, to ensure the residential nodes can receive messages.
+      In Urbit, these public nodes are the galaxies (root nodes) and
+      stars (infrastructure nodes). For now, only galaxies perform
+      routing, due to edge cases with two levels of supernodes
+      in peer discovery using criss-cross routing – we expect
+      Directed Messaging will unblock stars from participating in
+      routing.
+   </p><!--l. 245-->
+   <p class="indent"> When communicating with another ship for the ﬁrst time,
+      a ship ﬁrst sends the packet to the other ship’s sponsoring
+      galaxy, which has an open connection to its sponsored ship if
+      it’s online. The galaxy receives a ping every 25 seconds from
+      its sponsored ship. Whenever the source IP and port
+      change, the galaxy’s runtime injects an Arvo event and
+      its Arvo OS saves the sponsored ship’s new location to
+      disk.
+   </p><!--l. 247-->
+   <p class="indent"> In Directed Messaging, when the galaxy receives a packet
+      intended for one of its sponsored ships, it relays the packet.
+      This uses the pending interest table described above to track
+      the fact that there is an outstanding request that the
+      galaxy is expecting to be honored by a response from the
+      sponsored ship. The fundamental invariant of directed
+      routing is that the response packet must trace the exact
+      same path through the network as the request packet
+      had, just reversed. Since this request had gone through
+      this galaxy, the response must also route through the
+      galaxy.
+   </p><!--l. 250-->
+   <p class="indent"> In Urbit’s previous protocols, in contrast, the response
+      would go directly from the sponsored ship back to the
+      requesting ship, and also potentially through the requesting
+      ship’s sponsoring galaxy. This works in principle, but one
+      drawback has to do with “route tightening” (described
+      below): the response route only tightens to a direct route
+
+
+      (without relays) if there are requests ﬂowing in both
+      directions; otherwise every response will ﬂow through the
+      requester’s sponsor, even if the requester is not behind a
+      ﬁrewall.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">3.4 </span> <a id="x1-90003.4"></a>Route Tightening</h4>
+   <!--l. 255-->
+   <p class="noindent">It is better for performance, scaling, and individual sovereignty
+      to obtain a direct route to another ship, rather than
+      communicating through relays. In order to facilitate this, the
+      system must automatically “tighten” a route over time to
+      reduce the number of hops. Directed Messaging accomplishes
+      this in the relay. When a relay receives a response packet
+      (originally sent by a transivitely sponsored ship, but possibly
+      through a relay once stars begin relaying packets), it appends
+      the IP and port from which it heard that packet to the end of
+      the packet before forwarding it to the requesting ship. Once
+      the requesting ship receives this augmented packet, it knows
+      the address appended to that packet is next hop in the relay
+      chain. Once it knows that, when it sends packets to the
+      responding ship, it can send them through the ﬁrst hop
+      in the relay chain (the receiving ship’s galaxy), or to
+      the next hop, which could be another relay or the ship
+      itself.
+   </p><!--l. 270-->
+   <p class="indent"> In the current implementation, the requesting ship uses a
+      simple procedure to decide which routes to send the packet on.
+      It tracks the date of the last received packet from both the
+      direct route and the route through the galaxy. A route is
+      considered active if a packet has been received on it within the
+      last ﬁve seconds. When the requesting ship goes to send a
+      packet, if the direct route is active, it sends the packet on that
+      route. Otherwise, it sends the packet through the galaxy and
+      also sends a copy of the packet on the direct route as a
+      probe.
+   </p><!--l. 279-->
+   <p class="indent"> This ensures continuity of communication when switching
+      to or from a direct route, and it automatically tightens
+
+
+      to the direct route if the direct route is responsive and
+      loosens to the galaxy route if the direct route becomes
+      unresponsive.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">4 </span> <a id="x1-100004"></a>Authentication and Encryption</h3>
+   <!--l. 287-->
+   <p class="noindent">Directed Messaging is always authenticated and supports
+      encryption in a number of diﬀerent modes: </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 289-->
+         <p class="noindent"><strong>Unencrypted reads</strong>: A ship can publish data
+            into its namespace without encryption. Response
+            messages are signed using the ship’s private key. The
+            signature attests to the scry binding: the pair of the
+            scry path and the datum at that path.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 290-->
+         <p class="noindent"><strong>One-to-One Encrypted Reads</strong>: A ship can
+            make data available to a single peer ship.
+            Response messages are authenticated via an external
+            hash-based message authentication code (<span class="small-caps">hmac</span>)
+            and internal signature. They are encrypted using a
+            symmetric key derived from the Diﬃe-Hellman key
+            exchange of the two ships’ keys.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 291-->
+         <p class="noindent"><strong>Commands</strong>: Commands and their acks are both
+            handled as one-to-one encrypted reads.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 292-->
+         <p class="noindent"><strong>One-to-Many Encryption</strong>: A ship can make data
+            available to many ships by sharing an encryption
+
+
+            key for that data to each ship using a one-to-one
+            encrypted read. The requesting ship then uses that
+            key to encrypt the request’s scry path and decrypt
+            the scry response.</p>
+      </li>
+   </ul>
+   <!--l. 295-->
+   <p class="indent"> The core encryption primitives consist of:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 298-->
+         <p class="noindent">kdf: BLAKE3, in its key derivation mode.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 299-->
+         <p class="noindent">crypt: XChaCha8, with its 24-byte nonce derived by
+            processing the (arbitrary-length) input initialization
+            vector (IV) using the key derivation function (kdf)
+            with &#x0022;mesa-crypt-iv&#x0022; as the context string.</p>
+      </li>
+   </ul>
+   <!--l. 302-->
+   <p class="noindent">Messages and their paths are encrypted separately. First, kdf
+      is used to derive an authentication key and encryption key
+      from the shared secret. The authentication key is used to
+      compute a 128-bit keyed BLAKE3 hash of the path; this
+      serves as the Authenticated Encryption with Associated Data
+      (<span class="small-caps">aead</span>) tag. The encryption key is then used to encrypt the
+      path with crypt, using the tag as the IV. Concatenating the
+      encrypted path and authentication tag yields a “sealed”
+      path. The message itself is then encrypted with crypt,
+      using the sealed path as the IV. Authentication of the
+      message is achieved via a Merkle hashing scheme described
+      later.
+   </p><!--l. 305-->
+   <p class="indent"> Directed Messaging’s encryption scheme uses a variant of
+      ChaCha20, XChaCha, with reduced rounds for performance.
+      XChaCha is an extended-nonce variant of ChaCha that
+      accepts a 192-bit nonce instead of the standard 96-bit nonce.
+      However, rather than using the caller-provided initialization
+      vector directly as the nonce, Directed Messaging ﬁrst
+      applies a BLAKE3 key derivation function to derive a
+      deterministic 24-byte nonce from the IV using the context
+
+
+      string &#x0022;mesa-crypt-iv&#x0022;. This XChaCha operation with 8 rounds
+      then produces a derived key and extended nonce, which are
+      subsequently used for the actual ChaCha encryption (also
+      with 8 rounds) of the message payload. The use of 8 rounds
+      instead of the standard 20 is a performance optimization –
+      ChaCha’s security margin allows for this reduction in
+      cryptographic applications where the extreme paranoia of
+      20 rounds may be unnecessary (<a id="x1-10001"></a>Aumasson, 2019), and
+      the deterministic nonce derivation via BLAKE3 adds an
+      additional layer of domain separation.
+   </p><!--l. 307-->
+   <p class="indent"> Because the scry namespace immutably binds paths to
+      their message data, the path serves as a synthetic IV for the
+      message, making encryption deterministic. This solves
+      multiple problems. It (along with other principles of Directed
+      Messaging) prevents replay attacks by construction. Every
+      Directed Messaging packet is idempotent at the application
+      level (a duplicate packet can trigger a duplicate ack and minor
+      state changes in the runtime and Arvo kernel related to
+      routing state, but it cannot modify anything visible to an
+      application). It further removes the need for explicit nonce
+      management, such as generating, storing, and transmitting an
+      explicit nonce for each message. Not tracking nonces reduces
+      the system’s security attack surface area considerably,
+      since nonce state mismanagement is a common source of
+      vulnerabilities. Finally, supporting encrypted values in the
+      namespace allows the system to implement encryption using
+      overlay namespaces (described in more detail below), which
+      provide a clean layering that separates encryption from other
+      concerns.
+   </p><!--l. 309-->
+   <p class="indent"> Before transmission, a single 0x1 byte is appended
+      to the encrypted message, called a “trailer byte”. This
+      solves a representation problem speciﬁc to Urbit’s atom
+      system. In Urbit, data is ultimately stored as “atoms”:
+      arbitrary-precision natural numbers. The atom system cannot
+      distinguish between byte streams with equivalent numerical
+      value; that is, it has no way to “say” 0x1000 instead of
+      0x1 or 0x1000000000 – all are numerically equivalent to
+
+
+      1.<span class="footnote-mark"><a href="mss3.html#fn2x0"><sup class="textsuperscript">2</sup></a></span><a
+         id="x1-10002f2"></a>
+      Thus, if a ciphertext happens to end with one or more zero
+      bytes, those would be stripped when the ciphertext is
+      represented as an atom, corrupting the data. Appending a 0x1
+      byte ensures that the atom representation always preserves the
+      full length of the ciphertext, including any trailing zeros.
+      During decryption, the code veriﬁes that the ﬁnal byte is
+      indeed 0x1 (which catches truncation or corruption) and then
+      strips it before decrypting. This construction provides
+      authenticated encryption properties through the deterministic
+      relationship between the IV and nonce, ensuring that any
+      tampering with the ciphertext or IV will result in decryption
+      failure.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">4.1 </span> <a id="x1-110004.1"></a>Message Authentication and
+      Encryption Details</h4>
+
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.1 </span> <a id="x1-120004.1.1"></a>Overlay Namespaces</h5>
+   <!--l. 316-->
+   <p class="noindent">Each of the three privacy modes has its own “overlay
+      namespace”, i. e. a part of the scry namespace that somehow
+      transforms values bound to a diﬀerent part of the namespace.
+      A path in an overlay namespace often consists of a path preﬁx
+      containing the name of the overlay and any parameters needed
+      for the transformation it performs on the datum at the
+      overlaid path, followed by the overlaid path.
+   </p><!--l. 318-->
+   <p class="indent"> A handler function that deals with scry requests to
+      the overlay namespace is free to parse transformation
+      parameters out of the overlay preﬁx, inspect the overlaid path,
+      make a scry request for the data at that path, make scry
+      requests related to that path (such as existence checks
+      for ﬁle paths), and run arbitrary code to transform the
+
+
+      results. This is all possible because scry requests are
+      purely functional by construction – they are deterministic
+      functions of their inputs, with no hidden inputs, and
+      there is no mechanism by which they could change Arvo
+      state.
+   </p><!--l. 320-->
+   <p class="indent"> Directed Messaging uses overlay namespaces not only for
+      privacy modes, but also to publish individual packets within a
+      message. The packet’s size (expressed as the log base 2 kiB,
+      e. g. 3 for 8 kiB or 4 for 16 kiB) and fragment number (index
+      within the message) are parameters to this overlay, which
+      overlays the message’s scry path.
+   </p><!--l. 322-->
+   <p class="indent"> Directed Messaging is the ﬁrst Urbit kernel module to
+      make heavy use of overlay namespaces in its design. They play
+      an important role in maintaining boundaries between layers
+      within the system: privacy is separated, by construction, from
+      other concerns due to the isolation imposed by overlay
+      namespaces. For example, an application can declare what
+      privacy mode it wants to use for a piece of data it publishes,
+      and the kernel enforces that by exposing it over the network
+      using the appropriate overlay namespace.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.2 </span> <a id="x1-130004.1.2"></a>%publ namespace
+      (unencrypted public)</h5>
+   <!--l. 327-->
+   <p class="noindent">A value registered in the <code
+         class="lstinline"><span style="color:#000000">%publ </span></code> namespace is intended to be
+      publicly readable by anyone on the network. The message is
+      not encrypted, but it is authenticated using signature
+      authentication only (using a 64-byte Ed25519 signature
+      calculated over the encoded beam path and the <span class="small-caps">lss</span> root of the
+      unencrypted jammed data). The publisher signs the message
+      using their Ed25519 private key (extracted from their
+      networking key), and the receiver veriﬁes the signature using
+      the publisher’s Ed25519 public key retrieved from Azimuth. In
+      this model, authenticity is provided by the signature, while
+      conﬁdentiality is not provided since the message is sent in
+      plaintext.
+   </p><!--l. 329-->
+   <p class="indent"> The %publ namespace uses unencrypted paths with the
+
+
+      structure:
+   </p>
+   <!--l. 331-->
+   <pre class="lstlisting" id="listing-5"><span class="label"><a 
+ id="x1-13001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/publ/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">life</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">path</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 335-->
+   <p class="noindent">with the components: </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 338-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">life </span></code> (key revision
+            number) of the publisher’s
+            networking keys is used to identify which public key
+            to use for signature veriﬁcation.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 339-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">path </span></code> is the actual user
+            path in plaintext. This is not
+            encrypted and is visible to all network observers.</p>
+      </li>
+   </ul>
+   <!--l. 342-->
+   <p class="indent"> Everything in the <code class="lstinline"><span style="color:#000000">%publ </span></code>
+      namespace is public: both the
+      publisher’s identity/key version and the content path are
+      visible to anyone. No encryption is applied to either the path
+      or the message payload. Authentication comes solely from the
+      Ed25519 signature, which proves the publisher created
+      this content. Key rotation is supported through the life
+      counter.
+   </p><!--l. 344-->
+   <p class="indent"> Its use cases include public data that should be readable by
+      anyone, content where authenticity matters but conﬁdentiality
+      doesn’t, and scenarios where simplicity is preferred over the
+      complexity of encrypted namespaces (since no key exchange or
+      group key distribution is required).
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.3 </span> <a id="x1-140004.1.3"></a>%shut namespace (group
+      encrypted)</h5>
+   <!--l. 349-->
+   <p class="noindent">In contrast, the <code class="lstinline"><span style="color:#000000">%shut </span></code>
+      namespace is intended for one-to-many
+      encrypted data sharing, wherein a publisher ship shares data
+      with a group of ships by encrypting the data with a shared
+
+
+      symmetric key known to the group. The message is encrypted
+      with XChaCha8 using this group symmetric key. The key is
+      provided via the <code class="lstinline"><span style="color:#000000">%keen </span></code> task (not derived from
+      <span class="small-caps">ecdh</span>). The
+      encrypted path indicates which group key to use. Signature
+      authentication takes place using a 64-byte Ed25519 signature
+      computed over the encoded beam path and the <span class="small-caps">lss</span> root of the
+      encrypted data. The signature uses the publisher’s Ed25519
+      private key, proving that the publisher created this encrypted
+      payload. The receiver veriﬁes the signature using the
+      publisher’s Ed25519 public key from Azimuth, then decrypts
+      with the group key. In this security model, the signature
+      proves authenticity from the publisher, while encryption
+      provides conﬁdentiality to group members. Anyone with the
+      group key can decrypt, but only the publisher can create valid
+      signatures.
+   </p><!--l. 351-->
+   <p class="indent"> The <code class="lstinline"><span style="color:#000000">%shut </span></code> namespace uses
+      encrypted paths with the
+      structure:
+   </p>
+   <!--l. 353-->
+   <pre class="lstlisting" id="listing-12"><span class="label"><a 
+ id="x1-14001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/shut/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">key-id</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">encrypted-path</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 357-->
+   <p class="noindent">with the components: </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 360-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">key-id </span></code>: A numeric
+            identiﬁer indicating which group
+            symmetric key to use for decryption. This allows
+            multiple groups to be supported, each with their own
+            key.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 361-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">encrypted-path </span></code>: The
+            actual user path, encrypted
+            using the group key. This is sealed with the same
+            symmetric key used to encrypt the message payload,
+            making the entire scry path opaque to anyone
+            without the group key.</p>
+      </li>
+   </ul>
+
+
+   <!--l. 364-->
+   <p class="noindent">The actual content path is hidden from network observers.
+      Only the key ID is visible in plaintext. The group key must be
+      obtained separately (typically via a <code class="lstinline"><span style="color:#000000">%keen </span></code>
+      task) to decrypt
+      both the path and the message payload. Diﬀerent groups using
+      diﬀerent key IDs can coexist without revealing which content
+      is being accessed.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.4 </span> <a id="x1-150004.1.4"></a>%chum namespace (1-to-1
+      encrypted)</h5>
+   <!--l. 370-->
+   <p class="noindent">The <code class="lstinline"><span style="color:#000000">%chum </span></code> namespace is
+      intended for one-to-one encrypted
+      data sharing between two ships. Authentication utilizes <span class="small-caps">hmac</span>
+      only (without signatures). The message is encrypted with
+      XChaCha8 using a symmetric key derived from Curve25519
+      <span class="small-caps">ecdh</span> key exchange between the two ships’ networking keys.
+      A 16-byte <span class="small-caps">hmac</span> (BLAKE3 keyed hash) is computed
+      over the encoded beam path and the <span class="small-caps">lss</span> root of the
+      encrypted data, using the same <span class="small-caps">ecdh</span>-derived symmetric key.
+      Both parties can independently derive this key from their
+      own private key and the other party’s public key. The
+      receiver veriﬁes the <span class="small-caps">hmac</span> using the shared symmetric
+      key, then decrypts with the same key. In this security
+      model, the <span class="small-caps">hmac</span> proves the sender possesses the shared
+      symmetric key (implicitly authenticating them as the
+      expected peer). No signatures are needed since only two
+      parties share this key. This applies to both pokes and
+      acks.
+   </p><!--l. 372-->
+   <p class="indent"> The <code class="lstinline"><span style="color:#000000">%chum </span></code> namespace uses
+      encrypted paths with structure:
+   </p>
+   <!--l. 374-->
+   <pre class="lstlisting" id="listing-18"><span class="label"><a 
+ id="x1-15001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/chum/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">server-life</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">client-ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">client-life</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span> 
+<span class="label"><a 
+ id="x1-15002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">encrypted-path</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+   <!--l. 379-->
+   <p class="noindent">with the components: </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 382-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">server-life </span></code>: The life
+            (key revision number) of the
+
+
+            server ship’s networking keys, used to identify which
+            version of their keys to use for <span class="small-caps">ecdh</span> key derivation.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 383-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">client-ship </span></code>: The @p
+            address of the client ship in
+            the communication pair.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 384-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">client-life </span></code>: The life of
+            the client ship’s networking
+            keys, used to identify which version of their keys to
+            use for <span class="small-caps">ecdh</span> key derivation.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 385-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">encrypted-path </span></code>: The
+            actual user path, encrypted
+            using the symmetric <span class="small-caps">ecdh</span> key derived from both
+            ships’ networking keys. This makes the scry path
+            opaque to network observers.</p>
+      </li>
+   </ul>
+   <!--l. 388-->
+   <p class="noindent">This arrangement yields some nice privacy properties. The
+      actual content path is hidden from network observers. Only
+      the identities of both parties and their key versions are visible
+      in plaintext. Only the two ships involved can derive the
+      symmetric key to decrypt the path and payload. Key rotation
+      is supported through the life counters.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.1.5 </span> <a id="x1-160004.1.5"></a>Other Cryptographic
+      Properties</h5>
+   <!--l. 394-->
+   <p class="noindent">Directed Messaging relies on the ability to rotate keys on
+      chain for its forward secrecy. Future versions of the protocol
+      might add a ratchet to minimize the damage if a private key is
+      compromised.
+
+
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">4.2 </span> <a id="x1-170004.2"></a>Packet Authentication</h4>
+   <!--l. 399-->
+   <p class="noindent">One of the goals of Directed Messaging was to improve upon
+      the safe but dumb conservative design of old Ames to
+      sign every 1 KiB packet. The standard approach is to
+      use asymmetric crypto to establish a shared <span class="small-caps">aead</span> key,
+      and use it to authenticate each packet. This is just as
+      safe as signing every packet, and orders of magnitude
+      faster. However, one still can’t verify that a peer is sending
+      <span class="ec-lmri-10">correct </span>data until one has received the entire message. The
+      remote could send 999 good packets and one bad, and the
+      receiver has no way of knowing which was which. This is
+      especially annoying if one wants to download in parallel from
+      multiple peers: if the ﬁnal result is invalid, which peer is to
+      blame?
+   </p><!--l. 402-->
+   <p class="indent"> Verifying that a packet belongs to a particular message
+      is a job for a Merkle tree. Thus the protocol needs to
+      split message data into the leaves of a tree, and send
+      both leaf data and tree hashes. Early on, we debated
+      whether to make these distinct request types; we settled on
+      interleaving them. Now the question becomes: which tree
+      hashes does one need to send, and when does one send
+      them?
+   </p><!--l. 404-->
+   <p class="indent"> The relevant design constraints were:
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-17002x1">
+         <!--l. 406-->
+         <p class="noindent">Suﬃciently-small messages should not require more
+            than one packet.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-17004x2">
+         <!--l. 407-->
+         <p class="noindent">It should be possible to download in parallel.
+         </p>
+      </li>
+
+
+      <li class="enumerate" id="x1-17006x3">
+         <!--l. 408-->
+         <p class="noindent">The protocol should be ﬂexible with respect to the
+            size of a leaf.</p>
+      </li>
+   </ol>
+   <!--l. 411-->
+   <p class="noindent">An obvious ﬁrst place to look for inspiration was <a
+         href="https://github.com/oconnor663/bao">Bao</a>
+      (<a id="x1-17007"></a>O’Connor, 2018). However, Bao is not very amenable to
+      being split into ﬁxed-size packets: it intermingles leaf
+      data and tree hashes into one stream, and the number of
+      consecutive hashes varies based on the oﬀset. You could
+      modify it such that each packet consists of a leaf followed
+      by at most one hash; indeed, this was the initial plan.
+      Visually:
+   </p><!--l. 421-->
+   <p class="noindent"> <img src="mss0x1.png" alt="0123456789111111111abqcjdgknefhilmopr012345678" />
+   </p><!--l. 603-->
+   <p class="indent"> This is a <a href="https://eprint.iacr.org/2021/038">binary numeral tree</a>: a structure composed
+      of
+      perfect binary trees, imposed upon a ﬂat sequence of bytes.
+      The numbers 0–18 represent leaf data (typically 1 KiB per
+      leaf), while letters <code class="lstinline"><span style="color:#000000">a </span></code>–<code
+         class="lstinline"><span style="color:#000000">r </span></code> represents tree hashes that are used to
+      verify the leaves. So packet 3 would contain bytes 3072–4096
+      and leaf hash <code class="lstinline"><span style="color:#000000">d </span></code>.
+   </p><!--l. 605-->
+   <p class="indent"> The main problem with this approach is that it requires
+      buﬀering. In order to verify leaf 0, we need hashes <code
+         class="lstinline"><span style="color:#000000">a </span></code> through <code
+         class="lstinline"><span style="color:#000000">e </span></code>
+      – ﬁve packets! Worse, once we’ve received ﬁve packets,
+      we have the whole <code
+         class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000">,4</span><span style="color:#000000">)</span></code>
+      subtree, making hashes <code class="lstinline"><span style="color:#000000">d </span></code> and
+      <code class="lstinline"><span style="color:#000000">e</span></code> redundant. (In <span
+         class="small-caps">bnt</span>s, we use the notation <code
+         class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">n,m</span><span style="color:#000000">)</span></code>
+      to
+      refer to the perfect subtree containing leaves <code
+         class="lstinline"><span style="color:#000000">n </span></code> through
+      <code class="lstinline"><span style="color:#000000">m-1</span></code>.)
+   </p><!--l. 607-->
+   <p class="indent"> Buﬀering a few packets is not the end of the world, but the
+      whole thing had kind of a bad smell to it. We asked: what
+      would happen if we added another constraint?
+   </p><!--l. 610-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+
+
+      <li class="enumerate" id="x1-17009x4">
+         <!--l. 612-->
+         <p class="noindent">It should be possible to validate each packet as soon
+            as it arrives, with no buﬀering.</p>
+      </li>
+   </ol>
+   <!--l. 615-->
+   <p class="indent"> For starters, an inescapable consequence of this constraint
+      is that we must send the <span class="ec-lmri-10">full </span>Merkle proof for the ﬁrst leaf
+      before we can send the leaf data itself. Also, we can no longer
+      send hashes that can’t be immediately veriﬁed. For example,
+      to verify <code class="lstinline"><span style="color:#000000">g </span></code>, we ﬁrst need to have veriﬁed <code
+         class="lstinline"><span style="color:#000000">c </span></code>; we can then
+      combine <code class="lstinline"><span style="color:#000000">g </span></code> with its sibling hash and conﬁrm that
+      the result
+      matches <code class="lstinline"><span style="color:#000000">c </span></code>.
+   </p><!--l. 617-->
+   <p class="indent"> While adding another constraint seems like it would
+      make our life harder, in reality the opposite happened:
+      the protocol was greatly simpliﬁed. It turns out that by
+      front-loading the initial proof hashes, we ensure that the
+      received leaf data and hashes will never “run ahead” of what
+      can be immediately veriﬁed. Here’s what it looks like in
+      practice:
+   </p><!--l. 626-->
+   <p class="noindent"> <img src="mss0x2.png" alt="0123456789111111111**aaccddgghhjjkkmm****bbffeeiill012345678" />
+   </p><!--l. 822-->
+   <p class="indent"> In the initial packet, we send the Merkle proof for leaf 0,
+      i. e. all of the hashes marked with *. Each subsequent
+      packet contains leaf data (leaf 0, 1, 2, etc.), and possibly a
+      “pair” (<code class="lstinline"><span style="color:#000000">a </span></code>, <code
+         class="lstinline"><span style="color:#000000">b </span></code>, <code
+         class="lstinline"><span style="color:#000000">c </span></code>, etc.), which comprises <span
+         class="ec-lmri-10">both </span>child hashes
+      under a particular node. Packet-by-packet, the veriﬁer
+      sees:
+   </p>
+   <!--l. 824-->
+   <pre class="lstlisting" id="listing-41"><span class="label"><a 
+ id="x1-17010r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17011r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root.</span></span> 
+<span class="label"><a 
+ id="x1-17012r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17013r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a.</span></span> 
+<span class="label"><a 
+ id="x1-17014r5"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17015r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17016r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17017r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b.</span></span> 
+<span class="label"><a 
+ id="x1-17018r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17019r10"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17020r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17021r12"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c.</span></span> 
+<span class="label"><a 
+ id="x1-17022r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17023r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17024r15"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17025r16"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">...</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">so</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on.</span></span></pre>
+
+
+   <!--l. 843-->
+   <p class="indent"> At each step, we “consume” two hashes (one to verify a
+      leaf, one to verify a pair), and add the pair to our veriﬁed set;
+      thus, the number of veriﬁed-but-unused hashes stays constant
+      until we get to packet 13. At this point, packets still contain
+      leaf data (so we’ll consume one hash), but there are no more
+      pairs left to send; thus, our stockpile of hashes is steadily
+      exhausted, until we consume the ﬁnal hash to verify the ﬁnal
+      packet.
+   </p><!--l. 845-->
+   <p class="indent"> This is a solid improvement! We dubbed it “Lockstep
+      Streaming,” after the fact that veriﬁcation proceeds in
+      lockstep with packet receipt. But when we sat down to write
+      the code for matching veriﬁed-but-unused hashes to incoming
+      leaves and pairs, things got hairy. It was clearly <span class="ec-lmri-10">possible</span>, but
+      the ugliness of the logic suggested that there was a better way.
+      And after ﬁlling plenty of notebook pages with hand-drawn
+      Merkle trees, ~rovnys-ricfer found it: a mapping of packet
+      numbers to hash pairs that was not only much cleaner, but
+      also <span class="ec-lmri-10">scale invariant</span>. It’s called Blackman ordering, and it looks
+      like this:
+   </p><!--l. 854-->
+   <p class="noindent"> <img src="mss0x3.png" alt="0123456789111111111**aacceeggiikkmmoo****bbffddjjhh012345678" />
+   </p><!--l. 1050-->
+   <p class="indent"> See the diﬀerence? Instead of ordering the pairs on a
+      ﬁrst-needed basis, we jump around a bit. Speciﬁcally, we send
+      a pair whose “height” corresponds to the number of trailing
+      zeroes in the binary representation of the packet number. For
+      example, packet 4 is <code
+         class="lstinline"><span style="color:#000000">0</span><span style="color:#000000">b100 </span></code> in
+      binary, with two trailing
+      zeroes, so we send pair d, which sits two levels above the
+      leaves.<span class="footnote-mark"><a href="mss4.html#fn3x0"><sup class="textsuperscript">3</sup></a></span><a
+         id="x1-17026f3"></a>
+      Here is a packet-by-packet veriﬁcation for Blackman ordering:
+
+
+   </p><!--l. 1052-->
+   <p class="indent"> The <code
+         class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">x,y</span><span style="color:#000000">)</span></code>
+      notation indicates a half-open set, i. e. it
+      includes <code class="lstinline"><span style="color:#000000">x </span></code>, <code
+         class="lstinline"><span style="color:#000000">x+1 </span></code>, <code
+         class="lstinline"><span style="color:#000000">x+2 </span></code>, …, <code
+         class="lstinline"><span style="color:#000000">y-1 </span></code>. <code
+         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000">,4</span><span style="color:#000000">)</span></code>
+      contains elements <code class="lstinline"><span style="color:#000000">2 </span></code> and <code
+         class="lstinline"><span style="color:#000000">3 </span></code>.
+      <code
+         class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000">,1</span><span style="color:#000000">)</span></code>
+      contains the single element <code class="lstinline"><span style="color:#000000">0 </span></code>.
+   </p>
+   <!--l. 1054-->
+   <pre class="lstlisting" id="listing-53"><span class="label"><a 
+ id="x1-17028r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17029r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root.</span></span> 
+<span class="label"><a 
+ id="x1-17030r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17031r4"></a></span> 
+<span class="label"><a 
+ id="x1-17032r5"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a.</span></span> 
+<span class="label"><a 
+ id="x1-17033r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17034r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17035r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17036r9"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b.</span></span> 
+<span class="label"><a 
+ id="x1-17037r10"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17038r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17039r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17040r13"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c.</span></span> 
+<span class="label"><a 
+ id="x1-17041r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17042r15"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17043r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17044r17"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">...</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">so</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on.</span></span></pre>
+   <!--l. 1074-->
+   <p class="indent"> Shortly after, ~watter-parter tweaked the ordering slightly,
+      oﬀsetting it by one; this further simpliﬁed the low-level
+      bithacking. We called this variant “Lackman ordering,” and it
+      is used in the ﬁnal version of Lockstep Streaming. A diagram
+      of the order is depicted in Figure <a href="#x1-17060r2">2<!--tex4ht:ref: fig:lackman-1 --></a>.
+   </p><!--l. 1076-->
+   <p class="indent"> Per-packet veriﬁcation for Lackman ordering looks
+      like:
+   </p>
+   <!--l. 1078-->
+   <pre class="lstlisting" id="listing-54"><span class="label"><a 
+ id="x1-17045r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Merkle</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17046r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">proof</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">signed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">root.</span></span> 
+<span class="label"><a 
+ id="x1-17047r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17048r4"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">no</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17049r5"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17050r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17051r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a.</span></span> 
+<span class="label"><a 
+ id="x1-17052r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17053r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17054r10"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17055r11"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b.</span></span> 
+<span class="label"><a 
+ id="x1-17056r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">leaf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[2</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17057r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Verify</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">against</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17058r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">We</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">have</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[3</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[8</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[16</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">,19</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.</span></span> 
+<span class="label"><a 
+ id="x1-17059r15"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">...</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">and</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">so</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">on.</span></span></pre>
+   <figure class="figure">
+      <img src="mss0x4.png" alt="" />
+      <div class="caption"><span class="id">Figure 2: </span><span class="content">Lackman-ordered traversal. See
+            Figure <a href="#x1-17061r3">3<!--tex4ht:ref: fig:lackman-2 --></a> for a
+            time series.
+         </span></div>
+   </figure>
+   <figure class="figure">
+      <img src="mss0x5.png" alt="" />
+      <div class="caption"><span class="id">Figure 3: </span><span class="content">Lackman-ordered traversal as time
+            series.
+         </span></div>
+   </figure>
+   <!--l. 1904-->
+   <p class="indent"> Compared to Blackman ordering, the pairs appear oﬀset
+      by one position, which simpliﬁes the bit-manipulation logic for
+      computing which pair to include in each packet.
+   </p><!--l. 1906-->
+   <p class="indent"> There’s one more optimization worth mentioning: If the
+      message is small enough, we can skip the initial step of
+      sending a packet containing only a Merkle proof (with no leaf
+      data). Obviously, for a one-leaf message, we can simply
+      send that leaf; the hash of that leaf is the Merkle root.
+      For a two-leaf message, we can send the leaf plus its
+      sibling hash (<code
+         class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000">,2</span><span style="color:#000000">)</span></code>);
+      the veriﬁer can hash the ﬁrst leaf and
+      combine it with the sibling hash to recover the root. And for
+      a three- or four-leaf message, we can send <code
+         class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000">,2</span><span style="color:#000000">)</span></code>
+      and
+      <code
+         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000">,3</span><span style="color:#000000">)</span></code>
+      (or <code
+         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000">,4</span><span style="color:#000000">)</span></code>,
+      respectively). That’s the limit, though;
+      if a message has ﬁve leaves, we would need to send at
+      least three sibling hashes for the veriﬁer to recompute
+      the root, but our packet framing only allows up to two
+      hashes.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.1 </span> <a id="x1-180004.2.1"></a>Arena Allocator</h5>
+   <!--l. 1911-->
+   <p class="noindent">Directed Messaging uses a simple bump allocator arena for
+      memory management. Each arena is a contiguous block of
+      memory with three pointers: the start of the allocation (dat),
+      the current allocation position (beg), and the end of the block
+      (end). The new() macro allocates objects by advancing the
+      beg pointer with proper alignment.
+   </p><!--l. 1918-->
+   <p class="indent"> The arena allocator provides <span class="ec-lmri-10">no individual deallocation </span>–
+      once memory is allocated from an arena, it can’t be freed
+      separately. Instead, the entire arena is freed at once when the
+      data structure that owns it is destroyed.
+
+   </p>
+   <!--l. 1920-->
+   <p class="noindent"><span class="paragraphHead"><a id="x1-19000"></a><span class="ec-lmbx-10">Allocation
+            Patterns</span></span>
+
+
+      <a id="x1-19000doc"></a>
+      Arenas are created with sizes tailored to their use
+      case:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 1926-->
+         <p class="noindent"><strong>Pending Interest Table entries</strong> use 16 KiB
+            arenas. These store lane addresses for pending
+            requests, with the arena holding the entry itself plus
+            a linked list of address records.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1927-->
+         <p class="noindent"><strong>Pending requests</strong> allocate arenas at 5× the
+            expected message size. A request receiving a
+            1 MiB message gets a 5 MiB arena. This single
+            arena holds the request state, fragment data
+            buﬀer, <span class="small-caps">lss</span> authentication pairs, packet statistics,
+            bitset tracking received fragments, and pre-serialized
+            request packets.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1928-->
+         <p class="noindent"><strong>Jumbo frame cache entries</strong> allocate based on
+            proof size, data size, hash pairs, plus a 2 KiB
+            buﬀer. For a 1 MiB message, this might be around
+            1–2 MiB. The arena stores the cached response data,
+            Merkle proof spine, and authentication hashes.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1929-->
+         <p class="noindent"><strong>Temporary arenas</strong> for packet sending use message
+            size plus 16 KiB to hold serialized packets plus
+            overhead.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 1930-->
+         <p class="noindent"><strong>Scry callbacks</strong> get small arenas for asynchronous
+            Arvo interactions.</p>
+      </li>
+   </ul>
+
+   <!--l. 1933-->
+   <p class="noindent"><span class="paragraphHead"><a id="x1-20000"></a><span class="ec-lmbx-10">Deallocation
+            Triggers</span></span>
+      <a id="x1-20000doc"></a>
+      Arenas are freed only when their parent data structure is
+      destroyed:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 1938-->
+         <p class="noindent"><strong>Request completion</strong>: When all fragments arrive,
+            the request is deleted and its arena freed. This
+            happens asynchronously through libuv’s handle
+            cleanup to ensure proper timer shutdown before
+            freeing memory.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1939-->
+         <p class="noindent"><strong>Authentication failure</strong>: If <span class="small-caps">lss</span> veriﬁcation
+            fails
+            while processing fragments, the entire request is
+            immediately deleted.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1940-->
+         <p class="noindent"><strong>Timeout expiration</strong>: When retry timers exhaust
+            their attempts, the request is deleted.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 1941-->
+         <p class="noindent"><strong><span class="small-caps">pit</span> expiration</strong>: After 20 seconds, entries
+            are cleaned
+            from the Pending Interest Table.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 1942-->
+         <p class="noindent"><strong>Cache eviction</strong>: When the jumbo cache exceeds
+            200 MiB, it’s entirely cleared and all cached arenas
+            are freed.</p>
+      </li>
+   </ul>
+
+   <!--l. 1945-->
+   <p class="noindent"><span class="paragraphHead"><a id="x1-21000"></a><span class="ec-lmbx-10">Lifecycle</span></span>
+      <a id="x1-21000doc"></a>
+      A typical request lifecycle:
+   </p><!--l. 1949-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-21002x1">
+         <!--l. 1950-->
+         <p class="noindent"><strong>Allocation</strong>: Receive initial packet, create arena with
+            5× data size, allocate all request state from arena.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-21004x2">
+         <!--l. 1951-->
+         <p class="noindent"><strong>Growth</strong>:
+            As fragments arrive, write into pre-allocated buﬀers
+            within the arena.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-21006x3">
+         <!--l. 1952-->
+         <p class="noindent"><strong>Completion</strong>: All fragments received, construct ﬁnal
+            message, send to Arvo.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-21008x4">
+         <!--l. 1953-->
+         <p class="noindent"><strong>Cleanup</strong>: Delete request from map, stop timer, close
+            handle asynchronously.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-21010x5">
+
+
+         <!--l. 1954-->
+         <p class="noindent"><strong>Deallocation</strong>: In UV callback, free entire arena with
+            single call.</p>
+      </li>
+   </ol>
+   <!--l. 1957-->
+   <p class="indent"> This design trades memory eﬃciency for speed. Arenas
+      may hold unused space, but allocation is extremely fast (just
+      pointer arithmetic), and the single-free design eliminates
+      per-object deallocation overhead and fragmentation issues.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.2 </span> <a id="x1-220004.2.2"></a>Download Checkpointing
+   </h5>
+   <!--l. 1961-->
+   <p class="noindent">This has not been deployed to the network, but this design
+      allows the requesting ship’s runtime to inject jumbo frames of
+      arbitrary size into its Arvo as each one ﬁnishes downloading,
+      with real authentication by using Lockstep. Arvo will
+      seamlessly store those jumbo frames and accumulate them
+      until it has the whole message, at which time it will deserialize
+      the message into an Urbit ‘noun’ data structure and deliver it
+      to the application or kernel module that had triggered the
+      request.
+   </p><!--l. 1963-->
+   <p class="indent"> This allows the system to make eﬀective use of Arvo as a
+      download checkpointing system. After a process crash,
+      machine restart, or any other transient failure, the download
+      can be resumed with minimal loss of information.
+   </p><!--l. 1965-->
+   <p class="indent"> Injecting an authenticated jumbo frame into Arvo
+      maintains a security boundary. Urbit’s main runtime, Vere,
+      has two Unix processes: one runs the Arvo kernel, and the
+      other handles input and output. Arvo maintains ultimate
+      responsibility for cryptographic operations. This lets the
+      private key remain solely in the Arvo process, leaving the I/O
+      process without the ability to encrypt, decrypt, authenticate,
+      or verify authentication.
+   </p><!--l. 1967-->
+   <p class="indent"> Instead, the runtime delegates any operation requiring a
+      private key to Arvo, including validating the message-level
+      authentication in the ﬁrst packet of a scry response. To add
+      a layer of defense in depth in case the I/O process is
+      compromised, Arvo performs its own packet validation,
+      including the Lockstep packet authentication. This remains
+
+
+      eﬃcient because each packet can be a large jumbo frame.
+   </p><!--l. 1969-->
+   <p class="indent"> Checkpointing has another beneﬁt. No matter how large a
+      message is, the downloader can keep a ﬁxed upper bound
+      on the memory footprint while download that message,
+      proportional to one jumbo frame.
+
+   </p>
+   <h5 class="subsubsectionHead"><span class="titlemark">4.2.3 </span> <a id="x1-230004.2.3"></a>Download Resumption
+   </h5>
+   <!--l. 1974-->
+   <p class="noindent">After a transient failure – most commonly a process crash or
+      machine restart – a requesting ship can resume a download. In
+      order to pick up from where it left oﬀ, the runtime ﬁrst asks
+      its local Arvo for the leaf-packet hashes it needs, which Arvo
+      generates on demand from the jumbo frames that have already
+      been downloaded and stored in Arvo. This is <span class="mathjax-inline">\(O(\log (n))\)</span> hashes, where
+      <span class="mathjax-inline">\(n\)</span> is
+      the message length, and no message data needs to be sent
+      over inter-process communication in order to resume a
+      download, preventing restarts from becoming slow and
+      memory-intensive.
+   </p><!--l. 1976-->
+   <p class="indent"> Once the runtime has the hashes it needs, it resumes the
+      Lockstep streaming veriﬁcation that it had been doing,
+      beginning with the next jumbo frame after the last one that
+      had been downloaded and saved in Arvo.
+   </p><!--l. 1978-->
+   <p class="indent"> Download checkpointing and resumption together provide
+      a good set of tools for download management. This is beyond
+      what <span class="small-caps">tcp</span> provides, or even <span class="small-caps">http</span>. <span
+         class="small-caps">http</span> has resumption
+      headers, but both client and server have to opt into using
+      them, so in practice many <span class="small-caps">http</span>-based downloads cannot be
+      resumed.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">5 </span> <a id="x1-240005"></a>Congestion Control</h3>
+   <!--l. 1983-->
+   <p class="noindent">In Directed Messaging, congestion control is pluggable. The
+      requesting ship decides how many request packets to send and
+      at what time. The publisher ship is only responsible for
+
+
+      responding to requests and does not participate in congestion
+      control.
+   </p><!--l. 1985-->
+   <p class="indent"> It is possible for an Urbit implementation to have
+      functioning, if not performant, networking, without any
+      runtime implementation of congestion control. The formal
+      speciﬁcation in the networking module of the Arvo kernel for
+      how a ship sends request packets is a simple one-at-a-time
+      indeﬁnite repeating timer. The ship sends the ﬁrst request
+      packet, repeating it every thirty seconds until a response
+      packet is heard, at which point it begins requesting the next
+      packet.
+   </p><!--l. 1987-->
+   <p class="indent"> Performant congestion control, then, is an extension of
+      Urbit’s idea of a “jet”, i. e. a peephole optimization that
+      replaces a built-in function, deﬁned formally but is likely slow,
+      with an optimized low-level implementation.
+   </p><!--l. 1989-->
+   <p class="indent"> In practice, this slow packet re-send is used for retrying
+      dead connections, where the publishing ship has been
+      unresponsive for a long time. This is important because
+      Urbit network requests generally do not time out at the
+      application level; they are considered persistent, and
+      they must be retried indeﬁnitely. Fast, runtime-based
+      congestion control only kicks in when the runtime receives a
+      response packet, indicating the publishing ship has become
+      responsive.
+   </p><!--l. 1991-->
+   <p class="indent"> The current implementation of Directed Messaging
+      employs a modiﬁed <span class="small-caps">tcp</span> Tahoe-style congestion control
+      algorithm adapted to its request/response architecture and
+      packet-oriented nature. The protocol’s congestion control
+      diﬀers from traditional <span class="small-caps">tcp</span> in several fundamental ways
+      due to its pull-based communication model and implicit
+      acknowledgment scheme.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.1 </span> <a id="x1-250005.1"></a>Architectural Foundation</h4>
+   <!--l. 1996-->
+   <p class="noindent">Unlike <span class="small-caps">tcp</span>’s push-based model where senders transmit data
+      and await separate acknowledgment packets, Directed
+
+
+      Messaging operates on a request/response paradigm. The
+      requesting ship sends <span class="small-caps">peek</span> packets to solicit speciﬁc
+      fragments, and the responding ship sends <span class="small-caps">page</span> packets
+      containing the requested data. The arrival of each <span class="small-caps">page</span> packet
+      serves as an implicit acknowledgment – no separate <span class="small-caps">ack</span>
+      packets exist in the protocol. This inversion places congestion
+      control responsibility on the requester rather than the sender,
+      allowing the party pulling data to directly regulate network
+      load.
+   </p><!--l. 1998-->
+   <p class="indent"> The protocol operates on ﬁxed-size fragments rather than
+      byte streams. Each fragment contains up to 1024 bytes of
+      payload data (at the default <code class="lstinline"><span style="color:#000000">$bloq </span></code> parameter of
+      13). The
+      congestion window (<code class="lstinline"><span style="color:#000000">cwnd </span></code>) measures capacity in
+      fragment
+      count rather than bytes, providing coarser but simpler
+      granularity than <span class="small-caps">tcp</span>’s byte-oriented approach.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.2 </span> <a id="x1-260005.2"></a>State Variables</h4>
+   <!--l. 2003-->
+   <p class="noindent">Congestion control state is maintained per peer and includes:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2006-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">cwnd </span></code> (congestion
+            window): Number of fragments
+            allowed in ﬂight simultaneously.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2008-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">ssthresh </span></code> (slow start
+            threshold): Boundary between
+            exponential and linear growth phases.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2009-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">rttvar </span></code> (<span
+               class="small-caps">rtt</span> variance): Smoothed variance in
+            round-trip measurements.
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2010-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">rto </span></code> (retransmission
+            timeout): Calculated timeout for
+            loss detection.</p>
+      </li>
+   </ul>
+   <!--l. 2013-->
+   <p class="noindent">Per-request state tracks which fragments have been sent, when
+      they were sent, how many retransmission attempts have
+      occurred, and which fragments have been received using an
+      eﬃcient bitset representation.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.3 </span> <a id="x1-270005.3"></a>Slow Start and Congestion
+      Avoidance</h4>
+   <!--l. 2019-->
+   <p class="noindent">The protocol implements two growth phases analogous to
+      <span class="small-caps">tcp</span>:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2022-->
+         <p class="noindent"><strong>Slow Start Phase (<code
+                  class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">&#x003C;</span><span style="color:#000000"> </span><span style="color:#000000">ssthresh</span></code>)</strong>:
+            Upon
+            initiating a request or recovering from congestion,
+            <code class="lstinline"><span style="color:#000000">cwnd </span></code> begins at one fragment. For each
+            fragment
+            acknowledgment received (implicitly, by receiving
+            the corresponding <span class="small-caps">page</span> packet), <code
+               class="lstinline"><span style="color:#000000">cwnd </span></code> increments by
+            1. This produces exponential growth: 1→2→4→8→16,
+            allowing rapid probing of available bandwidth.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2024-->
+         <p class="noindent"><strong>Congestion
+               Avoidance Phase (<code
+                  class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">&#x003E;=</span><span style="color:#000000"> </span><span style="color:#000000">ssthresh</span></code>)</strong>:
+            Once
+            <code class="lstinline"><span style="color:#000000">cwnd </span></code> reaches <code
+               class="lstinline"><span style="color:#000000">ssthresh </span></code>, growth becomes linear.
+            The implementation uses a fractional accumulation
+            strategy: for each acknowledgment, a fractional
+            counter accumulates 1/<code class="lstinline"><span style="color:#000000">cwnd </span></code> of a window
+            increment.
+            When the accumulated value reaches <code class="lstinline"><span style="color:#000000">cwnd </span></code>,
+            the actual
+            <code class="lstinline"><span style="color:#000000">cwnd </span></code> increments by 1, yielding
+            approximately one
+
+
+            window size increase per round-trip time.
+         </p>
+      </li>
+   </ul>
+   <!--l. 2027-->
+   <p class="noindent">The default <code class="lstinline"><span style="color:#000000">ssthresh </span></code> is
+      initialized to 10,000 fragments
+      (approximately 10 MiB), eﬀectively allowing slow start to
+      dominate for typical transfer sizes.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.4 </span> <a id="x1-280005.4"></a>Loss Detection and Recovery
+   </h4>
+   <!--l. 2033-->
+   <p class="noindent">Directed Messaging currently implements timeout-based loss
+      detection only, without fast retransmit or fast recovery
+      mechanisms. This places it closest to <span class="small-caps">tcp</span> Tahoe’s behavior,
+      though with an important modiﬁcation to timeout handling.
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2036-->
+         <p class="noindent"><strong>Timeout Detection</strong>: Each in-ﬂight fragment’s
+            transmission time is recorded. A retransmission
+            timer ﬁres when the oldest unacknowledged fragment
+            exceeds the calculated <span class="small-caps">rto</span>. The protocol scans all
+            in-ﬂight fragments upon timeout and retransmits any
+            that have been outstanding beyond the <span class="small-caps">rto</span> interval.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2038-->
+         <p class="noindent"><strong>Timeout Response</strong>: Upon detecting packet loss
+            via timeout, the protocol reduces network load
+            by:
+         </p>
+         <ol class="enumerate1">
+            <li class="enumerate" id="x1-28002x1">
+               <!--l. 2040-->
+               <p class="noindent">Setting <code
+                     class="lstinline"><span style="color:#000000">ssthresh</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">max</span><span style="color:#000000">(1</span><span style="color:#000000">,</span><span style="color:#000000"> </span><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">/</span><span style="color:#000000"> </span><span style="color:#000000">2)</span></code>.
+               </p>
+            </li>
+            <li class="enumerate" id="x1-28004x2">
+
+
+               <!--l. 2041-->
+               <p class="noindent">Setting <code
+                     class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">ssthresh </span></code>.
+               </p>
+            </li>
+            <li class="enumerate" id="x1-28006x3">
+               <!--l. 2042-->
+               <p class="noindent">Doubling <code class="lstinline"><span style="color:#000000">rto </span></code> (up
+                  to a maximum bound).</p>
+            </li>
+         </ol>
+      </li>
+   </ul>
+   <!--l. 2046-->
+   <p class="noindent">This diﬀers from <span class="small-caps">tcp</span> Tahoe, which sets <code
+         class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1 </span></code>
+      and restarts
+      slow start from the beginning. Directed Messaging’s approach
+      is less conservative, immediately resuming transmission at the
+      reduced threshold rather than slowly ramping up from a single
+      packet. This assumes that while congestion occurred, the
+      network can still sustain traﬃc at half the previous rate
+      without requiring a full slow start restart.
+   </p><!--l. 2049-->
+   <p class="indent"> The lack of fast retransmit (triggering on three duplicate
+      acknowledgments) represents a signiﬁcant diﬀerence from
+      modern <span class="small-caps">tcp</span> variants. Fast retransmit requires detecting
+      duplicate acks, which in Directed Messaging would mean
+      detecting requests for the same fragment. However, the
+      current implementation treats each arriving <span class="small-caps">page</span> packet
+      independently without tracking the ordering implications that
+      would enable fast retransmit. This is a known simpliﬁcation
+      intended for future enhancement.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.5 </span> <a id="x1-290005.5"></a>Round-Trip Time Estimation
+   </h4>
+   <!--l. 2055-->
+   <p class="noindent">The protocol employs Jacobson/Karels <span class="small-caps">rtt</span> estimation,
+      the same algorithm used in <span class="small-caps">tcp</span>. When a fragment
+      acknowledgment arrives (excluding retransmissions), the
+      round-trip time measurement (<code class="lstinline"><span style="color:#000000">rtt_datum </span></code>) is
+      calculated as
+      the diﬀerence between current time and transmission
+      time.
+   </p><!--l. 2057-->
+   <p class="indent"> <span class="small-caps">rtt</span> smoothing uses exponential weighted moving averages
+      with traditional <span class="small-caps">tcp</span> parameters: </p>
+   <ul class="itemize1">
+      <li class="itemize">
+
+
+         <!--l. 2059-->
+         <p class="noindent"><code
+               class="lstinline"><span style="color:#000000">rtt</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">rtt_datum</span><span style="color:#000000"> </span><span style="color:#000000">+</span><span style="color:#000000"> </span><span style="color:#000000">7</span><span style="color:#000000">*rtt</span><span style="color:#000000">)</span><span style="color:#000000"> </span><span style="color:#000000">/</span><span style="color:#000000"> </span><span style="color:#000000">8</span><span style="color:#000000">,</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000">/8 </span></code>.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2060-->
+         <p class="noindent"><code
+               class="lstinline"><span style="color:#000000">rttvar</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">|rtt_datum</span><span style="color:#000000"> </span><span style="color:#000000">-</span><span style="color:#000000"> </span><span style="color:#000000">rtt|</span><span style="color:#000000"> </span><span style="color:#000000">+</span><span style="color:#000000"> </span><span style="color:#000000">7</span><span style="color:#000000">*rttvar</span><span style="color:#000000">)</span><span style="color:#000000"> </span><span style="color:#000000">/</span><span style="color:#000000"> </span><span style="color:#000000">8</span><span style="color:#000000">,</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000">/4 </span></code>.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2061-->
+         <p class="noindent"><code
+               class="lstinline"><span style="color:#000000">rto</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">rtt</span><span style="color:#000000"> </span><span style="color:#000000">+</span><span style="color:#000000"> </span><span style="color:#000000">4</span><span style="color:#000000">*rttvar </span></code>.
+         </p>
+      </li>
+   </ul>
+   <!--l. 2064-->
+   <p class="noindent">The retransmission timeout <code class="lstinline"><span style="color:#000000">rto </span></code>
+      is furthermore clamped to a
+      minimum of 200 milliseconds and a maximum that varies by
+      context (typically 2 minutes for most traﬃc, 25 seconds for
+      keepalive probes to sponsors).
+   </p><!--l. 2067-->
+   <p class="indent"> Retransmitted fragments do not contribute to <span class="small-caps">rtt</span>
+      estimation, following Karn’s algorithm to avoid ambiguity
+      about which transmission is being acknowledged.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.6 </span> <a id="x1-300005.6"></a>Selective Request Architecture
+   </h4>
+   <!--l. 2072-->
+   <p class="noindent">The implicit acknowledgment scheme combines naturally with
+      selective fragment requesting. The protocol maintains a
+      bitset tracking which fragments have been received. When
+      requesting additional fragments during congestion-controlled
+      transmission, the requester consults both the congestion
+      window (how many new requests can be sent) and the
+      bitset (which fragments are needed). This provides the
+      beneﬁts of <span class="small-caps">tcp</span> <span class="small-caps">sack</span> without requiring additional
+      protocol
+      machinery – selectivity is inherent to the request/response
+      model.
+   </p><!--l. 2074-->
+   <p class="indent"> When fragments arrive out of order, the <span class="small-caps">lss</span> (Lockstep
+      Signature Scheme) authentication requires buﬀering
+      misordered packets until their Merkle proof predecessors
+      arrive. Once authenticated, these fragments are marked
+      received in the bitset, and the congestion control state updates
+      accordingly.
+
+
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.7 </span> <a id="x1-310005.7"></a>Request Rate Limiting</h4>
+   <!--l. 2080-->
+   <p class="noindent">The congestion window limits the number of <span class="small-caps">peek</span> requests in
+      ﬂight. Before sending additional requests, the protocol
+      calculates
+   </p><!--l. 2082-->
+   <p class="indent"> <code
+         class="lstinline"><span style="color:#000000">available_window</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">-</span><span style="color:#000000"> </span><span style="color:#000000">outstanding_requests </span></code>
+   </p><!--l. 2084-->
+   <p class="noindent">where <code class="lstinline"><span style="color:#000000">outstanding_requests </span></code>
+      counts fragments that have been
+      requested but not yet received. This naturally throttles the
+      request rate according to observed network capacity.
+      As <span class="small-caps">page</span> packets arrive (serving as acknowledgments),
+      <code class="lstinline"><span style="color:#000000">outstanding_requests</span></code> decreases, allowing new
+      <span class="small-caps">peek</span> packets
+      to be sent.
+   </p><!--l. 2087-->
+   <p class="indent"> This pull-based ﬂow control provides inherent advantages:
+      the requester cannot be overwhelmed by data it didn’t
+      request, and the congestion control directly limits the rate at
+      which the requester pulls data from the network.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.8 </span> <a id="x1-320005.8"></a>Per-Peer State Management</h4>
+   <!--l. 2092-->
+   <p class="noindent">Congestion control state is maintained per peer rather than
+      per connection or per ﬂow. All concurrent requests to the
+      same peer share a single congestion window and <span class="small-caps">rtt</span> estimate.
+      This design choice reﬂects the architectural principle that
+      network capacity constraints exist between pairs of ships
+      rather than between individual conversations.
+   </p><!--l. 2094-->
+   <p class="indent"> Sharing state across requests to the same peer provides
+      several beneﬁts:
+   </p><!--l. 2096-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-32002x1">
+         <!--l. 2097-->
+         <p class="noindent"><span class="small-caps">rtt</span> measurements from any request improve
+            estimates for all requests.
+
+
+         </p>
+      </li>
+      <li class="enumerate" id="x1-32004x2">
+         <!--l. 2098-->
+         <p class="noindent">Congestion signals from one request protect other
+            concurrent requests.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-32006x3">
+         <!--l. 2099-->
+         <p class="noindent">State initialization costs are amortized across
+            multiple requests.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-32008x4">
+         <!--l. 2100-->
+         <p class="noindent">The aggregate transmission rate to each peer is
+            controlled.</p>
+      </li>
+   </ol>
+   <!--l. 2103-->
+   <p class="noindent">However, this also means that multiple concurrent large
+      transfers to the same peer must share available bandwidth,
+      which could reduce throughput compared to per-ﬂow windows
+      in some scenarios.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.9 </span> <a id="x1-330005.9"></a>Initial Window and Probing
+   </h4>
+   <!--l. 2109-->
+   <p class="noindent">New peer connections begin with conservative initial values:
+      <code
+         class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1</span></code>,
+      <code
+         class="lstinline"><span style="color:#000000">rtt</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000">.000 </span></code>
+      ms, <code
+         class="lstinline"><span style="color:#000000">rttvar</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000">.000 </span></code>
+      ms, <code
+         class="lstinline"><span style="color:#000000">rto</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">200 </span></code>
+      ms.<span class="footnote-mark"><a href="mss5.html#fn4x0"><sup class="textsuperscript">4</sup></a></span><a
+         id="x1-33001f4"></a>
+      The ﬁrst fragment request initiates <span class="small-caps">rtt</span> measurement and slow
+      start growth. This cautious initialization ensures the protocol
+      probes network capacity gradually rather than assuming high
+      bandwidth is available.
+
+
+   </p><!--l. 2111-->
+   <p class="indent"> For peers with no recent traﬃc, the congestion state
+      persists but becomes stale. Future enhancements may include
+      state expiration and re-initialization after prolonged idle
+      periods, though the current implementation maintains state
+      indeﬁnitely once a peer is known.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.10 </span> <a id="x1-340005.10"></a>Comparison with TCP Variants
+   </h4>
+   <!--l. 2116-->
+   <p class="noindent">The congestion control algorithm most closely resembles <span class="small-caps">tcp</span>
+      Tahoe but with notable diﬀerences:
+   </p><!--l. 2119-->
+   <p class="indent"> Similarities to Tahoe:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2122-->
+         <p class="noindent">Slow start with exponential growth
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2123-->
+         <p class="noindent">Congestion avoidance with linear growth
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2124-->
+         <p class="noindent">Loss detection via timeout only
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2125-->
+         <p class="noindent">Conservative initial probing</p>
+      </li>
+   </ul>
+   <!--l. 2128-->
+   <p class="indent"> Diﬀerences from Tahoe:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2131-->
+         <p class="noindent">Modiﬁed timeout recovery (<code
+               class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">ssthresh </span></code>
+            rather
+            than <code
+               class="lstinline"><span style="color:#000000">cwnd</span><span style="color:#000000"> </span><span style="color:#000000">=</span><span style="color:#000000"> </span><span style="color:#000000">1 </span></code>)
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2133-->
+         <p class="noindent">Packet-oriented rather than byte-oriented windows
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2134-->
+         <p class="noindent">Implicit acknowledgment via data receipt
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2135-->
+         <p class="noindent">Pull-based rather than push-based architecture
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2136-->
+         <p class="noindent">Per-peer rather than per-connection state</p>
+      </li>
+   </ul>
+   <!--l. 2139-->
+   <p class="indent"> Compared to NewReno/<span class="small-caps">sack</span>, the protocol lacks fast
+      retransmit and fast recovery, making it less responsive
+      to isolated packet loss. However, the selective request
+      architecture provides the functional beneﬁts of <span class="small-caps">sack</span> naturally.
+      The implicit acknowledgment scheme eliminates issues with
+      <span class="small-caps">ack</span> loss and compression that aﬀect <span class="small-caps">tcp</span>.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.11 </span> <a id="x1-350005.11"></a>Design Trade-oﬀs</h4>
+   <!--l. 2143-->
+   <p class="noindent">The congestion control design reﬂects several architectural
+      trade-oﬀs. Advantages include:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2146-->
+         <p class="noindent">Simpler than modern <span class="small-caps">tcp</span> variants (no fast recovery
+            complexity).
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 2147-->
+         <p class="noindent">Natural selective acknowledgment through
+            request/response model.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2148-->
+         <p class="noindent">Requester controls rate, preventing receiver
+            overwhelm.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2149-->
+         <p class="noindent">No separate <span class="small-caps">ack</span> channel to fail.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2150-->
+         <p class="noindent">Precise retransmission control with bitset tracking.</p>
+      </li>
+   </ul>
+   <!--l. 2153-->
+   <p class="indent"> The limitations include:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 2156-->
+         <p class="noindent">Lack of fast retransmit increases latency for isolated
+            losses.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2157-->
+         <p class="noindent">Packet-oriented windows provide coarser bandwidth
+            control.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2158-->
+         <p class="noindent">Per-peer state sharing may reduce throughput for
+            concurrent ﬂows.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 2159-->
+         <p class="noindent">Modiﬁed timeout behavior is less studied than
+            standard algorithms.</p>
+      </li>
+   </ul>
+
+
+
+   <h4 class="subsectionHead"><span class="titlemark">5.12 </span> <a id="x1-360005.12"></a>Future Enhancements</h4>
+   <!--l. 2165-->
+   <p class="noindent">The protocol architecture supports several potential
+      improvements without fundamental redesign. Fast retransmit
+      could be implemented by tracking fragment request patterns
+      and detecting when requests skip over missing fragments. Fast
+      recovery could leverage the existing <code class="lstinline"><span style="color:#000000">ssthresh </span></code>
+      calculation while
+      avoiding the full slow start restart. Additional sophistication
+      in <span class="small-caps">rtt</span> measurement could distinguish network delay from
+      application processing time.
+   </p><!--l. 2167-->
+   <p class="indent"> The current implementation represents a pragmatic
+      balance between simplicity and eﬀectiveness, providing
+      reasonable congestion control while keeping the protocol
+      accessible to implementation and formal veriﬁcation.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">6 </span> <a id="x1-370006"></a>Integration</h3>
+   <!--l. 2172-->
+   <p class="noindent">In order to deploy Directed Messaging to Urbit’s live network,
+      the previous version of the protocol needed to remain
+      operational, since there is no central authority that can force
+      Urbit ships to update to a particular version. The developers
+      further decided that each ship should be able to upgrade
+      connections to peer ships one by one, and should be able to
+      downgrade without data loss.
+   </p><!--l. 2174-->
+   <p class="indent"> This was possible due to the persistent, transactional
+      nature of both the previous and new versions of the protocol.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">6.1 </span> <a id="x1-380006.1"></a>Ames Flows</h4>
+   <!--l. 2178-->
+   <p class="noindent">The Arvo kernel has a concept of an Ames “ﬂow”, a
+      directed connection between ships where the subscriber ship
+      can send commands and the publisher ship can send
+      responses, both as “commands” at the level of Directed
+      Messaging.
+
+
+   </p><!--l. 2180-->
+   <p class="indent"> The implementation of Directed Messaging maintained the
+      interface to the rest of the system, without modiﬁcation.
+      Applications do not need to modify their code at all to make
+      use of Directed Messaging.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">7 </span> <a id="x1-390007"></a>Conclusion</h3>
+   <!--l. 2185-->
+   <p class="noindent">Directed Messaging provides a secure, eﬃcient, and robust
+      mechanism for requesting and receiving large messages in the
+      Urbit network. By leveraging Lockstep Streaming for packet
+      authentication and a modiﬁed <span class="small-caps">tcp</span>-like congestion control
+      algorithm, it achieves high throughput while maintaining data
+      integrity and resilience to network conditions. The protocol’s
+      design reﬂects Urbit’s architectural principles of pull-based
+      communication, implicit acknowledgment, and per-peer state
+      management.
+   </p><!--l. 2187-->
+   <p class="indent"> In fact, Azimuth’s design, particularly star-based routing,
+      suggests that star relaying and star scry caching could further
+      enhance Directed Messaging’s performance and reliability in a
+      future development cycle. Download checkpointing and
+      resumption could be fully supported by relays, as well as a fast
+      retransmit mechanism integrated into the congestion
+      control algorithm. Support for the “sticky scry” mechanism
+      (<span class="small-caps">uip</span>-0100) and <code
+         class="lstinline"><span style="color:#000000">%pine </span></code> scry-at-latest (<span
+         class="small-caps">uip</span>-0121) will eventually
+      round out a full pub-sub system built on top of Directed
+      Messaging.
+   </p><!--l. 2189-->
+   <p class="indent"> Directed Messaging represents a signiﬁcant advancement
+      over previous messaging protocols in Urbit, enabling
+      applications to reliably transfer large amounts of data across
+      the decentralized network.<img src="ustj-logo.svg" alt="PIC" />
+
+   </p>
+   <h3 class="sectionHead"><a id="x1-40000"></a>References</h3>
+
+
+   <!--l. 2193-->
+   <p class="noindent">
+   </p>
+   <dl class="thebibliography">
+      <dt id="X0-Aumasson2019" class="thebibliography">
+      </dt>
+      <dd id="bib-1" class="thebibliography">
+         <!--l. 2193-->
+         <p class="noindent"><a id="cite.0@Aumasson2019"></a>Aumasson, Jean-Philippe
+            (2019).
+            “Too
+            Much
+            Crypto.”
+            In:
+            <span class="small-caps">iacr</span>
+            <span class="ec-lmri-10">Cryptology</span>
+            <span class="ec-lmri-10">ePrint</span>
+            <span class="ec-lmri-10">Archive</span>.
+            <span class="small-caps">url</span>:
+            <a href="https://eprint.iacr.org/2019/1492" class="url">https://eprint.iacr.org/2019/1492</a>
+            (visited
+            on
+            ~2025.11.17).
+         </p>
+      </dd>
+      <dt id="X0-Cheshire1996" class="thebibliography">
+      </dt>
+      <dd id="bib-2" class="thebibliography">
+         <!--l. 2193-->
+         <p class="noindent"><a id="cite.0@Cheshire1996"></a>Cheshire, Stuart
+            (1996)
+            “It’s
+            the
+            Latency,
+            Stupid”.
+            <span class="small-caps">url</span>:
+            <a href="https://www.stuartcheshire.org/rants/latency.html"
+               class="url">https://www.stuartcheshire.org/rants/latency.html</a>
+            (visited
+            on
+            ~2025.11.16).
+         </p>
+      </dd>
+      <dt id="X0-oconnor663" class="thebibliography">
+      </dt>
+      <dd id="bib-3" class="thebibliography">
+
+
+         <!--l. 2193-->
+         <p class="noindent"><a id="cite.0@oconnor663"></a>O’Connor, Jack
+            (2018)
+            “Bao”.
+            <span class="small-caps">url</span>:
+            <a href="https://github.com/oconnor663/bao" class="url">https://github.com/oconnor663/bao</a>
+            (visited
+            on
+            ~2025.11.23).
+         </p>
+      </dd>
+      <dt id="X0-Whitepaper" class="thebibliography">
+      </dt>
+      <dd id="bib-4" class="thebibliography">
+         <!--l. 2193-->
+         <p class="noindent"><a id="cite.0@Whitepaper"></a>~sorreg-namtyv, Curtis Yarvin,
+            Philip Monk ~wicdev-wisryt,
+            Anton Dyudin ~fyr,
+            and
+            Raymond Pasco ~sigryn-habrex
+            (2016).
+            <span class="ec-lmri-10">Urbit:</span>
+            <span class="ec-lmri-10">A</span>
+            <span class="ec-lmri-10">Solid-State</span>
+            <span class="ec-lmri-10">Interpreter</span>.
+            Whitepaper.
+            Tlon
+            Corporation.
+            <span class="small-caps">url</span>:
+            <a href="https://media.urbit.org/whitepaper.pdf" class="url">https://media.urbit.org/whitepaper.pdf</a>
+            (visited
+            on
+            ~2024.1.25).
+         </p>
+      </dd>
+      <dt id="X0-Champine2021" class="thebibliography">
+      </dt>
+      <dd id="bib-5" class="thebibliography">
+         <!--l. 2193-->
+         <p class="noindent"><a id="cite.0@Champine2021"></a>~watter-parter, Luke Champine
+            (2021).
+            <span class="ec-lmri-10">Streaming</span>
+            <span class="ec-lmri-10">Merkle</span>
+            <span class="ec-lmri-10">Proofs</span>
+            <span class="ec-lmri-10">within</span>
+            <span class="ec-lmri-10">Binary</span>
+
+
+            <span class="ec-lmri-10">Numeral</span>
+            <span class="ec-lmri-10">Trees</span>.
+            Cryptology
+            ePrint
+            Archive,
+            Paper
+            2021/038.
+            <span class="small-caps">url</span>:
+            <a href="https://eprint.iacr.org/2021/038" class="url">https://eprint.iacr.org/2021/038</a>.
+         </p>
+      </dd>
+   </dl>
+
+</body>
+
+</html>
