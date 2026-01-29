@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+
+<head>
+   <title>Subject Knowledge Analysis</title>
+   <meta charset="utf-8" />
+   <meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+   <meta name="viewport" content="width=device-width,initial-scale=1" />
+   <link rel="stylesheet" type="text/css" href="/latex.css" />
+   <meta name="src" content="mss.tex" />
+   <script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+   <script type="text/javascript" async="async" id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head>
+
+<body>
+   <div class="maketitle">
+      <h2 class="titleHead">Subject Knowledge Analysis</h2>
+      <div class="author"><span class="ec-lmbx-12">K. Afonin</span><span class="ec-lmbx-12"> </span><span
+            class="ec-lmbx-12"><code>~dozreg-toplud</code></span>
+         <br /> <span class="ec-lmbx-12">Urbit Foundation</span>
+      </div><br />
+      <div class="date"></div>
+   </div>
+   <section role="doc-abstract" class="abstract">
+      <h3 class="abstracttitle">
+         <span class="ec-lmbx-9">Abstract</span>
+      </h3>
+   </section>
+
+   <h3 class="likesectionHead"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+      <span class="sectionToc">1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+      <br /> <span class="sectionToc">2 <a href="#x1-30002" id="QQ2-1-3">Dynamism of Nock</a></span>
+      <br /> <span class="sectionToc">3 <a href="#x1-40003" id="QQ2-1-4">Motivation</a></span>
+      <br /> <span class="sectionToc">4 <a href="#x1-50004" id="QQ2-1-5">Core Algorithm</a></span>
+      <br /> <span class="sectionToc">5 <a href="#x1-60005" id="QQ2-1-6">Loop handling</a></span>
+
+
+      <br /> <span class="subsectionToc">5.1 <a href="#x1-70005.1" id="QQ2-1-7">Loop detection</a></span>
+      <br /> <span class="subsectionToc">5.2 <a href="#x1-80005.2" id="QQ2-1-8">Call graph topology</a></span>
+      <br /> <span class="subsectionToc">5.3 <a href="#x1-90005.3" id="QQ2-1-10">Loops as strongly connected
+            components</a></span>
+      <br /> <span class="subsectionToc">5.4 <a href="#x1-100005.4" id="QQ2-1-15">Cycle Validation, Code Usage
+            Distribution, Fixed-Point Search</a></span>
+      <br /> <span class="sectionToc">6 <a href="#x1-110006" id="QQ2-1-16">Performance: load-bearing design choices and
+            optimizations</a></span>
+      <br /> <span class="subsectionToc">6.1 <a href="#x1-120006.1" id="QQ2-1-17">Vastness of nouns</a></span>
+      <br /> <span class="subsectionToc">6.2 <a href="#x1-130006.2" id="QQ2-1-18">Provenance Tree</a></span>
+      <br /> <span class="subsectionToc">6.3 <a href="#x1-140006.3" id="QQ2-1-19">Provenance tree operations and
+            heuristics</a></span>
+      <br /> <span class="subsectionToc">6.4 <a href="#x1-150006.4" id="QQ2-1-20">Load-bearing comparison checks and
+            %memo hints</a></span>
+      <br /> <span class="subsectionToc">6.5 <a href="#x1-160006.5" id="QQ2-1-21">Algorithm caches for ﬁnalized and
+            non-ﬁnalized calls</a></span>
+      <br /> <span class="sectionToc">7 <a href="#x1-170007" id="QQ2-1-22">Vere integration</a></span>
+      <br /> <span class="subsectionToc">7.1 <a href="#x1-180007.1" id="QQ2-1-23">Nomm (Nock--)</a></span>
+      <br /> <span class="subsectionToc">7.2 <a href="#x1-190007.2" id="QQ2-1-24">Road data structures</a></span>
+      <br /> <span class="subsectionToc">7.3 <a href="#x1-200007.3" id="QQ2-1-25">Analysis lifecycle</a></span>
+      <br /> <span class="subsubsectionToc">7.3.1 <a href="#x1-210007.3.1" id="QQ2-1-26">%ska hint</a></span>
+      <br /> <span class="subsubsectionToc">7.3.2 <a href="#x1-220007.3.2" id="QQ2-1-27">Nomm compilation and
+            execution</a></span>
+      <br /> <span class="subsectionToc">7.4 <a href="#x1-230007.4" id="QQ2-1-28">Benchmarks and Notable
+            Results</a></span>
+      <br /> <span class="sectionToc">8 <a href="#x1-240008" id="QQ2-1-31">Conclusion and future work</a></span>
+      <br /> <span class="sectionToc"><a href="#x1-25000" id="QQ2-1-32">References</a></span>
+   </div>
+
+   <h3 class="sectionHead"><span class="titlemark">1 </span> <a id="x1-20001"></a>Introduction</h3>
+   <!--l. 58-->
+   <p class="noindent">To date, the Nock combinator calculus or instruction set
+      (depending on one’s viewpoint) has been evaluated using
+      either a tree-walking interpreter or a bytecode interpreter. The
+      former has been found straightforward to implement but
+      regrettably slow in practice. Following a suggestion by
+      <code>~ritpub-sipsyl</code> to incorporate better information about what is
+      known about the subject into the compilation process, Urbit
+      engineers elaborated Subject Knowledge Analysis, or <span class="small-caps">ska</span>.
+      This static analysis pass is performed on a subject-formula
+      pair, producing a call graph and a subject mask. The latter
+      can be used to determine if two subject-formula pairs are
+      equivalent, allowing the reuse of analysis results. The
+      call graph can be used to introduce direct calls in the
+
+
+      bytecode interpreter, as well as to perform compile-time jet
+      matching. <span class="small-caps">ska</span> unlocks ample gains in practical Nock
+      performance, as well as enabling future optimizations and
+      analyses.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">2 </span> <a id="x1-30002"></a>Dynamism of Nock</h3>
+   <!--l. 62-->
+   <p class="noindent">The Nock 2 operator is one of the two opcodes that are used
+      for Nock evaluation. From the Nock speciﬁcation:
+   </p>
+   <!--l. 64-->
+   <pre class="lstlisting" id="listing-1"><span class="label"><a  id="x1-3001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span></pre>
+
+   <!--l. 68-->
+   <p class="noindent">Put plainly, we evaluate two operands of Nock 2 against the
+      given subject, then evaluate Nock with the product of the ﬁrst
+      operand as a subject, and the product of the second operand
+      as a formula.
+   </p><!--l. 71-->
+   <p class="indent"> The compound Nock 9 operator is deﬁned in terms of
+      other Nock operators:
+   </p>
+   <!--l. 73-->
+   <pre class="lstlisting" id="listing-2"><span class="label"><a  id="x1-3002r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span></pre>
+
+   <!--l. 77-->
+   <p class="noindent">Evaluation of the formula from the second operator yields a
+      noun, from which a formula to be evaluated is pulled with
+      Nock 0. That formula is then evaluated against that noun,
+      which is often referred to as a “core”.
+   </p><!--l. 80-->
+   <p class="indent"> Since Nock 9 is essentially a macro for Nock 2, we can
+      focus our attention on Nock 2. This operator is equivalent to
+      <code class="lstinline"><span style="color:#000000">eval</span></code> in other languages: execution of
+      dynamically generated
+      code. Unlike most languages, Nock does not have a notion of a
+      static call, and <span class="ec-lmri-10">all </span>function calls are implemented in terms
+      of <code class="lstinline"><span style="color:#000000">eval</span></code>. In practice, however, we can discover
+      formula
+      products <code
+         class="lstinline"><span style="color:#000000">*</span><span style="color:#000000">[</span><span style="color:#000000">a</span><span style="color:#000000"> </span><span style="color:#000000">c</span><span style="color:#000000">]</span></code>
+      for almost all Nock 2 sites, given the
+      subject.
+
+
+   </p><!--l. 84-->
+   <p class="indent"> Examples when we cannot do that, such as receiving
+      code to evaluate over the wire, or from the outer
+      virtualization context via Nock 12, or as a product of a
+      complex expression where we cannot reliably execute it at
+      compile time, are rare. In practice, these exceptions are
+      limited to either evaluating dynamically-supplied code
+      or running the Hoon compiler at run time, e.g. in vase
+      mode.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a
+         id="x1-3003f1"></a>
+      For all other cases, e.g. Arvo, Gall agents, the subject’s code
+      contents do not often change and the result of static analysis
+      is likely to be reused until a kernel upgrade or Gall agent
+      upgrade respectively.
+   </p><!--l. 88-->
+   <p class="indent"> This static analysis procedure, dubbed “Subject Knowledge
+      Analysis”, is as follows: given a pair of a subject and a
+      formula, we construct the call graph for all Nock 2 sites for
+      which we have enough information, yielding call graph
+      information and subject mask. A new subject-formula pair
+      where the formula is equal to the analyzed formula, and the
+      parts of the subject included in the mask are equal to the
+      same parts from the previously analyzed subject, is considered
+      to be equivalent. Consider analyzing the subject-formula
+      pair:
+   </p>
+   <!--l. 90-->
+   <pre class="lstlisting" id="listing-6"><span class="label"><a  id="x1-3005r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">dec</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2]]</span></span></pre>
+
+   <!--l. 94-->
+   <p class="noindent">Then a pair <code
+         class="lstinline"><span style="color:#000000">[[</span><span style="color:#000000">dec</span><span style="color:#000000"> </span><span style="color:#000000">2]</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">%9</span><span style="color:#000000"> </span><span style="color:#000000">2</span><span style="color:#000000"> </span><span style="color:#000000">%10</span><span style="color:#000000"> </span><span style="color:#000000">[6</span><span style="color:#000000"> </span><span style="color:#000000">%0</span><span style="color:#000000"> </span><span style="color:#000000">3]</span><span style="color:#000000"> </span><span style="color:#000000">%0</span><span style="color:#000000"> </span><span style="color:#000000">2]]</span></code>
+      is equivalent to the ﬁrst one in terms of the call graph
+      information: the diﬀerent subnouns of the subject are never
+      used as code by the <code class="lstinline"><span style="color:#000000">$</span></code> arm of the <code
+         class="lstinline"><span style="color:#000000">dec</span></code> core. A pair of a
+      minimized subject and a formula thus constructs an object
+      equivalent to a function in other languages, with the masked
+      out parts of the subject being the function’s arguments.
+      Further in the text, we will refer to pairs (minimized
+      subject)-formula as functions that we discovered during the
+
+
+      analysis.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">3 </span> <a id="x1-40003"></a>Motivation</h3>
+   <!--l. 99-->
+   <p class="noindent">In prior work on <span class="small-caps">ska</span> by <code>~ritpub-sipsyl</code> and
+      <code>~master-morzod</code>, the
+      analysis was considered as a ﬁrst step in compiling Nock to a
+      static single assignment intermediary representation language
+      (<span class="small-caps">ssa ir</span>) to introduce direct calls in Nock. In their absence,
+      Nock registerization, or any kind of optimization/analysis for
+      that matter is limited by the lack of knowledge about the call
+      target and the call product: in the <span class="small-caps">ssa ir</span> example, we would
+      not know which parts of a call’s subject are actually used by
+      the callee program.
+   </p><!--l. 102-->
+   <p class="indent"> For the current work, a simpler goal was set: the
+      introduction of direct calls and compile-time jet matching in
+      the Vere bytecode interpreter. Currently, the interpreter
+      has to, ﬁrst, look up a Nock bytecode program in the
+      bytecode cache, and second, it has to dynamically
+      perform a jet matching routine at each Nock 9 call
+      site.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a
+         id="x1-4001f2"></a>
+      With <span class="small-caps">ska</span>, the bytecode programs could have instructions for
+      direct calls into other bytecode programs, and a program
+      could also check if a given Nock 2 site matches some jet
+      information the program has already accumulated, thus
+      adding the jet driver directly into the bytecode stream if the
+      match was obtained.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">4 </span> <a id="x1-50004"></a>Core Algorithm</h3>
+   <!--l. 106-->
+   <p class="noindent">To analyze a subject-formula pair, we run what is essentially a
+
+
+      partial Nock interpreter to propagate known information to
+      formulas deeper in the formula tree, and to accumulate call
+      graph information. Instead of a noun, the subject is a partial
+      noun described with the type <code class="lstinline"><span style="color:#000000">$sock</span></code>:
+   </p>
+   <!--l. 109-->
+   <pre class="lstlisting" id="listing-11"><span class="label"><a  id="x1-5001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">cape</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">|</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">?</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cape</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">cape</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]))</span></span> 
+<span class="label"><a  id="x1-5002r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sock</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$</span><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">|</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">=cape</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">data=*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span></pre>
+
+   <!--l. 114-->
+   <p class="indent"> That is, <code class="lstinline"><span style="color:#000000">$cape</span></code> is a mask that
+      describes the shape of the
+      known parts of a given noun, and <code class="lstinline"><span style="color:#000000">$sock</span></code> is a pair
+      of a mask
+      and data, where unknown parts are stubbed with <code class="lstinline"><span style="color:#000000">0</span></code>
+      or
+      <code class="lstinline"><span style="color:#000000">~</span></code>.
+   </p><!--l. 118-->
+   <p class="indent"> The treatment of the partial noun by that interpreter is
+      mostly trivial:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 121-->
+         <p class="noindent">Autocons conses the partial products, normalizing
+            the mask and data if necessary.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 122-->
+         <p class="noindent">Nock 0 grabs a subnoun from <code
+               class="lstinline"><span style="color:#000000">$sock</span></code> if it can,
+            otherwise it returns unknown result <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">|</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 123-->
+         <p class="noindent">Nock 1 returns a fully known result.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 124-->
+         <p class="noindent">Actual computations (Nock 3, Nock 4, and Nock 5)
+            return unknown result <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">|</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>
+            – we do not attempt to
+            run all code at compile time, we just want to evaluate
+            code-generating expressions.
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 125-->
+         <p class="noindent">Nock 6 produces an intersection of the results of
+            branches, that is, only parts of the products that are
+            known and equal between branches.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 126-->
+         <p class="noindent">Nock 7 composes formulas: the product of the ﬁrst
+            formula is passed as a partial subject to the second
+            one.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 127-->
+         <p class="noindent">Nock 10 edits the product of one formula with
+            the product of the other. If the recipient noun is
+            not known, and the donor noun is known at least
+            partially, cells will be created that lead to the edited
+            part.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 128-->
+         <p class="noindent">Nock 8 and Nock 9 are desugared in terms of Nock
+            7, Nock 2, and autocons.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 129-->
+         <p class="noindent">Nock 11 calls have their dynamic hint formula products
+            dropped and some hints are handled directly. </p>
+         <ul class="itemize2">
+            <li class="itemize">
+               <!--l. 131-->
+               <p class="noindent"><code class="lstinline"><span style="color:#000000">%spot</span></code> hints are
+                  used for debugging/verbose
+                  printouts.
+               </p>
+            </li>
+            <li class="itemize">
+               <!--l. 132-->
+               <p class="noindent"><code class="lstinline"><span style="color:#000000">%fast</span></code> hints are
+                  used to accumulate cold state.</p>
+            </li>
+         </ul>
+
+
+      </li>
+      <li class="itemize">
+         <!--l. 134-->
+         <p class="noindent">Nock 12 of the virtual Nock produces an unknown
+            result.</p>
+      </li>
+   </ul>
+   <!--l. 137-->
+   <p class="noindent">In the case of Nock 2, the operands are evaluated, and then we
+      check if the formula at this site is fully known. If it is not
+      known, the call is <span class="ec-lmri-10">indirect </span>– we cannot make any assumptions
+      about its product, so we return <code
+         class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">|</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>.
+      If it is known, we do
+      two things:
+   </p><!--l. 140-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-5004x1">
+         <!--l. 141-->
+         <p class="noindent">We record information on subject usage as code for
+            each call below us in the stack, including the root call.
+            This step is needed to produce a minimized subject
+            for each call, which is necessary to avoid redoing the
+            work for the functions we already analyzed.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-5006x2">
+         <!--l. 142-->
+         <p class="noindent">We enter a new frame of the partial interpreter,
+            executing/analyzing new <code class="lstinline"><span style="color:#000000">$sock</span></code>–formula pair
+            we
+            just got, returning the result of that analysis as a
+            product.</p>
+      </li>
+   </ol>
+   <!--l. 145-->
+   <p class="indent"> To track the code usage of the subjects of function calls,
+      the partial noun is paired with a structure to describe the ﬂow
+      of data from the functions below us in the stack to the new
+      callsite. That data structure will be described later in the
+      performance section.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">5 </span> <a id="x1-60005"></a>Loop handling</h3>
+
+
+   <!--l. 149-->
+   <p class="noindent">The most complicated part of the algorithm is the handling of
+      loops. Unlike the regular interpreter, where only one branch is
+      executed at a time, the partial interpreter enters both, so a
+      lack of loop handling would quickly lead to an inﬁnite cycle in
+      the analysis, be it a simple decrement loop or mutual
+      recursion in the Hoon compiler.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.1 </span> <a id="x1-70005.1"></a>Loop detection</h4>
+   <!--l. 153-->
+   <p class="noindent">One way to detect loops would be to simply compare
+      <code class="lstinline"><span style="color:#000000">$sock</span></code>-formula pairs that we have on the stack
+      with the one
+      that we are about to evaluate. That, however, would not work
+      with functions that, for example, recursively construct a list,
+      as the subject <code class="lstinline"><span style="color:#000000">$sock</span></code> would change from iteration
+      to iteration.
+      So instead of a simple equality check, we need to see if
+      the new subject (further referred to as <span class="ec-lmri-10">kid </span>subject, or
+      subject of the <span class="ec-lmri-10">kid call</span>) nests under the subject of the
+      supposedly matching function call on the stack (<span class="ec-lmri-10">parent</span>
+      subject, or subject of the <span class="ec-lmri-10">parent call</span>), given the current
+      information we have about the usage of parent subject as
+      code.
+   </p><!--l. 155-->
+   <p class="indent"> The problem is that the code usage information for
+      the parent is not complete until we analyzed all its
+      callees/descendants. Therefore, that loop guess would have to
+      be validated when we return from the loop, and before that,
+      no analysis of function calls in that loop can be ﬁnalized. We
+      can see that we have three kinds of function calls: ones
+      that are not a part of any cycle, and can be ﬁnalized
+      immediately, ones that are in the middle of a cycle and
+      cannot be ﬁnalized unless the entry point into that cycle
+      is ﬁnalized, and ﬁnally, those that are the entry points
+      into a cycle, whose ﬁnalization also means ﬁnalizing all
+      members of a cycle. Another interesting aspect is that we
+      do not know which kind of a function call we have on
+      entry, we know it only on return. For the non-ﬁnalizable
+      calls, we also do not know which call ﬁnalization they
+
+
+      depend on until that loop entry is ﬁnalized, since we could
+      always discover a new loop call that points deeper into the
+      stack.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.2 </span> <a id="x1-80005.2"></a>Call graph topology</h4>
+   <!--l. 159-->
+   <p class="noindent">We ﬁrst describe in more detail what an abstract call graph is
+      and how it is traversed and discovered in <span class="small-caps">ska</span>.
+   </p><!--l. 161-->
+   <p class="indent"> The call graph is a directed graph with the vertices
+      being the functions and the edges being function calls.
+      The graph has a root, which is the top-level function
+      that is being analyzed. We include function calls from
+      callers to callees, even if the calls are conditional: from
+      the point of view of the call graph topology, conditional
+      calls of functions B and C performed by a function A
+      are indistinguishable from consecutive calls, i.e. these
+      two Hoon expressions would yield the same call graph
+      shape (but the other information could, of course, be
+      diﬀerent):
+   </p>
+   <!--l. 163-->
+   <pre class="lstlisting" id="listing-25"><span class="label"><a  id="x1-8001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">condition</span></span> 
+<span class="label"><a  id="x1-8002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">func-a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">x</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8003r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">func-b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">x</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-8004r4"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-8005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">func-b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">func-a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">x</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span></pre>
+
+   <!--l. 171-->
+   <p class="indent"> We can see that, when we execute Nock, we traverse the
+      call graph in depth-ﬁrst, head-ﬁrst order, except we skip some
+      edges if they are conditional. As we enter other functions, the
+      path from the root vertex to the current one forms the
+      computational stack.
+   </p><!--l. 173-->
+   <p class="indent"> The abstract call graph may contain cycles. Figure <a
+         href="#x1-8006r1">1<!--tex4ht:ref: fig:dec-abstract --></a> shows
+      the abstract call graph for Nock obtained from compiling
+      <code
+         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">dec</span><span style="color:#000000"> </span><span style="color:#000000">42)</span></code>
+      against <code class="lstinline"><span style="color:#000000">..ride</span></code> subject. Firstly <code
+         class="lstinline"><span style="color:#000000">dec</span></code> expression is
+      evaluated, which pulls <code class="lstinline"><span style="color:#000000">+dec</span></code> arm from a core in
+      the subject.
+      With the product of that expression, which is the <code
+         class="lstinline"><span style="color:#000000">dec</span></code> core,
+      pinned to the subject, we edit that core with the argument <code
+         class="lstinline"><span style="color:#000000">42</span></code>,
+      then we pull the arm <code class="lstinline"><span style="color:#000000">$</span></code> from that core. The <code
+         class="lstinline"><span style="color:#000000">$</span></code> arm call either
+      returns the decremented value or calls itself, incrementing the
+
+
+      counter.
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <!--l. 177-->
+      <p class="noindent"><img src="mss1x0.png" alt="(d$de:ecdce 4c2)" />
+         <a id="x1-8006r1"></a>
+      </p>
+      <figcaption class="caption"><span class="id">Figure 1: </span><span class="content">Abstract call graph for (dec
+            42).
+         </span></figcaption><!--tex4ht:label?: x1-8006r1 -->
+
+
+   </figure>
+   <!--l. 198-->
+   <p class="indent"> When we traverse that call graph, we cannot simply
+      follow the edge from <code class="lstinline"><span style="color:#000000">$:dec</span></code> to itself, as doing
+      so would
+      cause an inﬁnite loop in the algorithm. Instead, when we
+      detect a loop call, or a <span class="ec-lmri-10">backedge</span>, we immediately return an
+      unknown result from the child call. As we traverse the call
+      graph, we enumerate the vertices, as shown in Figure
+      <a href="#x1-9002r2">2<!--tex4ht:ref: fig:dec-ska --></a>.
+   </p><!--l. 200-->
+   <p class="indent"> Figure <a href="#x1-9002r2">2<!--tex4ht:ref: fig:dec-ska --></a> also demonstrates that the <span
+         class="small-caps">ska</span> representation of
+      the call graph is acyclic: back-pointing edges are replaced with
+      a forward-pointing edge to a new vertex that we do not
+      analyze through. Together with the fact that both branches
+      are traversed in Nock 6 analysis, <span class="small-caps">ska</span> call graph traversal
+      becomes a genuine depth-ﬁrst, head-ﬁrst traversal.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.3 </span> <a id="x1-90005.3"></a>Loops as strongly connected
+      components</h4>
+   <!--l. 204-->
+   <p class="noindent">From the point of view of the abstract, cyclical call graph, a
+      set of functions that cannot be ﬁnalized unless all functions
+      from this set are ﬁnalized forms a strongly-connected
+      component (<span class="small-caps">scc</span>) of that call graph. Thus, handling of loops in
+      <span class="small-caps">ska</span> becomes a question of handling <span class="small-caps">scc</span>s. The
+      algorithm that
+      follows was developed by the author to detect and manage
+      <span class="small-caps">scc</span>s during the analysis. The process turned out to be quite
+      similar to <a id="x1-9001"></a>Tarjan’s 1972 algorithm for ﬁnding <span class="small-caps">scc</span>s with some
+      diﬀerences:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 206-->
+         <p class="noindent">In Tarjan’s algorithm, the graph is known ahead
+            of time, while in <span class="small-caps">ska</span> the graph is simultaneously
+            inferred with symbolic execution of Nock and
+            traversed.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 207-->
+         <p class="noindent">Since Nock call graph is rooted, only one traversal is
+            necessary, and in this traversal the descendants down
+            the non-loop call edges are guaranteed to have higher
+            index values.</p>
+      </li>
+   </ul>
+   <!--l. 210-->
+   <p class="indent"> The latter fact allows for simpler comparisons and
+      simpler state management, allowing to have a stack of <span class="small-caps">scc</span>s
+      instead of a stack of vertices that are popped when an
+      <span class="small-caps">scc</span> is ﬁnalized. For example, when returning from a
+      vertex which is a member of a non-trivial <span class="small-caps">scc</span> in <span
+         class="small-caps">ska</span> we
+      only have to check one boolean value and compare the
+      index of this vertex with the index of the entry of the
+      current <span class="small-caps">scc</span> with equality operator, so we do not have
+      to call arithmetic functions and pay Nock function call
+      overhead.
+   </p><!--l. 212-->
+   <p class="indent"> As the call graph is traversed, we keep track of the stack of
+      mutually independent <span class="small-caps">scc</span>s (that is, <span class="small-caps">scc</span>s whose
+      unions are
+      not <span class="small-caps">scc</span>s) by keeping track of the entry point (the earliest
+      vertex that has a backedge pointing to it) and the <span class="ec-lmri-10">latch</span>
+      (the latest vertex that has a backedge originating from
+      it).
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <!--l. 219-->
+      <p class="noindent"><img src="mss1x1.png" alt="00000xxxxx01232:::: = ( d $ $=de::ecdd0ceexcc342?)" />
+         <a id="x1-9002r2"></a>
+      </p>
+      <figcaption class="caption"><span class="id">Figure 2: </span><span class="content">Call graph for (dec 42) in the
+            middle of<span class="small-caps">ska</span>.
+            Vertices 0x2 and 0x3 form a loop (strongly connected
+            component, <span class="small-caps">scc</span>) with vertex 0x2 being the entry point
+            (magenta), and vertex 0x3 being the latest (i.e. rightmost,
+            deepest) vertex that belongs to that <span class="small-caps">scc</span>, also called a <span
+               class="ec-lmri-10">latch</span>
+            of this <span class="small-caps">scc</span> (orange). The dashed gray line denotes the loop
+            assumptions that are to be validated upon exit from the
+            <span class="small-caps">scc</span> entry point. Vertex 0x3 is not analyzed through.
+         </span></figcaption><!--tex4ht:label?: x1-9002r2 -->
+
+
+   </figure>
+   <!--l. 245-->
+   <p class="indent"> Suppose that we encounter a new backedge. To determine
+      whether it forms a new <span class="small-caps">scc</span>, or belongs to an already existing
+      one, it is suﬃcient to compare the parent vertex enumeration
+      label with the latch of the latest <span class="small-caps">scc</span> on the loop stack. If
+      the parent vertex is greater than the latch, a new <span class="small-caps">scc</span>
+      data structure is pushed on the stack; otherwise, the
+      top <span class="small-caps">scc</span>’s entry and latch are updated, and then that
+      <span class="small-caps">scc</span> is repeatedly merged with the one beneath it if the
+      connection condition is satisﬁed: the entry of the updated
+      <span class="small-caps">scc</span> is less than or equal to the latch of the preceding
+      <span class="small-caps">scc</span>.
+   </p><!--l. 247-->
+   <p class="indent"> Let us prove that this comparison is suﬃcient. Recall that
+      the enumeration labels are assigned in depth-ﬁrst, head-ﬁrst
+      order. If the backedge parent is equal to the latch of the <span class="small-caps">scc</span>,
+      the kid is a part of the <span class="small-caps">scc</span> since the kid is reachable by an
+      <span class="small-caps">scc</span> member, in this case, the parent, and a member
+      of <span class="small-caps">scc</span> is reachable from kid via the backedge (Figure
+      <a href="#x1-9003r3">3<!--tex4ht:ref: fig:parent-eq-latch --></a>).
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <!--l. 252-->
+      <p class="noindent"><img src="mss1x2.png" alt="0x0x0x012" />
+         <a id="x1-9003r3"></a>
+      </p>
+      <figcaption class="caption"><span class="id">Figure 3: </span><span class="content">New backedge points to the
+            latch of previous
+            <span class="small-caps">scc</span>, extending that <span class="small-caps">scc</span>.
+         </span></figcaption><!--tex4ht:label?: x1-9003r3 -->
+
+
+   </figure>
+   <!--l. 274-->
+   <p class="indent"> If the parent label is greater than the latch, then either
+      they are on the same root path or not. In both cases, no
+      member of the <span class="small-caps">scc</span> can be reached from the parent, making
+      the parent, kid, and all vertices in between a new <span class="small-caps">scc</span>. These
+      scenarios are illustrated in Figure <a href="#x1-9004r4">4<!--tex4ht:ref: fig:parent-gth-latch --></a>.
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <div class="subfigure">
+         <!--l. 279-->
+         <p class="noindent"></p><!--l. 281-->
+         <p class="noindent"><img src="mss1x3.png" alt="00000xxxxx01234" /></p>
+      </div>
+      <div class="subfigure">
+         <!--l. 307-->
+         <p class="noindent"></p><!--l. 309-->
+         <p class="noindent"><img src="mss1x4.png" alt="00000xxxxx01234" /></p>
+      </div> <a id="x1-9004r4"></a>
+      <div class="caption"><span class="id">Figure 4: </span><span class="content">A new backedge points to a vertex
+            with a label
+            greater than the latch of the previous <span class="small-caps">scc</span>, creating a new
+            <span class="small-caps">scc</span> with 0x2 as entry and 0x4 as latch on the left, and 0x3
+            as an entry and 0x4 as a latch on the right.
+         </span></div>
+
+
+   </figure>
+   <!--l. 339-->
+   <p class="indent"> Finally, if the parent label is less than the latch, then
+      either they are on the same root path or not.
+   </p><!--l. 341-->
+   <p class="indent"> If they are, the latch is the parent’s descendant, making
+      the latest <span class="small-caps">scc</span> reachable from the parent. Since the parent and
+      the kid are necessarily of the same root path, which makes the
+      kid reachable from the latch, making both the parent and the
+      kid vertices reachable from the <span class="small-caps">scc</span>, thus making the kid,
+      parent, and all vertices between them are part of the previous
+      <span class="small-caps">scc</span>.
+   </p><!--l. 345-->
+   <p class="indent"> If they are not, then the latch still has to be a parent’s
+      descendant. Let us sketch the proof by disproving the
+      contrary.
+   </p><!--l. 347-->
+   <p class="indent"> Suppose that the opposite is true. Then the parent vertex
+      is to the left of the latch, where “A is to the left of B&#x0022; means
+      that A is entered before B and A is not B’s predecessor. The
+      latch is either on the same root path as the kid or it is to the
+      left of the kid vertex, since the latter is the latest vertex we
+      discovered. Since “leftness&#x0022; is transitive, that means that the
+      parent is to the left of the kid, which is impossible since they
+      are on the same root path. Contradiction: the latch and the
+      parent are on the same root path, making the kid, parent
+      vertices, and vertices between them parts of the existing
+      <span class="small-caps">scc</span>. Illustrations for both scenarios are shown in Figure
+      <a href="#x1-9005r5">5<!--tex4ht:ref: fig:parent-lth-latch --></a>.
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <div class="subfigure">
+         <!--l. 353-->
+         <p class="noindent"></p><!--l. 355-->
+         <p class="noindent"><img src="mss1x5.png" alt="00000xxxxx01234" /></p>
+      </div>
+      <div class="subfigure">
+         <!--l. 382-->
+         <p class="noindent"></p><!--l. 384-->
+         <p class="noindent"><img src="mss1x6.png" alt="00000xxxxx01234" /></p>
+      </div> <a id="x1-9005r5"></a>
+      <div class="caption"><span class="id">Figure 5: </span><span class="content">A new backedge points to a vertex
+            with a label
+            less than the latch of the previous <span class="small-caps">scc</span>, extending that <span
+               class="small-caps">scc</span>
+            and moving the latch to a new position.
+         </span></div>
+
+
+   </figure>
+   <!--l. 415-->
+   <p class="indent"> The condition for <span class="small-caps">scc</span> merging in case of <span
+         class="small-caps">scc</span> extension is
+      the same. In fact <span class="small-caps">scc</span> extension can be represented in terms of
+      <span class="small-caps">scc</span> creation, together with merging with the topmost <span
+         class="small-caps">scc</span> in
+      the loop stack.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">5.4 </span> <a id="x1-100005.4"></a>Cycle Validation, Code Usage
+      Distribution,
+      Fixed-Point Search</h4>
+   <!--l. 419-->
+   <p class="noindent">Since loop validation is deferred until returning from the loop
+      entry point, subject usage by the loop calls is not recorded
+      until that point. At loop validation, we want to distribute
+      subject code usage information of the parent over the
+      kid’s subject provenance, ﬁnally making an update we
+      deferred so far. But by doing so, since the kid’s subject may
+      contain nouns from the parent call, given that the kid
+      is always a parent’s descendant in the call graph, we
+      might update usage information of the parent’s subject.
+      We would have to do that in a loop until the parent’s
+      subject usage converged to the ﬁxpoint value for that
+      transformation.
+   </p><!--l. 421-->
+   <p class="indent"> For each backedge that we are validating, we perform the
+      following steps:
+   </p><!--l. 423-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-10002x1">
+         <!--l. 424-->
+         <p class="noindent">We calculate the parent subject, masked down with
+            the subject code usage information.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-10004x2">
+         <!--l. 425-->
+         <p class="noindent">We distribute the <code class="lstinline"><span style="color:#000000">$cape</span></code>
+            of that masked subject
+            using kid provenance information.
+
+
+         </p>
+      </li>
+      <li class="enumerate" id="x1-10006x3">
+         <!--l. 426-->
+         <p class="noindent">We recalculate the new masked-down parent subject.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-10008x4">
+         <!--l. 427-->
+         <p class="noindent">We compare their <code class="lstinline"><span style="color:#000000">$cape</span></code>s.
+            If they are equal, the
+            ﬁxpoint is found; otherwise, return to step 2.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-10010x5">
+         <!--l. 428-->
+         <p class="noindent">Check masked-down parent subject and kid subject
+            for nesting. If they nest, the backedge is valid;
+            otherwise, the assumption was wrong, and we will
+            redo the analysis of the loop with this parent-kid pair
+            added to a blacklist.</p>
+      </li>
+   </ol>
+   <!--l. 431-->
+   <p class="indent"> Steps 1 and 3 are necessary because otherwise, if we
+      distribute just the subject code usage information <code
+         class="lstinline"><span style="color:#000000">$cape</span></code>
+      without using it to mask actual data, the <code class="lstinline"><span style="color:#000000">$cape</span></code>
+      could start
+      growing inﬁnitely deep, causing an inﬁnite loop in the ﬁxpoint
+      search. Step 4 works because the <code class="lstinline"><span style="color:#000000">$cape</span></code>
+      distribution along the
+      given provenance is idempotent.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">6 </span> <a id="x1-110006"></a>Performance: load-bearing design
+      choices and
+      optimizations</h3>
+
+   <h4 class="subsectionHead"><span class="titlemark">6.1 </span> <a id="x1-120006.1"></a>Vastness of nouns</h4>
+
+
+   <!--l. 437-->
+   <p class="noindent">It is important to have a sense of scale when dealing with <span class="small-caps">ska</span>.
+      Consider, for example, Urbit’s standard library core <code
+         class="lstinline"><span style="color:#000000">zuse</span></code>.
+      How many nouns are there in total in that library? In Arvo
+      409K:
+   </p>
+   <!--l. 439-->
+   <pre class="lstlisting" id="listing-41"><span class="label"><a  id="x1-12001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">n=*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">..zuse</span></span> 
+<span class="label"><a  id="x1-12002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span> 
+<span class="label"><a  id="x1-12003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">atom</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">is</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">one</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">noun</span></span> 
+<span class="label"><a  id="x1-12004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">~+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">%memo</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">hint</span></span> 
+<span class="label"><a  id="x1-12005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">((</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">$</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">-.n</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">$</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">+.n</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)))</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">cell</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">is</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">1</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">noun</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+</span></span> 
+<span class="label"><a  id="x1-12006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">nouns</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">in</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">head</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+</span></span> 
+<span class="label"><a  id="x1-12007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">nouns</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">in</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">tail</span></span> 
+<span class="label"><a  id="x1-12008r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">.656.521.503.863.284.811.637</span></span></pre>
+
+   <!--l. 450-->
+   <p class="noindent">This yields <span class="mathjax-inline">\(1.66 \times 10^{21}\)</span> nouns! “Billions of
+      billions&#x0022; would be an
+      underestimate.
+   </p><!--l. 453-->
+   <p class="indent"> But Urbit’s runtime, Vere, handles this mass of nouns just
+      ﬁne. We can estimate that it takes only about 1.2 MB to store
+      that library. What is going on? And how can anything
+      calculate the number of nouns in a reasonable time with
+      something that looks like naive tree traversal?
+   </p><!--l. 455-->
+   <p class="indent"> The answer lies in structural
+      sharing.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a
+         id="x1-12009f3"></a>
+      The standard library supplies many duplicated nouns, which
+      are represented as pointers to reference-counted data
+      structures. The reason we could count the number of nouns
+      with something that seems like a simple tree traversal
+      is the use of <code class="lstinline"><span style="color:#000000">%memo</span></code> hint that enables
+      memoization of
+      Nock results, using the subject-formula pair as a key.
+      Even if the nouns are large, their comparison is still fast
+      precisely because they are duplicated: noun equality check is
+      short-circuited on pointer equality. So even though pointer
+      equality is not exposed in Nock directly, having nouns be
+      pointer-equivalent is crucial for performance. Thus, when
+      developing algorithms with performance in mind, we need
+      to:
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-12012x1">
+         <!--l. 458-->
+         <p class="noindent">Make sure not to disrupt structural sharing whenever
+
+
+            possible;
+         </p>
+      </li>
+      <li class="enumerate" id="x1-12014x2">
+         <!--l. 459-->
+         <p class="noindent">Leverage structural sharing by either short-circuiting
+            various checks/comparisons with Nock 5 equality
+            test, or by using Nock memoization.</p>
+      </li>
+   </ol>
+
+   <h4 class="subsectionHead"><span class="titlemark">6.2 </span> <a id="x1-130006.2"></a>Provenance Tree</h4>
+   <!--l. 465-->
+   <p class="noindent">We represent the provenance information of the subject with
+      <code class="lstinline"><span style="color:#000000">$source</span></code>:
+   </p>
+   <!--l. 467-->
+   <pre class="lstlisting" id="listing-44"><span class="label"><a  id="x1-13001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">source</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">lest</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">lest</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span></pre>
+
+   <!--l. 471-->
+   <p class="noindent">where <code class="lstinline"><span style="color:#000000">lest</span></code> is a non-empty list.
+   </p><!--l. 474-->
+   <p class="indent"> Raw nouns in the inner list describe the provenance from a
+      function call’s subject to a use site of that noun. The value
+      can be one of:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 477-->
+         <p class="noindent">0, if the noun does not come from the subject, e.g., it
+            was created. by evaluating Nock 1 from the formula;
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 478-->
+         <p class="noindent">a non-zero atom, in which case the noun comes from
+            the given axis of the subject.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 479-->
+         <p class="noindent">a cell, in which case the noun in question is also
+            a cell, and its head and tail have provenances that
+            are described by the head and tail of the provenance
+            noun respectively.</p>
+      </li>
+   </ul>
+   <!--l. 482-->
+   <p class="indent"> Nock 1, 3, 4, 5, and 12 erase provenance information. Nock
+      0 gets a sub-provenance tree in an obvious way. Nock 7
+      composes the provenance calculation. Nock 10 performs an
+      edit. All are similar to the <code class="lstinline"><span style="color:#000000">$sock</span></code> treatment.
+      What diﬀers
+      signiﬁcantly is the handling of the branching operator Nock 6.
+      What we care about is where the data <span class="ec-lmri-10">could </span>come from, so we
+      need to calculate a union of provenances, masked down to
+      the intersection of produced data. Instead of creating a
+      tree that includes all union information, in the spirit of
+      saving structural sharing, we simply make a list of simple
+      provenances. Thus <code
+         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">lest</span><span style="color:#000000"> </span><span style="color:#000000">*</span><span style="color:#000000">)</span></code>
+      is a union of provenances in a
+      given call.
+   </p><!--l. 484-->
+   <p class="indent"> The outer list keeps entries per call frame. Whenever we
+      enter a new call with Nock 2, we push the new provenance
+      union list <code
+         class="lstinline"><span style="color:#000000">~</span><span style="color:#000000">[1]</span></code> onto the
+      provenance stack. When we
+      return from a call, the stack is popped, and the popped
+      provenance union list is composed with the second-to-top.
+      Whenever we need to distribute subject usage, e.g., when we
+      encounter a direct call, the provenance stack is folded with
+      composition.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">6.3 </span> <a id="x1-140006.3"></a>Provenance tree operations and
+      heuristics</h4>
+   <!--l. 489-->
+   <p class="noindent">When dealing with provenance information <code
+         class="lstinline"><span style="color:#000000">$source</span></code>, some
+      heuristics were added to improve performance. When applying
+      binary functions like composition to two union lists of
+      provenances, the function would be applied to all pairs, and a
+      new union list would be constructed, omitting duplicates or
+      other provenances that nest under some other provenance that
+      is already present in the assembled list. The compatibility
+      check function only checks provenance nouns up to ten cells
+      deep, assuming that they are incompatible beyond that point.
+
+
+      This heuristic prevents from walking provenance nouns
+      exhaustively and taking too much time if they are too
+      deep at the expense of possibly having larger union lists
+      with duplicates, which does not aﬀect the semantics of
+      the algorithm. In case of Nock 10 provenance edit, the
+      check was disabled altogether if the lengths of the union
+      lists of donor and recipient nouns multiplied exceeded
+      100.
+   </p><!--l. 491-->
+   <p class="indent"> Since the provenance union is expressed as a list, there are
+      two ways of implementing the consing of provenances. We can
+      either cons every member of the list of the head provenance
+      with every member of the list of the tail provenance, yielding a
+      union list with the length equal to the product of the lengths
+      of the operand lists. Alternatively, we can cons every member
+      of the list of the head provenance with empty provenance <code
+         class="lstinline"><span style="color:#000000">0</span></code>,
+      cons <code class="lstinline"><span style="color:#000000">0</span></code> with every member of the list of the tail
+      provenance,
+      then concatenate the lists. That way, we end up with a
+      union list whose length is a sum of the operand lists’
+      lengths. The algorithm for consing chooses between two
+      approaches depending on the length of the operand lists,
+      using the multiplicative approach almost always, since
+      typically the union list length is one, and switching to
+      the additive “cons via union&#x0022; if the union lists are too
+      long.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">6.4 </span> <a id="x1-150006.4"></a>Load-bearing comparison checks
+      and %memo
+      hints</h4>
+   <!--l. 495-->
+   <p class="noindent">In <code class="lstinline"><span style="color:#000000">$cape</span></code> and <code
+         class="lstinline"><span style="color:#000000">$sock</span></code> arithmetic, equality check shortcuts for
+      <code class="lstinline"><span style="color:#000000">$cape</span></code> union, which is heavily used for code
+      usage information
+      updates, and <code class="lstinline"><span style="color:#000000">$sock</span></code> intersection, which is used
+      for Nock 6
+      product calculation, are load-bearing. For <code class="lstinline"><span style="color:#000000">%memo</span></code>
+      hints, we
+      use them to short-circuit Nock memoization hints, these
+      are load-bearing for provenance noun composition and
+      construction of subject capture mask used for in-algorithm
+      caches described below. They also appear to add marginal
+
+
+      performance improvements in other places of the algorithm in
+      case of backtracking (reanalyzing a cycle over and over due to
+      making incorrect guesses).
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">6.5 </span> <a id="x1-160006.5"></a>Algorithm caches for ﬁnalized
+      and non-ﬁnalized
+      calls</h4>
+   <!--l. 499-->
+   <p class="noindent">To prevent doing the same work over and over, we want to
+      cache the intermediary analysis results. For ﬁnalized calls, the
+      cached data includes the formula and the minimized subject,
+      where the latter includes potential subject capture in addition
+      to code usage. If a Nock 2 formula gets a cache hit, it updates
+      the code usage information using the mask from the cache,
+      and returns the product, which it constructs by taking the
+      cached product <code class="lstinline"><span style="color:#000000">$sock</span></code> and composing the cached
+      union list
+      with current subject provenance, eﬀectively applying the
+      provenance transformation of the cached call to the new
+      subject.
+   </p><!--l. 501-->
+   <p class="indent"> Caching ﬁnalized calls turned out to be not
+      enough, as demonstrated by <code>~ritpub-sipsyl</code> and
+      <code>~master-morzod</code>.<span class="footnote-mark"><a href="#fn4x0"><sup
+               class="textsuperscript">4</sup></a></span><a id="x1-16001f4"></a>
+      To prevent reanalysis of cycles in highly mutually-recursive
+      code like the Hoon compiler, caching of non-ﬁnalized calls was
+      also necessary. Similarly to ﬁnalized-call caching, a potential
+      cache match would check the subject it has for nesting with
+      the cached subject <code class="lstinline"><span style="color:#000000">$sock</span></code>, masked down at cache
+      check time
+      with the currently available code usage information. Similarly
+      to loop calls, the code usage information distribution
+      along the new subject provenance would be deferred to
+      the cycle validation. Another point of similarity is the
+      necessity of checking cycles for overlap and merging in case
+      they do, since a cache hit call would have a loop call
+
+
+      to a member of an <span class="small-caps">scc</span> to which the cached function
+      belongs.
+   </p><!--l. 503-->
+   <p class="indent"> Unlike loop calls, the ﬁxpoint search is not necessary since
+      the cached call and the cache hit are never on the same
+      root path, so distributing the code usage information
+      along the hit call subject provenance would never have an
+      eﬀect on cached call. Validation is still necessary, and
+      reanalysis of cycles due to incorrect non-ﬁnalized call
+      cache guesses is currently the biggest overhead in the
+      analysis.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">7 </span> <a id="x1-170007"></a>Vere integration</h3>
+   <!--l. 507-->
+   <p class="noindent">The integration of <span class="small-caps">ska</span> analysis into Vere was done in the
+      simplest imaginable way as a proof of concept. The road struct
+      was updated to include bytecode caches for <span class="small-caps">ska</span>-produced
+      code and to house the analysis core. A new static hint
+      <code class="lstinline"><span style="color:#000000">%ska</span></code> marks the entry point into the
+      analysis-compilation
+      lifecycle.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">7.1 </span> <a id="x1-180007.1"></a>Nomm (Nock--)</h4>
+   <!--l. 511-->
+   <p class="noindent">In addition to producing call graph information, the <span class="small-caps">ska</span>
+      algorithm also produced desugared, annotated Nock-like code
+      called Nomm (a sort of Nock--). The practical diﬀerence, apart
+      from Nock 9 and Nock 8 expanded into other Nock operators,
+      is the annotation data in Nock 2. The version of Nomm that is
+      provided for use with the Vere development fork with
+      <span class="small-caps">ska</span>, <code class="lstinline"><span style="color:#000000">$nomm-1</span></code>, is
+      mostly indistinguishable from <code class="lstinline"><span style="color:#000000">$nock</span></code>
+      proper:
+   </p>
+   <!--l. 514-->
+   <pre class="lstlisting" id="listing-62"><span class="label"><a  id="x1-18001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">nomm-1</span></span> 
+<span class="label"><a  id="x1-18002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">info=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">less=sock</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">fol=*</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])]</span></span> 
+<span class="label"><a  id="x1-18005r5"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18008r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">r=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18009r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18010r10"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18011r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%11</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18012r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%12</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=nomm-1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=nomm-1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18013r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-18014r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+
+
+
+   <!--l. 531-->
+   <p class="noindent">In the case of <code class="lstinline"><span style="color:#000000">%2</span></code>, <code
+         class="lstinline"><span style="color:#000000">info=~</span></code> denotes an indirect call, and a
+      non-empty case denotes a direct call with a known formula
+      and masked subject. The pair of a minimized subject and a
+      formula is used here as a unique identiﬁer for a Nomm
+      function.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">7.2 </span> <a id="x1-190007.2"></a>Road data structures</h4>
+   <!--l. 536-->
+   <p class="noindent">Two <span class="small-caps">hamt</span> tables were added to the <code
+         class="lstinline"><span style="color:#000000">u3a_road</span></code> struct:
+      <code class="lstinline"><span style="color:#000000">dar_p</span></code>, a map from [sock formula] pair to loom
+      oﬀset of
+      <code class="lstinline"><span style="color:#000000">u3n_prog</span></code> bytecode <code
+         class="lstinline"><span style="color:#000000">u3p</span><span style="color:#000000">(</span><span style="color:#000000">u3n_prog</span><span style="color:#000000">)</span></code>,
+      and <code class="lstinline"><span style="color:#000000">lar_p</span></code>, a map
+      from formula to a list of pairs <code
+         class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">sock</span><span style="color:#000000"> </span><span style="color:#000000">u3p</span><span style="color:#000000">(</span><span style="color:#000000">u3n_prog</span><span style="color:#000000">)</span><span style="color:#000000">]</span></code>.
+      The former is used during Nomm compilation to bytecode, the
+      latter is used for searching for bytecode with direct calls, given
+      a formula and a subject.
+   </p><!--l. 538-->
+   <p class="indent"> The Nock bytecode struct was extended with an array of
+      direct call information structs:
+   </p>
+   <!--l. 540-->
+   <pre class="lstlisting" id="listing-71"><span class="label"><a  id="x1-19001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">/*</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">u3n_dire</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">:</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">direct</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">call</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">information</span></span> 
+<span class="label"><a  id="x1-19002r2"></a></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">*/</span></span> 
+<span class="label"><a  id="x1-19003r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">typedef</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">struct</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">{</span></span> 
+<span class="label"><a  id="x1-19004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">u3p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">u3n_prog</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pog_p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">;</span></span> 
+<span class="label"><a  id="x1-19005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">u3j_harm</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ham_u</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">;</span></span> 
+<span class="label"><a  id="x1-19006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">c3_l</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">axe_l</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">;</span></span> 
+<span class="label"><a  id="x1-19007r7"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">}</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">u3n_dire</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">;</span></span></pre>
+
+   <!--l. 550-->
+   <p class="noindent">where
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 554-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">pog_p</span></code> is a bytecode
+            program loom oﬀset for the
+            direct call,
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 555-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">ham_u</span></code> is a nullable
+            pointer to a jet driver if the jet
+            match occurred at compile time,
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 556-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">axe_l</span></code> is the arm axis for
+            jet driver debugging
+            checks.</p>
+      </li>
+   </ul>
+   <!--l. 559-->
+   <p class="noindent">Another addition to the road struct was a ﬁeld for the analysis
+      core <code class="lstinline"><span style="color:#000000">+ka</span></code>. A jammed cell of four pre-parsed Hoon
+      <span class="small-caps">ast</span>s for <span class="small-caps">ska</span>
+      source ﬁles was added to Vere source code, which was
+      unpacked and built into a core when the <span class="small-caps">ska</span> entry point was
+      executed with <code class="lstinline"><span style="color:#000000">+ka</span></code> core not being initialized.
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">7.3 </span> <a id="x1-200007.3"></a>Analysis lifecycle</h4>
+   <!--l. 564-->
+   <p class="noindent">Let us follow the execution of a [subject formula] pair using
+      <span class="small-caps">ska</span>. It starts with annotating a computation with a <code
+         class="lstinline"><span style="color:#000000">%ska</span></code>
+      hint:
+   </p>
+   <!--l. 566-->
+   <pre class="lstlisting" id="listing-78"><span class="label"><a  id="x1-20001r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">~&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%ska</span></span></pre>
+
+
+   <h5 class="subsubsectionHead"><span class="titlemark">7.3.1 </span> <a id="x1-210007.3.1"></a>%ska hint</h5>
+   <!--l. 573-->
+   <p class="noindent">When the regular bytecode compiler in Vere encounters a
+      <code class="lstinline"><span style="color:#000000">%ska</span></code> hint, it defers the compilation of the
+      hinted formula and
+      emits <span class="small-caps">ska</span>-entry point opcode. When that opcode is executed,
+      a lookup is performed in <code class="lstinline"><span style="color:#000000">lar_p</span></code>, returning <code
+         class="lstinline"><span style="color:#000000">u3n_prog*</span></code> on
+      success. If the lookup failed, the pair of subject and formula is
+      passed to <code class="lstinline"><span style="color:#000000">+rout</span></code> gate of the <code
+         class="lstinline"><span style="color:#000000">+ka</span></code> core, which returned <code
+         class="lstinline"><span style="color:#000000">+ka</span></code>
+      core with global code tables and cold state updated.
+      After that, the code maps were extracted from the global
+      state, and the <span class="small-caps">ska</span> compiler function was called with the
+      subject, formula, and the maps as arguments. The maps
+      include:
+
+
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 576-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">cole</span></code>: a map from <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">sock</span><span style="color:#000000"> </span><span style="color:#000000">*</span><span style="color:#000000">]</span></code>
+            to <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">path</span><span style="color:#000000"> </span><span style="color:#000000">axis</span><span style="color:#000000">]</span></code>
+            for
+            cold state accumulation,
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 577-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">code</span></code>: a map from <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">sock</span><span style="color:#000000"> </span><span style="color:#000000">*</span><span style="color:#000000">]</span></code>
+            to loom oﬀset of
+            <code class="lstinline"><span style="color:#000000">u3n_prog</span></code> for ﬁnalized call caching,
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 578-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">fols</span></code>: a map from formula
+            to a list of pairs
+            <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">sock</span><span style="color:#000000"> </span><span style="color:#000000">u3p</span><span style="color:#000000">(</span><span style="color:#000000">u3n_prog</span><span style="color:#000000">)</span><span style="color:#000000">]</span></code>
+            for non-ﬁnalized call
+            caching.
+         </p>
+      </li>
+   </ul>
+
+   <h5 class="subsubsectionHead"><span class="titlemark">7.3.2 </span> <a id="x1-220007.3.2"></a>Nomm compilation and
+      execution</h5>
+   <!--l. 583-->
+   <p class="noindent">The main diﬀerence between compiling regular Nock to Vere
+      bytecode and compiling Nomm is that compiling a Nomm
+      formula with direct calls also requires compiling all its
+      callees recursively. A rewrite step was added to handle
+      cycles properly: on the ﬁrst pass <code class="lstinline"><span style="color:#000000">u3_noun</span></code> values
+      for
+      <code
+         class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">sock</span><span style="color:#000000"> </span><span style="color:#000000">*</span><span style="color:#000000">]</span></code>
+      pairs were saved in <code class="lstinline"><span style="color:#000000">u3n_dire</span></code> structs, and on the
+      second pass, these values were replaced with corresponding
+      <code
+         class="lstinline"><span style="color:#000000">u3p</span><span style="color:#000000">(</span><span style="color:#000000">u3n_prog</span><span style="color:#000000">)</span></code>
+      values.
+   </p><!--l. 585-->
+   <p class="indent"> Once the bytecode program for the entry point function
+      and all its descendants were compiled, the Nock bytecode
+      interpreter would execute this program as any other program,
+      with the only diﬀerence of having direct call opcodes that skip
+      bytecode cache lookup and jet matching.
+
+
+
+   </p>
+   <h4 class="subsectionHead"><span class="titlemark">7.4 </span> <a id="x1-230007.4"></a>Benchmarks and Notable Results
+   </h4>
+   <!--l. 589-->
+   <p class="noindent">The eﬀect of the <code class="lstinline"><span style="color:#000000">%ska</span></code> hint on
+      performance was compared for
+      the Ackermann function and a simple list iteration algorithm.
+      In both cases, the performance gain was around 1.7<span class="mathjax-inline">\(\times \)</span>. The main
+      overhead in computations with direct calls appears to
+      come from refcounting/ allocating/freeing operations and
+      interpretation (Figures <a href="#x1-23001r6">6<!--tex4ht:ref: fig:ackermann_noska --></a> and <a
+         href="#x1-23002r7">7<!--tex4ht:ref: fig:ackermann_ska --></a>).
+   </p><!--l. 593-->
+   <p class="indent"> When it comes to the performance of the <span class="small-caps">ska</span> algorithm
+      itself, the results were sometimes surprising. Paradoxically,
+      analyzing <code class="lstinline"><span style="color:#000000">+mint:ut</span></code> call itself took <code
+         class="lstinline"><span style="color:#000000">~m1</span></code>, while analyzing the
+      entirety of <code class="lstinline"><span style="color:#000000">hoon.hoon</span></code>, including <code
+         class="lstinline"><span style="color:#000000">+mint:ut</span></code>, takes <code
+         class="lstinline"><span style="color:#000000">~s13</span></code>.
+      The reason appears to be a lack of knowledge in the solo
+      <code class="lstinline"><span style="color:#000000">+mint:ut</span></code> call case, causing excessive
+      backtracking due to
+      wrong non-ﬁnalized call cache hits (thus validating <span class="small-caps">ska</span>’s
+      fundamental thesis). In addition, every time the loop analysis
+      was discarded, all caches were also discarded, leading to
+      making more work multiple times when compared to the
+      <code class="lstinline"><span style="color:#000000">hoon.hoon</span></code> case. In the latter case, no wrong
+      cache hits were
+      made.
+   </p>
+   <figure class="figure">
+
+
+
+
+
+      <!--l. 598-->
+      <p class="noindent"><img src="fig/ack_comp_noska.png" alt="PIC" width="252" height="252" /> <a
+            id="x1-23001r6"></a>
+      </p>
+      <figcaption class="caption"><span class="id">Figure 6: </span><span class="content">Flame graph for Ackermann
+            function
+            computation without %ska hint. </span></figcaption><!--tex4ht:label?: x1-23001r6 -->
+
+
+   </figure>
+   <figure class="figure">
+
+
+
+
+
+      <!--l. 608-->
+      <p class="noindent"><img src="fig/ack_comp_ska.png" alt="PIC" width="252" height="252" /> <a id="x1-23002r7"></a>
+      </p>
+      <figcaption class="caption"><span class="id">Figure 7: </span><span class="content">Flame graph for Ackermann
+            function
+            computation with %ska hint. </span></figcaption><!--tex4ht:label?: x1-23002r7 -->
+
+
+   </figure>
+
+   <h3 class="sectionHead"><span class="titlemark">8 </span> <a id="x1-240008"></a>Conclusion and future work</h3>
+   <!--l. 615-->
+   <p class="noindent">There appear to be two viable future directions for this
+      project. A short-term objective is a proper integration with
+      the Vere runtime, such as making compiled <span class="small-caps">ska</span> bytecode
+      caches persistent and integrating cold states of Vere and <span class="small-caps">ska</span>.
+      A longer-term direction would pursue <code>~ritpub-sipsyl</code>’s
+      original vision by implementing <span class="small-caps">ssa ir</span> compilation, which
+      would ameliorate allocation overhead caused by cell
+      churning<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a
+         id="x1-24001f5"></a>
+      during temporary core construction for calls and deconstruction
+      to get function arguments.<img src="ustj-logo.svg" alt="PIC" />
+
+   </p>
+   <h3 class="sectionHead"><a id="x1-25000"></a>References</h3>
+   <!--l. 619-->
+   <p class="noindent">
+   </p>
+   <dl class="thebibliography">
+      <dt id="X0-Tarjan1972" class="thebibliography">
+      </dt>
+      <dd id="bib-1" class="thebibliography">
+         <!--l. 619-->
+         <p class="noindent"><a id="cite.0@Tarjan1972"></a>Tarjan, Robert Endre
+            (1972).
+            “Depth-First
+            Search
+            and
+            Linear
+
+
+            Graph
+            Algorithms.”
+            In:
+            <span class="small-caps">siam</span>
+            <span class="ec-lmri-10">Journal</span>
+            <span class="ec-lmri-10">on</span>
+            <span class="ec-lmri-10">Computing</span>
+            1.2,
+            pp. 146–160.
+            <span class="small-caps">doi</span>:
+            <a href="https://doi.org/10.1137/0201010">10.1137/0201010</a>.
+            <span class="small-caps">url</span>:
+            <a href="https://epubs.siam.org/doi/10.1137/0201010"
+               class="url">https://epubs.siam.org/doi/10.1137/0201010</a>.
+         </p>
+      </dd>
+   </dl>
+
+   <h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+   <p class="noindent">
+   <div class="footnote-text">
+      <!--l. 86-->
+      <p class="indent"> <span class="footnote-mark"><a id="x2-3004x2"></a><a id="fn1x0"> <sup
+                  class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">See </span><span
+            class="ec-lmr-8">~lagrev-nocfep, </span><span class="small-caps">ustj</span> <span class="ec-lmr-8">vol. 2
+            iss. 1, pp.</span><span class="ec-lmr-8"> 131</span><span class="ec-lmr-8">–153, for more</span>
+         <span class="ec-lmr-8">information on vase mode.</span><a href="#x1-3003f1">⤴</a>
+      </p>
+   </div>
+
+
+
+   <div class="footnote-text">
+      <!--l. 102-->
+      <p class="indent"> <span class="footnote-mark"><a id="x3-4002x3"></a><a id="fn2x0"> <sup
+                  class="textsuperscript">2</sup></a></span><span class="ec-lmr-8">There has been ongoing work to
+            ameliorate the situation, such as</span>
+         <a href="https://github.com/frodwith/nockets"><span class="ec-lmr-8">~fodwyt-ragful’s Nockets
+               project</span></a><span class="ec-lmr-8">.</span><a href="#x1-4001f2">⤴</a>
+      </p>
+   </div>
+
+
+
+   <div class="footnote-text">
+      <!--l. 455-->
+      <p class="indent"> <span class="footnote-mark"><a id="x4-12010x6.1"></a><a id="fn3x0"> <sup
+                  class="textsuperscript">3</sup></a></span><span class="ec-lmr-8">See </span><span
+            class="ec-lmr-8">~rovyns-ricfer and </span><span class="ec-lmr-8">~wicdev-wisryt in </span><span
+            class="small-caps">ustj</span> <span class="ec-lmr-8">vol. 1 iss. 1, pp.</span>
+         <span class="ec-lmr-8">75</span><span class="ec-lmr-8">—82, for details.</span><a href="#x1-12009f3">⤴</a>
+      </p>
+   </div>
+
+
+
+   <div class="footnote-text">
+      <!--l. 501-->
+      <p class="indent"> <span class="footnote-mark"><a id="x5-16002x6.5"></a><a id="fn4x0"> <sup
+                  class="textsuperscript">4</sup></a></span><span class="ec-lmr-8">See </span><a
+            href="https://www.youtube.com/watch?v=Z4bX4n1JH8I"><span class="ec-lmr-8">~ritpub-sipsyl and </span><span
+               class="ec-lmr-8">~master-morzod, “Subject Knowledge</span>
+            <span class="ec-lmr-8">Analysis”, Urbit Lake Summit, </span><span
+               class="ec-lmr-8">~2024.6.19</span></a><span class="ec-lmr-8">; at the time of press, a copy is</span>
+         <span class="ec-lmr-8">available at </span><a href="https://www.youtube.com/watch?v=Z4bX4n1JH8I"
+            class="url"><span class="ec-lmr-8">https://www</span><span class="cmmi-8">.</span><span
+               class="ec-lmr-8">youtube</span><span class="cmmi-8">.</span><span
+               class="ec-lmr-8">com/watch?v=Z4bX4n1JH8I</span></a><span class="ec-lmr-8">.</span><a
+            href="#x1-16001f4">⤴</a>
+      </p>
+   </div>
+
+
+
+   <div class="footnote-text">
+      <!--l. 615-->
+      <p class="indent"> <span class="footnote-mark"><a id="x6-24002x8"></a><a id="fn5x0"> <sup
+                  class="textsuperscript">5</sup></a></span><span class="ec-lmr-8">Compare the rationale for the
+            implementation of the </span><code class="lstinline"><span style="color:#000000">#</span></code> <span
+            class="ec-lmr-8">hax</span>
+         <span class="ec-lmr-8">edit instruction in Nock 4K as explained by </span><span
+            class="ec-lmr-8">~fodwyt-ragful. (See</span>
+         <span class="ec-lmr-8">~lagrev-nocfep and </span><span class="ec-lmr-8">~sorreg-namtyv, “A Documentary History
+            of the Nock</span>
+         <span class="ec-lmr-8">Combinator Calculus”, </span><span class="small-caps">ustj</span> <span
+            class="ec-lmr-8">vol. 2 iss. 1, pp.</span><span class="ec-lmr-8"> 75</span><span class="ec-lmr-8">–82, for
+            historical</span>
+         <span class="ec-lmr-8">context.)</span><a href="#x1-24001f5">⤴</a>
+      </p>
+   </div>
+
+
+</body>
+
+</html>

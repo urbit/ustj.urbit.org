@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+
+<head>
+   <title>Groundwire Comet Cryptography</title>
+   <meta charset="utf-8" />
+   <meta name="generator" content="TeX4ht (https://tug.org/tex4ht/)" />
+   <meta name="viewport" content="width=device-width,initial-scale=1" />
+   <link rel="stylesheet" type="text/css" href="/latex.css" />
+   <meta name="src" content="mss.tex" />
+   <script>window.MathJax = { tex: { tags: "ams", }, }; </script>
+   <script type="text/javascript" async="async" id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+</head>
+
+<body>
+   <div class="maketitle">
+
+
+
+
+
+      <h2 class="titleHead">Groundwire Comet
+         Cryptography</h2>
+      <div class="author"><span class="ec-lmbx-12">Trent Steen</span><span class="ec-lmbx-12"> </span><span
+            class="ec-lmbx-12"><code>~hanfel-dovned</code></span>
+         <br /> <span class="ec-lmbx-12">Groundwire Foundation</span>
+      </div><br />
+      <div class="date"></div>
+   </div>
+   <section role="doc-abstract" class="abstract">
+      <h3 class="abstracttitle">
+         <span class="ec-lmbx-9">Abstract</span>
+      </h3>
+      <!--l. 42-->
+      <p class="noindent"><span class="ec-lmr-9">This article presents three coordinated changes to</span>
+         <span class="ec-lmr-9">comet identity and networking on Urbit:</span>
+      </p>
+      <ol class="enumerate1">
+         <li class="enumerate" id="x1-3x1">
+            <!--l. 44-->
+            <p class="noindent"><span class="ec-lmr-9">Ames may query Jael for a comet</span><span class="ec-lmr-9">’s
+                  current</span>
+               <span class="ec-lmr-9">life and networking keys instead of requiring</span>
+               <span class="ec-lmr-9">comet self-attestation;</span>
+
+
+            </p>
+         </li>
+         <li class="enumerate" id="x1-5x2">
+            <!--l. 45-->
+            <p class="noindent"><span class="ec-lmr-9">Introduction of a cryptosuite with tweaked</span>
+               <span class="ec-lmr-9">signing keys, binding keys to explicit</span>
+               <span class="ec-lmr-9">provenance data while preserving Suite B</span>
+               <span class="ec-lmr-9">compatibility; and</span>
+            </p>
+         </li>
+         <li class="enumerate" id="x1-7x3">
+            <!--l. 46-->
+            <p class="noindent"><span class="ec-lmr-9">Optional ﬁef-based routing, allowing comets</span>
+               <span class="ec-lmr-9">to route directly by static IP or domain and</span>
+               <span class="ec-lmr-9">lifting the assumption that sponsor chains</span>
+               <span class="ec-lmr-9">must terminate at galaxies.</span>
+            </p>
+         </li>
+      </ol>
+      <!--l. 48-->
+      <p class="noindent"><span class="ec-lmr-9">Collectively, comet identity becomes cryptographically</span>
+         <span class="ec-lmr-9">coupled to the chosen </span><span class="small-caps">pki</span> <span
+            class="ec-lmr-9">substrate while remaining</span>
+         <span class="ec-lmr-9">substrate-agnostic at the protocol level.</span>
+      </p><!--l. 51-->
+      <p class="indent"> <span class="ec-lmri-9">Adapted from</span>
+         <span class="small-caps">uip</span><span class="ec-lmri-9">-0136.</span><span class="footnote-mark"><a
+               href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-8f1"></a>
+      </p>
+   </section>
+
+   <h3 class="likesectionHead"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+      <span class="sectionToc">1 <a href="#x1-20001" id="QQ2-1-2">Introduction</a></span>
+      <br /> <span class="sectionToc">2 <a href="#x1-30002" id="QQ2-1-3">Design Overview</a></span>
+      <br /> <span class="sectionToc">3 <a href="#x1-40003" id="QQ2-1-4">Elliptic Curves</a></span>
+      <br /> <span class="sectionToc">4 <a href="#x1-50004" id="QQ2-1-6">Asymmetric Cryptosuites</a></span>
+      <br /> <span class="sectionToc">5 <a href="#x1-60005" id="QQ2-1-7">Tweaked Keys</a></span>
+      <br /> <span class="sectionToc">6 <a href="#x1-70006" id="QQ2-1-10">Routing</a></span>
+   </div>
+
+
+
+   <h3 class="sectionHead"><span class="titlemark">1 </span> <a id="x1-20001"></a>Introduction</h3>
+   <!--l. 62-->
+   <p class="noindent">Urbit currently derives comet identity from self-attested
+      networking keys whose public half hashes into the comet’s <code
+         class="lstinline"><span style="color:#000000">@p</span></code>.
+      In practice, this creates an implicit coupling between a
+      comet’s keys and whichever source of truth a peer happens to
+      trust at ﬁrst contact.
+   </p><!--l. 65-->
+   <p class="indent"> Groundwire’s proposal is deliberately modest and
+      pragmatic. Over the long term, we believe Bitcoin is the only
+      chain that deﬁnes canonical history at the protocol level (the
+      heaviest valid proof-of-work chain) in a way that a zero-kelvin
+      Urbit could verify without social coordination or trusted
+      checkpoints. This makes Bitcoin an attractive long-term
+      anchor for the Urbit <span class="small-caps">pki</span>. At the same time, it is premature to
+      elevate that belief to kernel policy or to bless a single on-chain
+      abstraction (e.g., ordinals/inscriptions) in perpetuity.
+      Diﬀerent chains—and even diﬀerent protocols on the same
+      chain—oﬀer distinct data and scripting aﬀordances for
+      identity; we should let those options be explored in the
+      ﬁeld.
+   </p><!--l. 67-->
+   <p class="indent"> Accordingly, we propose a substrate-agnostic mechanism
+      whereby:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 70-->
+         <p class="noindent">Ames ﬁrst consults Jael for comet keys and only falls
+            back to comet self-attestation if Jael lacks a record.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 71-->
+         <p class="noindent">Networking keys may be <span class="ec-lmri-10">tweaked </span>using explicit
+            provenance data, so the key material itself
+            cryptographically commits to the on-chain (or
+            oﬀ-chain) attestation it corresponds to.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 72-->
+         <p class="noindent">Comets may advertise routing information (a
+            <code class="lstinline"><span style="color:#000000">$fief</span></code>) so packets can route directly
+            without
+            assuming a sponsorship hierarchy that must
+            terminate at galaxies.
+         </p>
+      </li>
+   </ul>
+   <!--l. 75-->
+   <p class="noindent">This leaves the memorable-name hierarchy (galaxies, stars,
+      planets) on Azimuth untouched while upgrading the vast
+      expanse of ephemeral identities for self-sovereign networking.
+      Practically, Jael continues to subscribe to sources (via
+      <code class="lstinline"><span style="color:#000000">%listen</span></code>) chosen by the operator; the kernel does
+      not
+      enshrine a single source of truth.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">2 </span> <a id="x1-30002"></a>Design Overview</h3>
+   <!--l. 81-->
+   <p class="noindent">There are three concrete kernel changes entailed by the
+      Groundwire proposal:
+   </p><!--l. 83-->
+   <p class="indent">
+   </p>
+   <ol class="enumerate1">
+      <li class="enumerate" id="x1-3002x1">
+         <!--l. 84-->
+         <p class="noindent"><strong>Jael-ﬁrst comet keys.</strong> Ames replaces <code
+               class="lstinline"><span style="color:#000000">+request-</span></code>
+            <code class="lstinline"><span style="color:#000000">attestation</span></code>
+            with <code class="lstinline"><span style="color:#000000">+fetch-comet-pki</span></code>, which asks Jael for
+            the
+            comet’s latest life and corresponding keys. If a record
+            exists, Ames validates messages against it; otherwise,
+            it may fall back to self-attestation. The authoritative
+            store remains Jael’s map from <code class="lstinline"><span style="color:#000000">$life</span></code> to
+            <code
+               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">crypto-suite=@ud</span><span style="color:#000000"> </span><span style="color:#000000">=pass</span><span style="color:#000000">]</span></code>
+            in <code class="lstinline"><span style="color:#000000">$point:jael</span></code>.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-3004x2">
+         <!--l. 86-->
+         <p class="noindent"><strong>Suite C tweaked keys.</strong> We extend Suite B
+            (<code class="lstinline"><span style="color:#000000">+crub</span></code>) to Suite C (<code
+               class="lstinline"><span style="color:#000000">+cric</span></code>), which preserves
+            Suite B and adds a case with tweaked signing
+
+
+            keys. The untweaked signing public key and tweak
+            data are included so any peer can reconstruct
+            the tweaked key and verify it matches what
+            the comet uses. In practice, current Groundwire
+            comets commit to their ordinal; this prevents a
+            wide class of replay and spooﬁng attacks and
+            enables bidirectional provenance between on-chain
+            and oﬀ-chain attestations.
+         </p>
+      </li>
+      <li class="enumerate" id="x1-3006x3">
+         <!--l. 88-->
+         <p class="noindent"><strong>Fief-based routing.</strong> We add an optional <code
+               class="lstinline"><span style="color:#000000">$fief</span></code>
+            ﬁeld to comet entries in Jael deﬁning a static
+            IP/port or domain. Ames should attempt ﬁef-based
+            routing before sponsor-chain routing. It must not
+            assume sponsor-chain termination at galaxies and
+            must detect cycles.</p>
+      </li>
+   </ol>
+   <!--l. 91-->
+   <p class="indent"> The remainder of this article recaps elliptic-curve context
+      and the current asymmetric cryptosuite interface used by
+      Ames, then details the tweaked-key construction and routing
+      implications. A prototype exists in Groundwire’s forks of
+      <code class="lstinline"><span style="color:#000000">urbit/urbit</span></code>, <code
+         class="lstinline"><span style="color:#000000">urbit/vere</span></code>, and <code
+         class="lstinline"><span style="color:#000000">urbit/urcrypt</span></code>
+      implementing <code class="lstinline"><span style="color:#000000">+fetch-comet-pki</span></code>, <code
+         class="lstinline"><span style="color:#000000">+cric</span></code>, and <code
+         class="lstinline"><span style="color:#000000">$fief</span></code>.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">3 </span> <a id="x1-40003"></a>Elliptic Curves</h3>
+   <!--l. 95-->
+   <p class="noindent">
+   </p>
+   <blockquote class="quote">
+      <!--l. 96-->
+      <p class="noindent">Each Urbit ship possesses two networking
+         keypairs: one for encryption, and one for
+         authentication. We often refer to these two
+         keypairs as though they were a single
+
+
+         keypair because they are stored as a single
+         atom. Elliptic Curve Diﬃe-Hellman is used
+         for encryption, while Elliptic Curve Digital
+         Signature Algorithm is used for authentication.
+         ( <a href="https://docs.urbit.org/urbit-os/kernel/ames/cryptography#key-exchange">Urbit docs, “Ames
+            Cryptography”</a>)</p>
+   </blockquote>
+   <!--l. 99-->
+   <p class="noindent">An <span class="ec-lmri-10">elliptic curve </span>is a two-dimensional curve deﬁned by the
+      general form <span class="mathjax-inline">\(y^{2} = x^{3} + ax + b\)</span> with the special condition that <span
+         class="mathjax-inline">\(4a^{3} + 27b^{2} \neq 0\)</span>. As long as that
+      special condition holds true for whatever constants you picked
+      for <span class="mathjax-inline">\(a\)</span> and <span class="mathjax-inline">\(b\)</span>, you can deﬁne a
+      special type of addition for pairs of
+      points on this curve where you draw a line between them,
+      ﬁnd the singular third point on the curve that this line
+      hits, <span class="mathjax-inline">\(c\)</span>, and then ﬂip that third point across the <span
+         class="mathjax-inline">\(x\)</span> axis, <span class="mathjax-inline">\(-c\)</span>
+      (see Figure <a href="#x1-40011">1<!--tex4ht:ref: fig:elliptic-curve --></a>). Multiplication means doing this
+      process
+      repeatedly.
+   </p>
+   <figure class="figure">
+
+
+
+      <a id="x1-40011"></a>
+
+
+      <!--l. 106-->
+      <p class="noindent"><img src="mss2x0.png" alt="abc− c" />
+      </p>
+      <figcaption class="caption"><span class="id">Figure 1: </span><span class="content">Elliptic curve point addition
+            and multiplication,
+            with the curve <span class="mathjax-inline">\(y^2 = x^3 - x + 1\)</span>.</span></figcaption>
+      <!--tex4ht:label?: x1-40011 -->
+
+
+   </figure>
+   <!--l. 156-->
+   <p class="indent"> What is the beneﬁt of this? Its irreversibility. A private key
+      is just a number; a public key is just that number multiplied
+      by some other commonly agreed on number (the &#x0022;base point&#x0022;)
+      using elliptic curve arithmetic. Regular multiplication would
+      mean that one could trivially obtain someone’s private key
+      by dividing their public key by the base point, but by
+      bouncing all our operations around with elliptic curve
+      multiplication, we prevent division. This is less crude
+      and more beautiful than it might seem, because these
+      keypairs have some special properties that are useful for
+      cryptography.
+   </p><!--l. 158-->
+   <p class="indent"> If Alice multiplies her private key by Bob’s public key,
+      Alice gets the same answer as if Bob multiplied his private key
+      by Alice’s public key. This allows the two parties to use that
+      answer as a shared secret that only they know. In the
+      <span class="ec-lmri-10">Elliptic Curve Diﬃe-Hellman </span>(<span class="small-caps">ecdh</span>) protocol, we
+      take the <span class="mathjax-inline">\(x\)</span>
+      coordinate of that shared secret and run it through a key
+      derivation function (in Urbit’s case, <span class="small-caps">sha</span>-256) to get a
+      symmetric key which allows them to both encrypt and
+      decrypt messages. Using this key, they can communicate
+      privately.
+   </p><!--l. 160-->
+   <p class="indent"> Similarly, <span class="ec-lmri-10">Elliptic Curve Digital Signature Algorithm</span>
+      (<span class="small-caps">ecdsa</span>) uses a more extensive algorithm to allow Alice
+      to sign a message with her private key and for Bob to
+      use his public key to verify that Alice did in fact sign
+      it.
+   </p><!--l. 162-->
+   <p class="indent"> The elliptic curve that Urbit uses for key generation is the
+      fast and un-patented <span class="ec-lmri-10">Curve25519</span>. This speciﬁes the curve
+      equation, the base point, and the ﬁnite ﬁeld (the range of
+      integers that we operate on, wrapping back to 0 if we go over
+      the max value). There are two algebraically equivalent
+      representations of Curve25519 that Urbit uses, with each
+      deﬁning its own set of standard operations: Montgomery
+      Form (X25519), which is more eﬃcient for <span class="small-caps">ecdh</span>, and
+      Twisted Edwards Form (Ed25519), which is more eﬃcient
+      for <span class="small-caps">eddsa</span> (an elliptic curve signature scheme similar to
+      <span class="small-caps">ecdsa</span>).
+   </p><!--l. 165-->
+   <p class="indent"> Urbit implements the Ed25519 standard operations in
+
+
+      its <code class="lstinline"><span style="color:#000000">+ed:crypto</span></code> zuse core for <span
+         class="small-caps">eddsa</span>, along with a few
+      X25519-like operations for <span class="small-caps">ecdh</span>.
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 170-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+scam</span></code>: scalar multiply.
+            Takes a point and a scalar →
+            returns scalar × point. This is the core elliptic curve
+            operation.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 171-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+ward</span></code>: point addition
+            (Edwards curve formula).
+            Needed for scalar multiplication by repeated
+            doubling-and-adding.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 172-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+etch</span></code>/<code
+               class="lstinline"><span style="color:#000000">+deco</span></code>: encode/decode a curve point
+            into/from an atom. This is how keys are serialized.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 173-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+luck</span></code>: derive a keypair
+            (public plus private) from
+            a seed. This is how comets/planets get Curve25519
+            keys.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 174-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+puck</span></code>: get the public key
+            from a seed.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 175-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+slar</span></code>/<code
+               class="lstinline"><span style="color:#000000">+shar</span></code>: perform a Diﬃe–Hellman secret
+            derivation (<span class="small-caps">ecdh</span>). Given your private scalar and
+            someone else’s public point, return a shared secret.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 176-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+sign</span></code>/<code
+               class="lstinline"><span style="color:#000000">+sign-raw</span></code>/<code
+               class="lstinline"><span style="color:#000000">+sign-octs</span></code>:
+            produce signatures. This is the <span class="small-caps">ecdsa</span>/<span
+               class="small-caps">eddsa</span>-like
+            functionality.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 177-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+veri</span></code>/<code
+               class="lstinline"><span style="color:#000000">+veri-octs</span></code>: verify signatures against a
+            public key.</p>
+      </li>
+   </ul>
+   <!--l. 180-->
+   <p class="noindent">With all of this context, you can imagine why we’d want to
+      have two pairs of networking keys: <span class="small-caps">ecdh</span> encryption and
+      <span class="small-caps">eddsa</span> signatures are both complicated mathematical
+      operations, so it’s cleaner and safer to delineate between the
+      two protocols completely in case of implementation bugs,
+      future cryptographic discoveries, nonce reuse, and key
+      rotations.
+   </p><!--l. 184-->
+   <p class="indent"> So how are these keypairs turned into an atom, where are
+      they stored, and when are they used?
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">4 </span> <a id="x1-50004"></a>Asymmetric Cryptosuites</h3>
+   <!--l. 189-->
+   <p class="noindent">The usage of public and private keys we’ve described so
+      far is called <span class="ec-lmri-10">asymmetric cryptography</span>. In current Arvo,
+      the only existing implementation is <code class="lstinline"><span style="color:#000000">+crub:crypto</span></code>
+      in
+      zuse:
+   </p>
+   <ul class="itemize1">
+      <li class="itemize">
+         <!--l. 193-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+seal</span></code>: encrypt to a peer.
+            Runs <span class="small-caps">ecdh</span> with our
+            encode secret plus their encode pubkey, hashes with
+            <span class="small-caps">sha</span>-256, signs with our auth secret, encrypts with
+            <span class="small-caps">aes</span>-<span class="small-caps">siv</span>.
+         </p>
+      </li>
+      <li class="itemize">
+
+
+         <!--l. 194-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+sign</span></code>: sign a message
+            with our auth secret (<span class="small-caps">eddsa</span>).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 195-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+sure</span></code>: verify a message
+            was signed with the
+            matching auth pubkey.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 196-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+tear</span></code>: decrypt from a
+            peer. <span class="small-caps">ecdh</span> with our encrypt
+            secret plus their encrypt pubkey, <span class="small-caps">sha</span>-256, <span
+               class="small-caps">aes</span>-<span class="small-caps">siv</span>
+            decrypt, then verify signature.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 197-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+fig</span></code>: <span
+               class="small-caps">sha</span>-256 ﬁngerprint of the public key(s).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 198-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+pac</span></code>: <span
+               class="small-caps">sha</span>-256 ﬁngerprint of the secret key(s).
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 199-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+pub</span></code>: concatenate encode
+            pubkey plus auth pubkey
+            into one atom.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 200-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+sec</span></code>: concatenate encode
+            secret plus auth secret
+            into one atom.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 201-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+pit</span></code>: generate a new
+            keypair from a seed.
+            Uses <span class="small-caps">sha</span>-512 for privates, <code
+               class="lstinline"><span style="color:#000000">+puck:ed:crypto</span></code> for
+            publics.
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 202-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+nol</span></code>: reconstruct a <code
+               class="lstinline"><span style="color:#000000">+crub</span></code> from a secret key atom.
+
+
+         </p>
+      </li>
+      <li class="itemize">
+         <!--l. 203-->
+         <p class="noindent"><code class="lstinline"><span style="color:#000000">+com</span></code>: reconstruct a <code
+               class="lstinline"><span style="color:#000000">+crub</span></code> from a public key atom.</p>
+      </li>
+   </ul>
+   <!--l. 206-->
+   <p class="indent"> Here we have the key derivation and signing functions as
+      wrappers around <code class="lstinline"><span style="color:#000000">+ed:crypto</span></code> and <code
+         class="lstinline"><span style="color:#000000">+aes:crypto</span></code>, along
+      with arms for turning networking keys into atoms and atoms
+      back into … <code class="lstinline"><span style="color:#000000">+crub</span></code>s? You’d think that we’d turn
+      an atom back
+      into a pair of networking keys. Right?
+   </p><!--l. 208-->
+   <p class="indent"> But what if you wanted to use a diﬀerent cryptosuite with
+      Ames? Then all of your old keys would be stranded as
+      incompatible atoms. By using a <code class="lstinline"><span style="color:#000000">+crub</span></code> object
+      instead,
+      with keys in its payload and a battery for how to use
+      them, we maintain consistency even if there were multiple
+      implementations of <code class="lstinline"><span style="color:#000000">+acru</span></code>.
+   </p><!--l. 210-->
+   <p class="indent"> We do, then, need to track which cryptosuite to decode a
+      key atom to—so we store this in the Jael secrets vane right
+      next to the keys themselves:
+   </p>
+   <!--l. 213-->
+   <pre class="lstlisting" id="listing-53"><span class="label"><a  id="x1-5001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">point</span></span> 
+<span class="label"><a  id="x1-5002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=rift</span></span> 
+<span class="label"><a  id="x1-5003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=life</span></span> 
+<span class="label"><a  id="x1-5004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">keys=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">life</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">crypto-suite=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=pass</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-5005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sponsor=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-5006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+
+   <!--l. 222-->
+   <p class="indent"> Now we can begin to home in on exactly what needs to
+      change in the Urbit crypto suite in order for Groundwire to
+      allow comets to rotate their keys.
+   </p><!--l. 225-->
+   <p class="indent"> In current Arvo (Listing <a href="#x1-6010r1">1<!--tex4ht:ref: lst:arvo --></a>), when a comet
+      contacts
+      another ship, that ship will ask the comet for an <span class="ec-lmri-10">unecrypted</span>
+      <span class="ec-lmri-10">self-attestation packet </span>to prove that the sender does in fact
+      control the private key whose public counterpart was hashed
+      into the comet’s <code class="lstinline"><span style="color:#000000">@p</span></code>.
+   </p><!--l. 227-->
+   <p class="indent"> But Groundwire comets don’t self-attest to their identity;
+      that attestation comes into Jael via <code
+         class="lstinline"><span style="color:#000000">%ord-watcher</span></code> in the
+      same way that Azimuth attestations come into Jael via
+      <code class="lstinline"><span style="color:#000000">%azimuth</span></code> and <code
+         class="lstinline"><span style="color:#000000">%eth-watcher</span></code>. In the Groundwire codebase,
+      the <code class="lstinline"><span style="color:#000000">+request-</span></code> <code
+         class="lstinline"><span style="color:#000000">attestation</span></code> arm is replaced with
+      (Listing <a href="#x1-6032r2">2<!--tex4ht:ref: lst:groundwire --></a>).
+   </p><!--l. 232-->
+   <p class="indent"> If we have this comet’s networking keys in Jael (and thus
+      <code class="lstinline"><span style="color:#000000">lyf</span></code> is not null), then instead of asking the
+      comet to
+
+
+      self-attest, we check our recorded networking keys. So far,
+      so good: even though we’re still expecting the comet’s
+      <code class="lstinline"><span style="color:#000000">@p</span></code> to match its public key in the non-Groundwire
+      <code class="lstinline"><span style="color:#000000">?:</span></code>
+      wutcol branch, we can skip that check and trust Jael for
+      Groundwire comets. So why do we need to change our crypto
+      suite?
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">5 </span> <a id="x1-60005"></a>Tweaked Keys</h3>
+   <!--l. 236-->
+   <p class="noindent">Groundwire’s proposed change to comet attestation has
+      greater philosophical implications for identity than you might
+      expect.
+   </p><!--l. 239-->
+   <p class="indent"> Groundwire’s strategy is to bet on Bitcoin being the one
+      true long-term substrate that Urbit’s <span class="small-caps">pki</span> will live on, because
+      Bitcoin is the only chain that oﬀers an unambiguous
+      protocol-level deﬁnition of canonical history (“the longest
+      valid proof-of-work chain”) that a zero-kelvin Urbit could
+      resolve without appeal to social coordination or trusted
+      checkpoints.
+   </p><!--l. 241-->
+   <p class="indent"> But it <span class="ec-lmri-10">is </span>a bet, and a contentious one at that in an
+      ecosystem that includes Ethereum and Nockchain. For this
+      reason, we <span class="ec-lmri-10">don’t </span>insist that Jael only ingest comet <span
+         class="small-caps">pki</span> data
+      from Bitcoin.
+   </p><!--l. 244-->
+   <p class="indent"> All of Groundwire’s changes to Arvo stem from
+      modifying Ames’s <code class="lstinline"><span style="color:#000000">+request-attestation</span></code> arm to
+      <code class="lstinline"><span style="color:#000000">+fetch-comet-pki</span></code>, with the core proposition
+      being that
+      comets have the ability to publish their networking keys to
+      any source of <span class="small-caps">pki</span> truth that other Urbit ships choose to
+      interpret. To enable this, comets need to somehow encode
+      within Jael <span class="ec-lmri-10">which </span><span class="small-caps">pki</span> they’ve attested to. This is
+      where
+      tweaked keys come in.
+   </p><!--l. 247-->
+   <p class="indent"> The payload of <code class="lstinline"><span style="color:#000000">+crub</span></code> is:
+   </p>
+   <!--l. 249-->
+   <pre class="lstlisting" id="listing-66"><span class="label"><a  id="x1-6001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])]</span></span></pre>
+
+
+
+   <!--l. 253-->
+   <p class="noindent">which are an encryption public key, a signing public key, and
+      optionally their secret counterparts.
+   </p><!--l. 256-->
+   <p class="indent"> The Groundwire codebase introduces a new crypto-suite,
+      <code class="lstinline"><span style="color:#000000">+cric</span></code>, with the payload:
+   </p>
+   <!--l. 258-->
+   <pre class="lstlisting" id="listing-68"><span class="label"><a  id="x1-6002r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">suite=%b</span></span> 
+<span class="label"><a  id="x1-6003r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6004r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek=</span><span 
+class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">sed=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-6005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6006r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">suite=%c</span></span> 
+<span class="label"><a  id="x1-6007r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">tw=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">ugn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dat=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span> 
+<span class="label"><a  id="x1-6008r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek=</span><span 
+class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">sed=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-6009r8"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+
+   <!--l. 269-->
+
+
+   <figure class="float">
+
+
+      <a id="x1-6010r1"></a>
+      <figcaption class="caption"><span class="id">Listing 1:
+         </span><span class="content">The
+            current
+            Arvo
+            comet
+            handler.</span></figcaption><!--tex4ht:label?: x1-6010r5 -->
+      <pre class="lstlisting" id="listing-69"><span class="label"><a  id="x1-6011r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">+request-attestation:</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">helper</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">to</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">request</span></span> 
+<span class="label"><a  id="x1-6012r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">attestation</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">from</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">comet.</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">Also</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">sets</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">a</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">timer</span></span> 
+<span class="label"><a  id="x1-6013r3"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">to</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">resend</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">the</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">request</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">every</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">30</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">s.</span></span> 
+<span class="label"><a  id="x1-6014r4"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a  id="x1-6015r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">request-attestation</span></span> 
+<span class="label"><a  id="x1-6016r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=ship</span></span> 
+<span class="label"><a  id="x1-6017r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">event-core</span></span> 
+<span class="label"><a  id="x1-6018r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ev-trace</span></span> 
+<span class="label"><a  id="x1-6019r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">msg.veb</span></span> 
+<span class="label"><a  id="x1-6020r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span> 
+<span class="label"><a  id="x1-6021r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|.</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">requesting</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">attestion</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6022r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">event-core</span></span> 
+<span class="label"><a  id="x1-6023r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=blob</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">sendkeys-packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6024r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">send-blob</span></span> 
+<span class="label"><a  id="x1-6025r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for=|</span></span> 
+<span class="label"><a  id="x1-6026r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span> 
+<span class="label"><a  id="x1-6027r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">blob</span></span> 
+<span class="label"><a  id="x1-6028r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">get</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">by</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">peers.ames-state</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6029r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6030r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/alien/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6031r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">emit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">duct</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%wait</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~s30</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+
+
+   </figure>
+   <!--l. 293-->
+
+
+   <figure class="float">
+
+
+      <a id="x1-6032r2"></a>
+      <figcaption class="caption"><span class="id">Listing 2:
+         </span><span class="content">The
+            current
+            Groundwire
+            comet
+            handler.</span></figcaption><!--tex4ht:label?: x1-6032r5 -->
+      <pre class="lstlisting" id="listing-70"><span class="label"><a  id="x1-6033r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">fetch-comet-pki</span></span> 
+<span class="label"><a  id="x1-6034r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=ship</span></span> 
+<span class="label"><a  id="x1-6035r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">event-core</span></span> 
+<span class="label"><a  id="x1-6036r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%</span><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ev-trace</span></span> 
+<span class="label"><a  id="x1-6037r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">msg.veb</span></span> 
+<span class="label"><a  id="x1-6038r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span> 
+<span class="label"><a  id="x1-6039r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|.</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">requesting</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">attestion</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6040r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">lyf</span></span> 
+<span class="label"><a  id="x1-6041r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">rof</span></span> 
+<span class="label"><a  id="x1-6042r10"></a><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6043r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/ames</span></span> 
+<span class="label"><a  id="x1-6044r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%j</span></span> 
+<span class="label"><a  id="x1-6045r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ts1-lmtt9-">`</span><span 
+class="ec-lmtt-9">beam</span><span 
+class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">our</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%lyfe</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6046r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6047r15"></a><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">?=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">*</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">^</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">lyf</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6048r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">event-core</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">emil</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">moves</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6049r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">emit</span></span> 
+<span class="label"><a  id="x1-6050r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">//keys</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-6051r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span> 
+<span class="label"><a  id="x1-6052r20"></a><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/public-keys</span></span> 
+<span class="label"><a  id="x1-6053r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%j</span></span> 
+<span class="label"><a  id="x1-6054r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%public-keys</span></span> 
+<span class="label"><a  id="x1-6055r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span> 
+<span class="label"><a  id="x1-6056r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-6057r25"></a><span 
+class="ec-lmr-5">25</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span> 
+<span class="label"><a  id="x1-6058r26"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6059r27"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">event-core</span></span> 
+<span class="label"><a  id="x1-6060r28"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=blob</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">sendkeys-packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6061r29"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">send-blob</span></span> 
+<span class="label"><a  id="x1-6062r30"></a><span 
+class="ec-lmr-5">30</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">for=|</span></span> 
+<span class="label"><a  id="x1-6063r31"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span> 
+<span class="label"><a  id="x1-6064r32"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">blob</span></span> 
+<span class="label"><a  id="x1-6065r33"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">get</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">by</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">peers.ames-state</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6066r34"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span> 
+<span class="label"><a  id="x1-6067r35"></a><span 
+class="ec-lmr-5">35</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">/alien/</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6068r36"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">emit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">duct</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%wait</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~s30</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+
+
+   </figure>
+   <!--l. 332-->
+   <p class="indent">
+
+
+   </p><!--l. 333-->
+   <p class="noindent">We refer to <code class="lstinline"><span style="color:#000000">+crub</span></code> as “Suite B”
+      because it implements the
+      <span class="small-caps">nsa</span> Suite B Cryptography Standard. <code
+         class="lstinline"><span style="color:#000000">+cric</span></code> includes
+      everything in Suite B, along with a new “Suite C” (a coinage
+      of our own).
+   </p><!--l. 336-->
+   <p class="indent"> The Suite C payload’s main diﬀerence is that the signing
+      keys are “tweaked”. We store <code class="lstinline"><span style="color:#000000">ugn</span></code>, the untweaked
+      public key,
+      and <code class="lstinline"><span style="color:#000000">sed</span></code>, the random seed used to originally
+      generate
+      our untweaked keypair, so that we have everything we
+      need to recreate them if we ever need to. Then, we can
+      tweak them by passing them into a tweaking function
+      along with a bytestring, <code class="lstinline"><span style="color:#000000">dat</span></code> (omitting from our
+      tweak
+      the additional new ﬁeld <code class="lstinline"><span style="color:#000000">xtr</span></code> which can include
+      extra
+      data):
+   </p>
+   <!--l. 338-->
+   <pre class="lstlisting" id="listing-77"><span class="label"><a  id="x1-6069r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">pub.s</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">public</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">signing</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">key</span></span> 
+<span class="label"><a  id="x1-6070r2"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">sek.s</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">=</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">private</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">signing</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">key</span></span> 
+<span class="label"><a  id="x1-6071r3"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mit</span></span> 
+<span class="label"><a  id="x1-6072r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">shax</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">can</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[32</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub.s</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">met</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dat</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">dat</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">))</span></span> 
+<span class="label"><a  id="x1-6073r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scad:ed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub.s</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek.s</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">mit</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span></pre>
+
+   <!--l. 346-->
+   <p class="indent"> First, the public key is hashed along with the data to
+      produce <code class="lstinline"><span style="color:#000000">mit</span></code>, the “tweak scalar.” All three of
+      these arguments
+      get passed into <code class="lstinline"><span style="color:#000000">+scad:ed</span></code>, a wrapper around two
+      other <code class="lstinline"><span style="color:#000000">+ed</span></code>
+      arms:
+   </p>
+   <!--l. 348-->
+   <pre class="lstlisting" id="listing-81"><span class="label"><a  id="x1-6074r1"></a></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">scalar</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">addition</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">on</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">public</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">and</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">private</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">keys</span></span> 
+<span class="label"><a  id="x1-6075r2"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">scad</span></span> 
+<span class="label"><a  id="x1-6076r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">~/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">%scad</span></span> 
+<span class="label"><a  id="x1-6077r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub=@uxpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek=@uxscalar</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sca=@uxscalar</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6078r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub=@uxpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek=@uxscalar</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-6079r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">pub</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sca</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">scas</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sek</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sca</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)]</span></span></pre>
+
+   <!--l. 357-->
+   <p class="noindent">These two arms, <code class="lstinline"><span style="color:#000000">+scap</span></code> and <code
+         class="lstinline"><span style="color:#000000">+scas</span></code>, perform elliptic curve
+      addition between the tweak scalar and corresponding
+      key.
+   </p><!--l. 360-->
+   <p class="indent"> Anyone with both your public untweaked key and your
+      tweak data can recreate your tweaked key. And, sure enough,
+      we recall the <code class="lstinline"><span style="color:#000000">$point:jael</span></code> type:
+   </p>
+   <!--l. 364-->
+   <pre class="lstlisting" id="listing-85"><span class="label"><a  id="x1-6080r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">point</span></span> 
+<span class="label"><a  id="x1-6081r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=rift</span></span> 
+<span class="label"><a  id="x1-6082r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=life</span></span> 
+<span class="label"><a  id="x1-6083r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">keys=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">life</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">crypto-suite=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">=pass</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">])</span></span> 
+<span class="label"><a  id="x1-6084r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">sponsor=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@p</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span> 
+<span class="label"><a  id="x1-6085r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+
+   <!--l. 373-->
+   <p class="noindent">wherein the <code class="lstinline"><span style="color:#000000">pass</span></code> ﬁeld is the
+      atom that, in Suite B, encodes
+
+
+      the two public keys. In Suite C, it encodes the encryption key,
+      the untweaked signing key, <span class="ec-lmri-10">and </span>the tweak data. Upon
+      receiving a message from a comet, your ship can reconstruct
+      the tweaked key and check if it matches the key that the
+      comet provides.
+   </p><!--l. 376-->
+   <p class="indent"> This might seem like a ton of unnecessary work. If you
+      already trust Jael’s sources of truth (<code
+         class="lstinline"><span style="color:#000000">%ord-watcher</span></code>, in this
+      case), why bother with tweaked keys at all?
+   </p><!--l. 378-->
+   <p class="indent"> The reason is that tweaking keys allows for a bidirectional
+      cryptographic commitment between on-chain and oﬀ-chain
+      attestations to prevent replay, spooﬁng, and double-spawning
+      attacks. If there wasn’t an oﬀ-chain anchor pointing to
+      on-chain data, then anyone could come in and attest to
+      ownership of any comet and <code class="lstinline"><span style="color:#000000">%ord-watcher</span></code> would
+      naively
+      believe them.
+   </p><!--l. 380-->
+   <p class="indent"> In Groundwire’s implementation, that anchor is the ordinal
+      number of the sat used for the comet’s inscription. When
+      <code class="lstinline"><span style="color:#000000">%ord-watcher</span></code> sees an attempted key rotation, it
+      checks the
+      speciﬁed comet identity’s <code class="lstinline"><span style="color:#000000">$pass</span></code> in Jael to
+      verify that the
+      transaction’s ordinal number matches the current tweak data,
+      and rejects it if it doesn’t. Back in userspace, any agent can
+      later recompute the tweak to conﬁrm that the key they’re
+      communicating with really does originate from the expected
+      on-chain inscription.
+   </p><!--l. 382-->
+   <p class="indent"> This tweaked key protocol enables a new conception of
+      identity on Urbit: rift, life, keys, <span class="ec-lmri-10">and data</span>.
+
+   </p>
+   <h3 class="sectionHead"><span class="titlemark">6 </span> <a id="x1-70006"></a>Routing</h3>
+   <!--l. 386-->
+   <p class="noindent">The ﬁnal implication of Groundwire’s change to Ames’
+      interpretation of comet provenance is that, since Groundwire
+      comets articulate a network independent of Azimuth, they
+      shouldn’t need to rely on the current sponsorship hierarchy for
+      packet routing. To facilitate this, comets can include
+      include another piece of info in their attestations, called a
+      <code class="lstinline"><span style="color:#000000">$fief</span></code>:
+
+
+   </p>
+   <!--l. 388-->
+   <pre class="lstlisting" id="listing-92"><span class="label"><a  id="x1-7001r1"></a></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">+</span><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">fief</span></span> 
+<span class="label"><a  id="x1-7002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%turf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">turf</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%if</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@ifF</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">%is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">p=@isH</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">]</span></span> 
+<span class="label"><a  id="x1-7005r5"></a><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span></span></pre>
+
+   <!--l. 396-->
+   <p class="noindent">in which <code class="lstinline"><span style="color:#000000">$point:jael</span></code> is updated
+      to contain a <code
+         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">fief</span><span style="color:#000000">)</span></code>,
+      potentially storing the comet’s static IP address (<code
+         class="lstinline"><span style="color:#000000">%if</span></code> for IPv4
+      or <code class="lstinline"><span style="color:#000000">%is</span></code> for IPv6) or domain (<code
+         class="lstinline"><span style="color:#000000">%turf</span></code>).
+   </p><!--l. 399-->
+   <p class="indent"> On top of this, Ames has been updated to allow any ship
+      to be a valid sponsor, necessitating a few changes to its
+      routing logic to detect cycles and ensure that sponsorship
+      chains are allowed to terminate in any sponsor with a <code
+         class="lstinline"><span style="color:#000000">$fief</span></code>,
+      rather than only in galaxies.<img src="ustj-logo.svg" alt="PIC" />
+   </p>
+
+   <h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+   <p class="noindent">
+   <div class="footnote-text">
+      <!--l. 51-->
+      <p class="indent"> <span class="footnote-mark"><a id="x2-9x"></a><a id="fn1x0"> <sup
+                  class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">The author would like to thank
+         </span><span class="ec-lmr-8">~tinnus-napbus and</span>
+         <span class="ec-lmr-8">~bonbud-macryg for help documenting the original Groundwire</span>
+         <span class="ec-lmr-8">codebase, and </span><span class="ec-lmr-8">~tondes-sitrym and </span><span
+            class="ec-lmr-8">~sarpen-laplux for developing</span>
+         <span class="ec-lmr-8">it.</span><a href="#x1-8f1">⤴</a>
+      </p>
+   </div>
+
+</body>
+
+</html>

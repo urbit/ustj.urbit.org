@@ -10,11 +10,15 @@
     },
     {
       "author": ["dozreg-toplud"],
-      "title": "Subject Knowledge Analysis"
+      "title": "Subject Knowledge Analysis",
+      "pdf": "/ustj/v03-i01/mss1.pdf",
+      "html": "/ustj/v03-i01/mss1.html"
     },
     {
       "author": ["hanfel-dovned"],
-      "title": "Groundwire Comet Cryptography"
+      "title": "Groundwire Comet Cryptography",
+      "pdf": "/ustj/v03-i01/mss2.pdf",
+      "html": "/ustj/v03-i01/mss2.html"
     },
     {
       "author": ["ticlys-monlun", "lagrev-nocfep"],
