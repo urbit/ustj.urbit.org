@@ -25,6 +25,17 @@
    <section role="doc-abstract" class="abstract">
       <h3 class="abstracttitle">
          <span class="ec-lmbx-9">Abstract</span>
+         <p>
+            Classic Nock execution sees all function calls evaluate code dynamically. In practice, most Nock call sites
+            have statically known code products given the subject.
+            Subject Knowledge Analysis (SKA) is a static analysis
+            pass to construct a call graph and subject mask from
+            a subject-formula pair. The call graph facilitates direct
+            calls in the bytecode interpreter and compile-time jet
+            matching. The mask determines if two subject-formula
+            pairs are equivalent to enable reuse of analysis results.
+            SKA unlocks ample Nock performance gains.
+         </p>
       </h3>
    </section>
 
@@ -554,7 +565,7 @@ class="ec-lmtt-9">))</span></span></pre>
 
       counter.
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
@@ -643,7 +654,7 @@ class="ec-lmtt-9">))</span></span></pre>
       (the latest vertex that has a backedge originating from
       it).
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
@@ -688,7 +699,7 @@ class="ec-lmtt-9">))</span></span></pre>
       of <span class="small-caps">scc</span> is reachable from kid via the backedge (Figure
       <a href="#x1-9003r3">3<!--tex4ht:ref: fig:parent-eq-latch --></a>).
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
@@ -712,7 +723,7 @@ class="ec-lmtt-9">))</span></span></pre>
       the parent, kid, and all vertices in between a new <span class="small-caps">scc</span>. These
       scenarios are illustrated in Figure <a href="#x1-9004r4">4<!--tex4ht:ref: fig:parent-gth-latch --></a>.
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
@@ -761,7 +772,7 @@ class="ec-lmtt-9">))</span></span></pre>
       <span class="small-caps">scc</span>. Illustrations for both scenarios are shown in Figure
       <a href="#x1-9005r5">5<!--tex4ht:ref: fig:parent-lth-latch --></a>.
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
@@ -1512,15 +1523,14 @@ class="ec-lmtt-9">%ska</span></span></pre>
       cache hits were
       made.
    </p>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
 
 
       <!--l. 598-->
-      <p class="noindent"><img class="full" src="mss1x6.png" /> <a
-            id="x1-23001r6"></a>
+      <p class="noindent"><img class="full" src="mss1x6.png" /> <a id="x1-23001r6"></a>
       </p>
       <figcaption class="caption"><span class="id">Figure 6: </span><span class="content">Flame graph for Ackermann
             function
@@ -1528,7 +1538,7 @@ class="ec-lmtt-9">%ska</span></span></pre>
 
 
    </figure>
-   <figure class="figure"  style="width: 67%; margin: 0 auto;">
+   <figure class="figure" style="width: 67%; margin: 0 auto;">
 
 
 
