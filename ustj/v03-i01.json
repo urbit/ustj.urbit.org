@@ -28,7 +28,9 @@
     },
     {
       "author": ["nomryg-nilref"],
-      "title": "Obelisk:  Reinventing SQL for Modern Computing"
+      "title": "Obelisk:  Reinventing SQL for Modern Computing",
+      "pdf": "/ustj/v03-i01/mss4.pdf",
+      "html": "/ustj/v03-i01/mss4.html"
     }
   ],
   "theme": {
