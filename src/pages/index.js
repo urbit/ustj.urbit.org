@@ -147,8 +147,20 @@ export default function Home({ issues }) {
             <img className="h-full w-auto" alt="" src={issue.links.cover} />
           </div>
         </main>
-        <footer className="flex justify-center w-full bg-primary">
+        <div className="flex justify-center w-full bg-primary">
           <Contents issue={issue} />
+        </div>
+        <footer className="flex flex-col items-center w-full bg-primary text-black type-ui">
+          <div className="layout h-12 md:h-16">
+            <div className="flex justify-between items-center h-full layout-px gap-4">
+              <span className="truncate min-w-0">
+                Urbit Systems Technical Journal
+              </span>
+              <span className="font-mono shrink-0">
+                {process.env.NEXT_PUBLIC_COMMIT_HASH || "unknown"}
+              </span>
+            </div>
+          </div>
         </footer>
       </div>
     </>
