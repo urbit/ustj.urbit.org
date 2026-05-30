@@ -99,8 +99,8 @@ Nock. It is instead called Mock, which is Nock with two
 additions: deterministic errors are caught and returned
 as values to the kernel; and there is an extra Nock
 opcode, opcode 12. A simple Nock 12 formula looks like
-<code class="lstinline"><span style="color:#000000">[12</span><span style="color:#000000"> </span><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar/baz</span><span style="color:#000000">]]</span></code>, where <code class="lstinline"><span style="color:#000000">/foo/bar/baz</span></code> is a path
-literal <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%foo</span><span style="color:#000000"> </span><span style="color:#000000">%bar</span><span style="color:#000000"> </span><span style="color:#000000">%baz</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>, representing a path in the
+<code class="lstinline"><span style="color:#000000">[12 [1 /foo/bar/baz]]</span></code>, where <code class="lstinline"><span style="color:#000000">/foo/bar/baz</span></code> is a path
+literal <code class="lstinline"><span style="color:#000000">[%foo %bar %baz ~]</span></code>, representing a path in the
 scry namespace. The result of running this opcode will be the
 result of performing the scry request, i. e. dereferencing the
 path.
@@ -118,26 +118,26 @@ opcode).
 </p><!--l. 62--><p class="indent" >   Userspace code cannot memoize Nock persistently because
 it is not feasible for the runtime to prevent a jet mismatch in
 the metacircular evaluator gate. A gate like <code class="lstinline"><span style="color:#000000">++mink</span></code> takes in a
-Mock expression (a cell of <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>) and a
+Mock expression (a cell of <code class="lstinline"><span style="color:#000000">[subject formula]</span></code>) and a
 “scry handler gate” (which is described shortly), and returns a
 value which is one of:
 </p>
      <ul class="itemize1">
      <li class="itemize">
-     <!--l. 65--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">computation-result</span><span style="color:#000000">]</span></code>  for    a    successful
+     <!--l. 65--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[0 computation-result]</span></code>  for    a    successful
      evaluation;
                                                 
                                                 
      </p></li>
      <li class="itemize">
-     <!--l. 66--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">block</span><span style="color:#000000">]</span></code> in the case of a failed scry request; or
+     <!--l. 66--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[1 block]</span></code> in the case of a failed scry request; or
      </p></li>
      <li class="itemize">
-     <!--l. 67--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">error</span><span style="color:#000000">]</span></code> in the case of a deterministic error.</p></li></ul>
+     <!--l. 67--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[2 error]</span></code> in the case of a deterministic error.</p></li></ul>
 <!--l. 70--><p class="noindent" >While error handling is not relevant to the current question, a
 brief description is included here for thoroughness. The <code class="lstinline"><span style="color:#000000">error</span></code>
-in <code class="lstinline"><span style="color:#000000">++mink</span></code>’s result <code class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">error</span><span style="color:#000000">]</span></code> is a deterministic error, meaning
-that every attempt to evaluate that <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>
+in <code class="lstinline"><span style="color:#000000">++mink</span></code>’s result <code class="lstinline"><span style="color:#000000">[2 error]</span></code> is a deterministic error, meaning
+that every attempt to evaluate that <code class="lstinline"><span style="color:#000000">[subject formula]</span></code>
 pair will always result in that same error value—deterministic
 errors correspond to the lines in the Nock spec where <code class="lstinline"><span style="color:#000000">*a</span></code>
 evaluates to <code class="lstinline"><span style="color:#000000">*a</span></code>, i. e. a trivial inﬁnite loop. Nondeterministic
@@ -146,11 +146,11 @@ interrupted by the user, result in the function failing
 to complete, and the Arvo event will be aborted and
 rolled back to its state before trying to run this new
 event.
-</p><!--l. 73--><p class="indent" >   As mentioned, the <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> pair is not the
+</p><!--l. 73--><p class="indent" >   As mentioned, the <code class="lstinline"><span style="color:#000000">[subject formula]</span></code> pair is not the
 only input to <code class="lstinline"><span style="color:#000000">++mink</span></code>. There is also an argument of the
-form <code class="lstinline"><span style="color:#000000">scry=</span><span style="color:#000000"> </span><span style="color:#000000">$-</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000">)</span><span style="color:#000000">)</span><span style="color:#000000">)</span></code>, called the scry
+form <code class="lstinline"><span style="color:#000000">scry= $-(^ (unit (unit)))</span></code>, called the scry
 handler gate. When <code class="lstinline"><span style="color:#000000">++mink</span></code> encounters a Nock 12 opcode
-while evaluating an expression <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>, it
+while evaluating an expression <code class="lstinline"><span style="color:#000000">[subject formula]</span></code>, it
 evaluates the sub-formula to obtain a path to look up
 in the scry namespace. Once it has this path, it calls
 the scry handler gate on the path, which returns one
@@ -158,10 +158,10 @@ of:
 </p>
      <ul class="itemize1">
      <li class="itemize">
-     <!--l. 76--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">value</span><span style="color:#000000">]</span></code> positive scry response;
+     <!--l. 76--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[~ ~ value]</span></code> positive scry response;
      </p></li>
      <li class="itemize">
-     <!--l. 77--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span><span style="color:#000000"> </span></code>permanent scry failure; or
+     <!--l. 77--><p class="noindent" ><code class="lstinline"><span style="color:#000000">[~ ~] </span></code>permanent scry failure; or
                                                 
                                                 
      </p></li>
@@ -179,21 +179,21 @@ question, i. e. the request was &#x0022;blocked&#x0022; for some reason—this
 could be due to lack of permission, or because the request
 asked about the future, or the request asked for data from
 another ship that isn’t synchronously available within this
-Arvo event. If the scry blocks, <code class="lstinline"><span style="color:#000000">++mink</span></code> returns a <code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">block</span><span style="color:#000000">]</span></code>,
+Arvo event. If the scry blocks, <code class="lstinline"><span style="color:#000000">++mink</span></code> returns a <code class="lstinline"><span style="color:#000000">[1 block]</span></code>,
 where <code class="lstinline"><span style="color:#000000">block</span></code> is the scry request path whose value could not
 be resolved.
 </p><!--l. 86--><p class="indent" >   The Nock 12 opcode is problematic because it renders the
 result of the computation dependent on external data
-which are not in the <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> that is being
+which are not in the <code class="lstinline"><span style="color:#000000">[subject formula]</span></code> that is being
 evaluated. The result is no longer a pure function of the
 <code class="lstinline"><span style="color:#000000">subject</span></code> and <code class="lstinline"><span style="color:#000000">formula</span></code>: depending on what the scry
-handler gate is, the same <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> could
-yield diﬀerent results. Consider <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> of
-<code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">[12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span></code>. This returns the result of
+handler gate is, the same <code class="lstinline"><span style="color:#000000">[subject formula]</span></code> could
+yield diﬀerent results. Consider <code class="lstinline"><span style="color:#000000">[subject formula]</span></code> of
+<code class="lstinline"><span style="color:#000000">[0 [12 1 /foo/bar]]</span></code>. This returns the result of
 looking up the <code class="lstinline"><span style="color:#000000">/foo/bar</span></code> scry request path from the
 scry gate. Userspace code (which is untrusted) could call
-<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">mink</span><span style="color:#000000"> </span><span style="color:#000000">[[0</span><span style="color:#000000"> </span><span style="color:#000000">12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span><span style="color:#000000"> </span><span style="color:#000000">|=</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">33])</span><span style="color:#000000">)</span></code>, acquire a result
-<code class="lstinline"><span style="color:#000000">33</span></code>, then call <code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">mink</span><span style="color:#000000"> </span><span style="color:#000000">[[0</span><span style="color:#000000"> </span><span style="color:#000000">12</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">/foo/bar</span><span style="color:#000000">]]</span><span style="color:#000000"> </span><span style="color:#000000">|=</span><span style="color:#000000">(</span><span style="color:#000000">^</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">44])</span><span style="color:#000000">)</span></code>
+<code class="lstinline"><span style="color:#000000">(mink [[0 12 1 /foo/bar]] |=(^ [~ ~ 33]))</span></code>, acquire a result
+<code class="lstinline"><span style="color:#000000">33</span></code>, then call <code class="lstinline"><span style="color:#000000">(mink [[0 12 1 /foo/bar]] |=(^ [~ ~ 44]))</span></code>
 to yield <code class="lstinline"><span style="color:#000000">44</span></code>. The <code class="lstinline"><span style="color:#000000">subject</span></code>s and <code class="lstinline"><span style="color:#000000">formula</span></code>s were identical, but
 because they were evaluated with diﬀerent scry gates, they
 yielded diﬀerent results.
@@ -234,7 +234,7 @@ immutable.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscri
 </p><!--l. 97--><p class="indent" >   As long as a correct Arvo kernel is supplying the scry
 handler, Mock retains its purely functional nature. But
 consider again the case where userspace code runs the same
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> twice, but with two diﬀerent scry
+<code class="lstinline"><span style="color:#000000">[subject formula]</span></code> twice, but with two diﬀerent scry
 gates that give diﬀerent answers to some scry path. From
                                                 
                                                 
@@ -251,9 +251,9 @@ memoization. This means a programmer can emit a Nock hint
 to the interpreter asking the interpreter to cache the result of
 the computation, so that if it gets run again, the result will be
 retrieved from the runtime’s cache instead of rerun step by
-step. The cache key is a <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> pair.
+step. The cache key is a <code class="lstinline"><span style="color:#000000">[subject formula]</span></code> pair.
 When the interpreter sees a <code class="lstinline"><span style="color:#000000">%memo</span></code> hint, it looks at the
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> that the hint surrounds. If the
+<code class="lstinline"><span style="color:#000000">[subject formula]</span></code> that the hint surrounds. If the
 memoization cache has a value for that key, the runtime uses
 that value as the result of the computation. Otherwise the
 runtime runs the computation, inserts the result into the
@@ -285,8 +285,8 @@ items into the cache, there would be three options:
   class="enumerate" id="x1-3009x2">
      <!--l. 106--><p class="noindent" >Place  the  scry  gate  into  the  cache  key  for  the
      memoization  cache,  so  a  cache  key  would  be
-     <code class="lstinline"><span style="color:#000000">[[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span><span style="color:#000000"> </span><span style="color:#000000">scry-gate</span><span style="color:#000000">]</span></code> instead  of
-     just  <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code>.  This  would  close  the
+     <code class="lstinline"><span style="color:#000000">[[subject formula] scry-gate]</span></code> instead  of
+     just  <code class="lstinline"><span style="color:#000000">[subject formula]</span></code>.  This  would  close  the
      security hole, but since Arvo’s scry gate undergoes
      small changes on between every agent activation, it
      would make these cache lines useless outside of the
@@ -297,7 +297,7 @@ items into the cache, there would be three options:
 <li 
   class="enumerate" id="x1-3011x3">
      <!--l. 108--><p class="noindent" >Have   the   interpreter   record   the   set   of   scry
-     <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">path</span><span style="color:#000000"> </span><span style="color:#000000">value</span><span style="color:#000000">]</span></code> pairs looked up by the computation.
+     <code class="lstinline"><span style="color:#000000">[path value]</span></code> pairs looked up by the computation.
      This   would   allow   userspace   code   to   perform
      scry  requests  safely,  but  the  cost  is  a  nontrivial
      amount of machinery in the runtime, along with a
@@ -385,47 +385,47 @@ Consider a Gall agent that scries using the current
 </p>
    <!--l. 135-->
    <pre class="lstlisting" id="listing-71"><span class="label"><a  id="x1-5002r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">on-poke</span></span> 
-<span class="label"><a  id="x1-5003r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5003r2"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">m=mark</span> <span 
+class="ec-lmtt-9">v=vase</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-5004r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5004r3"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">quip</span> <span 
+class="ec-lmtt-9">card</span> <span 
+class="ec-lmtt-9">_this</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-5005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo-result</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-5005r4"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo-result</span>  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">.</span><span 
 class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">@da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/cx/</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">/foo</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@da</span></span><span style="color:#000000"> <span 
+class="ec-lmtt-9">/cx/</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scot</span> <span 
+class="ec-lmtt-9">%da</span> <span 
+class="ec-lmtt-9">now</span><span 
+class="ec-lmtt-9">)</span><span 
+class="ec-lmtt-9">/foo</span><span 
 class="ec-lmtt-9">)</span></span> 
 <span class="label"><a  id="x1-5006r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">do</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">something</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">with</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">do</span> <span 
+class="ec-lmtti-10x-x-90">something</span> <span 
+class="ec-lmtti-10x-x-90">with</span> <span 
 class="ec-lmtti-10x-x-90">foo-result...</span></span> 
-<span class="label"><a  id="x1-5007r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5007r6"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">this</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    
 <!--l. 144--><p class="indent" >   A corresponding snippet of a Gall agent that scries
@@ -434,79 +434,79 @@ this:
 </p>
    <!--l. 146-->
    <pre class="lstlisting" id="listing-73"><span class="label"><a  id="x1-5008r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">gall</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">gear</span>         </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">gall</span> <span 
 class="ec-lmtti-10x-x-90">seer</span></span> 
-<span class="label"><a  id="x1-5009r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5009r2"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">a=mold</span></span> 
-<span class="label"><a  id="x1-5010r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5010r3"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">seer</span> <span 
+class="ec-lmtt-9">vase</span> <span 
+class="ec-lmtt-9">a</span><span 
 class="ec-lmtt-9">)</span></span> 
 <span class="label"><a  id="x1-5011r4"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">on-poke</span></span> 
 <span class="label"><a  id="x1-5012r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">m=mark</span> <span 
+class="ec-lmtt-9">v=vase</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-5013r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5013r6"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">gear</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">quip</span> <span 
+class="ec-lmtt-9">card</span> <span 
+class="ec-lmtt-9">_this</span><span 
 class="ec-lmtt-9">))</span></span> 
-<span class="label"><a  id="x1-5014r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">(</span></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">seer</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">vase</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">(</span></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">quip</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">card</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">_this</span></span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-5014r7"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">(</span><span 
+class="ec-lmtti-10x-x-90">seer</span> <span 
+class="ec-lmtti-10x-x-90">vase</span> <span 
+class="ec-lmtti-10x-x-90">(</span><span 
+class="ec-lmtti-10x-x-90">quip</span> <span 
+class="ec-lmtti-10x-x-90">card</span> <span 
+class="ec-lmtti-10x-x-90">_this</span><span 
 class="ec-lmtti-10x-x-90">))</span></span> 
-<span class="label"><a  id="x1-5015r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%scry</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/cx/</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">/foo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5015r8"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">%scry</span>  <span 
+class="ec-lmtt-9">/cx/</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">now</span><span 
+class="ec-lmtt-9">)</span><span 
+class="ec-lmtt-9">/foo</span>  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">foo=vase</span></span> 
-<span class="label"><a  id="x1-5016r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo-result</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-5016r9"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo-result</span>  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">!&#x003C;</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">(</span></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"> <span 
+class="ec-lmtt-9">foo</span><span 
 class="ec-lmtt-9">)</span></span> 
 <span class="label"><a  id="x1-5017r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">do</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">something</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">with</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">do</span> <span 
+class="ec-lmtti-10x-x-90">something</span> <span 
+class="ec-lmtti-10x-x-90">with</span> <span 
 class="ec-lmtti-10x-x-90">foo-result...</span></span> 
-<span class="label"><a  id="x1-5018r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5018r11"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%done</span> <span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">this</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    
 <!--l. 160--><p class="indent" >   <code class="lstinline"><span style="color:#000000">++seer</span></code> values can be composed using a monadic
@@ -514,83 +514,83 @@ bind:
 </p>
    <!--l. 162-->
    <pre class="lstlisting" id="listing-75"><span class="label"><a  id="x1-5019r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo</span>  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">seer</span> <span 
+class="ec-lmtt-9">vase</span> </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtt-9">)</span>  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
 class="ec-lmtti-10x-x-90">/foo</span></span> 
 <span class="label"><a  id="x1-5020r2"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bar</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">bar</span>  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">seer</span> <span 
+class="ec-lmtt-9">vase</span> </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">@</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtt-9">)</span>  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">!!</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
 class="ec-lmtti-10x-x-90">/bar</span></span> 
 <span class="label"><a  id="x1-5021r3"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">on-poke</span></span> 
-<span class="label"><a  id="x1-5022r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">m=mark</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">v=vase</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5022r4"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">m=mark</span> <span 
+class="ec-lmtt-9">v=vase</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-5023r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">=*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">quip</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">card</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">_this</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">r</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">quip</span> <span 
+class="ec-lmtt-9">card</span> <span 
+class="ec-lmtt-9">_this</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-5024r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">gear</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">r</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5024r6"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">gear</span> <span 
+class="ec-lmtt-9">r</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-5025r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">rapt</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">vase</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">r</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5025r7"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">bind</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">rapt</span> <span 
+class="ec-lmtt-9">vase</span> <span 
+class="ec-lmtt-9">r</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-5026r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo=@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5026r8"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo=@</span>  <span 
+class="ec-lmtt-9">bind</span>  <span 
 class="ec-lmtt-9">foo</span></span> 
-<span class="label"><a  id="x1-5027r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bar=@</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bind</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5027r9"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">;&#x003C;</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">bar=@</span>  <span 
+class="ec-lmtt-9">bind</span>  <span 
 class="ec-lmtt-9">bar</span></span> 
 <span class="label"><a  id="x1-5028r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">some-state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">bar</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%done</span> <span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">this</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">some-state</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">add</span> <span 
+class="ec-lmtt-9">foo</span> <span 
+class="ec-lmtt-9">bar</span><span 
 class="ec-lmtt-9">))]</span></span></pre>
    
 <!--l. 175--><p class="noindent" >(In this example, use is made of <code class="lstinline"><span style="color:#000000">++rapt</span></code>. <code class="lstinline"><span style="color:#000000">++rapt</span></code> is a
@@ -599,42 +599,42 @@ monadic scry binding gate (<a  id="x1-5029"></a> <a href="#cite.0@Levan2023b"><c
 </p>
    <!--l. 180-->
    <pre class="lstlisting" id="listing-79"><span class="label"><a  id="x1-5030r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">seer</span></span> 
-<span class="label"><a  id="x1-5031r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">r=mold</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">a=mold</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5031r2"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">r=mold</span> <span 
+class="ec-lmtt-9">a=mold</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-5032r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-5032r3"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">$</span><span 
-class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">*a</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%done</span> <span 
+class="ec-lmtt-9">*a</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-5033r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%done</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">p=a</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5033r4"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%done</span> <span 
+class="ec-lmtt-9">p=a</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-5034r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%scry</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">p=path</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%scry</span> <span 
+class="ec-lmtt-9">p=path</span> <span 
 class="ec-lmtt-9">k=</span><span 
-class="ec-lmtt-9">$-</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">seer</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">r</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">$-</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">r</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">seer</span> <span 
+class="ec-lmtt-9">r</span> <span 
+class="ec-lmtt-9">a</span><span 
 class="ec-lmtt-9">))]</span></span> 
-<span class="label"><a  id="x1-5035r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-5035r6"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
    
 <!--l. 189--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">++seer</span></code> scry system is intentionally incompatible with
@@ -659,7 +659,7 @@ move that will be delivered back into the agent in
 a later activation of the Gall vane, in accordance with
 the normal move processing order that Gall and Arvo
 use. Thus an agent could emit a list of moves such as
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">poke-1</span><span style="color:#000000"> </span><span style="color:#000000">scry-A</span><span style="color:#000000"> </span><span style="color:#000000">poke-2</span><span style="color:#000000"> </span><span style="color:#000000">scry-B</span><span style="color:#000000"> </span><span style="color:#000000">poke-3</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code> and Gall
+<code class="lstinline"><span style="color:#000000">[poke-1 scry-A poke-2 scry-B poke-3 ~]</span></code> and Gall
 will handle all of those moves in the same order as if they
 were all pokes, i. e. the kernel will not introduce any
 exceptions to its normal move processing order for scry
@@ -701,8 +701,8 @@ snapshot, meaning the requesting agent will see a consistent
 view of the system without any tearing.
 </p><!--l. 206--><p class="indent" >   Gall will also need to run the <code class="lstinline"><span style="color:#000000">++on-peek</span></code> arm of a
 Gall agent in the Seer monad, i. e. that arm will return
-either <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%done</span><span style="color:#000000"> </span><span style="color:#000000">scry-result</span><span style="color:#000000">]</span></code> to indicate it’s done or
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">%scry</span><span style="color:#000000"> </span><span style="color:#000000">scry-request-path</span><span style="color:#000000"> </span><span style="color:#000000">callback</span><span style="color:#000000">]</span></code> to ask Gall to
+either <code class="lstinline"><span style="color:#000000">[%done scry-result]</span></code> to indicate it’s done or
+<code class="lstinline"><span style="color:#000000">[%scry scry-request-path callback]</span></code> to ask Gall to
 perform a scry request, in which case Gall performs the scry,
 injects the result into the callback gate, and repeats,
 until a <code class="lstinline"><span style="color:#000000">%done</span></code> is returned. This should not be a direct
@@ -898,7 +898,7 @@ class="ec-lmr-8">Mock code, or even nested Mock code, that had previously perfor
   <span 
 class="ec-lmr-8">scry requests that were not referentially transparent: raw Nock is</span>
   <span 
-class="ec-lmr-8">context-free, so no matter how the </span><code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">subject</span><span style="color:#000000"> </span><span style="color:#000000">formula</span><span style="color:#000000">]</span></code> <span 
+class="ec-lmr-8">context-free, so no matter how the </span><code class="lstinline"><span style="color:#000000">[subject formula]</span></code> <span 
 class="ec-lmr-8">cell was</span>
   <span 
 class="ec-lmr-8">created, the result of its evaluation is still pure.</span><a href="#x1-5001f6">⤴</a></p></div>

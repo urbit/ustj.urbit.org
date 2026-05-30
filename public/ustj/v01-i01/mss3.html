@@ -181,44 +181,44 @@ the Urbit build system.
 compile time.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-4003f1"></a> 
 In the Urbit build arm <code class="lstinline"><span style="color:#000000">++ford</span></code>, a pair of builds becomes the
 build of a pair. The subject (environment) used to build a ﬁle is
-the tuple <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">import_n</span><span style="color:#000000"> </span>…<span style="color:#000000"> </span><span style="color:#000000">import_2</span><span style="color:#000000"> </span><span style="color:#000000">import_1</span><span style="color:#000000"> </span><span style="color:#000000">stdlib</span><span style="color:#000000">]</span></code>.
+the tuple <code class="lstinline"><span style="color:#000000">[import_n </span>…<span style="color:#000000"> import_2 import_1 stdlib]</span></code>.
 Since Hoon symbol lookup is left-to-right, this nests scopes
 seamlessly and predictably. The linking technique is essentially
 trivial.
 </p><!--l. 87--><p class="indent" >   Ford compiles a Hoon source ﬁle into a data structure
-called a “vase”, a pair <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">type</span><span style="color:#000000"> </span><span style="color:#000000">noun</span><span style="color:#000000">]</span></code> where <code class="lstinline"><span style="color:#000000">noun</span></code> is a
+called a “vase”, a pair <code class="lstinline"><span style="color:#000000">[type noun]</span></code> where <code class="lstinline"><span style="color:#000000">noun</span></code> is a
 member of the set of nouns described by <code class="lstinline"><span style="color:#000000">type</span></code>. Linking is
 thence just calling the <code class="lstinline"><span style="color:#000000">++slop</span></code> funciton, a one-liner from a
 pair of vases to a vase of the pair.
-</p><!--l. 89--><p class="indent" >   For example, the (trivial) Hoon source ﬁle with text <code class="lstinline"><span style="color:#000000">&#x0027;</span><span style="color:#000000">3</span><span style="color:#000000">&#x0027;</span></code>
-compiles to the vase <code class="lstinline"><span style="color:#000000">[[</span><span style="color:#000000">%atom</span><span style="color:#000000"> </span><span style="color:#000000">%ud</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span><span style="color:#000000"> </span><span style="color:#000000">3]</span></code>. <code class="lstinline"><span style="color:#000000">3</span></code> is the value. Its
+</p><!--l. 89--><p class="indent" >   For example, the (trivial) Hoon source ﬁle with text <code class="lstinline"><span style="color:#000000">&#x0027;3&#x0027;</span></code>
+compiles to the vase <code class="lstinline"><span style="color:#000000">[[%atom %ud ~] 3]</span></code>. <code class="lstinline"><span style="color:#000000">3</span></code> is the value. Its
 type is an atom (number), tagged as an unsigned decimal
 (<code class="lstinline"><span style="color:#000000">%ud</span></code>) for printing.
 </p><!--l. 91--><p class="indent" >   As another example, the Hoon source ﬁle with text
-<code class="lstinline"><span style="color:#000000">&#x0027;</span><span style="color:#000000">[3</span><span style="color:#000000"> </span><span style="color:#000000">0</span><span style="color:#000000">x4</span><span style="color:#000000">]</span><span style="color:#000000">&#x0027;</span></code> compiles to </p><!--l. 92-->
+<code class="lstinline"><span style="color:#000000">&#x0027;[3 0x4]&#x0027;</span></code> compiles to </p><!--l. 92-->
    <pre class="lstlisting" id="listing-15"><span class="label"><a  id="x1-4004r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%cell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%ux</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">x4</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">%cell</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%atom</span> <span 
+class="ec-lmtt-9">%ud</span> <span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%atom</span> <span 
+class="ec-lmtt-9">%ux</span> <span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">]]</span> <span 
+class="ec-lmtt-9">[3</span> <span 
+class="ec-lmtt-9">0</span><span 
+class="ec-lmtt-9">x4</span><span 
 class="ec-lmtt-9">]]</span></span></pre>
    
 <!--l. 95--><p class="noindent" >This is a vase of a <code class="lstinline"><span style="color:#000000">%cell</span></code> (pair) of unsigned decimal
 number (<code class="lstinline"><span style="color:#000000">%ud</span></code>) and unsigned hexadecimal number (<code class="lstinline"><span style="color:#000000">%ux</span></code>).
-If <code class="lstinline"><span style="color:#000000">/foo/hoon</span></code> is <code class="lstinline"><span style="color:#000000">&#x0027;</span><span style="color:#000000">3</span><span style="color:#000000">&#x0027;</span></code>, <code class="lstinline"><span style="color:#000000">/bar/hoon</span></code> is <code class="lstinline"><span style="color:#000000">&#x0027;</span><span style="color:#000000">0</span><span style="color:#000000">x4</span><span style="color:#000000">&#x0027;</span></code>, then
+If <code class="lstinline"><span style="color:#000000">/foo/hoon</span></code> is <code class="lstinline"><span style="color:#000000">&#x0027;3&#x0027;</span></code>, <code class="lstinline"><span style="color:#000000">/bar/hoon</span></code> is <code class="lstinline"><span style="color:#000000">&#x0027;0x4&#x0027;</span></code>, then
 importing both of those ﬁles changes the build subject to
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">foo=3</span><span style="color:#000000"> </span><span style="color:#000000">bar=0x4</span><span style="color:#000000"> </span><span style="color:#000000">&#x003C;stdlib&#x003E;</span><span style="color:#000000">]</span></code> (or really, a vase of that
+<code class="lstinline"><span style="color:#000000">[foo=3 bar=0x4 &#x003C;stdlib&#x003E;]</span></code> (or really, a vase of that
 value).
 </p><!--l. 98--><p class="indent" >   This is a form of static linking. The linking is performed at
 build time, not at runtime, and the resulting program contains
@@ -233,7 +233,7 @@ that library would be built twice and two copies of it would
 exist in memory.
 </p><!--l. 100--><p class="indent" >   In Urbit, everything is a “noun” (a binary tree with
 arbitrarily-sized integers at leaves). If you “copy” a noun <code class="lstinline"><span style="color:#000000">foo</span></code>,
-like <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">foo</span><span style="color:#000000"> </span><span style="color:#000000">foo</span><span style="color:#000000">]</span></code>, the runtime just copies a pointer to it. They
+like <code class="lstinline"><span style="color:#000000">[foo foo]</span></code>, the runtime just copies a pointer to it. They
 are immutable, so everything shares structure. Nouns are
 “persistent” data structures, like Clojure’s collections. If
 one copies a library, the copy is merely a pointer to the

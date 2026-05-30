@@ -537,8 +537,8 @@ source, runs the Ford runes to perform imports, and then
 compiles the source, producing a <code class="lstinline"><span style="color:#000000">$vase</span></code>, a noun tagged with
 its Hoon type.
 </p><!--l. 189--><p class="indent" >   Clay exposes ﬁle builds into the scry namespace with
-<code class="lstinline"><span style="color:#000000">%ca</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^</span><span style="color:#000000">(</span><span style="color:#000000">vase</span><span style="color:#000000"> </span><span style="color:#000000">%ca</span><span style="color:#000000"> </span><span style="color:#000000">/~zod/base/3</span></code>
-<code class="lstinline"><span style="color:#000000">/lib/sole/hoon</span><span style="color:#000000">)</span></code> will build the <code class="lstinline"><span style="color:#000000">sole</span></code> library.
+<code class="lstinline"><span style="color:#000000">%ca</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^(vase %ca /~zod/base/3</span></code>
+<code class="lstinline"><span style="color:#000000">/lib/sole/hoon)</span></code> will build the <code class="lstinline"><span style="color:#000000">sole</span></code> library.
                                                 
                                                 
 </p><!--l. 191--><p class="noindent" >
@@ -553,8 +553,8 @@ delegated revision control operations to another mark core,
 the mark build will also load the delegate mark core and
 resolve the result into the <code class="lstinline"><span style="color:#000000">$dais</span></code>.
 </p><!--l. 196--><p class="indent" >   Clay exposes mark builds into the scry namespace with
-<code class="lstinline"><span style="color:#000000">%cb</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^</span><span style="color:#000000">(</span><span style="color:#000000">dais:clay</span><span style="color:#000000"> </span><span style="color:#000000">%cb</span><span style="color:#000000"> </span><span style="color:#000000">/~zod/base/3</span></code>
-<code class="lstinline"><span style="color:#000000">/mar/foo/hoon</span><span style="color:#000000">)</span></code> builds a <code class="lstinline"><span style="color:#000000">$dais</span></code> for the <code class="lstinline"><span style="color:#000000">%foo</span></code> mark.
+<code class="lstinline"><span style="color:#000000">%cb</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^(dais:clay %cb /~zod/base/3</span></code>
+<code class="lstinline"><span style="color:#000000">/mar/foo/hoon)</span></code> builds a <code class="lstinline"><span style="color:#000000">$dais</span></code> for the <code class="lstinline"><span style="color:#000000">%foo</span></code> mark.
 </p><!--l. 198--><p class="noindent" >
 </p>
    <h5 class="subsubsectionHead"><span class="titlemark">4.1.3   </span> <a 
@@ -591,8 +591,8 @@ core, and <code class="lstinline"><span style="color:#000000">%bar</span></code>
 <code class="lstinline"><span style="color:#000000">+grab</span></code> arm produce a delegate mark instead of directly
 deﬁning a conversion gate.
 </p><!--l. 212--><p class="indent" >   Clay exposes cast builds into the scry namespace with
-<code class="lstinline"><span style="color:#000000">%cc</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^</span><span style="color:#000000">(</span><span style="color:#000000">tube:clay</span><span style="color:#000000"> </span><span style="color:#000000">%cc</span><span style="color:#000000"> </span><span style="color:#000000">/~zod/base/3</span></code>
-<code class="lstinline"><span style="color:#000000">/foo/bar</span><span style="color:#000000">)</span></code> builds a <code class="lstinline"><span style="color:#000000">$tube</span></code> conversion gate from <code class="lstinline"><span style="color:#000000">%foo</span></code> to
+<code class="lstinline"><span style="color:#000000">%cc</span></code>: as an example, <code class="lstinline"><span style="color:#000000">.^(tube:clay %cc /~zod/base/3</span></code>
+<code class="lstinline"><span style="color:#000000">/foo/bar)</span></code> builds a <code class="lstinline"><span style="color:#000000">$tube</span></code> conversion gate from <code class="lstinline"><span style="color:#000000">%foo</span></code> to
 <code class="lstinline"><span style="color:#000000">%bar</span></code>.
 </p><!--l. 214--><p class="noindent" >
 </p>
@@ -606,9 +606,9 @@ one line, and they must be in the standard order of <code class="lstinline"><spa
    <!--l. 218-->
 <pre class="lstlisting" id="listing-68"><span class="label"><a 
  id="x1-13001r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">/-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">*bar,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">/-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo,</span> <span 
+class="ec-lmtt-9">*bar,</span> <span 
 class="ec-lmtt-9">baz=qux</span></span></pre>
 <!--l. 222--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/-</span></code> rune imports a structures ﬁle from <code class="lstinline"><span style="color:#000000">/sur</span></code>. You can
 import it as just <code class="lstinline"><span style="color:#000000">foo</span></code>, in which case the build result of
@@ -627,9 +627,9 @@ languages.
    <!--l. 224-->
 <pre class="lstlisting" id="listing-78"><span class="label"><a 
  id="x1-13002r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">/+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">foo,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">*bar,</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">/+</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">foo,</span> <span 
+class="ec-lmtt-9">*bar,</span> <span 
 class="ec-lmtt-9">baz=qux</span></span></pre>
 <!--l. 228--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/+</span></code> rune imports a library ﬁle from <code class="lstinline"><span style="color:#000000">/lib</span></code>. Aside from
 the diﬀerent source folder, the syntax and semantics are the
@@ -638,8 +638,8 @@ same as for <code class="lstinline"><span style="color:#000000">/-</span></code>
    <!--l. 230-->
 <pre class="lstlisting" id="listing-82"><span class="label"><a 
  id="x1-13003r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">/=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">clay-raw</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">/=</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">clay-raw</span>  <span 
 class="ec-lmtt-9">/sys/vane/clay</span></span></pre>
 <!--l. 234--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/=</span></code> rune imports the result of building a Hoon ﬁle
 from a user-speciﬁed path (the second argument), wrapping it
@@ -654,9 +654,9 @@ the results of any Ford runes it has at the top of the
    <!--l. 236-->
 <pre class="lstlisting" id="listing-85"><span class="label"><a 
  id="x1-13004r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">/*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">hello-gen</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">/*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">hello-gen</span>  <span 
+class="ec-lmtt-9">%hoon</span>  <span 
 class="ec-lmtt-9">/gen/hello/hoon</span></span></pre>
 <!--l. 240--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/*</span></code> rune imports the contents of a ﬁle in the desk,
 speciﬁed as the third argument with the full path including
@@ -682,35 +682,35 @@ as:
    <!--l. 244-->
 <pre class="lstlisting" id="listing-94"><span class="label"><a 
  id="x1-13005r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">fastar-2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">fastar-2</span>  <span 
 class="ec-lmtt-9">fastar-1</span></span> 
 <span class="label"><a 
- id="x1-13006r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">fastis-2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+ id="x1-13006r2"></a></span><span style="color:#000000">    <span 
+class="ec-lmtt-9">fastis-2</span>  <span 
 class="ec-lmtt-9">fastis-1</span></span> 
 <span class="label"><a 
- id="x1-13007r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">faslus-2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+ id="x1-13007r3"></a></span><span style="color:#000000">    <span 
+class="ec-lmtt-9">faslus-2</span>  <span 
 class="ec-lmtt-9">faslus-1</span></span> 
 <span class="label"><a 
- id="x1-13008r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">fashep-2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+ id="x1-13008r4"></a></span><span style="color:#000000">    <span 
+class="ec-lmtt-9">fashep-2</span>  <span 
 class="ec-lmtt-9">fashep-1</span></span> 
 <span class="label"><a 
  id="x1-13009r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">    <span 
 class="ec-lmtt-9">&#x003C;zuse&#x003E;</span></span> 
 <span class="label"><a 
  id="x1-13010r6"></a></span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
    <!--l. 253-->
 <pre class="lstlisting" id="listing-95"><span class="label"><a 
- id="x1-13011r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+ id="x1-13011r1"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">/</span><span 
-class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">some-face</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%from-mark</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">some-face</span>  <span 
+class="ec-lmtt-9">%from-mark</span>  <span 
 class="ec-lmtt-9">%to-mark</span></span></pre>
 <!--l. 257--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/$</span></code> rune imports a mark conversion gate between
 two types. These are marks on the same desk as the
@@ -718,11 +718,11 @@ two types. These are marks on the same desk as the
 </p>
    <!--l. 259-->
 <pre class="lstlisting" id="listing-97"><span class="label"><a 
- id="x1-13012r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+ id="x1-13012r1"></a></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">/</span><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">some-face</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">some-type</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span>  <span 
+class="ec-lmtt-9">some-face</span>  <span 
+class="ec-lmtt-9">some-type</span>  <span 
 class="ec-lmtt-9">/some/directory</span></span></pre>
 <!--l. 263--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/~</span></code> rune imports, builds, evaluates, and pins the
 results of many <code class="lstinline"><span style="color:#000000">hoon</span></code> ﬁles in a directory. Each Hoon ﬁle in the
@@ -741,9 +741,9 @@ type speciﬁed <code class="lstinline"><span style="color:#000000">some-type</s
 </p>
    <!--l. 267-->
 <pre class="lstlisting" id="listing-106"><span class="label"><a 
- id="x1-13013r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">/%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">some-face</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+ id="x1-13013r1"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">/%</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">some-face</span>  <span 
 class="ec-lmtt-9">%some-mark</span></span></pre>
 <!--l. 271--><p class="indent" >   The <code class="lstinline"><span style="color:#000000">/%</span></code> rune imports a mark deﬁnition from the <code class="lstinline"><span style="color:#000000">/mar</span></code>
 directory. The mark deﬁnition will be built and pinned with
@@ -759,7 +759,7 @@ criteria for accepting an update.
 </p><!--l. 278--><p class="indent" >   This work also hopefully provides a good foundation of a
 package management and software distribution system for
 Urbit. As ~wicdev-wisryt has said, a user should be able to
-run <code class="lstinline"><span style="color:#000000">|install</span><span style="color:#000000"> </span><span style="color:#000000">~norsyr-torryn</span><span style="color:#000000"> </span><span style="color:#000000">%canvas</span></code> to load and
+run <code class="lstinline"><span style="color:#000000">|install ~norsyr-torryn %canvas</span></code> to load and
 build remote source. No one should experience dependency
 hell on Urbit, but we’re not there yet.
 </p><!--l. 280--><p class="indent" >   At least now, building a desk has no dependencies, other

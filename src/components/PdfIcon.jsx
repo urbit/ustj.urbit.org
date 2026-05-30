@@ -1,4 +1,4 @@
-export default function ({ className = "" }) {
+export default function PdfIcon({ className = "" }) {
   return (
     <svg
       className={className}

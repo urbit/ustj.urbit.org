@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import IntraNav from "@/components/IntraNav";
 
 export default function Information() {
@@ -12,7 +11,6 @@ export default function Information() {
     <>
       <Head>
         <title>ustj.urbit.org</title>
-        {/* {Meta(post)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
         <IntraNav />
@@ -23,8 +21,9 @@ export default function Information() {
             </h1>
             <p>
               Urbit is a new computing paradigm that provides complete ownership
-              of your digital world. We envision replacing the "ball of mud of
-              conventional software with an entirely new software stack.
+              of your digital world. We envision replacing the &ldquo;ball of
+              mud&rdquo; of conventional software with an entirely new software
+              stack.
             </p>
             <p>
               Urbit is a deterministic, transactional operating system and
@@ -32,7 +31,7 @@ export default function Information() {
               combinator calculus. We are building a world for personal
               computational sovereignty: decentralized peer-to-peer
               applications, cryptographic identity, and designed to last
-              forever. But the work isn't done yet, and we are meeting
+              forever. But the work isn&rsquo;t done yet, and we are meeting
               compelling and novel challenges in solid-state computing head-on.
             </p>
             <p>
@@ -55,14 +54,14 @@ export default function Information() {
             <p>
               The Urbit community is currently engaged in such endeavors, such
               as the Neo Urbit project to increase data storage and execution
-              speed of Urbit's low-level interpreted language Nock. USTJ
+              speed of Urbit&rsquo;s low-level interpreted language Nock. USTJ
               showcases advancements in dynamic linking, floating-point
               calculation, and memory management systems. We welcome
               submissions from those engaged in making computing more
               solid-state.
             </p>
             <p>
-              Urbit's network is already fully operational and free to use and
+              Urbit&rsquo;s network is already fully operational and free to use and
               build on.
             </p>
           </article>

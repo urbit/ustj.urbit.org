@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Head from "next/head";
 import { init } from "@socialgouv/matomo-next";
 import "@/styles/fonts.css";
@@ -13,7 +13,7 @@ function MyApp({ Component, pageProps }) {
       url: MATOMO_URL,
       siteId: MATOMO_SITE_ID,
     });
-  });
+  }, []);
 
   return (
     <>

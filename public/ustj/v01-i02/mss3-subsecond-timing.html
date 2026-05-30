@@ -65,35 +65,35 @@ class="ec-lmr-9">negative powers of ten.</span>
 atom,<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a  id="x1-2f1"></a> 
 with the lower 64 bits denoting fractions of a second and the
 upper 64 bits denoting multiples of a second. (That is, 1 s =
-<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">bex</span><span style="color:#000000"> </span><span style="color:#000000">64)</span></code>.)
+<code class="lstinline"><span style="color:#000000">(bex 64)</span></code>.)
 </p><!--l. 50--><p class="indent" >   By expanding the atomic form of time (<code class="lstinline"><span style="color:#000000">@dr</span></code>) to the tuple
 form, we can clearly see how each component of the time is
 represented:
 </p>
    <!--l. 52-->
-<pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-3r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">yell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">Treating</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">&#x0022;now</span></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">&#x0022;</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">as</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">an</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+<pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-3r1"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">&#x003E;</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">yell</span> <span 
+class="ec-lmtt-9">now</span><span 
+class="ec-lmtt-9">)</span>  </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span> <span 
+class="ec-lmtti-10x-x-90">Treating</span> <span 
+class="ec-lmtti-10x-x-90">&#x0022;now</span><span 
+class="ec-lmtti-10x-x-90">&#x0022;</span> <span 
+class="ec-lmtti-10x-x-90">as</span> <span 
+class="ec-lmtti-10x-x-90">an</span> <span 
 class="ec-lmtti-10x-x-90">interval.</span></span> 
-<span class="label"><a  id="x1-4r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">d=106.751.991.823.894</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">h=15</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">m=19</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">s=22</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-4r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">d=106.751.991.823.894</span> <span 
+class="ec-lmtt-9">h=15</span> <span 
+class="ec-lmtt-9">m=19</span> <span 
+class="ec-lmtt-9">s=22</span> <span 
 class="ec-lmtt-9">f=</span><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">xd43</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">[0</span><span 
+class="ec-lmtt-9">xd43</span><span 
 class="ec-lmtt-9">]]</span></span></pre>
 <!--l. 57--><p class="indent" >   The last component of the tuple is a list of subsecond
 time intervals; while <code class="lstinline"><span style="color:#000000">now</span></code> does not feign to provide more
@@ -102,31 +102,31 @@ subsecond intervals down to \(2^{-64} \,\textrm {s}\) by including more values i
 list.
 </p>
    <!--l. 59-->
-<pre class="lstlisting" id="listing-5"><span class="label"><a  id="x1-5r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">yell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<pre class="lstlisting" id="listing-5"><span class="label"><a  id="x1-5r1"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">&#x003E;</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">yell</span> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">`</span><span 
 class="ec-lmtt-9">@dr</span><span 
 class="ts1-lmtt9-">`</span><span 
 class="ec-lmtt-9">0x1</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">d=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">h=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">m=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">s=0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">d=0</span> <span 
+class="ec-lmtt-9">h=0</span> <span 
+class="ec-lmtt-9">m=0</span> <span 
+class="ec-lmtt-9">s=0</span> <span 
 class="ec-lmtt-9">f=</span><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">x0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">x1</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">[0</span><span 
+class="ec-lmtt-9">x0</span> <span 
+class="ec-lmtt-9">0</span><span 
+class="ec-lmtt-9">x0</span> <span 
+class="ec-lmtt-9">0</span><span 
+class="ec-lmtt-9">x0</span> <span 
+class="ec-lmtt-9">0</span><span 
+class="ec-lmtt-9">x1</span><span 
 class="ec-lmtt-9">]]</span></span></pre>
 <!--l. 64--><p class="indent" >   Subsecond decimal time does not cleanly map to this
 representation, and the resulting hexadecimal values are

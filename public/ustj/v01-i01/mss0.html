@@ -985,7 +985,7 @@ aren’t duplicated while full revision history can be retained for
 other things where it’s appropriate.
 </p><!--l. 339--><p class="indent" >   Tombstoning is not at odds with the referential
 transparency of scries, since a scry attempt may return
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">~</span><span style="color:#000000"> </span><span style="color:#000000">~</span><span style="color:#000000">]</span></code>, a permanent scry failure (that resource will never be
+<code class="lstinline"><span style="color:#000000">[~ ~]</span></code>, a permanent scry failure (that resource will never be
 available).
 </p><!--l. 341--><p class="noindent" >
 </p>
@@ -1488,8 +1488,8 @@ class="ec-lmbx-10">5.1 Nouns</span></span>
    The Murmur3 system was aspirational but has been
 subsequently realized. A few years ago, a horrendous bug was
 found and ﬁxed in the “mug” short hash for cells: the
-algorithm was symmetric, so <code class="lstinline"><span style="color:#000000">[1</span><span style="color:#000000"> </span><span style="color:#000000">0]</span></code> hashed to the same value
-as <code class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">1]</span></code>. This led to far more hash collisions than there
+algorithm was symmetric, so <code class="lstinline"><span style="color:#000000">[1 0]</span></code> hashed to the same value
+as <code class="lstinline"><span style="color:#000000">[0 1]</span></code>. This led to far more hash collisions than there
 should have been, degrading the asymptotics of a number of
 data structures.
 </p>

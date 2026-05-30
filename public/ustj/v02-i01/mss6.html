@@ -199,9 +199,9 @@
       <li class="enumerate" id="x1-5020x10">
          <!--l. 87-->
          <p class="noindent"><code
-               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">a</span><span style="color:#000000"> </span><span style="color:#000000">b</span><span style="color:#000000"> </span><span style="color:#000000">c</span><span style="color:#000000">]</span></code>
+               class="lstinline"><span style="color:#000000">[a b c]</span></code>
             → <code
-               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">a</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">b</span><span style="color:#000000"> </span><span style="color:#000000">c</span><span style="color:#000000">]]</span></code>
+               class="lstinline"><span style="color:#000000">[a [b c]]</span></code>
          </p>
       </li>
       <li class="enumerate" id="x1-5022x11">
@@ -222,11 +222,11 @@
    <h4 class="likesubsectionHead"><a id="x1-6000"></a>Term</h4>
    <!--l. 94-->
    <pre class="lstlisting" id="listing-17"><span class="label"><a  id="x1-6001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(0</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">..1</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">(0</span><span 
+class="ec-lmtt-9">..1</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">σ</span></span></pre>
 
    <h4 class="likesubsectionHead"><a id="x1-7000"></a>Reduction</h4>
@@ -234,335 +234,335 @@ class="ec-lmtt-9">σ</span></span></pre>
    <h5 class="likesubsubsectionHead"><a id="x1-8000"></a>Axioms</h5>
    <!--l. 102-->
    <pre class="lstlisting" id="listing-18"><span class="label"><a  id="x1-8001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0]</span>            </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">  <span 
+class="ec-lmtt-9">Ξ</span> <span 
 class="ec-lmtt-9">[0]</span></span> 
 <span class="label"><a  id="x1-8002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0]</span>          </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">  <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
 class="ec-lmtt-9">0]</span></span> 
 <span class="label"><a  id="x1-8003r3"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">0]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">0</span></span> 
 <span class="label"><a  id="x1-8004r4"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">0]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">1</span></span> 
 <span class="label"><a  id="x1-8005r5"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">1]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">2</span></span> 
 <span class="label"><a  id="x1-8006r6"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[2</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">3</span></span> 
 <span class="label"><a  id="x1-8007r7"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">b</span></span> 
 <span class="label"><a  id="x1-8008r8"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">n</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span> <span 
+class="ec-lmtt-9">+</span> <span 
 class="ec-lmtt-9">1</span></span> 
 <span class="label"><a  id="x1-8009r9"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span> <span 
+class="ec-lmtt-9">+</span> <span 
 class="ec-lmtt-9">1</span></span> 
 <span class="label"><a  id="x1-8010r10"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">0]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">?</span></span> 
 <span class="label"><a  id="x1-8011r11"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">a</span></span> 
 <span class="label"><a  id="x1-8012r12"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">2]</span>    </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">a</span></span> 
 <span class="label"><a  id="x1-8013r13"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">3]</span>    </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">b</span></span> 
 <span class="label"><a  id="x1-8014r14"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">)</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
 class="ec-lmtt-9">2]</span></span> 
 <span class="label"><a  id="x1-8015r15"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">1)</span><span 
+class="ec-lmtt-9">]</span>  </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
 class="ec-lmtt-9">3]</span></span> 
 <span class="label"><a  id="x1-8016r16"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-8017r17"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[3</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">[1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[3</span> <span 
 class="ec-lmtt-9">4]</span></span> 
 <span class="label"><a  id="x1-8018r18"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>    </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">d</span><span 
 class="ec-lmtt-9">]]</span></span> 
 <span class="label"><a  id="x1-8019r19"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]]</span></span> 
 <span class="label"><a  id="x1-8020r20"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">4</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">1</span></span> 
 <span class="label"><a  id="x1-8021r21"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">4</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">0</span></span> 
 <span class="label"><a  id="x1-8022r22"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">σ</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">5</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">σ</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">b</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-8023r23"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">6</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">1</span></span> 
 <span class="label"><a  id="x1-8024r24"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">6</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">     <span 
+class="ec-lmtt-9">d</span>     </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">0</span></span></pre>
    <!--l. 129-->
    <p class="noindent">
@@ -575,149 +575,149 @@ class="ec-lmtt-9">0</span></span></pre>
    <h4 class="likesubsectionHead"><a id="x1-10000"></a>Terms</h4>
    <!--l. 135-->
    <pre class="lstlisting" id="listing-19"><span class="label"><a  id="x1-10001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">operators</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">7</span> <span 
+class="ec-lmtt-9">operators</span>                 <span 
+class="ec-lmtt-9">7</span> <span 
 class="ec-lmtt-9">lemmas</span></span> 
 <span class="label"><a  id="x1-10002r2"></a></span> 
 <span class="label"><a  id="x1-10003r3"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">12</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">0</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">is</span>                    <span 
+class="ec-lmtt-9">12</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">dec</span></span> 
 <span class="label"><a  id="x1-10004r4"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">inc</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">13</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">1</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">inc</span>                   <span 
+class="ec-lmtt-9">13</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">add</span></span> 
 <span class="label"><a  id="x1-10005r5"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">14</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">br</span>                    <span 
+class="ec-lmtt-9">14</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">sub</span></span> 
 <span class="label"><a  id="x1-10006r6"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ax</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">15</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">3</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">ax</span>                    <span 
+class="ec-lmtt-9">15</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">mul</span></span> 
 <span class="label"><a  id="x1-10007r7"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">4</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">eq</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">16</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">4</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">eq</span>                    <span 
+class="ec-lmtt-9">16</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">div</span></span> 
 <span class="label"><a  id="x1-10008r8"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">fz</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">17</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">fz</span>                    <span 
+class="ec-lmtt-9">17</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">mod</span></span> 
 <span class="label"><a  id="x1-10009r9"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">6</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">cel</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">18</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">6</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
+class="ec-lmtt-9">cel</span>                   <span 
+class="ec-lmtt-9">18</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">lt</span></span> 
 <span class="label"><a  id="x1-10010r10"></a></span> 
 <span class="label"><a  id="x1-10011r11"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">5</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">5</span> <span 
 class="ec-lmtt-9">idioms</span></span> 
 <span class="label"><a  id="x1-10012r12"></a></span> 
 <span class="label"><a  id="x1-10013r13"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">7</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">cmp</span></span> 
 <span class="label"><a  id="x1-10014r14"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">8</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">8</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">if</span></span> 
 <span class="label"><a  id="x1-10015r15"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">9</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">9</span>  <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">cnk</span></span> 
 <span class="label"><a  id="x1-10016r16"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">10</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">put</span></span> 
 <span class="label"><a  id="x1-10017r17"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">11</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">:=</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">11</span> <span 
+class="ec-lmtt-9">:=</span> <span 
 class="ec-lmtt-9">arm</span></span> 
 <span class="label"><a  id="x1-10018r18"></a></span> 
 <span class="label"><a  id="x1-10019r19"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">12</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cnk</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">12</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>  </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">  <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cnk</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">is</span> <span 
 class="ec-lmtt-9">0]</span></span> 
-<span class="label"><a  id="x1-10020r20"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cnk</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">if</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">eq</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">up</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-10020r20"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cnk</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">is</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">if</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">eq</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">br</span> <span 
+class="ec-lmtt-9">7]</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">up</span> <span 
+class="ec-lmtt-9">br</span> <span 
 class="ec-lmtt-9">6]]</span></span> 
-<span class="label"><a  id="x1-10021r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-10021r21"></a></span><span style="color:#000000">               <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">br</span> <span 
 class="ec-lmtt-9">6]</span></span> 
-<span class="label"><a  id="x1-10022r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">arm</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">up</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">6]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-10022r22"></a></span><span style="color:#000000">               <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">arm</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">br</span> <span 
+class="ec-lmtt-9">2]</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">up</span> <span 
+class="ec-lmtt-9">br</span> <span 
+class="ec-lmtt-9">6]</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">br</span> <span 
 class="ec-lmtt-9">7]]]]]</span></span> 
-<span class="label"><a  id="x1-10023r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">arm</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">br</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-10023r23"></a></span><span style="color:#000000">       <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">arm</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">br</span> <span 
 class="ec-lmtt-9">1]]]]</span></span> 
 <span class="label"><a  id="x1-10024r24"></a></span> 
 <span class="label"><a  id="x1-10025r25"></a></span><span style="color:#000000"><span 
 class="ec-lmtt-9">etc.</span></span> 
 <span class="label"><a  id="x1-10026r26"></a></span> 
 <span class="label"><a  id="x1-10027r27"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Version</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">61</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Version</span> <span 
+class="ec-lmtt-9">61</span><span 
 class="ec-lmtt-9">K</span></span></pre>
 
    <h4 class="subsectionHead"><span class="titlemark">2.2 </span> <a id="x1-110002.2"></a>Explanation</h4>
@@ -735,11 +735,11 @@ class="ec-lmtt-9">K</span></span></pre>
    </p>
    <!--l. 173-->
    <pre class="lstlisting" id="listing-20"><span class="label"><a  id="x1-13001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">-&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">0]</span> <span 
+class="ec-lmtt-9">-&#x003E;</span> <span 
 class="ec-lmtt-9">0</span></span></pre>
 
 
@@ -752,12 +752,12 @@ class="ec-lmtt-9">0</span></span></pre>
    </p>
    <!--l. 181-->
    <pre class="lstlisting" id="listing-21"><span class="label"><a  id="x1-14001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">-&#x003E;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0]</span> <span 
+class="ec-lmtt-9">-&#x003E;</span> <span 
 class="ec-lmtt-9">1</span></span></pre>
 
    <!--l. 185-->
@@ -1527,31 +1527,31 @@ class="ec-lmtt-9">1</span></span></pre>
    </p>
    <h5 class="subsubsectionHead"><span class="titlemark">2.6.2 </span> <a id="x1-270002.6.2"></a>The Noun</h5>
    <!--l. 395-->
-   <pre class="lstlisting" id="listing-22"><span class="label"><a  id="x1-27001r1"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">A</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">noun</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">either</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">an</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">or</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+   <pre class="lstlisting" id="listing-22"><span class="label"><a  id="x1-27001r1"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">A</span> <span 
+class="ec-lmtt-9">noun</span> <span 
+class="ec-lmtt-9">is</span> <span 
+class="ec-lmtt-9">either</span> <span 
+class="ec-lmtt-9">an</span> <span 
+class="ec-lmtt-9">atom</span> <span 
+class="ec-lmtt-9">or</span> <span 
+class="ec-lmtt-9">a</span> <span 
 class="ec-lmtt-9">cell.</span></span> 
-<span class="label"><a  id="x1-27002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">An</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">atom</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">any</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">natural</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-27002r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">An</span> <span 
+class="ec-lmtt-9">atom</span> <span 
+class="ec-lmtt-9">is</span> <span 
+class="ec-lmtt-9">any</span> <span 
+class="ec-lmtt-9">natural</span> <span 
 class="ec-lmtt-9">number.</span></span> 
-<span class="label"><a  id="x1-27003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">A</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">cell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">an</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ordered</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">of</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-27003r3"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">A</span> <span 
+class="ec-lmtt-9">cell</span> <span 
+class="ec-lmtt-9">is</span> <span 
+class="ec-lmtt-9">an</span> <span 
+class="ec-lmtt-9">ordered</span> <span 
+class="ec-lmtt-9">pair</span> <span 
+class="ec-lmtt-9">of</span> <span 
 class="ec-lmtt-9">nouns.</span></span></pre>
 
    <!--l. 401-->
@@ -1563,18 +1563,18 @@ class="ec-lmtt-9">nouns.</span></span></pre>
    <h5 class="subsubsectionHead"><span class="titlemark">2.6.3 </span> <a id="x1-280002.6.3"></a>Loops</h5>
    <!--l. 405-->
    <pre class="lstlisting" id="listing-23"><span class="label"><a  id="x1-28001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0]</span>  </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">  <span 
+class="ec-lmtt-9">Ξ</span> <span 
 class="ec-lmtt-9">[0]</span></span> 
 <span class="label"><a  id="x1-28002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0]</span>  </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">  <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
 class="ec-lmtt-9">0]</span></span></pre>
    <!--l. 410-->
    <p class="noindent">These are the identity atom and the identity cell. Neither is
@@ -1585,11 +1585,11 @@ class="ec-lmtt-9">0]</span></span></pre>
    <h5 class="subsubsectionHead"><span class="titlemark">2.6.4 </span> <a id="x1-290002.6.4"></a>Identity</h5>
    <!--l. 415-->
    <pre class="lstlisting" id="listing-24"><span class="label"><a  id="x1-29001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">0]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">0</span></span></pre>
    <!--l. 419-->
    <p class="noindent">Zero has, as one of its cardinal properties, which are, again,
@@ -1623,12 +1623,12 @@ class="ec-lmtt-9">0</span></span></pre>
    </p>
    <!--l. 432-->
    <pre class="lstlisting" id="listing-25"><span class="label"><a  id="x1-29002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">0]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">1</span></span></pre>
    <!--l. 436-->
    <p class="noindent">In our ﬁrst demonstration, the Zero which emerges from the
@@ -1646,12 +1646,12 @@ class="ec-lmtt-9">1</span></span></pre>
    </p>
    <!--l. 441-->
    <pre class="lstlisting" id="listing-26"><span class="label"><a  id="x1-29003r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">1]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">2</span></span></pre>
    <!--l. 445-->
    <p class="noindent">The Zero that became One is now One, and so that One is
@@ -1711,15 +1711,15 @@ class="ec-lmtt-9">2</span></span></pre>
    </p>
    <!--l. 465-->
    <pre class="lstlisting" id="listing-27"><span class="label"><a  id="x1-30005r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">A</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">cell</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">an</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ordered</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pair</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">of</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">2</span><span 
+class="ec-lmtt-9">:</span> <span 
+class="ec-lmtt-9">A</span> <span 
+class="ec-lmtt-9">cell</span> <span 
+class="ec-lmtt-9">is</span> <span 
+class="ec-lmtt-9">an</span> <span 
+class="ec-lmtt-9">ordered</span> <span 
+class="ec-lmtt-9">pair</span> <span 
+class="ec-lmtt-9">of</span> <span 
 class="ec-lmtt-9">nouns.</span></span></pre>
 
    <!--l. 469-->
@@ -1744,7 +1744,7 @@ class="ec-lmtt-9">nouns.</span></span></pre>
    </p><!--l. 474-->
    <p class="indent"> We will be treating repeatedly upon triple cells, which we
       should call a phrase. The root phrase, <code
-         class="lstinline"><span style="color:#000000">Ξ</span><span style="color:#000000"> </span><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">0</span><span style="color:#000000"> </span><span style="color:#000000">0]</span></code>,
+         class="lstinline"><span style="color:#000000">Ξ [0 0 0]</span></code>,
       gives 0;
       here Zero is the Subject, Verb, and Object of the root phrase.
       The branch operation <span class="ec-lmri-10">selects </span>from within the Subject, as
@@ -1754,18 +1754,18 @@ class="ec-lmtt-9">nouns.</span></span></pre>
    </p>
    <!--l. 478-->
    <pre class="lstlisting" id="listing-29"><span class="label"><a  id="x1-30006r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[2</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">3</span></span></pre>
 
 
    <!--l. 482-->
    <p class="noindent">In which we up <code
-         class="lstinline"><span style="color:#000000">Ξ</span><span style="color:#000000"> </span><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">2</span><span style="color:#000000"> </span><span style="color:#000000">1]</span></code>,
+         class="lstinline"><span style="color:#000000">Ξ [2 2 1]</span></code>,
       in which Two selects Two, the
       whole (One) of the Subject. Yielding Three, thus.
    </p><!--l. 485-->
@@ -1805,13 +1805,13 @@ class="ec-lmtt-9">3</span></span></pre>
    <h5 class="subsubsectionHead"><span class="titlemark">2.7.1 </span> <a id="x1-320002.7.1"></a>The First</h5>
    <!--l. 526-->
    <pre class="lstlisting" id="listing-31"><span class="label"><a  id="x1-32001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">b</span></span></pre>
 
 
@@ -1823,16 +1823,16 @@ class="ec-lmtt-9">b</span></span></pre>
    <h5 class="subsubsectionHead"><span class="titlemark">2.7.2 </span> <a id="x1-330002.7.2"></a>The Second</h5>
    <!--l. 535-->
    <pre class="lstlisting" id="listing-32"><span class="label"><a  id="x1-33001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">n</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span> <span 
+class="ec-lmtt-9">+</span> <span 
 class="ec-lmtt-9">1</span></span></pre>
    <!--l. 539-->
    <p class="noindent">This line is part demonstration, part rule. I believe that a
@@ -1845,23 +1845,23 @@ class="ec-lmtt-9">1</span></span></pre>
    </p>
    <!--l. 544-->
    <pre class="lstlisting" id="listing-33"><span class="label"><a  id="x1-33002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">n</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">1</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">n</span> <span 
+class="ec-lmtt-9">+</span> <span 
 class="ec-lmtt-9">1</span></span></pre>
    <!--l. 548-->
    <p class="noindent">Here we have the statement of the up operator. Which should
@@ -1874,12 +1874,12 @@ class="ec-lmtt-9">1</span></span></pre>
    <h5 class="subsubsectionHead"><span class="titlemark">2.7.3 </span> <a id="x1-340002.7.3"></a>The Third</h5>
    <!--l. 553-->
    <pre class="lstlisting" id="listing-37"><span class="label"><a  id="x1-34001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">0]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">?</span></span></pre>
    <!--l. 557-->
    <p class="noindent">At last we have returned from this excursion to explanation.
@@ -1974,92 +1974,92 @@ class="ec-lmtt-9">?</span></span></pre>
    </p>
    <!--l. 585-->
    <pre class="lstlisting" id="listing-38"><span class="label"><a  id="x1-34002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]</span>            </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">a</span></span> 
 <span class="label"><a  id="x1-34003r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">2]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">a</span></span> 
 <span class="label"><a  id="x1-34004r3"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">3]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
 class="ec-lmtt-9">b</span></span> 
 <span class="label"><a  id="x1-34005r4"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">)</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
 class="ec-lmtt-9">2]</span></span> 
 <span class="label"><a  id="x1-34006r5"></a><span 
 class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">+</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1)</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">+</span> <span 
+class="ec-lmtt-9">1)</span><span 
+class="ec-lmtt-9">]</span>  </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
 class="ec-lmtt-9">3]</span></span> 
 <span class="label"><a  id="x1-34007r6"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span>            </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 594-->
    <p class="indent"> The remaining six reductions follow this recursive, fractal
@@ -2085,11 +2085,11 @@ class="ec-lmtt-9">]</span></span></pre>
       an index error.
    </p><!--l. 602-->
    <p class="indent"> If the <code
-         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">2</span><span style="color:#000000"> </span><span style="color:#000000">1]</span></code>
+         class="lstinline"><span style="color:#000000">[2 1 2 1]</span></code>
       demonstration were instead <code
-         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">1</span><span style="color:#000000"> </span><span style="color:#000000">2</span><span style="color:#000000"> </span><span style="color:#000000">2]</span></code>,
+         class="lstinline"><span style="color:#000000">[2 1 2 2]</span></code>,
       it would fail in the same way, by failing to reduce <code
-         class="lstinline"><span style="color:#000000">[2</span><span style="color:#000000"> </span><span style="color:#000000">2</span><span style="color:#000000"> </span><span style="color:#000000">2]</span></code>,
+         class="lstinline"><span style="color:#000000">[2 2 2]</span></code>,
       which would loop inﬁnitely, in principle.
    </p><!--l. 604-->
    <p class="indent"> This ﬁrst multiple reduction takes seven forms, and there
@@ -2147,25 +2147,25 @@ class="ec-lmtt-9">]</span></span></pre>
    </p>
    <!--l. 624-->
    <pre class="lstlisting" id="listing-42"><span class="label"><a  id="x1-35001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[3</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">[1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[3</span> <span 
 class="ec-lmtt-9">4]</span></span></pre>
    <!--l. 628-->
    <p class="noindent">combines the implicit and explicit forms of the distributive
       operation, splitting the atomic 3 object and incrementing the
       right half of this cell to produce <code
-         class="lstinline"><span style="color:#000000">[3</span><span style="color:#000000"> </span><span style="color:#000000">4]</span></code>.
+         class="lstinline"><span style="color:#000000">[3 4]</span></code>.
    </p><!--l. 631-->
    <p class="indent"> This is the seed of falsehood. We will discuss its signiﬁcance
       in the next section, under equality.
@@ -2182,52 +2182,52 @@ class="ec-lmtt-9">4]</span></span></pre>
 
    <!--l. 637-->
    <pre class="lstlisting" id="listing-44"><span class="label"><a  id="x1-35002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>    </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">d</span><span 
 class="ec-lmtt-9">]]</span></span></pre>
    <!--l. 641-->
    <p class="noindent">with
    </p>
    <!--l. 644-->
    <pre class="lstlisting" id="listing-45"><span class="label"><a  id="x1-35003r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]]</span></span></pre>
    <!--l. 648-->
    <p class="noindent">jointly manage state by consuming a chain of objects
@@ -2249,9 +2249,9 @@ class="ec-lmtt-9">]]</span></span></pre>
    </p><!--l. 657-->
    <p class="indent"> The base case of inequality between two atoms could be
       represented <code
-         class="lstinline"><span style="color:#000000">[0</span><span style="color:#000000"> </span><span style="color:#000000">1]</span></code>.
+         class="lstinline"><span style="color:#000000">[0 1]</span></code>.
       That is how I would do it. <code
-         class="lstinline"><span style="color:#000000">[3</span><span style="color:#000000"> </span><span style="color:#000000">4]</span></code>
+         class="lstinline"><span style="color:#000000">[3 4]</span></code>
       has
       these interesting properties: it is grown, as it were, from
       Three, through the application of lower-ordered verbs, and
@@ -2451,21 +2451,21 @@ class="ec-lmtt-9">]]</span></span></pre>
    </p>
    <!--l. 733-->
    <pre class="lstlisting" id="listing-48"><span class="label"><a  id="x1-39001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">7</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>        </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">0</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 737-->
    <p class="indent"> This uses the Nock operation to distribute the subject
@@ -2479,19 +2479,19 @@ class="ec-lmtt-9">]</span></span></pre>
    </p>
    <!--l. 741-->
    <pre class="lstlisting" id="listing-49"><span class="label"><a  id="x1-39002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[3</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">[1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[3</span> <span 
 class="ec-lmtt-9">4]</span></span></pre>
 
    <!--l. 747-->
@@ -2530,50 +2530,50 @@ class="ec-lmtt-9">4]</span></span></pre>
 
 
    <pre class="lstlisting" id="listing-50"><span class="label"><a  id="x1-40001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">8</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000"> <span 
+class="ec-lmtt-9">1</span> </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000"> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-40002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">8</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">8</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>      </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000"> <span 
+class="ec-lmtt-9">0</span> </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000"> <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">d</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 762-->
    <p class="indent"> Eight is 2 raised to the 3rd power. It is in that sense,
@@ -2596,26 +2596,26 @@ class="ec-lmtt-9">]</span></span></pre>
    </p>
    <!--l. 796-->
    <pre class="lstlisting" id="listing-51"><span class="label"><a  id="x1-41001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">9</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>          </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">7</span> <span 
+class="ec-lmtt-9">[[7</span> <span 
+class="ec-lmtt-9">[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">b</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 800-->
    <p class="noindent">To quote … the author “[this] is 7, except that the subject for c
@@ -2624,19 +2624,19 @@ class="ec-lmtt-9">]</span></span></pre>
    </p>
    <!--l. 803-->
    <pre class="lstlisting" id="listing-52"><span class="label"><a  id="x1-41002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[0</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[3</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">[1</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span> <span 
+class="ec-lmtt-9">[0</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">1]]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">   <span 
+class="ec-lmtt-9">[3</span> <span 
 class="ec-lmtt-9">4]</span></span></pre>
 
    <!--l. 807-->
@@ -2707,40 +2707,40 @@ class="ec-lmtt-9">4]</span></span></pre>
    </p>
    <!--l. 829-->
    <pre class="lstlisting" id="listing-53"><span class="label"><a  id="x1-42005r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">10</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>       </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">c</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-42006r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">10</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">9</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">d</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">10</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">d</span><span 
+class="ec-lmtt-9">]</span>   </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">9</span> <span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">7</span> <span 
+class="ec-lmtt-9">[2</span> <span 
+class="ec-lmtt-9">3]</span> <span 
+class="ec-lmtt-9">d</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 834-->
    <p class="noindent">We see that the ﬁrst just annihilates b. It’s like the reverse of 0, which
@@ -2776,24 +2776,24 @@ class="ec-lmtt-9">]</span></span></pre>
    </p>
    <!--l. 855-->
    <pre class="lstlisting" id="listing-54"><span class="label"><a  id="x1-43001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">11</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span 
-class="ec-lmtt-9">→</span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">Ξ</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">a</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">7</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">c</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">2</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">b</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">11</span> <span 
+class="ec-lmtt-9">b</span> <span 
+class="ec-lmtt-9">c</span><span 
+class="ec-lmtt-9">]</span>       </span><span 
+class="ec-lmtt-9">→</span><span style="color:#000000">    <span 
+class="ec-lmtt-9">Ξ</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">a</span> <span 
+class="ec-lmtt-9">7</span> <span 
+class="ec-lmtt-9">c</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[2</span> <span 
+class="ec-lmtt-9">1]</span> <span 
+class="ec-lmtt-9">2</span> <span 
+class="ec-lmtt-9">b</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    <!--l. 859-->
    <p class="noindent">Now I think this is a pretty macro, with that 3 2 1 streak in it.

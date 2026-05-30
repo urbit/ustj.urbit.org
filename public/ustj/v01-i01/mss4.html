@@ -323,10 +323,10 @@ system.
 <code class="lstinline"><span style="color:#000000">++jam</span></code>med nouns (deﬁned below) which take the form
 </p><!--l. 118-->
    <pre class="lstlisting" id="listing-3"><span class="label"><a  id="x1-7002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">request-id</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">command</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">arguments</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">request-id</span> <span 
+class="ec-lmtt-9">command</span> <span 
+class="ec-lmtt-9">arguments</span><span 
 class="ec-lmtt-9">]</span></span></pre>
    
 <!--l. 121--><p class="noindent" >Newt encoding is a way of communicating nouns as single
@@ -363,7 +363,7 @@ variety of commands to be executed, including:
   class="enumerate" id="x1-7013x5">
      <!--l. 135--><p class="noindent" >%peel, emulated namespace scry requests into Vere.</p></li></ol>
 <!--l. 137--><p class="noindent" >A valid conn.c command produces a newt-encoded <code class="lstinline"><span style="color:#000000">++jam</span></code>med
-noun with type <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">request-id</span><span style="color:#000000"> </span><span style="color:#000000">output</span><span style="color:#000000">]</span></code>, where: </p>
+noun with type <code class="lstinline"><span style="color:#000000">[request-id output]</span></code>, where: </p>
      <ul class="itemize1">
      <li class="itemize">
      <!--l. 140--><p class="noindent" >request-id matches the input request-id; and
@@ -427,103 +427,103 @@ communicate (Listing <a href="#x1-8002r1">1<!--tex4ht:ref: lst:lick-cards --></a
 <figcaption class="caption" ><span class="id">Listing 1:                </span><span  
 class="content">Usage                of                Lick
 cards.</span></figcaption><!--tex4ht:label?: x1-8002r5 --><pre class="lstlisting" id="listing-14"><span class="label"><a  id="x1-8004r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">init</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%l</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%spin</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/control</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">init</span>  <span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">%pass</span> <span 
+class="ec-lmtt-9">/</span> <span 
+class="ec-lmtt-9">%arvo</span> <span 
+class="ec-lmtt-9">%l</span> <span 
+class="ec-lmtt-9">%spin</span> <span 
+class="ec-lmtt-9">/control</span><span 
+class="ec-lmtt-9">]</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">this</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-8005r2"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">on-arvo</span></span> 
-<span class="label"><a  id="x1-8006r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=sign-arvo</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8006r3"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">=wire</span> <span 
+class="ec-lmtt-9">=sign-arvo</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-8007r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sign-arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">on-arvo:def</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sign-arvo</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8007r4"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000">    <span 
+class="ec-lmtt-9">sign-arvo</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">on-arvo:def</span> <span 
+class="ec-lmtt-9">wire</span> <span 
+class="ec-lmtt-9">sign-arvo</span><span 
 class="ec-lmtt-9">)</span></span> 
 <span class="label"><a  id="x1-8008r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%lick</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%soak</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">*</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%lick</span> <span 
+class="ec-lmtt-9">%soak</span> <span 
+class="ec-lmtt-9">*</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-8009r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">mark.sign-arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8009r6"></a></span><span style="color:#000000">    </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">?+</span></span><span style="color:#000000">    <span 
+class="ec-lmtt-9">mark.sign-arvo</span>  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">this</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-8010r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8010r7"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">%connect</span></span> 
-<span class="label"><a  id="x1-8011r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:_</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8011r8"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:_</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">this</span></span> 
-<span class="label"><a  id="x1-8012r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-8012r9"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">:</span><span 
-class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">%pass</span>  <span 
+class="ec-lmtt-9">/spit</span>  <span 
+class="ec-lmtt-9">%arvo</span>  <span 
 class="ec-lmtt-9">%l</span></span> 
 <span class="label"><a  id="x1-8013r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/control</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%init</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">              <span 
+class="ec-lmtt-9">%spit</span>  <span 
+class="ec-lmtt-9">/control</span>  <span 
+class="ec-lmtt-9">%init</span>  <span 
 class="ec-lmtt-9">area.state</span></span> 
-<span class="label"><a  id="x1-8014r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-8014r11"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span> 
-<span class="label"><a  id="x1-8015r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-8015r12"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span> 
 <span class="label"><a  id="x1-8016r13"></a></span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">send-state</span></span> 
-<span class="label"><a  id="x1-8017r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8017r14"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">=state</span></span> 
 <span class="label"><a  id="x1-8018r15"></a><span 
-class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">card:agent:gall</span></span> 
-<span class="label"><a  id="x1-8019r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%arvo</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8019r16"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">%pass</span>  <span 
+class="ec-lmtt-9">/spit</span>  <span 
+class="ec-lmtt-9">%arvo</span>  <span 
 class="ec-lmtt-9">%l</span></span> 
-<span class="label"><a  id="x1-8020r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%spit</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/control</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8020r17"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">%spit</span>  <span 
+class="ec-lmtt-9">/control</span>  <span 
 class="ec-lmtt-9">%state</span></span> 
-<span class="label"><a  id="x1-8021r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">slick:state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">face.state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">food.state</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">live.state</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-8021r18"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">slick:state</span> <span 
+class="ec-lmtt-9">face.state</span> <span 
+class="ec-lmtt-9">food.state</span> <span 
+class="ec-lmtt-9">live.state</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-8022r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-8022r19"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
                                                 
                                                 

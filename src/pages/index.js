@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import classnames from "classnames";
@@ -34,15 +34,9 @@ function Contents({ issue }) {
       {issue.content.map((o) => {
         const renderAuthors = (authors) =>
           authors.map((s) => <p key={s}>~ {s}</p>);
-        let ComingSoon = null;
-        if (!o.pdf && comingSoonFlag) {
-          ComingSoon = () => (
-            <img
-              className="hidden sm:block h-[1.5em]"
-              alt=""
-              src="/images/coming-soon.png"
-            />
-          );
+        // Show the "coming soon" badge only on the first article without a PDF.
+        const showComingSoon = !o.pdf && comingSoonFlag;
+        if (showComingSoon) {
           comingSoonFlag = false;
         }
         const articleUrl = `/article/${issue.slug}/${o.title
@@ -79,7 +73,13 @@ function Contents({ issue }) {
                 </div>
                 <span>{o.title}</span>
               </div>
-              {ComingSoon && <ComingSoon />}
+              {showComingSoon && (
+                <img
+                  className="hidden sm:block h-[1.5em]"
+                  alt=""
+                  src="/images/coming-soon.png"
+                />
+              )}
             </Row>
           </div>
         );
@@ -111,7 +111,6 @@ export default function Home({ issues }) {
     <>
       <Head>
         <title>Urbit Systems Technical Journal</title>
-        {/* {Meta(post, false, true)} */}
       </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
         <IntraNav shopUrl={issue.links.shop} />

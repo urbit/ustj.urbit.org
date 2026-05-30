@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  // target: 'serverless',
   webpack: (config, { isServer }) => {
     // Fixes npm packages that depend on `fs` module
     if (!isServer) {
@@ -16,12 +15,6 @@ const nextConfig = {
     }
     config.resolve.alias.stream = "stream-browserify";
     config.resolve.alias.zlib = "browserify-zlib";
-    // config.externals = {
-    //   ...config.externals,
-    //   canvas: "util",
-    //   bufferutil: "bufferutil",
-    //   "utf-8-validate": "utf-8-validate"
-    // }
     return config;
   },
 };

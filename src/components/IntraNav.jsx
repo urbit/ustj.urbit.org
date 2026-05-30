@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { Fragment, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import classnames from "classnames";
@@ -19,11 +19,6 @@ const sites = [
     href: "https://docs.urbit.org",
     theme: "blu",
   },
-  // {
-  //   title: "Foundation",
-  //   href: "https://urbit.foundation",
-  //   theme: "mos",
-  // },
   {
     title: "Roadmap",
     href: "https://roadmap.urbit.org",
@@ -43,6 +38,7 @@ const pages = [{ title: "Information", href: "/information" },
 function Dropdown({ className = "", label, items }) {
   const [isOpen, setOpen] = useState(false);
   const wrapperRef = useRef();
+  const firstCrumb = useRouter().asPath.split("/")[1];
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickListener);
@@ -94,9 +90,8 @@ function Dropdown({ className = "", label, items }) {
       {isOpen && (
         <div className="absolute top-full w-screen lg:w-full left-0 bg-black max-h-content overflow-y-auto">
           {items.map(({ title, theme, href, target }, i) => {
-            const firstCrumb = useRouter().asPath.split("/")[1];
             return (
-              <>
+              <Fragment key={title}>
                 {typeof label === "string" && i > 0 && (
                   <div className="layout-px bg-primary">
                     <hr className="hr-horizontal border-brite" />
@@ -117,7 +112,7 @@ function Dropdown({ className = "", label, items }) {
                 >
                   {title}
                 </Link>
-              </>
+              </Fragment>
             );
           })}
         </div>

@@ -518,7 +518,7 @@ update.
    <h4 class="subsectionHead"><span class="titlemark">2.5   </span> <a  id="x1-160002.5"></a>Layer 4: Messaging</h4>
 <!--l. 202--><p class="noindent" >The message layer is the “narrow waist” between the diﬀerent
 parts of the system. Every message is simply an <code class="lstinline"><span style="color:#000000">$oath</span></code>: a
-signed pair of <code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">path</span><span style="color:#000000"> </span><span style="color:#000000">noun</span><span style="color:#000000">]</span></code> representing a scry binding – the
+signed pair of <code class="lstinline"><span style="color:#000000">[path noun]</span></code> representing a scry binding – the
 path is permanently bound to that noun, and the signature
 attests to this permanence.
 </p><!--l. 204--><p class="indent" >   An oath is quite general – it could mean many diﬀerent
@@ -689,14 +689,14 @@ class="newline" />
 </p>
    <!--l. 269-->
 <pre class="lstlisting" id="listing-30"><span class="label"><a  id="x1-25001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/1/2/a/a/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~zod/2/3/c/x/4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4</span> <span 
 class="ec-lmtt-9">/base/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-25002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">&#x0026;</span></span></pre>
 <!--l. 274--><p class="indent" >   The value bound to a scry request path is a ﬂag indicating
 interest if yes, or disinterest if no. Disinterest can be used to
@@ -709,23 +709,23 @@ class="newline" />
 </p>
    <!--l. 278-->
 <pre class="lstlisting" id="listing-31"><span class="label"><a  id="x1-26001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/c/x/4/base/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-26002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">%hoon</span> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">::</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">141</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">::</span>  <span 
+class="ec-lmtt-9">hoon</span> <span 
+class="ec-lmtt-9">141</span><span 
 class="ec-lmtt-9">k\0a...</span></span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">]</span></span></pre>
 <!--l. 283--><p class="indent" >   The value in any permanent response is a
-<code class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">[</span><span style="color:#000000">mark</span><span style="color:#000000"> </span><span style="color:#000000">noun</span><span style="color:#000000">])</span></code>.
+<code class="lstinline"><span style="color:#000000">(unit [mark noun])</span></code>.
                                                 
                                                 
 </p>
@@ -736,11 +736,11 @@ class="newline" />
 </p>
    <!--l. 287-->
 <pre class="lstlisting" id="listing-33"><span class="label"><a  id="x1-27001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/c/x/4/base/nonexistent/hoon</span></span> 
 <span class="label"><a  id="x1-27002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">~</span></span></pre>
 <!--l. 292--><p class="indent" >   A permanent negative response binds the requested path
 directly to a null value.
@@ -764,14 +764,14 @@ value at this path.
 </p>
    <!--l. 302-->
 <pre class="lstlisting" id="listing-35"><span class="label"><a  id="x1-29001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span> <span 
 class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-29002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">%yore</span></span></pre>
                                                 
                                                 
@@ -786,14 +786,14 @@ publication data at a future <code class="lstinline"><span style="color:#000000"
 </p>
    <!--l. 311-->
 <pre class="lstlisting" id="listing-37"><span class="label"><a  id="x1-30001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span> <span 
 class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-30002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">%nigh</span></span></pre>
 <!--l. 316--><p class="noindent" ><span class="paragraphHead"><a  id="x1-31000"></a><span 
 class="ec-lmbx-10">General Refusal (Other)</span></span>
@@ -808,14 +808,14 @@ request was denied.
 </p>
    <!--l. 320-->
 <pre class="lstlisting" id="listing-38"><span class="label"><a  id="x1-31001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/a/z/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~zod/2/3/c/x/4/base</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/c/x/4/base</span> <span 
 class="ec-lmtt-9">/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-31002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">%deny</span></span></pre>
 <!--l. 325--><p class="noindent" >
 </p>
@@ -838,14 +838,14 @@ class="newline" />
 </p>
    <!--l. 331-->
 <pre class="lstlisting" id="listing-44"><span class="label"><a  id="x1-33001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/1/2/a/b/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~zod/2/3/c/x/?</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/c/x/?</span> <span 
 class="ec-lmtt-9">/base/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-33002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">%ud</span></span></pre>
 <!--l. 336--><p class="indent" >   The value of a <code class="lstinline"><span style="color:#000000">%pine</span></code> request indicates which kind of
 <code class="lstinline"><span style="color:#000000">$case</span></code> it wants in the response path. A case can be either
@@ -864,18 +864,18 @@ wildcard.
 </p>
    <!--l. 342-->
 <pre class="lstlisting" id="listing-53"><span class="label"><a  id="x1-34001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/c/x/4/base/sys/hoon/hoon</span></span> 
 <span class="label"><a  id="x1-34002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">%hoon</span> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">::</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">hoon</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">141</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">::</span>  <span 
+class="ec-lmtt-9">hoon</span> <span 
+class="ec-lmtt-9">141</span><span 
 class="ec-lmtt-9">k\0a...</span></span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">]</span></span></pre>
@@ -891,23 +891,23 @@ class="newline" />
 </p>
    <!--l. 351-->
 <pre class="lstlisting" id="listing-54"><span class="label"><a  id="x1-36001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/1/2/a/c/1.234/</span><span 
-class="ec-lmtt-9">~zod/2/3/a/d/1.234</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~zod/2/3/a/d/1.234</span> <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/36</span></span> 
 <span class="label"><a  id="x1-36002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">/g/landscape/chat/my-channel</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%add-post</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">/g/landscape/chat/my-channel</span> <span 
+class="ec-lmtt-9">%add-post</span> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">first!!1</span></span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
 class="ec-lmtt-9">]</span></span></pre>
 <!--l. 356--><p class="indent" >   Here 36 is the <code class="lstinline"><span style="color:#000000">$bone</span></code>, i. e. the number of this “ﬂow”
-between the two ships. <code class="lstinline"><span style="color:#000000">1</span><span style="color:#000000">.234</span></code> is the message sequence
+between the two ships. <code class="lstinline"><span style="color:#000000">1.234</span></code> is the message sequence
 number, which is also the case of the request path. The poke
 request can be thought of as expressing interest in the ack
 message bound by the receiving ship.
@@ -919,12 +919,12 @@ class="newline" />
 </p>
    <!--l. 360-->
 <pre class="lstlisting" id="listing-57"><span class="label"><a  id="x1-37001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/a/d/1.234/</span><span 
 class="ec-lmtt-9">~rovnys/36</span></span> 
 <span class="label"><a  id="x1-37002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">&#x0026;</span></span></pre>
 <!--l. 365--><p class="indent" >   If the receiver performed the command, it emits a
 response on the requested ack path with a value of <code class="lstinline"><span style="color:#000000">&#x0026;</span></code>
@@ -939,27 +939,27 @@ class="newline" />
 </p>
    <!--l. 371-->
 <pre class="lstlisting" id="listing-59"><span class="label"><a  id="x1-38001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~zod/2/3/a/d/1.234/</span><span 
 class="ec-lmtt-9">~rovnys/36</span></span> 
 <span class="label"><a  id="x1-38002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">|</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">|</span> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">chat</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%add-post</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">chat</span> <span 
+class="ec-lmtt-9">%add-post</span> <span 
 class="ec-lmtt-9">failure:</span></span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">no</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">permissions</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">for</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">this</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">no</span> <span 
+class="ec-lmtt-9">permissions</span> <span 
+class="ec-lmtt-9">for</span> <span 
+class="ec-lmtt-9">this</span> <span 
 class="ec-lmtt-9">channel</span></span><span style="color:#000000"><span 
-class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ts1-lmtt9-">&#x0027;</span></span><span style="color:#000000"> <span 
+class="ec-lmtt-9">~</span><span 
 class="ec-lmtt-9">]</span></span></pre>
 <!--l. 376--><p class="indent" >   If the receiver declined to perform the command, it emits
 a response on the requested ack path containing a <code class="lstinline"><span style="color:#000000">|</span></code>
@@ -1000,7 +1000,7 @@ scry and <code class="lstinline"><span style="color:#000000">%pine</span></code>
 of this form without loss of generality. Poke paths are not
 encrypted, only their values.
 </p><!--l. 388--><p class="indent" >   (Aside: Should poke values always be
-<code class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">key-num</span><span style="color:#000000"> </span><span style="color:#000000">encrypted-value</span><span style="color:#000000">]</span></code> just like encrypted spurs?
+<code class="lstinline"><span style="color:#000000">[key-num encrypted-value]</span></code> just like encrypted spurs?
 That might be nice, to avoid race conditions between the
 handshake protocol and other pokes.)
 </p><!--l. 390--><p class="indent" >   Since cryptography evolves, it cannot be kelvin versioned.
@@ -1044,13 +1044,13 @@ messages to a ship.
 </p>
    <!--l. 404-->
 <pre class="lstlisting" id="listing-73"><span class="label"><a  id="x1-40001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/1/2/a/a/</span><span 
 class="ec-lmtt-9">~2023.1.10/lane/</span><span 
 class="ec-lmtt-9">~wicdev/5/6</span></span> 
 <span class="label"><a  id="x1-40002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">&#x0026;</span></span></pre>
 <!--l. 409--><p class="indent" >   When Vere hears this oath, it is responsible for ﬁnding
  wicdev using whatever transport protocol is indicated for
@@ -1080,14 +1080,14 @@ response:
 </p>
    <!--l. 422-->
 <pre class="lstlisting" id="listing-77"><span class="label"><a  id="x1-41001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~rovnys/1/2/a/e/</span><span 
 class="ec-lmtt-9">~2023.1.10/</span><span 
-class="ec-lmtt-9">~wicdev/5/6/a/f</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~wicdev/5/6/a/f</span> <span 
 class="ec-lmtt-9">/?/keep</span></span> 
 <span class="label"><a  id="x1-41002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
 class="ec-lmtt-9">&#x0026;</span></span></pre>
                                                 
                                                 
@@ -1103,22 +1103,22 @@ by its sponsor.
 </p>
    <!--l. 431-->
 <pre class="lstlisting" id="listing-80"><span class="label"><a  id="x1-42001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~wicdev/5/6/a/f/</span><span 
 class="ec-lmtt-9">~2023.1.11/keep</span></span> 
 <span class="label"><a  id="x1-42002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%udp-ipv4</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">.192.168.1.1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">.337</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">%udp-ipv4</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%&#x0026;</span> <span 
+class="ec-lmtt-9">.192.168.1.1</span> <span 
+class="ec-lmtt-9">1</span><span 
+class="ec-lmtt-9">.337</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">~</span><span 
 class="ec-lmtt-9">]</span></span></pre>
 <!--l. 436--><p class="noindent" >
 </p>
@@ -1132,48 +1132,48 @@ requests.
 </p>
    <!--l. 440-->
 <pre class="lstlisting" id="listing-81"><span class="label"><a  id="x1-43001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">path:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">path:</span>  <span 
 class="ec-lmtt-9">/</span><span 
 class="ec-lmtt-9">~dev/7/8/a/g/</span><span 
 class="ec-lmtt-9">~2023.1.12/fore/</span><span 
-class="ec-lmtt-9">~wicdev/5/6</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">~wicdev/5/6</span> <span 
 class="ec-lmtt-9">/a/f/</span><span 
 class="ec-lmtt-9">~2023.1.11/keep</span></span> 
 <span class="label"><a  id="x1-43002r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">value:</span></span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtt-9">value:</span> </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">~</span>  <span 
 class="ec-lmtt-9">%udp-ipv4</span></span> 
-<span class="label"><a  id="x1-43003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-43003r3"></a></span><span style="color:#000000">       </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">:</span><span 
-class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">~</span></span><span style="color:#000000">  </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:-</span></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">%&#x0026;</span>  <span 
 class="ec-lmtt-9">.123.456.789.0</span></span> 
-<span class="label"><a  id="x1-43004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
-class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-43004r4"></a></span><span style="color:#000000">           </span><span style="color:#404040"><span 
+class="ec-lmtk-10x-x-90">:+</span></span><span style="color:#000000">  <span 
 class="ec-lmtt-9">%|</span></span> 
 <span class="label"><a  id="x1-43005r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">0</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">             <span 
+class="ec-lmtt-9">0</span><span 
 class="ec-lmtt-9">x&#x003C;signature&#x003E;</span></span> 
-<span class="label"><a  id="x1-43006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+<span class="label"><a  id="x1-43006r6"></a></span><span style="color:#000000">           </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">:</span><span 
-class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000">    <span 
 class="ec-lmtt-9">~</span></span> 
-<span class="label"><a  id="x1-43007r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-43007r7"></a></span><span style="color:#000000">               <span 
 class="ec-lmtt-9">%udp-ipv4</span></span> 
-<span class="label"><a  id="x1-43008r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%&#x0026;</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">.192.168.1.1</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">1</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">.337</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-43008r8"></a></span><span style="color:#000000">             <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%&#x0026;</span> <span 
+class="ec-lmtt-9">.192.168.1.1</span> <span 
+class="ec-lmtt-9">1</span><span 
+class="ec-lmtt-9">.337</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-43009r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-43009r9"></a></span><span style="color:#000000">           <span 
 class="ec-lmtt-9">~</span></span> 
 <span class="label"><a  id="x1-43010r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#404040"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">       </span><span style="color:#404040"><span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
 <!--l. 453--><p class="noindent" ><span 
 class="ec-lmri-10">Ad Fontes has proven inﬂuential on the implementation of the</span>

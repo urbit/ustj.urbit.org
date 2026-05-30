@@ -171,7 +171,7 @@
             it may fall back to self-attestation. The authoritative
             store remains Jael’s map from <code class="lstinline"><span style="color:#000000">$life</span></code> to
             <code
-               class="lstinline"><span style="color:#000000">[</span><span style="color:#000000">crypto-suite=@ud</span><span style="color:#000000"> </span><span style="color:#000000">=pass</span><span style="color:#000000">]</span></code>
+               class="lstinline"><span style="color:#000000">[crypto-suite=@ud =pass]</span></code>
             in <code class="lstinline"><span style="color:#000000">$point:jael</span></code>.
          </p>
       </li>
@@ -511,30 +511,30 @@
    <!--l. 213-->
    <pre class="lstlisting" id="listing-53"><span class="label"><a  id="x1-5001r1"></a></span><span style="color:#000000"><span 
 class="ec-lmtk-10x-x-90">+</span><span 
-class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$</span>  <span 
 class="ec-lmtt-9">point</span></span> 
-<span class="label"><a  id="x1-5002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5002r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">$:</span>  <span 
 class="ec-lmtt-9">=rift</span></span> 
-<span class="label"><a  id="x1-5003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5003r3"></a></span><span style="color:#000000">      <span 
 class="ec-lmtt-9">=life</span></span> 
-<span class="label"><a  id="x1-5004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">keys=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">life</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">crypto-suite=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=pass</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5004r4"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">keys=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtk-10x-x-90">map</span> <span 
+class="ec-lmtt-9">life</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">crypto-suite=@ud</span> <span 
+class="ec-lmtt-9">=pass</span><span 
 class="ec-lmtt-9">])</span></span> 
 <span class="label"><a  id="x1-5005r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sponsor=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">@p</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">sponsor=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">unit</span> <span 
+class="ec-lmtk-10x-x-90">@p</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-5006r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-5006r6"></a></span><span style="color:#000000">  <span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
 
    <!--l. 222-->
@@ -608,18 +608,18 @@ class="ec-lmtk-10x-x-90">==</span></span></pre>
    </p>
    <!--l. 249-->
    <pre class="lstlisting" id="listing-66"><span class="label"><a  id="x1-6001r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sek=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">pub=</span><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">sek=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">unit</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span><span 
 class="ec-lmtt-9">])]</span></span></pre>
 
 
@@ -633,54 +633,54 @@ class="ec-lmtt-9">])]</span></span></pre>
    </p>
    <!--l. 258-->
    <pre class="lstlisting" id="listing-68"><span class="label"><a  id="x1-6002r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$%</span>  <span 
+class="ec-lmtk-10x-x-90">$:</span>  <span 
 class="ec-lmtt-9">suite=%b</span></span> 
-<span class="label"><a  id="x1-6003r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6003r2"></a></span><span style="color:#000000">        <span 
+class="ec-lmtt-9">pub=</span><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span> <span 
+class="ec-lmtt-9">~</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-6004r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6004r3"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">sek=</span><span 
-class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">sed=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">$@</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">sed=@</span> <span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span><span 
 class="ec-lmtt-9">])</span></span> 
-<span class="label"><a  id="x1-6005r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6005r4"></a></span><span style="color:#000000">    <span 
 class="ec-lmtk-10x-x-90">==</span></span> 
 <span class="label"><a  id="x1-6006r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">$:</span>  <span 
 class="ec-lmtt-9">suite=%c</span></span> 
-<span class="label"><a  id="x1-6007r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">tw=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">ugn=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">dat=@</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6007r6"></a></span><span style="color:#000000">        <span 
+class="ec-lmtt-9">pub=</span><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span> <span 
+class="ec-lmtt-9">tw=</span><span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">ugn=@</span> <span 
+class="ec-lmtt-9">dat=@</span><span 
 class="ec-lmtt-9">]]</span></span> 
-<span class="label"><a  id="x1-6008r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6008r7"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">sek=</span><span 
-class="ec-lmtt-9">$@</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">sed=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">cry=@</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sgn=@</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">$@</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">sed=@</span> <span 
+class="ec-lmtt-9">cry=@</span> <span 
+class="ec-lmtt-9">sgn=@</span><span 
 class="ec-lmtt-9">])</span></span> 
 <span class="label"><a  id="x1-6009r8"></a></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">==</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">==</span>  <span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
 
    <!--l. 269-->
@@ -697,114 +697,114 @@ class="ec-lmtk-10x-x-90">==</span></span></pre>
             comet
             handler.</span></figcaption><!--tex4ht:label?: x1-6010r5 -->
       <pre class="lstlisting" id="listing-69"><span class="label"><a  id="x1-6011r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">+request-attestation:</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">helper</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">to</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">+request-attestation:</span> <span 
+class="ec-lmtti-10x-x-90">helper</span> <span 
+class="ec-lmtti-10x-x-90">to</span> <span 
 class="ec-lmtti-10x-x-90">request</span></span> 
 <span class="label"><a  id="x1-6012r2"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">attestation</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">from</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">comet.</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">Also</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">sets</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">a</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">attestation</span> <span 
+class="ec-lmtti-10x-x-90">from</span> <span 
+class="ec-lmtti-10x-x-90">comet.</span> <span 
+class="ec-lmtti-10x-x-90">Also</span> <span 
+class="ec-lmtti-10x-x-90">sets</span> <span 
+class="ec-lmtti-10x-x-90">a</span> <span 
 class="ec-lmtti-10x-x-90">timer</span></span> 
 <span class="label"><a  id="x1-6013r3"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">to</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">resend</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">the</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">request</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">every</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">30</span></span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">to</span> <span 
+class="ec-lmtti-10x-x-90">resend</span> <span 
+class="ec-lmtti-10x-x-90">the</span> <span 
+class="ec-lmtti-10x-x-90">request</span> <span 
+class="ec-lmtti-10x-x-90">every</span> <span 
+class="ec-lmtti-10x-x-90">30</span><span 
 class="ec-lmtti-10x-x-90">s.</span></span> 
 <span class="label"><a  id="x1-6014r4"></a></span><span style="color:#404040"><span 
 class="ec-lmtti-10x-x-90">::</span></span> 
 <span class="label"><a  id="x1-6015r5"></a><span 
 class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span>  <span 
 class="ec-lmtt-9">request-attestation</span></span> 
-<span class="label"><a  id="x1-6016r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6016r6"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">|=</span>  <span 
 class="ec-lmtt-9">=ship</span></span> 
-<span class="label"><a  id="x1-6017r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">^+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6017r7"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">^+</span>  <span 
 class="ec-lmtt-9">event-core</span></span> 
-<span class="label"><a  id="x1-6018r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6018r8"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=+</span>  <span 
 class="ec-lmtk-10x-x-90">%</span><span 
-class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^</span>    <span 
 class="ec-lmtt-9">ev-trace</span></span> 
-<span class="label"><a  id="x1-6019r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6019r9"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">msg.veb</span></span> 
 <span class="label"><a  id="x1-6020r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">ship</span></span> 
-<span class="label"><a  id="x1-6021r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">|.</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">requesting</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">attestion</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6021r11"></a></span><span style="color:#000000">      <span 
+class="ec-lmtk-10x-x-90">|.</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">&#x0022;</span><span 
+class="ec-lmtt-9">requesting</span> <span 
+class="ec-lmtt-9">attestion</span><span 
+class="ec-lmtt-9">&#x0022;</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6022r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6022r12"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=.</span>  <span 
 class="ec-lmtt-9">event-core</span></span> 
-<span class="label"><a  id="x1-6023r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=blob</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">sendkeys-packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6023r13"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
+class="ec-lmtt-9">=blob</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">sendkeys-packet</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6024r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6024r14"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">%:</span>  <span 
 class="ec-lmtt-9">send-blob</span></span> 
 <span class="label"><a  id="x1-6025r15"></a><span 
-class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">for=|</span></span> 
-<span class="label"><a  id="x1-6026r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6026r16"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">ship</span></span> 
-<span class="label"><a  id="x1-6027r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6027r17"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">blob</span></span> 
-<span class="label"><a  id="x1-6028r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">get</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">by</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">peers.ames-state</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6028r18"></a></span><span style="color:#000000">        <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">get</span> <span 
+class="ec-lmtt-9">by</span> <span 
+class="ec-lmtt-9">peers.ames-state</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6029r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6029r19"></a></span><span style="color:#000000">    <span 
 class="ec-lmtk-10x-x-90">==</span></span> 
 <span class="label"><a  id="x1-6030r20"></a><span 
-class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/alien/</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
+class="ec-lmtt-9">=wire</span>  <span 
+class="ec-lmtt-9">/alien/</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scot</span> <span 
+class="ec-lmtt-9">%p</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6031r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">emit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">duct</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%wait</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~s30</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6031r21"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">emit</span> <span 
+class="ec-lmtt-9">duct</span> <span 
+class="ec-lmtt-9">%pass</span> <span 
+class="ec-lmtt-9">wire</span> <span 
+class="ec-lmtt-9">%b</span> <span 
+class="ec-lmtt-9">%wait</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">add</span> <span 
+class="ec-lmtt-9">now</span> <span 
+class="ec-lmtt-9">~s30</span><span 
+class="ec-lmtt-9">)</span><span 
 class="ec-lmtt-9">)</span></span></pre>
 
 
@@ -823,170 +823,170 @@ class="ec-lmtt-9">)</span></span></pre>
             comet
             handler.</span></figcaption><!--tex4ht:label?: x1-6032r5 -->
       <pre class="lstlisting" id="listing-70"><span class="label"><a  id="x1-6033r1"></a></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span>  <span 
 class="ec-lmtt-9">fetch-comet-pki</span></span> 
-<span class="label"><a  id="x1-6034r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6034r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">|=</span>  <span 
 class="ec-lmtt-9">=ship</span></span> 
-<span class="label"><a  id="x1-6035r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">^+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6035r3"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">^+</span>  <span 
 class="ec-lmtt-9">event-core</span></span> 
-<span class="label"><a  id="x1-6036r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=+</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6036r4"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=+</span>  <span 
 class="ec-lmtk-10x-x-90">%</span><span 
-class="ec-lmtk-10x-x-90">^</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">^</span>    <span 
 class="ec-lmtt-9">ev-trace</span></span> 
 <span class="label"><a  id="x1-6037r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">msg.veb</span></span> 
-<span class="label"><a  id="x1-6038r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6038r6"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">ship</span></span> 
-<span class="label"><a  id="x1-6039r7"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">|.</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">requesting</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">attestion</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">&#x0022;</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6039r7"></a></span><span style="color:#000000">      <span 
+class="ec-lmtk-10x-x-90">|.</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">&#x0022;</span><span 
+class="ec-lmtt-9">requesting</span> <span 
+class="ec-lmtt-9">attestion</span><span 
+class="ec-lmtt-9">&#x0022;</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6040r8"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6040r8"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
 class="ec-lmtt-9">lyf</span></span> 
-<span class="label"><a  id="x1-6041r9"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6041r9"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">%:</span>  <span 
 class="ec-lmtt-9">rof</span></span> 
 <span class="label"><a  id="x1-6042r10"></a><span 
-class="ec-lmr-5">10</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">10</span></span><span style="color:#000000">        <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">~</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-6043r11"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6043r11"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">/ames</span></span> 
-<span class="label"><a  id="x1-6044r12"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6044r12"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">%j</span></span> 
-<span class="label"><a  id="x1-6045r13"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6045r13"></a></span><span style="color:#000000">        </span><span style="color:#000000"><span 
 class="ts1-lmtt9-">`</span><span 
 class="ec-lmtt-9">beam</span><span 
 class="ts1-lmtt9-">`</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">our</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%lyfe</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%da</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">[[</span><span 
+class="ec-lmtt-9">our</span> <span 
+class="ec-lmtt-9">%lyfe</span> <span 
+class="ec-lmtt-9">%da</span> <span 
+class="ec-lmtt-9">now</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">/</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scot</span> <span 
+class="ec-lmtt-9">%p</span> <span 
+class="ec-lmtt-9">ship</span><span 
+class="ec-lmtt-9">)</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-6046r14"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6046r14"></a></span><span style="color:#000000">    <span 
 class="ec-lmtk-10x-x-90">==</span></span> 
 <span class="label"><a  id="x1-6047r15"></a><span 
-class="ec-lmr-5">15</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">?=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">([</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">*</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">*</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">^</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">lyf</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">15</span></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">?:</span>  <span 
+class="ec-lmtk-10x-x-90">?=</span><span 
+class="ec-lmtt-9">([</span><span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">~</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">*</span> <span 
+class="ec-lmtt-9">*</span> <span 
+class="ec-lmtt-9">^</span><span 
+class="ec-lmtt-9">]]</span> <span 
+class="ec-lmtt-9">lyf</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6048r16"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">event-core</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">emil</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">moves</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6048r16"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">=.</span>  <span 
+class="ec-lmtt-9">event-core</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">emil</span> <span 
+class="ec-lmtt-9">moves</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6049r17"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">%-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6049r17"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">%-</span>  <span 
 class="ec-lmtt-9">emit</span></span> 
-<span class="label"><a  id="x1-6050r18"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">:*</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">//keys</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6050r18"></a></span><span style="color:#000000">      <span 
+class="ec-lmtk-10x-x-90">:*</span>  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">//keys</span><span 
+class="ec-lmtt-9">]</span><span 
 class="ec-lmtt-9">~</span></span> 
-<span class="label"><a  id="x1-6051r19"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6051r19"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">%pass</span></span> 
 <span class="label"><a  id="x1-6052r20"></a><span 
-class="ec-lmr-5">20</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">20</span></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">/public-keys</span></span> 
-<span class="label"><a  id="x1-6053r21"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6053r21"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">%j</span></span> 
-<span class="label"><a  id="x1-6054r22"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6054r22"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">%public-keys</span></span> 
-<span class="label"><a  id="x1-6055r23"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6055r23"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">ship</span></span> 
-<span class="label"><a  id="x1-6056r24"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6056r24"></a></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">~</span></span> 
 <span class="label"><a  id="x1-6057r25"></a><span 
-class="ec-lmr-5">25</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">25</span></span><span style="color:#000000">          <span 
 class="ec-lmtt-9">~</span></span> 
-<span class="label"><a  id="x1-6058r26"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6058r26"></a></span><span style="color:#000000">      <span 
 class="ec-lmtk-10x-x-90">==</span></span> 
-<span class="label"><a  id="x1-6059r27"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=.</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6059r27"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=.</span>  <span 
 class="ec-lmtt-9">event-core</span></span> 
-<span class="label"><a  id="x1-6060r28"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=blob</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">sendkeys-packet</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6060r28"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
+class="ec-lmtt-9">=blob</span>  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">sendkeys-packet</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6061r29"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">%:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6061r29"></a></span><span style="color:#000000">    <span 
+class="ec-lmtk-10x-x-90">%:</span>  <span 
 class="ec-lmtt-9">send-blob</span></span> 
 <span class="label"><a  id="x1-6062r30"></a><span 
-class="ec-lmr-5">30</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">30</span></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">for=|</span></span> 
-<span class="label"><a  id="x1-6063r31"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6063r31"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">ship</span></span> 
-<span class="label"><a  id="x1-6064r32"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6064r32"></a></span><span style="color:#000000">        <span 
 class="ec-lmtt-9">blob</span></span> 
-<span class="label"><a  id="x1-6065r33"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">get</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">by</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">peers.ames-state</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6065r33"></a></span><span style="color:#000000">        <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">~</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">get</span> <span 
+class="ec-lmtt-9">by</span> <span 
+class="ec-lmtt-9">peers.ames-state</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6066r34"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6066r34"></a></span><span style="color:#000000">    <span 
 class="ec-lmtk-10x-x-90">==</span></span> 
 <span class="label"><a  id="x1-6067r35"></a><span 
-class="ec-lmr-5">35</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=wire</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">/alien/</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scot</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%p</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">ship</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">35</span></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
+class="ec-lmtt-9">=wire</span>  <span 
+class="ec-lmtt-9">/alien/</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scot</span> <span 
+class="ec-lmtt-9">%p</span> <span 
+class="ec-lmtt-9">ship</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6068r36"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">emit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">duct</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%pass</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">wire</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%b</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">%wait</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">add</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">now</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~s30</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6068r36"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">emit</span> <span 
+class="ec-lmtt-9">duct</span> <span 
+class="ec-lmtt-9">%pass</span> <span 
+class="ec-lmtt-9">wire</span> <span 
+class="ec-lmtt-9">%b</span> <span 
+class="ec-lmtt-9">%wait</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">add</span> <span 
+class="ec-lmtt-9">now</span> <span 
+class="ec-lmtt-9">~s30</span><span 
+class="ec-lmtt-9">)</span><span 
 class="ec-lmtt-9">)</span></span></pre>
 
 
@@ -1019,47 +1019,47 @@ class="ec-lmtt-9">)</span></span></pre>
    </p>
    <!--l. 338-->
    <pre class="lstlisting" id="listing-77"><span class="label"><a  id="x1-6069r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">pub.s</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">=</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">public</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">signing</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">pub.s</span> <span 
+class="ec-lmtti-10x-x-90">=</span> <span 
+class="ec-lmtti-10x-x-90">public</span> <span 
+class="ec-lmtti-10x-x-90">signing</span> <span 
 class="ec-lmtti-10x-x-90">key</span></span> 
 <span class="label"><a  id="x1-6070r2"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">sek.s</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">=</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">private</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">signing</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">sek.s</span> <span 
+class="ec-lmtti-10x-x-90">=</span> <span 
+class="ec-lmtti-10x-x-90">private</span> <span 
+class="ec-lmtti-10x-x-90">signing</span> <span 
 class="ec-lmtti-10x-x-90">key</span></span> 
 <span class="label"><a  id="x1-6071r3"></a></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">=/</span>  <span 
 class="ec-lmtt-9">mit</span></span> 
-<span class="label"><a  id="x1-6072r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">shax</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">can</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[32</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub.s</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">met</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">3</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">dat</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">dat</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">]</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">~</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6072r4"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">shax</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">can</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">[32</span> <span 
+class="ec-lmtt-9">pub.s</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">[(</span><span 
+class="ec-lmtt-9">met</span> <span 
+class="ec-lmtt-9">3</span> <span 
+class="ec-lmtt-9">dat</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">dat</span><span 
+class="ec-lmtt-9">]</span> <span 
+class="ec-lmtt-9">~</span><span 
 class="ec-lmtt-9">))</span></span> 
 <span class="label"><a  id="x1-6073r5"></a><span 
 class="ec-lmr-5">5</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scad:ed</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub.s</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sek.s</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">mit</span></span><span style="color:#000000"><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scad:ed</span> <span 
+class="ec-lmtt-9">pub.s</span> <span 
+class="ec-lmtt-9">sek.s</span> <span 
+class="ec-lmtt-9">mit</span><span 
 class="ec-lmtt-9">)</span></span></pre>
 
    <!--l. 346-->
@@ -1072,44 +1072,44 @@ class="ec-lmtt-9">)</span></span></pre>
    </p>
    <!--l. 348-->
    <pre class="lstlisting" id="listing-81"><span class="label"><a  id="x1-6074r1"></a></span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> </span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">scalar</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">addition</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">on</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">public</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">and</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
-class="ec-lmtti-10x-x-90">private</span></span><span style="color:#404040"> </span><span style="color:#404040"><span 
+class="ec-lmtti-10x-x-90">::</span>  <span 
+class="ec-lmtti-10x-x-90">scalar</span> <span 
+class="ec-lmtti-10x-x-90">addition</span> <span 
+class="ec-lmtti-10x-x-90">on</span> <span 
+class="ec-lmtti-10x-x-90">public</span> <span 
+class="ec-lmtti-10x-x-90">and</span> <span 
+class="ec-lmtti-10x-x-90">private</span> <span 
 class="ec-lmtti-10x-x-90">keys</span></span> 
 <span class="label"><a  id="x1-6075r2"></a></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">++</span>  <span 
 class="ec-lmtt-9">scad</span></span> 
-<span class="label"><a  id="x1-6076r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">~/</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6076r3"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">~/</span>  <span 
 class="ec-lmtt-9">%scad</span></span> 
-<span class="label"><a  id="x1-6077r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub=@uxpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sek=@uxscalar</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sca=@uxscalar</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6077r4"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">|=</span>  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">pub=@uxpoint</span> <span 
+class="ec-lmtt-9">sek=@uxscalar</span> <span 
+class="ec-lmtt-9">sca=@uxscalar</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-6078r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">^-</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub=@uxpoint</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sek=@uxscalar</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">^-</span>  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">pub=@uxpoint</span> <span 
+class="ec-lmtt-9">sek=@uxscalar</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-6079r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scap</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">pub</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sca</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">scas</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sek</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sca</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6079r6"></a></span><span style="color:#000000">  <span 
+class="ec-lmtt-9">[(</span><span 
+class="ec-lmtt-9">scap</span> <span 
+class="ec-lmtt-9">pub</span> <span 
+class="ec-lmtt-9">sca</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">scas</span> <span 
+class="ec-lmtt-9">sek</span> <span 
+class="ec-lmtt-9">sca</span><span 
 class="ec-lmtt-9">)]</span></span></pre>
 
    <!--l. 357-->
@@ -1125,30 +1125,30 @@ class="ec-lmtt-9">)]</span></span></pre>
    <!--l. 364-->
    <pre class="lstlisting" id="listing-85"><span class="label"><a  id="x1-6080r1"></a></span><span style="color:#000000"><span 
 class="ec-lmtk-10x-x-90">+</span><span 
-class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$</span>  <span 
 class="ec-lmtt-9">point</span></span> 
-<span class="label"><a  id="x1-6081r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$:</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6081r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">$:</span>  <span 
 class="ec-lmtt-9">=rift</span></span> 
-<span class="label"><a  id="x1-6082r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6082r3"></a></span><span style="color:#000000">      <span 
 class="ec-lmtt-9">=life</span></span> 
-<span class="label"><a  id="x1-6083r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">keys=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">map</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">life</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">crypto-suite=@ud</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">=pass</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6083r4"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">keys=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtk-10x-x-90">map</span> <span 
+class="ec-lmtt-9">life</span> <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">crypto-suite=@ud</span> <span 
+class="ec-lmtt-9">=pass</span><span 
 class="ec-lmtt-9">])</span></span> 
 <span class="label"><a  id="x1-6084r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">sponsor=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">unit</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">@p</span></span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">sponsor=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtt-9">unit</span> <span 
+class="ec-lmtk-10x-x-90">@p</span><span 
 class="ec-lmtt-9">)</span></span> 
-<span class="label"><a  id="x1-6085r6"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-6085r6"></a></span><span style="color:#000000">  <span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
 
    <!--l. 373-->
@@ -1207,39 +1207,39 @@ class="ec-lmtk-10x-x-90">==</span></span></pre>
    <!--l. 388-->
    <pre class="lstlisting" id="listing-92"><span class="label"><a  id="x1-7001r1"></a></span><span style="color:#000000"><span 
 class="ec-lmtk-10x-x-90">+</span><span 
-class="ec-lmtk-10x-x-90">$</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmtk-10x-x-90">$</span>  <span 
 class="ec-lmtt-9">fief</span></span> 
-<span class="label"><a  id="x1-7002r2"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">$%</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%turf</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">p=</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">(</span></span><span style="color:#000000"><span 
-class="ec-lmtk-10x-x-90">list</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">turf</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">)</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-7002r2"></a></span><span style="color:#000000">  <span 
+class="ec-lmtk-10x-x-90">$%</span>  <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%turf</span> <span 
+class="ec-lmtt-9">p=</span><span 
+class="ec-lmtt-9">(</span><span 
+class="ec-lmtk-10x-x-90">list</span> <span 
+class="ec-lmtt-9">turf</span><span 
+class="ec-lmtt-9">)</span> <span 
+class="ec-lmtt-9">q=@udE</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-7003r3"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%if</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">p=@ifF</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-7003r3"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%if</span> <span 
+class="ec-lmtt-9">p=@ifF</span> <span 
+class="ec-lmtt-9">q=@udE</span><span 
 class="ec-lmtt-9">]</span></span> 
-<span class="label"><a  id="x1-7004r4"></a></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">[</span></span><span style="color:#000000"><span 
-class="ec-lmtt-9">%is</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">p=@isH</span></span><span style="color:#000000"> </span><span style="color:#000000"><span 
-class="ec-lmtt-9">q=@udE</span></span><span style="color:#000000"><span 
+<span class="label"><a  id="x1-7004r4"></a></span><span style="color:#000000">      <span 
+class="ec-lmtt-9">[</span><span 
+class="ec-lmtt-9">%is</span> <span 
+class="ec-lmtt-9">p=@isH</span> <span 
+class="ec-lmtt-9">q=@udE</span><span 
 class="ec-lmtt-9">]</span></span> 
 <span class="label"><a  id="x1-7005r5"></a><span 
-class="ec-lmr-5">5</span></span><span style="color:#000000"> </span><span style="color:#000000"> </span><span style="color:#000000"><span 
+class="ec-lmr-5">5</span></span><span style="color:#000000">  <span 
 class="ec-lmtk-10x-x-90">==</span></span></pre>
 
    <!--l. 396-->
    <p class="noindent">in which <code class="lstinline"><span style="color:#000000">$point:jael</span></code> is updated
       to contain a <code
-         class="lstinline"><span style="color:#000000">(</span><span style="color:#000000">unit</span><span style="color:#000000"> </span><span style="color:#000000">fief</span><span style="color:#000000">)</span></code>,
+         class="lstinline"><span style="color:#000000">(unit fief)</span></code>,
       potentially storing the comet’s static IP address (<code
          class="lstinline"><span style="color:#000000">%if</span></code> for IPv4
       or <code class="lstinline"><span style="color:#000000">%is</span></code> for IPv6) or domain (<code
