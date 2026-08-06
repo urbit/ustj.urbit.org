@@ -33,6 +33,7 @@ const sites = [
 ];
 
 const pages = [{ title: "Information", href: "/information" },
+               { title: "Citations", href: "/citations" },
                { title: "Forum", href: "https://journal.urbitsystems.tech/forum" }];
 
 function Dropdown({ className = "", label, items }) {
