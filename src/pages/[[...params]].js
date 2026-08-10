@@ -200,7 +200,7 @@ export default function Home({ issues, initialSlug }) {
           <div className="layout h-12 md:h-16">
             <div className="flex justify-between items-center h-full layout-px gap-4">
               <span className="truncate min-w-0">
-                Urbit Systems Technical Journal
+                Urbit Systems Technical Journal • Sponsored by Groundwire Foundation
               </span>
               <span className="font-mono shrink-0">
                 {process.env.NEXT_PUBLIC_COMMIT_HASH || "unknown"}

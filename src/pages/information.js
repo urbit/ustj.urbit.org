@@ -64,6 +64,11 @@ export default function Information() {
               Urbit&rsquo;s network is already fully operational and free to use and
               build on.
             </p>
+            <p>
+              The Urbit Systems Technical Journal is sponsored by the Groundwire
+              Foundation, a nonprofit organization dedicated to supporting the
+              development of Bitcoin and secure deterministic computing.
+            </p>
           </article>
         </main>
       </div>
