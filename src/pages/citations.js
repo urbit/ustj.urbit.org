@@ -27,10 +27,20 @@ function parseIssueCode(issue) {
   };
 }
 
+function authorDisplay(author) {
+  return author.name ? `${author.name} ~${author.patp}` : `~${author.patp}`;
+}
+
+function authorBibtex(author) {
+  const ship = `\\texttt{\\textasciitilde{}${author.patp}}`;
+  return author.name ? `${author.name} ${ship}` : ship;
+}
+
 function formatAuthorsApa(authors) {
-  if (authors.length === 1) return `${authors[0]}.`;
-  if (authors.length === 2) return `${authors[0]} & ${authors[1]}.`;
-  return `${authors.slice(0, -1).join(", ")}, & ${authors[authors.length - 1]}.`;
+  const names = authors.map(authorDisplay);
+  if (names.length === 1) return `${names[0]}.`;
+  if (names.length === 2) return `${names[0]} & ${names[1]}.`;
+  return `${names.slice(0, -1).join(", ")}, & ${names[names.length - 1]}.`;
 }
 
 function apaCitation(article) {
@@ -41,7 +51,7 @@ function apaCitation(article) {
 }
 
 function bibtexKey(article) {
-  const firstAuthor = article.authors[0].split("-")[0];
+  const firstAuthor = article.authors[0].patp.split("-")[0];
   const firstWord = slugify(article.title).split("-")[0];
   return `${firstAuthor}${article.year || ""}${firstWord}`;
 }
@@ -50,7 +60,7 @@ function bibtexEntry(article) {
   const { authors, title, year, volume, number, url } = article;
   const lines = [
     `@article{${bibtexKey(article)},`,
-    `  author = {${authors.join(" and ")}},`,
+    `  author = {${authors.map(authorBibtex).join(" and ")}},`,
     `  title = {${title}},`,
     `  journal = {${JOURNAL_NAME}},`,
   ];
@@ -72,6 +82,26 @@ function decodeEntities(str) {
     .replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&");
+}
+
+function extractAuthorNames(htmlPath, patps) {
+  if (!fs.existsSync(htmlPath)) return patps.map(() => null);
+  const html = fs.readFileSync(htmlPath, "utf8");
+  const divMatch = html.match(/<div class="author"[^>]*>([\s\S]*?)<\/div>/);
+  if (!divMatch) return patps.map(() => null);
+
+  const names = [];
+  divMatch[1].split(/<br\s*\/?>/).forEach((line) => {
+    let text = line.replace(/<[^>]+>/g, "");
+    text = decodeEntities(text).replace(/\s+/g, " ").trim();
+    const m = text.match(/~([a-z]+(?:-[a-z]+)*)/);
+    if (!m) return;
+    if (text[m.index + m[0].length] === ".") return;
+    const name = text.slice(0, m.index).trim().replace(/,$/, "").trim();
+    names.push(name || null);
+  });
+
+  return names.length === patps.length ? names : patps.map(() => null);
 }
 
 function extractAbstract(htmlPath) {
@@ -220,8 +250,10 @@ export async function getStaticProps() {
     issue.content.forEach((c) => {
       if (!c.html) return;
       const path = `/article/${issueSlug}/${slugify(c.title)}`;
+      const names = extractAuthorNames(`./public${c.html}`, c.author);
+      const authors = c.author.map((patp, i) => ({ patp, name: names[i] }));
       articles.push({
-        authors: c.author,
+        authors,
         title: c.title.replace(/\s+/g, " ").trim(),
         year,
         volume,
