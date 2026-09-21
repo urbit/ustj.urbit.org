@@ -44,10 +44,11 @@ function formatAuthorsApa(authors) {
 }
 
 function apaCitation(article) {
-  const { authors, title, year, volume, number, url } = article;
+  const { authors, title, year, volume, number, url, forthcoming } = article;
   const yearStr = year ? `(${year}).` : "(n.d.).";
   const volNo = volume && number ? ` ${volume}(${number}).` : "";
-  return `${formatAuthorsApa(authors)} ${yearStr} ${title}. ${JOURNAL_NAME},${volNo} ${url}`;
+  const tail = forthcoming ? "Forthcoming." : url;
+  return `${formatAuthorsApa(authors)} ${yearStr} ${title}. ${JOURNAL_NAME},${volNo} ${tail}`;
 }
 
 function bibtexKey(article) {
@@ -57,7 +58,7 @@ function bibtexKey(article) {
 }
 
 function bibtexEntry(article) {
-  const { authors, title, year, volume, number, url } = article;
+  const { authors, title, year, volume, number, url, forthcoming } = article;
   const lines = [
     `@article{${bibtexKey(article)},`,
     `  author = {${authors.map(authorBibtex).join(" and ")}},`,
@@ -67,6 +68,7 @@ function bibtexEntry(article) {
   if (year) lines.push(`  year = {${year}},`);
   if (volume) lines.push(`  volume = {${volume}},`);
   if (number) lines.push(`  number = {${number}},`);
+  if (forthcoming) lines.push(`  note = {Forthcoming},`);
   lines.push(`  url = {${url}}`);
   lines.push(`}`);
   return lines.join("\n");
@@ -156,9 +158,13 @@ function ArticleEntry({ article }) {
   return (
     <div>
       <p>
-        <Link href={article.path} className="hover:text-primary">
-          {apaCitation(article)}
-        </Link>
+        {article.path ? (
+          <Link href={article.path} className="hover:text-primary">
+            {apaCitation(article)}
+          </Link>
+        ) : (
+          <span className="text-muted">{apaCitation(article)}</span>
+        )}
       </p>
       <div className="flex flex-wrap gap-x-4 mt-1">
         {hasAbstract && (
@@ -248,9 +254,15 @@ export async function getStaticProps() {
     const { year, volume, number } = parseIssueCode(issue.issue);
 
     issue.content.forEach((c) => {
-      if (!c.html) return;
-      const path = `/article/${issueSlug}/${slugify(c.title)}`;
-      const names = extractAuthorNames(`./public${c.html}`, c.author);
+      // Articles without HTML are pending publication; list them as
+      // forthcoming, pointing at the issue page instead of an article page.
+      const forthcoming = !c.html;
+      const path = forthcoming
+        ? null
+        : `/article/${issueSlug}/${slugify(c.title)}`;
+      const names = forthcoming
+        ? c.author.map(() => null)
+        : extractAuthorNames(`./public${c.html}`, c.author);
       const authors = c.author.map((patp, i) => ({ patp, name: names[i] }));
       articles.push({
         authors,
@@ -259,9 +271,10 @@ export async function getStaticProps() {
         volume,
         number,
         path,
-        url: `${SITE_URL}${path}`,
-        abstract: extractAbstract(`./public${c.html}`),
+        url: forthcoming ? `${SITE_URL}/issue/${issueSlug}` : `${SITE_URL}${path}`,
+        abstract: forthcoming ? "" : extractAbstract(`./public${c.html}`),
         issueLabel: issue.issue,
+        forthcoming,
       });
     });
   });

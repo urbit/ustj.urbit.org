@@ -146,7 +146,7 @@ export default function Home({ issues, initialSlug }) {
               className="btn sm:hidden border-2 border-primary bg-primary hover:bg-black text-black hover:text-primary"
               href={issue.links.shop}
             >
-              Buy $29
+              Buy $20
             </Link>
           </div>
           <div
@@ -214,7 +214,9 @@ export default function Home({ issues, initialSlug }) {
 }
 
 function readIssues() {
-  const slugs = fs.readdirSync("./ustj");
+  // Sort so the newest issue (last) is the default regardless of the
+  // filesystem's directory order.
+  const slugs = fs.readdirSync("./ustj").sort();
   return (
     slugs?.map((slug) => {
       return {

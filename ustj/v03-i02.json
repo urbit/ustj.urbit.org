@@ -1,0 +1,36 @@
+{
+  "issue": "FA2026: Vol. 3, No. 2",
+  "title": "The Journal of Solid-State Computing",
+  "content": [
+    {
+      "author": ["dozreg-toplud"],
+      "title": "Nock Compilation (Subject Knowledge Analysis II)"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "Representing the SKI Combinator Calculus in the Nock Instruction Set Architecture"
+    },
+    {
+      "author": ["wicdev-wisryt"],
+      "title": "Input and Output in Hoon"
+    },
+    {
+      "author": ["lagrev-nocfep"],
+      "title": "A Deterministic Numerical Stack"
+    },
+    {
+      "author": ["bonbud-macryg", "tondes-sitrym", "hanfel-dovned"],
+      "title": "Groundwire:  Decentralized Sybil Resistance for a Dead Internet"
+    }
+  ],
+  "theme": {
+    "black": "#141A14",
+    "white": "#FFFFFF",
+    "primary": "#FFF450",
+    "muted": "#B9B13D"
+  },
+  "links": {
+    "cover": "/ustj/v03-i02/cover.png",
+    "shop": "https://shop.ingramspark.com/b/084?params=VtkVcTSwG7PhD64CpaYknAjTkxuSRpGvPU7y9fiZgFZ"
+  }
+}
