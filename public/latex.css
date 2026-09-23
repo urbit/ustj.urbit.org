@@ -302,6 +302,11 @@ pre code {
   font-size: 95%;
   position: relative;
 }
+/* Inline code (patps, arm names) should not break mid-token at line ends. */
+:not(pre) > code {
+  white-space: nowrap;
+  word-break: normal;
+}
 kbd {
   background: var(--kbd-bg-color);
   border: 1px solid var(--kbd-border-color);

@@ -33,8 +33,7 @@ const sites = [
 ];
 
 const pages = [{ title: "Information", href: "/information" },
-               { title: "Citations", href: "/citations" },
-               { title: "Forum", href: "https://journal.urbitsystems.tech/forum" }];
+               { title: "Citations", href: "/citations" }];
 
 function Dropdown({ className = "", label, items }) {
   const [isOpen, setOpen] = useState(false);

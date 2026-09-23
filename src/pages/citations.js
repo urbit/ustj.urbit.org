@@ -109,7 +109,7 @@ function extractAuthorNames(htmlPath, patps) {
 function extractAbstract(htmlPath) {
   if (!fs.existsSync(htmlPath)) return "";
   const html = fs.readFileSync(htmlPath, "utf8");
-  const match = html.match(/<section role="doc-abstract"[^>]*>([\s\S]*?)<\/section>/);
+  const match = html.match(/<section[^>]*role="doc-abstract"[^>]*>([\s\S]*?)<\/section>/);
   if (!match) return "";
 
   let body = match[1].replace(/<h3[^>]*class="abstracttitle"[\s\S]*?<\/h3>/, "");
@@ -121,6 +121,9 @@ function extractAbstract(htmlPath) {
   body = body.replace(/[ \t]+/g, " ");
   body = body.replace(/ *\n */g, "\n");
   body = body.replace(/\n{2,}/g, "\n\n");
+  // TeX4ht keeps the PDF's line breaks; rejoin them into flowing text but
+  // keep paragraph breaks and bullet lines.
+  body = body.replace(/([^\n])\n(?!\n|• )/g, "$1 ");
   return body.trim();
 }
 

@@ -1,0 +1,1038 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en"> 
+<head><title>Nock Compilation
+(Subject Knowledge Analysis II)</title> 
+<meta charset="utf-8" /> 
+<meta content="TeX4ht (https://tug.org/tex4ht/)" name="generator" /> 
+<meta content="width=device-width,initial-scale=1" name="viewport" /> 
+<link href="/latex.css" rel="stylesheet" type="text/css" /> 
+<meta content="mss.tex" name="src" /> 
+<script>window.MathJax = { tex: { tags: "ams", packages: {"[+]": ["html"]}, macros: { mathand: "\\wedge", mathor: "\\vee", textsc: ["\\style{font-variant:small-caps}{\\text{#1}}", 1] } } }; </script> 
+<script async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>  
+</head><body>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Nock Compilation<br />
+(Subject Knowledge Analysis
+II)</h2>
+ <div class="author"><span class="ec-lmbx-12">K. Afonin <code>~dozreg-toplud</code></span>
+<br />      <span class="ec-lmbx-12">Urbit Foundation</span></div><br />
+<div class="date"></div>
+   </div>
+   <section class="abstract" role="doc-abstract"> 
+<h3 class="abstracttitle">
+<span class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!-- l. 50 --><p class="noindent"><span class="ec-lmr-9">The                                                    design
+     choices for the Nock compilation pipeline, which
+     has its roots in the Subject Knowledge Analysis
+     (</span><span class="small-caps">ska</span><span class="ec-lmr-9">) work by Edward Amsden <code>~ritpub-sipsyl</code> and
+     Joe  Bryan  <code>~master-morzod</code>,  are  presented  here.
+     In particular, I describe a call graph construction
+     algorithm that greatly improves on the previous
+     approach,  and  describe  the  shared  data  flow
+     analysis and code generation step that produces
+     linear  static  single-assignment  code  from  a  call
+     graph  of  </span><span class="small-caps">ska</span><span class="ec-lmr-9">-functions  with  tree-shaped  Nock
+     code.</span>
+                                                
+                                                
+</p>
+</section>
+   
+   <h3 class="likesectionHead" id="contents"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc">1 <a href="#introduction" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc">2 <a href="#call-graph-construction" id="QQ2-1-3">Call graph construction</a></span>
+<br />   <span class="subsectionToc">2.1 <a href="#previous-work-and-motivation-for-redesign" id="QQ2-1-4">Previous work and motivation for redesign</a></span>
+<br />   <span class="subsectionToc">2.2 <a href="#formal-design" id="QQ2-1-5">Formal Design</a></span>
+<br />   <span class="subsectionToc">2.3 <a href="#correctness-and-termination-guarantees" id="QQ2-1-6">Correctness and termination guarantees</a></span>
+<br />   <span class="subsubsectionToc">2.3.1 <a href="#kleene-iteration" id="QQ2-1-7">Kleene iteration</a></span>
+<br />   <span class="subsubsectionToc">2.3.2 <a href="#recursion-detection" id="QQ2-1-8">Recursion detection</a></span>
+<br />   <span class="subsubsectionToc">2.3.3 <a href="#cons-denormalization" id="QQ2-1-9">Cons denormalization</a></span>
+<br />   <span class="subsubsectionToc">2.3.4 <a href="#homeomorphic-embedding" id="QQ2-1-10">Homeomorphic embedding</a></span>
+<br />   <span class="subsectionToc">2.4 <a href="#optimizations" id="QQ2-1-11">Optimizations</a></span>
+<br />   <span class="subsubsectionToc">2.4.1 <a href="#worklist" id="QQ2-1-12">Worklist</a></span>
+<br />   <span class="subsubsectionToc">2.4.2 <a href="#memoization-within-a-fixedpoint-iteration" id="QQ2-1-13">Memoization within a fixed-point iteration</a></span>
+<br />   <span class="subsubsectionToc">2.4.3 <a href="#memoization-of-the-finalized-results" id="QQ2-1-14">Memoization of the finalized results</a></span>
+<br />   <span class="subsubsectionToc">2.4.4 <a href="#transitive-closure-of-the-reversed-call-graph-for-faster-recursion-detection" id="QQ2-1-15">Transitive closure of the reversed call graph for faster recursion detection</a></span>
+<br />   <span class="sectionToc">3 <a href="#compilation" id="QQ2-1-16">Compilation</a></span>
+<br />   <span class="subsectionToc">3.1 <a href="#fixedpoint-loop-for-sccs" id="QQ2-1-17">Fixed-point loop for <span class="small-caps">scc</span>s</a></span>
+<br />   <span class="subsectionToc">3.2 <a href="#lazy-destinationdriven-code-generation" id="QQ2-1-18">(Lazy) destination-driven code generation</a></span>
+<br />   <span class="subsectionToc">3.3 <a href="#two-modes-of-compilation" id="QQ2-1-21">Two modes of compilation</a></span>
+<br />   <span class="sectionToc"><a href="#references" id="QQ2-1-22">References</a></span>
+   </div>
+   
+   <h3 class="sectionHead" id="introduction"><span class="titlemark">1   </span> <a id="x1-20001"></a>Introduction</h3>
+<!-- l. 62 --><p class="noindent">Nock, unlike conventional languages, does not have a
+notion of a “code object", or a “function", or any other
+construct that corresponds to known callable code. The
+Nock 2 formula [2 b c]—and Nock 9 by extension, as it is
+just a macro over Nock 2—is the equivalent of eval in
+                                                
+                                                
+other languages and reduces like this (<a id="x1-2001"></a><code>~sorreg-namtyv</code>,
+2013):
+</p>
+   <!-- l. 64 -->
+<pre class="lstlisting" id="listing-1"><span class="label"><a id="x1-2002r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">a</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 b c]          *[*[a b] *[a c]]</span></span></pre>
+<!-- l. 68 --><p class="noindent">That is, one evaluates c against the original subject a to
+obtain a formula, then reduce that formula with *[a b] as our
+new subject. Nock is expressive enough that *[a c] can be
+unknowable in the general case without actually running the
+code.
+</p><!-- l. 71 --><p class="indent">   But while it is unknowable in the general case, in practice
+we can almost always know in advance what formula will be
+evaluated. That is because in practice the formula-formula c is
+almost always: </p>
+     <ul class="itemize1">
+     <li class="itemize">A Nock 0, with the formula being pulled from the
+     known subject (e.g. desugaring of Nock 9); or
+     </li>
+     <li class="itemize">A Nock 1, with the formula being a constant/quoted
+     value (i.e. |- loops, where the formula does not come
+     from the subject but is instead quoted into the outer
+     formula).</li></ul>
+<!-- l. 76 --><p class="noindent">This fact allows us to introduce the notion of a <span class="small-caps">ska</span><span class="ec-lmri-10">-function</span>
+object, which is identified by a Nock formula and a masked
+subject. <span class="small-caps">ska</span> stands for Subject Knowledge Analysis, the
+name of the call graph construction algorithm for Nock
+developed by Edward Amsden <code>~ritpub-sipsyl</code> and Joe Bryan
+<code>~master-morzod</code>.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-2003f1"></a> 
+In this paper, <span class="small-caps">ska</span> (in the spirit of notation abuse) will mean
+                                                
+                                                
+both the call graph construction algorithm for Nock and the
+overall compilation pipeline. The mask includes only the code
+that could be used by the <span class="small-caps">ska</span>-function, either by itself or
+transitively by its callees—that is, the subset of the subject’s
+noun structure that the function and its callees might
+actually reference. A <span class="small-caps">ska</span>-function can use any Nock
+operations, including raw Nock 2 when *[a c] could not be
+deduced (an <span class="ec-lmri-10">indirect </span>Nock call), but it can also call other
+<span class="small-caps">ska</span>-functions.
+</p><!-- l. 79 --><p class="indent">   Once the function call graph is obtained, the next step is
+to discover which parts of the subject are actually used as
+data by each function. Without it, each function would have
+to have a signature <code class="lstinline"><span style="color:#000000">(subject: noun -&gt; noun)</span></code>, which
+would lead to unnecessary busywork when it comes to
+function calls—the entire subject of a callee would have to
+be consed up, for it to be deconstructed later by the
+callee.
+</p><!-- l. 81 --><p class="indent">   With that step done, the actual code generation for a
+<span class="small-caps">ska</span>-function can be performed on-demand, avoiding extra
+work for functions with total jets and functions that are never
+called.
+   
+</p>
+   <h3 class="sectionHead" id="call-graph-construction"><span class="titlemark">2   </span> <a id="x1-30002"></a>Call graph construction</h3>
+   
+   <h4 class="subsectionHead" id="previous-work-and-motivation-for-redesign"><span class="titlemark">2.1   </span> <a id="x1-40002.1"></a>Previous work and motivation for redesign</h4>
+<!-- l. 87 --><p class="noindent">Multiple algorithms were developed by Edward Amsden
+<code>~ritpub-sipsyl</code> to construct the call graph from a subject-formula
+pair.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a id="x1-4001f2"></a>  I
+took his latest implementation and constructed a similar
+                                                
+                                                
+algorithm (<a id="x1-4003"></a><code>~dozreg-toplud</code>, 2026), whose primary characteristic
+was execution-order (i.e. depth-first) inference and traversal of
+the call graph. The traversal very closely resembled Tarjan’s
+strongly connected component (<span class="small-caps">scc</span>) algorithm—where an <span class="small-caps">scc</span>
+is a maximal set of mutually-reachable nodes in the call
+graph—except the graph was inferred at the same time
+as it was traversed, and the assumptions made in an
+<span class="small-caps">scc</span> were validated upon returning from that <span class="small-caps">scc</span>. If
+any assumption was invalid, then the entire <span class="small-caps">scc</span> was
+reanalyzed with the assumption added into an exclusion
+list.
+</p><!-- l. 89 --><p class="indent">   As the implementation matured and was tested on more
+and more complex workloads, it became apparent that the
+validation and reanalysis approach was too costly: analysis
+time increased exponentially with the depth of the <span class="small-caps">scc</span>
+stack. Independently of this problem, I examined the
+literature to figure out another fixed-point algorithm.
+This led me to the realization that the call graph itself
+can be expressed as a fixed point of a partial evaluation
+function.
+   
+</p>
+   <h4 class="subsectionHead" id="formal-design"><span class="titlemark">2.2   </span> <a id="x1-50002.2"></a>Formal Design</h4>
+<!-- l. 93 --><p class="noindent">Before the formal design, let me introduce two pieces of
+vocabulary. A <span class="ec-lmri-10">partial evaluator </span>runs a formula as far
+as it can using only the information known statically,
+producing an unknown result otherwise. A <span class="ec-lmri-10">fixed point </span>of a
+function is an input that the function maps to itself:
+we apply our analysis repeatedly until the result stops
+changing, and that stable result is the fixed point we are
+after.
+</p><!-- l. 95 --><p class="indent">   First, let me define the domain of the function whose fixed
+point we are going to find. It is going to be a mapping <span class="mathjax-inline">\(\mathbb {G}: \; \textsc {Identity} \rightarrow \textsc {Datum}\)</span>, where:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><span class="mathjax-inline">\(\textsc {Identity}\)</span> is a pair <span class="mathjax-inline">\((\mathbf {more}: \mathtt {Sock}, \mathbf {formula}: \mathtt {Cell})\)</span>, where <span class="mathjax-inline">\(\mathtt {Sock}\)</span> is a partial noun (a noun with some
+     structure known and some left as unknown holes), <span class="mathjax-inline">\(\mathbf {more}\)</span>
+     represents the entirety of the subject with which the
+     eval was performed, and <span class="mathjax-inline">\(\mathbf {formula}\)</span> is a Nock formula that is
+     being evaluated in this <span class="small-caps">ska</span>-function call.
+     </li>
+     <li class="itemize"><span class="mathjax-inline">\(\textsc {Datum}\)</span>   is   the   information   necessary   for   the   partial
+     evaluation of the callers of the <span class="small-caps">ska</span>-function with the
+     given <span class="mathjax-inline">\(\textsc {Identity}\)</span>, which is at least: <span class="mathjax-inline">\(\mathbf {less}: \mathtt {Sock}\)</span> for a minimized subject,
+     that includes only the parts that are used for eval by
+     that <span class="small-caps">ska</span>-function and its transitive callees; <span class="mathjax-inline">\(\mathbf {product}: \mathtt {Sock}\)</span> for the
+     product of the <span class="small-caps">ska</span>-function call; and <span class="mathjax-inline">\(\mathbf {map}: \mathtt {Provenance}\)</span>, the location
+     of the parts of the product in the subject, defined as:</li></ul>
+
+   <div class="mathjax-env mathjax-align*">\begin{align*} \textsc {Provenance:} \;&amp;\mathtt {nil} \;|\; \mathtt {slot}(\texttt {a}: \textsc {Atom}) \;|\\ &amp; \mathtt {cons}(\mathtt {head}: \textsc {Provenance}, \mathtt {tail}: \textsc {Provenance}) \end{align*}</div>
+<!-- l. 106 --><p class="indent">   At a fixed point, a <span class="small-caps">ska</span>-function is identified with a pair <span class="mathjax-inline">\((\mathbf {less},\;\mathbf {formula})\)</span>,
+and each <span class="small-caps">Identity</span> entry corresponds to a <span class="small-caps">ska</span>-function call
+with arguments captured in <span class="mathjax-inline">\(\mathbf {more}\)</span>.
+</p><!-- l. 108 --><p class="indent">   Let me now define the partial evaluator <span class="mathjax-inline">\(\mathcal {F}: \mathbb {G} \rightarrow \mathbb {G}\)</span>, that for each <span class="mathjax-inline">\(\mathbf {id}:\;\textsc {Identity}\)</span>
+partially evaluates <span class="mathjax-inline">\(\mathbf {formula}\)</span> against <span class="mathjax-inline">\(\mathbf {more}\)</span>, constructing a new <span class="mathjax-inline">\(\mathbf {dat}:\;\textsc {Datum}\)</span> for that <span class="mathjax-inline">\(\mathbf {id}\)</span>:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Partial  evaluation  starts  from  the  subject  itself,
+     tagged  with  the  provenance  <span class="mathjax-inline">\(\mathbf {slot}(1)\)</span>—the  subject  sits  at
+     axis 1 of itself. From there every intermediate value
+     carries a <span class="mathjax-inline">\(\textsc {Provenance}\)</span> that says which part of the subject it was
+     taken from, or <span class="mathjax-inline">\(\mathtt {nil}\)</span> if it was not taken from the subject
+     at all;
+     </li>
+     <li class="itemize">
+     <!-- l. 111 --><p class="noindent">The Nock formula is partially evaluated against the
+     annotated subject: </p>
+         <ul class="itemize2">
+         <li class="itemize">In  cons  case  <code class="lstinline"><span style="color:#000000">[[b c] d]</span></code> head  and  tail  are
+         evaluated and the products are consed;
+         </li>
+         <li class="itemize">Nock 0 produces the appropriate axis from the
+         annotated subject, if present;
+         </li>
+         <li class="itemize">Nock  1  produces  a  fully  known  sock  with  <span class="mathjax-inline">\(\mathtt {nil}\)</span>
+         provenance;
+         </li>
+         <li class="itemize">In Nock 3, 4, 5, 12 child formulas are evaluated
+         and an empty product is produced;
+         </li>
+         <li class="itemize">Nock  6  produces  an  intersection  of  values  of
+         both  branches:  the  results  are  intersected  on
+         both <span class="mathjax-inline">\(\textsc {Sock}\)</span> values and the provenances;
+         </li>
+         <li class="itemize">In Nock 7 the second child formula is evaluated
+         against the product of the evaluation of the first
+         child against the subject;
+         </li>
+         <li class="itemize">In   Nock   11   the   product   of   the   hinted
+         formula   is   produced,   and   in   a   dynamic
+         case  <code class="lstinline"><span style="color:#000000">[a 11 [b c] d]</span></code> the  hint-formula  is
+         evaluated and its product is ignored;
+         </li>
+         <li class="itemize">Nock     8     is     desugared:     <code class="lstinline"><span style="color:#000000">[8 p q]</span></code>   <span class="mathjax-inline">\(\rightarrow \)</span>
+         <code class="lstinline"><span style="color:#000000">[7 [p 0 1] q]</span></code>;
+         </li>
+         <li class="itemize">Nock 9 is desugared: <code class="lstinline"><span style="color:#000000">[9 p q]</span></code><span class="mathjax-inline">\(\rightarrow \)</span><code class="lstinline"><span style="color:#000000">[2 [0 p] q]</span></code>;
+         </li>
+         <li class="itemize">Finally,  in  Nock  2  the  formula-formula  is
+         evaluated, and if its product is not known the
+         call is considered to be indirect, and an empty
+         product is returned. Otherwise, the subject of
+         the callee is calculated and the appropriate <span class="mathjax-inline">\(\textsc {Datum}\)</span> is
+         obtained: <span class="mathjax-inline">\(\mathbb {G}(\mathtt {calleeSubject}, \mathbf {formula})\)</span>. The code usage mask of the current
+         call  is  updated  using  the  provenance  of  the
+         callee’s  formula  noun  and  the  provenance  of
+         the callee’s subject plus the code usage mask
+         of  the  callee.  Details  like  recursion  detection
+         are discussed in “Recursion detection” below.
+         The  product  is  the  <span class="mathjax-inline">\(\textsc {Sock}\)</span>  from  the  callee’s  <span class="mathjax-inline">\(\textsc {Datum}\)</span>,  with
+         the  provenance  composed  with  the  subject’s
+         provenance.</li></ul>
+     </li></ul>
+<!-- l. 126 --><p class="noindent">Finally, the call graph is constructed by finding <span class="mathjax-inline">\(\mathtt {fix}\;\mathcal {F}\)</span>: we build a
+chain <span class="mathjax-inline">\(\left [\mathbb {G}_\bot ,\;\mathcal {F}(\mathbb {G}_\bot ),\;\mathcal {F}(\mathcal {F}(\mathbb {G}_\bot )),\;\ldots {}\right ]\)</span> until it converges. <span class="mathjax-inline">\(\mathbb {G}_\bot \)</span> is a mapping <span class="mathjax-inline">\(\mathbb {G}\)</span> such that for every <span class="mathjax-inline">\(\mathbf {id}:\;\textsc {Identity}\)</span>, <span class="mathjax-inline">\(\mathbb {G}_\bot (\mathbf {id}) = \textsc {Datum}_\bot \)</span>,
+and <span class="mathjax-inline">\(\textsc {Datum}_\bot \)</span> is the minimal <span class="mathjax-inline">\(\textsc {Datum}\)</span> for a function call: an unknown result
+with no provenance and empty <span class="mathjax-inline">\(\mathbf {less}\)</span>, as we assume no code is
+used.
+   
+</p>
+   <h4 class="subsectionHead" id="correctness-and-termination-guarantees"><span class="titlemark">2.3   </span> <a id="x1-60002.3"></a>Correctness and termination guarantees</h4>
+<!-- l. 131 --><p class="noindent">The final value of the chain above is evidently <span class="mathjax-inline">\(\mathtt {fix}\;\mathcal {F}\)</span>. What I
+would like to demonstrate, if not fully prove, is that the
+chain is finite and the resulting fixed point is almost
+always the least fixed point of <span class="mathjax-inline">\(\mathcal {F}\)</span>: the code usage masks
+capture no more than the parts of the subject that could
+actually be used as code, except for some unusual recursive
+cases, discussed later (see the section “Homeomorphic
+embedding”).
+   
+                                                
+                                                
+</p>
+   <h5 class="subsubsectionHead" id="kleene-iteration"><span class="titlemark">2.3.1   </span> <a id="x1-70002.3.1"></a>Kleene iteration</h5>
+<!-- l. 135 --><p class="noindent">Let me introduce some more vocabulary. A <span class="ec-lmri-10">partially ordered
+set </span>is a set with an ordering <span class="mathjax-inline">\(\leq \)</span> defined such that, for certain
+pairs of elements of the set, one precedes the other. A <span class="ec-lmri-10">lattice </span>is
+a partially ordered set that for each pair of elements has a <span class="ec-lmri-10">join
+</span><span class="mathjax-inline">\(a \mathor b\)</span> and a <span class="ec-lmri-10">meet </span><span class="mathjax-inline">\(a \mathand b\)</span> such that:
+</p>
+   <div class="mathjax-env mathjax-align*">\begin{align*} a \mathand b \leq a \leq a \mathor b \; \text {and} \; a \mathand b \leq b \leq a \mathor b \end{align*}</div>
+<!-- l. 141 --><p class="noindent">A <span class="ec-lmri-10">complete lattice </span>is a lattice that has a join and a meet for
+any subset of the lattice.
+</p><!-- l. 144 --><p class="indent">   It can be readily seen that, for a given noun <span class="mathjax-inline">\(N\)</span>, the set of all
+socks generated by masking data away from <span class="mathjax-inline">\(N\)</span> forms a complete
+lattice with an ordering <span class="mathjax-inline">\(\underset {\mathbf {sock}(N)}{\leq }\)</span> such that the fully unknown sock <span class="mathjax-inline">\(\bot _{\mathbf {Sock}}\)</span> is
+the <span class="ec-lmri-10">bottom element </span>of the lattice (i.e. it is the infimum
+of the entire set), and the fully known sock <span class="mathjax-inline">\(\top _{\mathbf {Sock}}^{N}\)</span> is the <span class="ec-lmri-10">top
+element </span>(the supremum of the set). The ordering then tells
+us whether two socks nest: <span class="mathjax-inline">\(A \underset {\mathbf {sock}(N)}{\leq } B\)</span> if <span class="mathjax-inline">\(A\)</span> and <span class="mathjax-inline">\(B\)</span> do not have data
+that contradicts <span class="mathjax-inline">\(N\)</span> and if <span class="mathjax-inline">\(B\)</span> has at least as much data as
+<span class="mathjax-inline">\(A\)</span>.
+</p><!-- l. 146 --><p class="indent">   The Kleene fixed-point theorem (<a id="x1-7001"></a>P. Cousot and R. Cousot,
+1979) states that <span class="mathjax-inline">\(\sup \left (\left [\mathbb {G}_\bot ,\;\mathcal {F}(\mathbb {G}_\bot ),\;\mathcal {F}(\mathcal {F}(\mathbb {G}_\bot )), \ldots {}\right ]\right )\)</span> is <span class="mathjax-inline">\(\mathtt {lfp}\;\mathcal {F}\)</span>, or <span class="ec-lmri-10">the least fixed point </span>of <span class="mathjax-inline">\(\mathcal {F}\)</span>, as long as <span class="mathjax-inline">\(\mathcal {F}\)</span> is
+monotonic: for any two mappings <span class="mathjax-inline">\(a\)</span> and <span class="mathjax-inline">\(b\)</span>, <span class="mathjax-inline">\(a \leq b \Rightarrow \mathcal {F}(a) \leq \mathcal {F}(b)\)</span>.
+</p><!-- l. 148 --><p class="indent">   If <span class="mathjax-inline">\(\mathbb {G}\)</span> could be represented as a simple product of socks,
+and if the chain was guaranteed to be finite, then the
+iterative process described above, known as <span class="ec-lmri-10">Kleene iteration</span>,
+would obviously produce <span class="mathjax-inline">\(\mathtt {lfp}\; \mathcal {F}\)</span>, as <span class="mathjax-inline">\(\mathbb {G}\)</span> would also form a complete
+lattice, and <span class="mathjax-inline">\(\mathcal {F}\)</span> only adds information on each iteration, never
+subtracting anything.
+   
+</p>
+   <h5 class="subsubsectionHead" id="recursion-detection"><span class="titlemark">2.3.2   </span> <a id="x1-80002.3.2"></a>Recursion detection</h5>
+<!-- l. 152 --><p class="noindent">To make sure that the iteration chain is actually finite, we
+need to be able to detect recursive calls to add pessimizations
+to them. Without that, a simple tail-recursive Nock expression
+                                                
+                                                
+that produces a list of nouns could be reevaluated on each
+fixed-point iteration because its product changed. Simple
+recursion like in that example is detected as follows: for a
+given Nock 2 eval, if its subject nests under the subject of one
+of its transitive callers with the same formula, we assume that
+the Nock 2 call in question is a recursive call to that
+transitive caller, and its <span class="mathjax-inline">\(\textsc {Datum}\)</span> is returned to the caller with the
+product replaced with a fully unknown sock with no
+provenance.
+</p><!-- l. 154 --><p class="indent">   Masking the product this way keeps the chain finite, but it
+costs us the strict monotonicity of <span class="mathjax-inline">\(\mathcal {F}\)</span> over the subjects and
+results of <span class="small-caps">ska</span>-functions: a call that one iteration treats as
+recursive may, on a later iteration, no longer satisfy the
+recursion condition, at which point it returns <span class="mathjax-inline">\(\textsc {Datum}_\bot \)</span> instead—a
+strictly smaller value that shrinks the recorded code usage
+rather than growing it. However, once the transitive caller is
+no longer classified as a recursion target, it is removed
+from the finite set of potential recursion targets, so such
+non-monotone steps can occur only finitely many times and
+the iteration still converges.
+   
+</p>
+   <h5 class="subsubsectionHead" id="cons-denormalization"><span class="titlemark">2.3.3   </span> <a id="x1-90002.3.3"></a>Cons denormalization</h5>
+<!-- l. 158 --><p class="noindent">Another avenue for infinite Kleene chains is the dynamic
+generation of Nock code to <span class="mathjax-inline">\(\mathtt {eval}\)</span>. Since Nock 3, 4, and 5 return
+unknown results, the only way to synthesize a new formula is
+to cons existing ones together.
+</p><!-- l. 160 --><p class="indent">   The prevention strategy is simple: a consed noun as a
+whole may never be used as a formula—only the components
+that were consed into it may. This bounds the executable
+formulas to the finitely many subtrees already present in the
+subject-formula pair, making the set of possible <span class="small-caps">ska</span>-functions
+it generates finite.
+   
+                                                
+                                                
+</p>
+   <h5 class="subsubsectionHead" id="homeomorphic-embedding"><span class="titlemark">2.3.4   </span> <a id="x1-100002.3.4"></a>Homeomorphic embedding</h5>
+<!-- l. 164 --><p class="noindent">Finally, another way to produce infinite Kleene chains is to
+cons together the subject, not the formula, to produce
+new <span class="small-caps">ska</span>-function candidates. This example in Hoon is
+demonstrative:
+</p>
+   <!-- l. 166 -->
+<pre class="lstlisting" id="listing-9"><span class="label"><a id="x1-10001r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">=/</span></span><span style="color:#000000">  <span class="ec-lmtt-9">t  </span><span class="ec-lmtk-10x-x-90">|.</span><span class="ec-lmtt-9">(0)</span> 
+</span><span class="label"><a id="x1-10002r2"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">|-</span></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">^-  </span><span class="ec-lmtt-9">~</span> 
+</span><span class="label"><a id="x1-10003r3"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">?:</span></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">=</span><span class="ec-lmtt-9">(3 $:t)  ~</span> 
+</span><span class="label"><a id="x1-10004r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">$</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">t</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">|.</span><span class="ec-lmtt-9">(+($:t)))</span></span></pre>
+<!-- l. 173 --><p class="indent">   Here t is a trap that accumulates previous values of t in its
+payload. Each recursive iteration generates a new subject for
+the <code class="lstinline"><span style="color:#000000">$:t</span></code> eval in the conditional, infinitely expanding the call
+stack.
+</p><!-- l. 175 --><p class="indent">   To prevent this, when two calls are checked for simple
+recursion (that is, whether their subjects straightforwardly
+nest) and turn out not to be simply recursive, we also check
+whether the caller’s subject is homeomorphically embedded
+into the callee’s (a termination criterion borrowed from online
+partial evaluation, <a id="x1-10005"></a>Leuschel (2002)): <span class="mathjax-inline">\(\text {caller} \unlhd \text {callee}\)</span>, defined as follows:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">For every <span class="mathjax-inline">\(\textsc {Sock}\;a:\;a \unlhd a\)</span>.
+     </li>
+     <li class="itemize"><span class="ec-lmri-10">Coupling rule</span>: if <span class="mathjax-inline">\(a\)</span> and <span class="mathjax-inline">\(b\)</span> are <span class="mathjax-inline">\(\textsc {Sock}\)</span> cells and <span class="mathjax-inline">\(\text {Head}(a)\unlhd \text {Head}(b)\)</span> and <span class="mathjax-inline">\(\text {Tail}(a)\unlhd \text {Tail}(b)\)</span>, then <span class="mathjax-inline">\(a \unlhd b\)</span>.
+     </li>
+     <li class="itemize"><span class="ec-lmri-10">Diving rule</span>: if <span class="mathjax-inline">\(b\)</span> is a <span class="mathjax-inline">\(\textsc {Sock}\)</span> cell and <span class="mathjax-inline">\(a \unlhd \text {Head}(b)\)</span> or <span class="mathjax-inline">\(a \unlhd \text {Tail}(b)\)</span>, then <span class="mathjax-inline">\(a \unlhd b\)</span>.</li></ul>
+<!-- l. 182 --><p class="indent">   When homeomorphic embedding is detected, the callee’s
+subject is replaced with the most specific generalization (<span class="small-caps">msg</span>)
+of the two subjects—the most specific sock that both subjects
+nest under, which keeps the data where the two agree and
+                                                
+                                                
+masks it out where they differ—effectively erasing the
+accumulating part.
+</p><!-- l. 184 --><p class="indent">   Kruskal’s tree theorem (<a id="x1-10006"></a>Kruskal, 1960) guarantees exactly
+this termination: the finite trees over a finite set of labels are
+well-quasi-ordered by homeomorphic embedding, so any
+infinite sequence of them must contain an earlier tree that is
+homeomorphically embedded into a later one. The bound this
+gives is enormous, though: even a handful of labels admits
+embedding-free sequences of astronomical length, the
+classic illustration being <span class="small-caps">tree(3)</span>, a number too large to
+meaningfully describe. I did try to construct subject-formula
+pairs whose embedding-free sequences grow even exponentially
+in the size of the pair, and could not—in every attempt
+the accumulating part was either masked out by the
+recursion product or collapsed by the very restrictive Nock 6
+intersection. So it appears that worst-case chains are at most
+linear in length relative to the size of the subject-formula
+pair.
+   
+</p>
+   <h4 class="subsectionHead" id="optimizations"><span class="titlemark">2.4   </span> <a id="x1-110002.4"></a>Optimizations</h4>
+   
+   <h5 class="subsubsectionHead" id="worklist"><span class="titlemark">2.4.1   </span> <a id="x1-120002.4.1"></a>Worklist</h5>
+<!-- l. 190 --><p class="noindent">While the formal definition of <span class="mathjax-inline">\(\mathcal {F}\)</span> operates on an infinite mapping
+<span class="mathjax-inline">\(\mathbb {G}\)</span> and partially evaluates every member of the mapping, in
+reality the call graph is finite. Further, in each fixed-point
+iteration we only need to evaluate function calls whose
+immediate callees’ <span class="mathjax-inline">\(\textsc {Datum}\)</span> entries have changed since the last
+iteration, otherwise the evaluation would not give new results.
+This is addressed with a worklist: a set of <span class="mathjax-inline">\(\textsc {Identity}\)</span> entries that
+includes brand new calls, not present in the previous value of <span class="mathjax-inline">\(\mathbb {G}\)</span>,
+and calls whose callees changed since the last iteration. This
+fixed-point computation algorithm falls into the family of
+chaotic fixed-point iterations (<a id="x1-12001"></a>Geser et al., 1994), and it also
+                                                
+                                                
+produces <span class="mathjax-inline">\(\mathtt {lfp}\;\mathcal {F}\)</span>.
+   
+</p>
+   <h5 class="subsubsectionHead" id="memoization-within-a-fixedpoint-iteration"><span class="titlemark">2.4.2   </span> <a id="x1-130002.4.2"></a>Memoization within a fixed-point iteration</h5>
+<!-- l. 194 --><p class="noindent">To save time within one fixed-point iteration, the result of a
+partial evaluation of a function call was saved into an
+iteration-local cache. Before evaluating a function call the
+cache was checked, and on a hit the saved result was
+returned. Extra care was applied to prevent the caching from
+pessimizing calls with transitive indirect callees. Firstly, if a
+function captured some part of its subject in the product, and
+some part of the captured subject subtree was unknown, the
+function was not memoized to allow analysis of more specific
+calls. Secondly, whenever an indirect call was performed,
+the provenance of the formula was recorded, and during
+cache look-ups the algorithm checked whether the cache
+candidate had known data at the places where the cached call
+tried to obtain a formula for its indirect call. If there
+was any known data the cache entry was skipped, again
+allowing more specific calls than the cached one to be
+analyzed.
+</p><!-- l. 196 --><p class="indent">   There were also some optimizations that ultimately were
+not included in the algorithm because the machinery to
+support them took more time than the optimizations saved.
+Let me briefly mention them.
+   
+</p>
+   <h5 class="subsubsectionHead" id="memoization-of-the-finalized-results"><span class="titlemark">2.4.3   </span> <a id="x1-140002.4.3"></a>Memoization of the finalized results</h5>
+<!-- l. 200 --><p class="noindent">Whenever a function call and all of its transitive callees were
+no longer in the worklist we could consider the function to be
+finalized: no other updates to the call graph could cause
+reanalysis of such functions. To support such memoization I
+had to keep track of the transitive closure of the call graph
+(i.e. the graph whose edges connect a function call with any
+                                                
+                                                
+function call reachable down the stack, not only the immediate
+callees).
+   
+</p>
+   <h5 class="subsubsectionHead" id="transitive-closure-of-the-reversed-call-graph-for-faster-recursion-detection"><span class="titlemark">2.4.4   </span> <a id="x1-150002.4.4"></a>Transitive closure of the reversed call graph for
+faster recursion detection</h5>
+<!-- l. 204 --><p class="noindent">Instead of walking the reversed call graph to find a candidate
+for a recursive call I tried keeping track of the transitive
+closure of the reversed call graph. Incremental updates to that
+graph and to the transitive closure of the direct call graph
+mentioned above worked in the same way:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Firstly, the set of vertices whose immediate children
+     changed was collected, called a <span class="ec-lmri-10">seed</span>;
+     </li>
+     <li class="itemize">Then  the  appropriate  reversed  graph  was  walked,
+     assembling a set of vertices that could reach the seed
+     set, or <span class="ec-lmri-10">affected </span>set;
+     </li>
+     <li class="itemize">The  reversed  subgraph  of  affected  vertices  was
+     assembled;
+     </li>
+     <li class="itemize">The reversed subgraph was condensed with Tarjan’s
+     <span class="small-caps">scc</span> algorithm; the <span class="small-caps">scc</span>s of the reversed subgraph
+     were  toposorted,  i.e.  predecessors  (in  the  reversed
+     graph) first;
+                                                
+                                                
+     </li>
+     <li class="itemize">For  each  <span class="small-caps">scc</span>  a  <span class="ec-lmri-10">closure  </span>was  computed,  and  each
+     member of the <span class="small-caps">scc</span> got edges to every member of the
+     closure;
+     </li>
+     <li class="itemize">The <span class="ec-lmri-10">closure </span>was computed by taking a union over
+     every immediate child of every member of the <span class="small-caps">scc</span>: <span class="mathjax-inline">\(\{\mathtt {child}\}\)</span> if
+     the child was in the <span class="small-caps">scc</span>, else <span class="mathjax-inline">\(\{\mathtt {child}\} \cup \mathtt {TC}\left [\mathtt {child}\right ]\)</span>, where <span class="mathjax-inline">\(\mathtt {TC}\)</span> is the previous
+     value of the transitive closure.</li></ul>
+<!-- l. 215 --><p class="noindent">This approach allowed me to avoid fixed-point iterations in
+the construction of the transitive closures, but it was still not
+worth it for all tested workloads.
+   
+</p>
+   <h3 class="sectionHead" id="compilation"><span class="titlemark">3   </span> <a id="x1-160003"></a>Compilation</h3>
+<!-- l. 220 --><p class="noindent">Once we have the call graph, we can start compiling bodies
+of <span class="small-caps">ska</span>-functions into a static single-assignment (<span class="small-caps">ssa</span>)
+intermediate representation (IR)—that is, compiling the
+tree-shaped Nock formula of a function into a stream of
+instructions that assign parts of the input subject and
+products of computations to immutable variables, each written
+exactly once. That IR would then be subject to further
+optimization and compilation passes; <span class="small-caps">ssa</span> form was chosen to
+simplify these subsequent passes.
+</p><!-- l. 222 --><p class="indent">   During the call graph construction phase we made no
+assumptions about the shape of the input subject, nor about
+the shape of the resulting noun. The simplest way to treat this
+in the compilation phase would be to assume that all functions
+take a single noun with an unknown shape as an input and
+return a noun with an unknown shape as a result. The
+problem with this approach becomes apparent when we
+consider how an <span class="mathjax-inline">\(n\)</span>-ary gate is typically called and evaluated in
+                                                
+                                                
+Nock, as in the current bytecode Nock interpreter in Vere:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><span class="mathjax-inline">\(n\)</span> input arguments from different parts of the subject
+     and/or Nock 1 formulas are consed into a single noun
+     tuple;
+     </li>
+     <li class="itemize">The gate’s arm is evaluated to produce a core with
+     the default sample;
+     </li>
+     <li class="itemize">The sample is edited with the tuple;
+     </li>
+     <li class="itemize">The <code class="lstinline"><span style="color:#000000">$</span></code> arm is evaluated: we enter the callee’s body;
+     </li>
+     <li class="itemize">In the callee’s code, the argument tuple is split back
+     into <span class="mathjax-inline">\(n\)</span> pieces, and computations are run with them.</li></ul>
+<!-- l. 231 --><p class="indent">   All of this extra work could have been avoided if we knew
+ahead of time that a given function uses data from certain
+axes, for example, that a binary function uses data at axes 12
+and 13. That way, when compiling the caller of that function,
+we could just provide the variables that hold the inputs for
+the callee, and when compiling the callee, we wouldn’t
+have to emit subject decomposition code to get the input
+arguments.
+</p><!-- l. 233 --><p class="indent">   We can figure out the data requirements of a function by
+observing which parts of the input subject the function tries to
+access with Nock 0, and requiring the presence of data at an
+axis whenever the function would have crashed had that axis
+been missing.
+                                                
+                                                
+</p><!-- l. 235 --><p class="indent">   So a <span class="small-caps">ska</span>-function behind this Hoon gate would be binary
+with arguments at axes 12 and 13:
+</p>
+   <!-- l. 237 -->
+<pre class="lstlisting" id="listing-12"><span class="label"><a id="x1-16001r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span class="ec-lmtt-9">[a=@ b=@]</span> 
+</span><span class="label"><a id="x1-16002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">add</span></span><span style="color:#000000"> <span class="ec-lmtt-9">b (mul 10 a))</span></span></pre>
+<!-- l. 242 --><p class="indent">   because a and b are accessed individually and unconditionally,
+and the function would have crashed, were it called with an
+atom as its sample. This function, on the other hand, would
+be unary:
+</p>
+   <!-- l. 244 -->
+<pre class="lstlisting" id="listing-13"><span class="label"><a id="x1-16003r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">|=</span></span><span style="color:#000000">  <span class="ec-lmtt-9">[a=@ b=@]</span> 
+</span><span class="label"><a id="x1-16004r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">add</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42 (add +&lt;))</span></span></pre>
+<!-- l. 249 --><p class="indent">   because here the entire sample is given to <code class="lstinline"><span style="color:#000000">+add</span></code>. If that
+gate was called with an atom as its sample, the crash would
+have happened inside <code class="lstinline"><span style="color:#000000">+add</span></code>, which we would have to call to
+preserve stack trace correctness.
+</p><!-- l. 251 --><p class="indent">   There are some complications when it comes to obtaining
+data requirements, solutions for which will be described below.
+Firstly, when a caller and a callee belong to the same
+<span class="small-caps">scc</span>, compiling them both, and thus finding their data
+requirements, needs to be done simultaneously.
+</p><!-- l. 253 --><p class="indent">   Secondly, the data usage of a Nock formula cannot be
+simply composed out of its sub-formulas, when iterating over
+them in one direction or the other, due to branches. Consider
+this Hoon example:
+</p>
+   <!-- l. 255 -->
+<pre class="lstlisting" id="listing-16"><span class="label"><a id="x1-16005r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">++</span></span><span style="color:#000000">  <span class="ec-lmtt-9">maybe-add-to-42</span> 
+</span><span class="label"><a id="x1-16006r2"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">|=  </span><span class="ec-lmtt-9">delta=(unit </span><span class="ec-lmtk-10x-x-90">@</span><span class="ec-lmtt-9">)</span> 
+</span><span class="label"><a id="x1-16007r3"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">^-  @</span> 
+</span><span class="label"><a id="x1-16008r4"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">?~  </span><span class="ec-lmtt-9">delta  42</span> 
+</span><span class="label"><a id="x1-16009r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  <span class="ec-lmtt-9">(add 42 u.delta)</span></span></pre>
+<!-- l. 263 --><p class="indent">   Here the desired argument usage of the function
+represented by this gate would, of course, be “noun at axis
+6”, which corresponds to delta. Let’s iterate over the
+underlying Nock formula in two directions, forwards and
+backwards, and see what conclusion each direction leads to.
+                                                
+                                                
+When going forward, as is natural for symbolic or actual
+interpretation:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">The  conditional  reaches  for  axis  6,  where  delta  is
+     located;
+     </li>
+     <li class="itemize">In the first branch, 42 is returned, and no other axis
+     is reached;
+     </li>
+     <li class="itemize">In  the  second  branch,  axis  13  is  reached  to  get
+     u.delta,  then  a  direct  call  to  <code class="lstinline"><span style="color:#000000">+add</span></code> is  performed,
+     which uses no axes;
+     </li>
+     <li class="itemize">When  joining  the  data  usage  of  the  branches,  we
+     need to take into account that the first branch did
+     not access axis 13, so that axis might not be present
+     in the subject, as would be the case here. We did
+     already reach axis 6 in the conditional, so we can
+     get  the  data  usage  of  the  two  by  computing  the
+     <span class="small-caps">msg</span>—the  most  specific  generalization,  introduced
+     in the section “Homeomorphic embedding”—of the
+     unions of the data usage before the branch with the
+     data usage in each branch, which would give us “noun
+     at axis 6”.</li></ul>
+<!-- l. 272 --><p class="indent">   If we iterate over the formula backwards, as is customary
+for destination-driven code generation (<a id="x1-16010"></a>Dybvig, Hieb, and
+Butler, 1990) as discussed below, we obtain a different
+result:
+                                                
+                                                
+</p>
+     <ul class="itemize1">
+     <li class="itemize">The first branch uses nothing from its subject;
+     </li>
+     <li class="itemize">The second branch accesses axis 13;
+     </li>
+     <li class="itemize">Their  <span class="small-caps">msg</span> is  axis  1—in  the  first  branch  nothing
+     was asserted about the shape of the subject, so in
+     the  second  branch  we  would  have  to  add  subject
+     decomposition code;
+     </li>
+     <li class="itemize">The conditional accesses axis 6;
+     </li>
+     <li class="itemize">The body overall needs a union of usages “axis 6”
+     and “axis 1”, which, depending on the representation
+     of the argument split, could devolve to just “axis 1”.</li></ul>
+<!-- l. 282 --><p class="indent">   Special-casing the conditional would not help in the
+general case: to properly calculate the data requirements of a
+branch we need to take an MSG of the unions of the branches’
+data requirements with the data requirements before and after
+the branch. Furthermore, this accumulation of lazy data
+requirements and their final collapse into a single data
+requirement needs to be done recursively for nested branches
+as well.
+</p><!-- l. 284 --><p class="indent">   Finally, it is not sufficient to reproduce whether a crash
+<span class="ec-lmri-10">would </span>happen if a function was called with an ill-fitting
+subject; we also need to reproduce the location of the crash, or
+                                                
+                                                
+rather, the state of the stack trace at the moment it occurs.
+Indeed, <code class="lstinline"><span style="color:#000000">+mink</span></code> allows us to materialize the stack trace as a
+product of Nock evaluation, which demands that we uphold
+these semantics. Simply ignoring <code class="lstinline"><span style="color:#000000">%mean</span></code>/<code class="lstinline"><span style="color:#000000">%spot</span></code> hints would
+mean that calling a binary function with an atom for a sample
+would <span class="ec-lmri-10">relocate </span>the crash to the callsite, but to preserve <code class="lstinline"><span style="color:#000000">+mink</span></code>
+semantics we would need to know what the stack trace would
+look like in the callee at the place where the crash would occur
+in Nock.
+</p><!-- l. 286 --><p class="indent">   Knowing the shape, or more generally, the type of the
+product of a function would also enable some optimizations.
+Cell-checking code could be eliminated, for example, if we
+knew that a given function always returns atoms. For
+simplicity, however, this kind of analysis is not yet performed,
+and all functions are assumed to return nouns of unknown
+shape.
+   
+</p>
+   <h4 class="subsectionHead" id="fixedpoint-loop-for-sccs"><span class="titlemark">3.1   </span> <a id="x1-170003.1"></a>Fixed-point loop for SCCs</h4>
+<!-- l. 290 --><p class="noindent">I resolve the circularity of compiling functions in an <span class="small-caps">scc</span>
+by compiling an entire <span class="small-caps">scc</span> at a time, with a starting
+assumption that all functions are nullary, i.e. they use no
+data from their subjects. A worklist algorithm similar to
+the one used in the call graph construction is applied,
+where the initial worklist contains the entire <span class="small-caps">scc</span>, and
+members are re-queued if the data requirements of their
+immediate callees changed. On subsequent iterations the data
+requirements are joined with the previous value by taking
+their <span class="small-caps">msg</span> and emitting code to deconstruct the pessimized
+parts; this is necessary to prevent divergence of the data
+requirements. On achieving the fixed point the entire
+‘(map bell straight)‘ is returned, where <code class="lstinline"><span style="color:#000000">$bell</span></code> is the
+<span class="small-caps">ska</span>-function identifier and <code class="lstinline"><span style="color:#000000">straight</span></code> contains the <span class="small-caps">ssa</span>
+IR.
+</p><!-- l. 292 --><p class="indent">   On direct calls to jetted functions the supplied data usage
+is used—if a jet driver exists then the data requirements of a
+                                                
+                                                
+function are surely known. On calls within the current <span class="small-caps">scc</span> the
+latest best guess is used. On calls outside of the current <span class="small-caps">scc</span>
+the algorithm is invoked recursively.
+   
+</p>
+   <h4 class="subsectionHead" id="lazy-destinationdriven-code-generation"><span class="titlemark">3.2   </span> <a id="x1-180003.2"></a>(Lazy) destination-driven code generation</h4>
+<!-- l. 296 --><p class="noindent">The compilation follows the destination-driven code
+generation (<span class="small-caps">ddcg</span>) style (<a id="x1-18001"></a>Dybvig, Hieb, and Butler, 1990):
+the body of the <span class="small-caps">ska</span>-function is walked backwards or, in
+the case of tree-shaped Nock formulas, iterated from
+the inner subformulas outwards. Every Nock formula
+consumes a given <code class="lstinline"><span style="color:#000000">$goal</span></code>, describing what must happen
+to its product, and produces a data requirement that
+must be satisfied by the preceding code, or by the input
+arguments in the case of the top-level formula. The data
+requirement is described by the <code class="lstinline"><span style="color:#000000">$need-lazy</span></code> type in
+Listing <a href="#x1-18002r1">1<!-- tex4ht:ref: lst:need-lazy  --></a>.
+</p>
+   <!-- l. 298 -->
+                                                
+                                                
+   <figure class="float" id="x1-18002r1"><span id="the-needlazy-type-providing-the-data-requirement-for-nock-formula-code-generation"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 1:
+    </span><span class="content">The
+    $need-lazy
+    type
+    providing
+    the
+    data
+    requirement
+    for
+    Nock
+    formula
+    code
+    generation.</span></figcaption><!-- tex4ht:label?: x1-18002r3.2  --><pre class="lstlisting" id="listing-26"><span class="label"><a id="x1-18003r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">@uwoo - basic block index</span> 
+</span><span class="label"><a id="x1-18004r2"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">@uvre - SSA register index</span> 
+</span><span class="label"><a id="x1-18005r3"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">need</span> 
+</span><span class="label"><a id="x1-18006r4"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$~  </span><span class="ec-lmtt-9">[%none ~]</span> 
+</span><span class="label"><a id="x1-18007r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">cons case: something is needed from the head</span> 
+</span><span class="label"><a id="x1-18008r6"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">and/or the tail</span> 
+</span><span class="label"><a id="x1-18009r7"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$^  </span><span class="ec-lmtt-9">[p=need q=need]</span> 
+</span><span class="label"><a id="x1-18010r8"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$%</span>  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">nothing is needed from this noun</span> 
+</span><span class="label"><a id="x1-18011r9"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%none ~]</span> 
+</span><span class="label"><a id="x1-18012r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">this noun needs to be in </span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">r</span><span class="ts1-lmtti10-x-x-90">`</span> 
+</span><span class="label"><a id="x1-18013r11"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%this r=@uvre]</span> 
+</span><span class="label"><a id="x1-18014r12"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">both the entire noun is needed in </span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">r</span><span class="ts1-lmtti10-x-x-90">` </span><span class="ec-lmtti-10x-x-90">and</span> 
+</span><span class="label"><a id="x1-18015r13"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">something from its head and/or tail is</span> 
+</span><span class="label"><a id="x1-18016r14"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">also needed.</span> 
+</span><span class="label"><a id="x1-18017r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">if </span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">c</span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">: the downstream code asserts that</span> 
+</span><span class="label"><a id="x1-18018r16"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">r</span><span class="ts1-lmtti10-x-x-90">` </span><span class="ec-lmtti-10x-x-90">contains a cell</span> 
+</span><span class="label"><a id="x1-18019r17"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%both r=@uvre c=? h=need t=need]</span> 
+</span><span class="label"><a id="x1-18020r18"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span> 
+</span><span class="label"><a id="x1-18021r19"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">need-lazy</span> 
+</span><span class="label"><a id="x1-18022r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">  <span class="ec-lmtt-9">$+  need-lazy</span> 
+</span><span class="label"><a id="x1-18023r21"></a></span><span style="color:#000000">  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">recursive type</span> 
+</span><span class="label"><a id="x1-18024r22"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$;  |-</span> 
+</span><span class="label"><a id="x1-18025r23"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$:</span>  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">data requirements on this level of branching/</span> 
+</span><span class="label"><a id="x1-18026r24"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">stacktrace hints</span> 
+</span><span class="label"><a id="x1-18027r25"></a><span class="ec-lmr-5">25</span></span><span style="color:#000000">      <span class="ec-lmtt-9">sure=need</span> 
+</span><span class="label"><a id="x1-18028r26"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">data requirements of branches, with their</span> 
+</span><span class="label"><a id="x1-18029r27"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">basic block indices</span> 
+</span><span class="label"><a id="x1-18030r28"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">fork=(</span><span class="ec-lmtk-10x-x-90">list </span><span class="ec-lmtt-9">[y=[o=@uwoo laz=$] n=[o=@uwoo laz=$]])</span> 
+</span><span class="label"><a id="x1-18031r29"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">data requirements of blocks guarded with a</span> 
+</span><span class="label"><a id="x1-18032r30"></a><span class="ec-lmr-5">30</span></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">stacktrace-affecting hint, with their basic</span> 
+</span><span class="label"><a id="x1-18033r31"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">block indices</span> 
+</span><span class="label"><a id="x1-18034r32"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">bond=(</span><span class="ec-lmtk-10x-x-90">list </span><span class="ec-lmtt-9">[o=@uwoo laz=$])</span> 
+</span><span class="label"><a id="x1-18035r33"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 337 --><p class="indent">   A $goal, in turn, is one of three shapes (Listing <a href="#x1-18036r2">2<!-- tex4ht:ref: lst:goal  --></a>).
+</p>
+   <!-- l. 339 -->
+                                                
+                                                
+   <figure class="float" id="x1-18036r2"><span id="the-goal-type-providing-the-objective-for-nock-formula-code-generation"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 2:
+    </span><span class="content">The
+    $goal
+    type
+    providing
+    the
+    objective
+    for
+    Nock
+    formula
+    code
+    generation.</span></figcaption><!-- tex4ht:label?: x1-18036r3.2  --><pre class="lstlisting" id="listing-27"><span class="label"><a id="x1-18037r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$jmp: call given basic block with the arguments.</span> 
+</span><span class="label"><a id="x1-18038r2"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">Arguments replace phi nodes</span> 
+</span><span class="label"><a id="x1-18039r3"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">jmp  [args=(</span><span class="ec-lmtk-10x-x-90">list </span><span class="ec-lmtt-9">@uvre) there=@uwoo]</span> 
+</span><span class="label"><a id="x1-18040r4"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">goal</span> 
+</span><span class="label"><a id="x1-18041r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$%</span>  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">product is used as a conditional</span> 
+</span><span class="label"><a id="x1-18042r6"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%pick z=jmp o=jmp]</span> 
+</span><span class="label"><a id="x1-18043r7"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">tail position</span> 
+</span><span class="label"><a id="x1-18044r8"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%done ~]</span> 
+</span><span class="label"><a id="x1-18045r9"></a></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">put the product into registers of </span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">laz</span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">,</span> 
+</span><span class="label"><a id="x1-18046r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">then go to </span><span class="ts1-lmtti10-x-x-90">`</span><span class="ec-lmtti-10x-x-90">then</span><span class="ts1-lmtti10-x-x-90">`</span> 
+</span><span class="label"><a id="x1-18047r11"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[%next laz=need-lazy then=jmp]</span> 
+</span><span class="label"><a id="x1-18048r12"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 357 --><p class="indent">   The generated code is organized into <span class="ec-lmri-10">basic blocks</span>: a basic
+block contains a list of input arguments—always empty for
+blocks with a single predecessor—a straight-line list of <span class="small-caps">ssa</span>
+operations, and a control-flow operation that terminates the
+block. Basic block parameters were chosen instead of
+phi-nodes (the traditional <span class="small-caps">ssa</span> device for merging values that
+arrive from different branches), similar to the Cranelift IR
+approach (<a id="x1-18049"></a>Bytecode Alliance, 2024), to simplify codegen. At a
+merge point of two branches, the common successor block
+is “called” by the final blocks of the branches with the
+appropriate arguments.
+</p><!-- l. 359 --><p class="indent">   The starting goal is <code class="lstinline"><span style="color:#000000">[%done ~]</span></code>, as we are in the tail
+position. This goal enables tail-call optimization.
+</p><!-- l. 361 --><p class="indent">   Needs produced by consecutive computations, as in
+autocons, are unified into one by concatenating the lazy lists
+and emitting the code needed to copy nouns between registers.
+Direct calls produce needs by checking the hot state table, by
+using the latest best guess if the callee is in the current <span class="small-caps">scc</span>, or
+by recursively entering the compilation of the child <span class="small-caps">scc</span>.
+When a lazy need must be satisfied with a noun—either a
+Nock 1 literal or a Nock 2 or Nock 12 product—the lazy
+need is collapsed by walking the recursive data structure
+and emitting deconstructing code into the basic blocks
+attached to the nested lazy needs. Similarly, needs satisfied
+with Nock 3/4/5 that produce an atom are collapsed by
+emitting assertion code into the contained basic blocks. Hints
+with crash-relocation boundaries (<code class="lstinline"><span style="color:#000000">%mean</span></code> and <code class="lstinline"><span style="color:#000000">%spot</span></code>
+for Nock virtualization correctness, <code class="lstinline"><span style="color:#000000">%slog</span></code> for better
+UX) wrap the need by including it in the <code class="lstinline"><span style="color:#000000">bond</span></code> lazy
+list.
+</p><!-- l. 363 --><p class="indent">   Once the top-level formula’s lazy need is produced, it is
+collapsed into a simple <code class="lstinline"><span style="color:#000000">$need</span></code> by walking the nested lists
+inwards, propagating the top-level guaranteed argument usage,
+then collapsing the lists outwards. For branches, the <span class="small-caps">msg</span> of
+the yes- and no-branch requirements is constructed, with
+appropriate deconstructing code emitted into the relevant
+basic blocks before branches and crash relocation boundaries.
+Once the need is collapsed, a register-rewrite pass renumbers
+                                                
+                                                
+the registers so that the input registers are numbered 0 to <span class="mathjax-inline">\(n\)</span>,
+simplifying the calling convention. The final compilation
+product for a <span class="small-caps">ska</span>-function is then a register-less need
+recording the shape of the argument tree, an argument count,
+and a <code class="lstinline"><span style="color:#000000">(map @uwoo blob)</span></code>. Index 0 serves as the function’s
+entry point.
+   
+</p>
+   <h4 class="subsectionHead" id="two-modes-of-compilation"><span class="titlemark">3.3   </span> <a id="x1-190003.3"></a>Two modes of compilation</h4>
+<!-- l. 367 --><p class="noindent">To correctly compile a function that would crash if called with
+a subject of an incorrect shape, while also trying not to
+pessimize its compilation by making defensive assumptions, a
+function can be compiled twice: the first time to get the shape
+of its subject, and the second time to compile it for the subject
+as a single noun of an unknown shape. To prevent the call
+graph from partitioning into two disconnected parts, each
+function call in the pessimized version is wrapped with cell
+checks. That way the caller function tries to disassemble the
+arguments itself at the callsite, and if any of the cell checks
+fail, it falls back to calling the pessimized version of the
+callee. Thus the pessimized partition of the call graph
+will call into the optimized partition whenever possible,
+reducing the time the interpreter spends in the pessimized
+partition.<img alt="PIC" src="ustj-logo-.png" />
+   
+</p>
+   <h3 class="sectionHead" id="references"><a id="x1-20000"></a>References</h3>
+<!-- l. 371 --><p class="noindent">
+   </p><dl class="thebibliography"><dt class="thebibliography" id="X0-cranelift-ir">
+</dt><dd class="thebibliography" id="bib-1">
+                                                
+                                                
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_cranelift-ir"></a>Bytecode
+   Alliance
+   (2024).
+   <span class="ec-lmri-10">Cranelift
+   IR
+   Reference</span>.
+   Accessed:
+   2026-07-22.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/bytecodealliance/wasmtime/blob/2c72afc5ccd3fa385d83c6b144a3d305d94550d0/cranelift/docs/ir.md">https://github.com/bytecodealliance/wasmtime/blob/2c72afc5ccd3fa385d83c6b144a3d305d94550d0/cranelift/docs/ir.md</a>.
+   </p></dd><dt class="thebibliography" id="X0-cousot-constructive">
+</dt><dd class="thebibliography" id="bib-2">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_cousot-constructive"></a>Cousot, Patrick
+   and
+   Radhia Cousot
+   (1979).
+   “Constructive
+   Versions
+   of
+   Tarski’s
+   Fixed
+   Point
+   Theorems.”
+   In:
+   <span class="ec-lmri-10">Pacific
+   Journal
+   of
+   Mathematics</span>
+   82.1,
+   pp. 43–57.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.2140/pjm.1979.82.43">10.2140/pjm.1979.82.43</a>.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://www.di.ens.fr/~cousot/COUSOTpapers/Tarski-79.shtml">https://www.di.ens.fr/~cousot/COUSOTpapers/Tarski-79.shtml</a>.
+   </p></dd><dt class="thebibliography" id="X0-ska-afonin">
+</dt><dd class="thebibliography" id="bib-3">
+                                                
+                                                
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_ska-afonin"></a><code>~dozreg-toplud</code>, K. Afonin
+   (2026).
+   “Subject
+   Knowledge
+   Analysis.”
+   In:
+   <span class="ec-lmri-10">Urbit
+   Systems
+   Technical
+   Journal</span>
+   3.1.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://ustj.urbit.org/article/v03-i01/subject-knowledge-analysis">https://ustj.urbit.org/article/v03-i01/subject-knowledge-analysis</a>.
+   </p></dd><dt class="thebibliography" id="X0-ddcg">
+</dt><dd class="thebibliography" id="bib-4">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_ddcg"></a>Dybvig, R. Kent,
+   Robert Hieb,
+   and
+   Tom Butler
+   (1990).
+   <span class="ec-lmri-10">Destination-Driven
+   Code
+   Generation</span>.
+   Tech. rep.
+   302.
+   Indiana
+   University
+   Computer
+   Science
+   Department.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://bernsteinbear.com/assets/img/ddcg.pdf">https://bernsteinbear.com/assets/img/ddcg.pdf</a>.
+   </p></dd><dt class="thebibliography" id="X0-chaos-iter">
+</dt><dd class="thebibliography" id="bib-5">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_chaos-iter"></a>Geser, Alfons
+   et al.
+   (1994).
+                                                
+                                                
+   <span class="ec-lmri-10">Chaotic
+   Fixed
+   Point
+   Iterations</span>.
+   Tech. rep.
+   <span class="small-caps">mip</span>-9403.
+   Passau,
+   Germany:
+   Universität
+   Passau,
+   Fakultät
+   für
+   Mathematik
+   und
+   Informatik.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://www.swt-bamberg.de/luettgen/publications/pdf/Passau-MIP-9403.pdf">https://www.swt-bamberg.de/luettgen/publications/pdf/Passau-MIP-9403.pdf</a>.
+   </p></dd><dt class="thebibliography" id="X0-kruskal-tree">
+</dt><dd class="thebibliography" id="bib-6">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_kruskal-tree"></a>Kruskal, Joseph B.
+   (1960).
+   “Well-Quasi-Ordering,
+   the
+   Tree
+   Theorem,
+   and
+   Vázsonyi’s
+   Conjecture.”
+   In:
+   <span class="ec-lmri-10">Transactions
+   of
+   the
+   American
+   Mathematical
+   Society</span>
+   95.2,
+   pp. 210–225.
+   <span class="small-caps">doi</span>:
+                                                
+                                                
+   <a href="https://doi.org/10.1090/S0002-9947-1960-0111704-1">10.1090/S0002-9947-1960-0111704-1</a>.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://www.ams.org/journals/tran/1960-095-02/S0002-9947-1960-0111704-1/S0002-9947-1960-0111704-1.pdf">https://www.ams.org/journals/tran/1960-095-02/S0002-9947-1960-0111704-1/S0002-9947-1960-0111704-1.pdf</a>.
+   </p></dd><dt class="thebibliography" id="X0-leuschel-he">
+</dt><dd class="thebibliography" id="bib-7">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_leuschel-he"></a>Leuschel, Michael
+   (2002).
+   “Homeomorphic
+   Embedding
+   for
+   Online
+   Termination
+   of
+   Symbolic
+   Methods.”
+   In:
+   <span class="ec-lmri-10">The
+   Essence
+   of
+   Computation:
+   Complexity,
+   Analysis,
+   Transformation</span>.
+   Vol. 2566.
+   Lecture
+   Notes
+   in
+   Computer
+   Science.
+   Springer,
+   pp. 379–403.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://eprints.soton.ac.uk/257252/">https://eprints.soton.ac.uk/257252/</a>.
+   </p></dd><dt class="thebibliography" id="X0-nock4-spec">
+</dt><dd class="thebibliography" id="bib-8">
+   <!-- l. 371 --><p class="noindent"><a id="cite.0_nock4-spec"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2013)
+                                                
+                                                
+   “Nock
+   4K”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://docs.urbit.org/language/nock/reference/definition">https://docs.urbit.org/language/nock/reference/definition</a>
+   (visited
+   on
+   ~2024.2.20).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+<div class="footnote-text">
+  <!-- l. 77 --><p class="indent">     <span class="footnote-mark"><a id="x2-2004x1"></a><a id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">See <code>~dozreg-toplud</code>, “Subject Knowledge Analysis,” </span><span class="ec-lmri-8">Urbit
+  Systems Technical Journal </span><span class="ec-lmr-8">volume 3 issue 1, pp. 43–67.</span><a href="#x1-2003f1">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 87 --><p class="indent">     <span class="footnote-mark"><a id="x3-4002x2.1"></a><a id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span class="ec-lmr-8">See  </span><a href="https://www.youtube.com/watch?v=z24zWdHfVfI"><span class="ec-lmr-8"><code>~ritpub-sipsyl</code> and <code>~master-morzod</code>, “Subject Knowledge
+  Analysis”, Urbit Lake Summit, ~2024.6.19</span></a><span class="ec-lmr-8">.</span><a href="#x1-4001f2">⤴</a></p></div>
+</body> 
+</html>
