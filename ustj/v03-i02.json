@@ -10,7 +10,9 @@
     },
     {
       "author": ["lagrev-nocfep"],
-      "title": "Representing the SKI Combinator Calculus in the Nock Instruction Set Architecture"
+      "title": "Representing the SKI Combinator Calculus in the Nock Instruction Set Architecture",
+      "pdf": "/ustj/v03-i02/mss1.pdf",
+      "html": "/ustj/v03-i02/mss1.html"
     },
     {
       "author": ["wicdev-wisryt"],

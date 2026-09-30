@@ -1,0 +1,1007 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en"> 
+<head><title>Representing the SKI Combinator Calculus in the Nock
+Instruction Set Architecture</title> 
+<meta charset="utf-8" /> 
+<meta content="TeX4ht (https://tug.org/tex4ht/)" name="generator" /> 
+<meta content="width=device-width,initial-scale=1" name="viewport" /> 
+<link href="/latex.css" rel="stylesheet" type="text/css" /> 
+<meta content="mss.tex" name="src" /> 
+<script>window.MathJax = { tex: { tags: "ams", packages: {"[+]": ["html"]}, macros: { mathand: "\\wedge", mathor: "\\vee", textsc: ["\\style{font-variant:small-caps}{\\text{#1}}", 1] } } }; </script> 
+<script async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>  
+</head><body id="caption-"><span id="caption-2"></span><span id="caption-1"></span>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Representing the SKI
+Combinator Calculus in the
+Nock Instruction Set
+Architecture</h2>
+ <div class="author"><span class="ec-lmbx-12">N. E. Davis <code>~lagrev-nocfep</code></span>
+<br />           <span class="ec-lmbx-12">ZeroAttest</span></div><br />
+<div class="date"></div>
+   </div>
+   <section class="abstract" role="doc-abstract"> 
+<h3 class="abstracttitle">
+<span class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!-- l. 45 --><p class="noindent"><span class="ec-lmr-9">The  Nock  </span><span class="small-caps">isa  </span><span class="ec-lmr-9">opcodes  2,  1,  and  0  have  been
+     said to correspond to the combinators S, K, and
+     I  in  the  SKI  combinator  calculus.  We  give  a
+     four-rule  compiler  from  arbitrary  SKI  terms  to
+     Nock formulas using only opcodes 0, 1, and 2, prove
+     it  correct  under  a  fixed  application  convention,
+     and exercise it on the usual worked examples: the
+                                                
+                                                
+     identity  laws,  Church  booleans,  the  B,  C,  and
+     W combinators, and Church numerals performing
+     real  arithmetic.  The  compiled  output  is  verified
+     against an independent Nock 4K interpreter. The
+     construction is a constructive proof that the Nock
+     fragment  of  0,  1,  2  opcodes  is  Turing-complete.
+     This fragment lacks certain properties, marking a
+     boundary beyond which the fragment is genuinely
+     insufficient and additional tools are required.</span>
+</p>
+</section>
+   
+   <h3 class="likesectionHead" id="contents"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc">1 <a href="#introduction" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc">2 <a href="#preliminaries" id="QQ2-1-3">Preliminaries</a></span>
+<br />   <span class="sectionToc">3 <a href="#combinator-formulas" id="QQ2-1-4">Combinator Formulas</a></span>
+<br />   <span class="subsectionToc">3.1 <a href="#i-identity" id="QQ2-1-5">I identity</a></span>
+<br />   <span class="subsectionToc">3.2 <a href="#k-constant" id="QQ2-1-6">K constant</a></span>
+<br />   <span class="subsectionToc">3.3 <a href="#s-substitution" id="QQ2-1-7">S substitution</a></span>
+<br />   <span class="subsectionToc">3.4 <a href="#b-composition" id="QQ2-1-8">B composition</a></span>
+<br />   <span class="subsectionToc">3.5 <a href="#c-transposition" id="QQ2-1-9">C transposition</a></span>
+<br />   <span class="subsectionToc">3.6 <a href="#w-duplication" id="QQ2-1-10">W duplication</a></span>
+<br />   <span class="subsectionToc">3.7 <a href="#commentary" id="QQ2-1-11">Commentary</a></span>
+<br />   <span class="sectionToc">4 <a href="#compilation-of-the-homomorphism" id="QQ2-1-13">Compilation of the Homomorphism</a></span>
+<br />   <span class="sectionToc">5 <a href="#worked-examples" id="QQ2-1-14">Worked Examples</a></span>
+<br />   <span class="subsectionToc">5.1 <a href="#identity-laws" id="QQ2-1-15">Identity laws</a></span>
+<br />   <span class="subsectionToc">5.2 <a href="#church-booleans" id="QQ2-1-22">Church booleans</a></span>
+<br />   <span class="subsectionToc">5.3 <a href="#the-b-c-w-combinators" id="QQ2-1-23">The B, C, W combinators</a></span>
+<br />   <span class="subsectionToc">5.4 <a href="#church-numerals-and-arithmetic" id="QQ2-1-24">Church numerals and arithmetic</a></span>
+<br />   <span class="sectionToc">6 <a href="#validation" id="QQ2-1-26">Validation</a></span>
+<br />   <span class="sectionToc">7 <a href="#cost" id="QQ2-1-27">Cost</a></span>
+<br />   <span class="sectionToc">8 <a href="#limitations" id="QQ2-1-29">Limitations</a></span>
+<br />   <span class="sectionToc">9 <a href="#conditionals" id="QQ2-1-30">Conditionals</a></span>
+<br />   <span class="sectionToc">10 <a href="#conclusion" id="QQ2-1-31">Conclusion</a></span>
+<br />   <span class="sectionToc"><a href="#references" id="QQ2-1-32">References</a></span>
+                                                
+                                                
+   </div>
+   
+   <h3 class="sectionHead" id="introduction"><span class="titlemark">1   </span> <a id="x1-20001"></a>Introduction</h3>
+<!-- l. 56 --><p class="noindent">The Nock instruction set architecture is a combinator
+calculus sufficient to represent all computable functions. It
+has been a longstanding temptation to draw a direct
+analogy from the Nock <span class="small-caps">isa</span> to the SKI combinator calculus.
+This analogy claims that the Nock opcodes 2, 1, and 0
+correspond to the combinators S, K, and I respectively. The
+analogy is usually stated informally, e.g. “[there are] some
+subtle differences to Nock’s expression of S as opcode 2
+that we will elide as being fundamentally similar, but
+perhaps worthy of its own monograph” (<a id="x1-2001"></a><code>~lagrev-nocfep</code>
+and <code>~sorreg-namtyv</code>, 2025). We here deliver upon that
+promise and convert Martian folk knowledge into a concrete
+demonstration.
+</p><!-- l. 58 --><p class="indent">   Combinator calculi build all computation from a
+handful of variable-free operators; the SKI system does
+it with three (<a id="x1-2002"></a>Curry and Feys, 1958), which is neither
+unique nor minimal but balances convenience with
+economy.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-2003f1"></a> 
+Put briefly, the S combinator (“substitute”) takes three
+arguments and applies the first to the third, then applies the
+second to the third, and finally applies the result of the first
+application to the result of the second. The K combinator
+(“<span class="ec-lmri-10">k</span>onstant”) takes two arguments and returns the first,
+discarding the second. The I combinator (“identity”)
+takes one argument and returns it unchanged. The SKI
+system is Turing-complete, meaning that any computable
+function can be expressed as a combination of these three
+operators.
+</p>
+                                                
+                                                
+   <!-- l. 60 -->
+<pre class="lstlisting" id="listing-1"><span class="label"><a id="x1-2006r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">x y z </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">x z (y z)</span> 
+</span><span class="label"><a id="x1-2007r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">K</span></span><span style="color:#000000"> <span class="ec-lmtt-9">x y   </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">x</span> 
+</span><span class="label"><a id="x1-2008r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">I</span></span><span style="color:#000000"> <span class="ec-lmtt-9">x     </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">x</span></span></pre>
+<!-- l. 66 --><p class="indent">   The Nock <span class="small-caps">isa</span> is also Turing-complete, and it is natural to
+ask whether the SKI combinators can be represented in Nock.
+The answer is yes, but some details are subtle. The analogy
+between Nock opcodes and SKI combinators is not a simple
+one-to-one compilation procedure, but a homomorphism that
+preserves the structure of the computation.
+</p><!-- l. 68 --><p class="indent">   A straightforward reading of Nock opcode 0 yielding I is
+uncontroversial, as <code class="lstinline"><span style="color:#000000">[0 1]</span></code> trivially returns identity. The
+reading of opcode 1 yielding K is also straightforward, as
+<code class="lstinline"><span style="color:#000000">[1 x]</span></code> returns a constant function that discards its argument
+(subject). The reading of opcode 2 yielding S is more subtle,
+as it requires a fixed convention for how the compiled
+combinator receives its arguments. The “subtle differences” of
+<a id="x1-2009"></a><code>~lagrev-nocfep</code> and <code>~sorreg-namtyv</code>’s elision matter more
+than they appear. The opcode-to-combinator analogy is
+not a compilation procedure. SKI terms are curried and
+higher-order: combinators are routinely partially applied, and
+a combinator may be passed as an argument to another
+combinator. A symbol-for-symbol substitution—writing 2 for
+S, 1 for K, and 0 for I, with appropriate transposition of
+arguments into subject and formula—produces nothing
+runnable the moment S has fewer than three arguments, which
+is almost always. What is needed is a <span class="ec-lmri-10">homomorphism</span>: a
+translation under which Nock application of compiled terms
+mirrors SKI reduction, with a fixed convention for how a
+compiled combinator receives its arguments.
+</p><!-- l. 70 --><p class="indent">   We supply such a homomorphism as four rules with three
+small Nock formulas yielding the SKI combinators. The
+remainder of this article consists of worked examples,
+mechanical validation, a cost analysis, and an accounting of
+the limitations.
+   
+                                                
+                                                
+</p>
+   <h3 class="sectionHead" id="preliminaries"><span class="titlemark">2   </span> <a id="x1-30002"></a>Preliminaries</h3>
+<!-- l. 75 --><p class="noindent">We assume Nock 4K. Evaluation is the function
+<code class="lstinline"><span style="color:#000000">*[subject formula]</span></code>. We require only three opcodes from
+the Nock <span class="small-caps">isa</span>:
+</p>
+   <!-- l. 77 -->
+<pre class="lstlisting" id="listing-5"><span class="label"><a id="x1-3001r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">slot: fetch the noun at tree address b</span> 
+</span><span class="label"><a id="x1-3002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">a</span></span><span style="color:#000000"> <span class="ec-lmtt-9">0 b]    -&gt;  /[b a]</span> 
+</span><span class="label"><a id="x1-3003r3"></a></span> 
+<span class="label"><a id="x1-3004r4"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">quote: return b unchanged</span> 
+</span><span class="label"><a id="x1-3005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">a</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1 b]    -&gt;  b</span> 
+</span><span class="label"><a id="x1-3006r6"></a></span> 
+<span class="label"><a id="x1-3007r7"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">eval: compute a subject and a formula, then run</span> 
+</span><span class="label"><a id="x1-3008r8"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">a</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 b c]  -&gt;  *[*[a b] *[a c]]</span></span></pre>
+<!-- l. 88 --><p class="noindent">plus the structural distribution (autocons) rule, which fires
+whenever a formula’s head is itself a cell:
+</p>
+   <!-- l. 91 -->
+<pre class="lstlisting" id="listing-6"><span class="label"><a id="x1-3009r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">a</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[b c] d]  -&gt;  [*[a b c] *[a d]]</span></span></pre>
+<!-- l. 95 --><p class="noindent">This distribution rule is not an opcode but the structural
+behavior of <code class="lstinline"><span style="color:#000000">*</span></code> when a formula’s head is a cell; it is Nock’s only
+means to construct a cell from evaluated components.
+Basically every combinator formula in this paper has a cell
+head and so depends on it; the construction therefore uses
+opcodes 0, 1, 2 together with distribution.
+</p><!-- l. 98 --><p class="indent">   Slot address 1 denotes the whole subject, thus <code class="lstinline"><span style="color:#000000">*[a 0 1]</span></code>
+reduces to <code class="lstinline"><span style="color:#000000">a</span></code>.
+</p><!-- l. 100 --><p class="indent">   A <span class="ec-lmri-10">value </span>is a Nock formula that consumes its argument as
+the <span class="ec-lmri-10">subject</span>. To apply a value <code class="lstinline"><span style="color:#000000">v</span></code> to an argument <code class="lstinline"><span style="color:#000000">x</span></code>, we evaluate
+<code class="lstinline"><span style="color:#000000">apply(v, x)  ==  *[x v]</span></code>.
+</p><!-- l. 103 --><p class="noindent">This operative convention inverts the lambda-calculus
+argument order, because in Nock the function is the formula
+and the argument is the subject.
+</p><!-- l. 106 --><p class="indent">   Prior art exists for SKI using the Nock <span class="small-caps">isa</span> carried out by
+<a id="x1-3010"></a>~hex (2024) in Racket and miniKanren; his strategy for S and
+I anticipated and are identical to ours, but his formulation of
+K relied on Nock opcode 8, as well as opcodes 3 and 6 for
+adaptively partial application, which is out of scope for our
+argument. (We resolve the tension of partial application via
+autocons rather than opcode 8.) ~hex permitted the outer
+entry point nock(E) to accept an expression E written in a
+                                                
+                                                
+“Nock Intermediate Representation” syntax, that is, with <code class="lstinline"><span style="color:#000000">*</span></code>
+annotations in front of sub-expressions to force an evaluation
+order. The Racket code also has a second, concatenative
+encoding (I = [0 1], K = [0 3], S = [[0 2] [[1 2] [0 3]]])
+for which all arguments sit in the subject as a stack.
+This is elegant and concise but, as he notes, it cannot
+curry.<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a id="x1-3011f2"></a> 
+Finally, ~hex also introduced a formulation of the Z
+combinator as the strict fixed point for eagerly evaluated
+languages.
+   
+</p>
+   <h3 class="sectionHead" id="combinator-formulas"><span class="titlemark">3   </span> <a id="x1-40003"></a>Combinator Formulas</h3>
+<!-- l. 111 --><p class="noindent">Under the convention of Section <a href="#preliminaries">2<!-- tex4ht:ref: sxn:preliminaries  --></a>, each SKI combinator is a
+closed Nock formula. We give each, then verify its defining law
+by reduction.
+   
+</p>
+   <h4 class="subsectionHead" id="i-identity"><span class="titlemark">3.1   </span> <a id="x1-50003.1"></a>I identity</h4>
+<!-- l. 115 --><p class="noindent"><code class="lstinline"><span style="color:#000000">I x = x</span></code> requires <code class="lstinline"><span style="color:#000000">*[x I] = x</span></code>, which is slot 1:
+</p>
+   <!-- l. 117 -->
+<pre class="lstlisting" id="listing-16"><span class="label"><a id="x1-5001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">I</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[0 1]</span></span></pre>
+   
+   <h4 class="subsectionHead" id="k-constant"><span class="titlemark">3.2   </span> <a id="x1-60003.2"></a>K constant</h4>
+<!-- l. 123 --><p class="noindent">Applying <code class="lstinline"><span style="color:#000000">K</span></code> to <code class="lstinline"><span style="color:#000000">x</span></code> must yield a value that ignores its next
+argument and returns its value. Thus <code class="lstinline"><span style="color:#000000">K x y = x</span></code> requires
+                                                
+                                                
+<code class="lstinline"><span style="color:#000000">*[x K] = [1 x]</span></code>, which is built from subject <code class="lstinline"><span style="color:#000000">x</span></code> by
+autocons:
+</p>
+   <!-- l. 125 -->
+<pre class="lstlisting" id="listing-22"><span class="label"><a id="x1-6001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">K</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 1] [0 1]]</span></span></pre>
+<!-- l. 129 --><p class="indent">   For example,
+</p>
+   <!-- l. 131 -->
+<pre class="lstlisting" id="listing-23"><span class="label"><a id="x1-6002r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">x</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[x [1 1]] *[x [0 1]]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 x]</span></span></pre>
+<!-- l. 135 --><p class="noindent">Then for any <code class="lstinline"><span style="color:#000000">y</span></code>, <code class="lstinline"><span style="color:#000000">*[y [1 x]] = x</span></code>, so <code class="lstinline"><span style="color:#000000">K x y = x</span></code> holds.
+   
+</p>
+   <h4 class="subsectionHead" id="s-substitution"><span class="titlemark">3.3   </span> <a id="x1-70003.3"></a>S substitution</h4>
+<!-- l. 140 --><p class="noindent">Substitution states <code class="lstinline"><span style="color:#000000">S x y z = (x z)(y z)</span></code>. The combinator
+accumulates <code class="lstinline"><span style="color:#000000">x</span></code>, then <code class="lstinline"><span style="color:#000000">y</span></code>, then fires on <code class="lstinline"><span style="color:#000000">z</span></code>. We construct it
+bottom-up.
+</p><!-- l. 142 --><p class="indent">   When the fully-applied <code class="lstinline"><span style="color:#000000">S x y</span></code> finally receives <code class="lstinline"><span style="color:#000000">z</span></code> as subject,
+it must produce <code class="lstinline"><span style="color:#000000">(x z)(y z)</span></code>. Under the convention,
+<code class="lstinline"><span style="color:#000000">x z = *[z x]</span></code> and <code class="lstinline"><span style="color:#000000">y z = *[z y]</span></code>, and the outer
+application is <code class="lstinline"><span style="color:#000000">*[ *[z y]  *[z x] ]</span></code>. That is precisely
+opcode 2 with subject <code class="lstinline"><span style="color:#000000">z</span></code>, formula-<code class="lstinline"><span style="color:#000000">b</span></code> equal to <code class="lstinline"><span style="color:#000000">y</span></code>, formula-<code class="lstinline"><span style="color:#000000">c</span></code>
+equal to <code class="lstinline"><span style="color:#000000">x</span></code>:
+</p>
+   <!-- l. 144 -->
+<pre class="lstlisting" id="listing-42"><span class="label"><a id="x1-7001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">x y </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 y x]</span> 
+</span><span class="label"><a id="x1-7002r2"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">*[z [2 y x]] = *[*[z y] *[z x]] = (x z)(y z)</span></span></pre>
+<!-- l. 149 --><p class="noindent">Working back one step, applying <code class="lstinline"><span style="color:#000000">S x</span></code> to <code class="lstinline"><span style="color:#000000">y</span></code> (subject <code class="lstinline"><span style="color:#000000">y</span></code>,
+constant <code class="lstinline"><span style="color:#000000">x</span></code>) must build the noun <code class="lstinline"><span style="color:#000000">[2 y x]</span></code>:
+</p>
+   <!-- l. 152 -->
+<pre class="lstlisting" id="listing-48"><span class="label"><a id="x1-7003r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">x </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 2] [0 1] [1 x]]</span></span></pre>
+                                                
+                                                
+<!-- l. 156 --><p class="noindent">We check that <code class="lstinline"><span style="color:#000000">*[y S x] = [2 y x]</span></code>, since <code class="lstinline"><span style="color:#000000">*[y [1 2]] = 2</span></code>,
+<code class="lstinline"><span style="color:#000000">*[y [0 1]] = y</span></code>, and <code class="lstinline"><span style="color:#000000">*[y [1 x]] = x</span></code>. Working
+back the final step, applying <code class="lstinline"><span style="color:#000000">S</span></code> to <code class="lstinline"><span style="color:#000000">x</span></code> (subject <code class="lstinline"><span style="color:#000000">x</span></code>) must
+build <code class="lstinline"><span style="color:#000000">S x</span></code>; the first two parts are constants and the third,
+<code class="lstinline"><span style="color:#000000">[1 x]</span></code>, is built from <code class="lstinline"><span style="color:#000000">x</span></code> by the same autocons trick used for
+<code class="lstinline"><span style="color:#000000">K</span></code>:
+</p>
+   <!-- l. 159 -->
+<pre class="lstlisting" id="listing-60"><span class="label"><a id="x1-7004r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 [1 2]] [1 [0 1]] [[1 1] [0 1]]]</span></span></pre>
+<!-- l. 163 --><p class="noindent">We check the evaluation: <code class="lstinline"><span style="color:#000000">*[x S] = [[1 2] [0 1] [1 x]] = S x</span></code>.
+   
+</p>
+   <h4 class="subsectionHead" id="b-composition"><span class="titlemark">3.4   </span> <a id="x1-80003.4"></a>B composition</h4>
+<!-- l. 168 --><p class="noindent">Any other combinator can be reached by elaborating its
+lambda definition to SKI and compiling, but the result is
+large. A named combinator is better derived directly, by the
+same method as the previous subsection: it becomes one
+builder layer per argument. The innermost layer is the opcode
+2 application skeleton that fires on the final argument; each
+enclosing layer is an autocons that captures one argument and
+embeds it. We here derive B, C, and W; a similar methodology
+could be used for much of Smullyan’s aviary (<a id="x1-8001"></a>Smullyan,
+1994).
+</p><!-- l. 170 --><p class="indent">   For <code class="lstinline"><span style="color:#000000">B f g x = f (g x)</span></code>, the firing step computes <code class="lstinline"><span style="color:#000000">f</span></code>
+applied to <code class="lstinline"><span style="color:#000000">g x</span></code>, i.e. <code class="lstinline"><span style="color:#000000">*[*[x g] f]</span></code>, which is opcode 2 with <code class="lstinline"><span style="color:#000000">g</span></code>
+in the formula-<code class="lstinline"><span style="color:#000000">b</span></code> slot and <code class="lstinline"><span style="color:#000000">f</span></code> quoted in the formula-<code class="lstinline"><span style="color:#000000">c</span></code> slot;
+capturing <code class="lstinline"><span style="color:#000000">g</span></code> then <code class="lstinline"><span style="color:#000000">f</span></code> gives:
+</p>
+   <!-- l. 172 -->
+<pre class="lstlisting" id="listing-72"><span class="label"><a id="x1-8002r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">*[x B f g] = *[*[x g] f] = f (g x)</span> 
+</span><span class="label"><a id="x1-8003r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">B</span></span><span style="color:#000000"> <span class="ec-lmtt-9">f g </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 g [1 f]]</span> 
+</span><span class="label"><a id="x1-8004r3"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">*[g B f]   = [2 g [1 f]]</span> 
+</span><span class="label"><a id="x1-8005r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">B</span></span><span style="color:#000000"> <span class="ec-lmtt-9">f   </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 2] [0 1] [1 [1 f]]]</span> 
+</span><span class="label"><a id="x1-8006r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8007r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">B</span></span><span style="color:#000000">     <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 [1 2]] [1 [0 1]] [[1 1] [[1 1] [0 1]]]]</span></span></pre>
+   
+                                                
+                                                
+   <h4 class="subsectionHead" id="c-transposition"><span class="titlemark">3.5   </span> <a id="x1-90003.5"></a>C transposition</h4>
+<!-- l. 183 --><p class="noindent">The same procedure yields C (flip):
+</p>
+   <!-- l. 185 -->
+<pre class="lstlisting" id="listing-73"><span class="label"><a id="x1-9001r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">f x y -&gt; f y x</span> 
+</span><span class="label"><a id="x1-9002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">C</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 1 2] [1 [1 1] 0 1] [1 1] 0 1]</span></span></pre>
+   
+   <h4 class="subsectionHead" id="w-duplication"><span class="titlemark">3.6   </span> <a id="x1-100003.6"></a>W duplication</h4>
+<!-- l. 192 --><p class="noindent">Likewise, W (duplicate):
+</p>
+   <!-- l. 194 -->
+<pre class="lstlisting" id="listing-74"><span class="label"><a id="x1-10001r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">f x   -&gt; f x x</span> 
+</span><span class="label"><a id="x1-10002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">W</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 2] [1 0 1] 0 1]</span></span></pre>
+   
+   <h4 class="subsectionHead" id="commentary"><span class="titlemark">3.7   </span> <a id="x1-110003.7"></a>Commentary</h4>
+<!-- l. 201 --><p class="noindent">The one subtlety is how a captured argument is embedded,
+which is dictated by how the combinator uses that argument.
+If the argument is applied to a computed value (as B’s <code class="lstinline"><span style="color:#000000">f</span></code> is
+applied to <code class="lstinline"><span style="color:#000000">g x</span></code>), it occupies a formula slot and is embedded
+quoted, <code class="lstinline"><span style="color:#000000">[1 f]</span></code>. If it is applied to the current subject (as
+W’s <code class="lstinline"><span style="color:#000000">f</span></code> is applied to <code class="lstinline"><span style="color:#000000">x</span></code>) it must pass through as the live
+formula, embedded by slot, <code class="lstinline"><span style="color:#000000">[0 1]</span></code>. Quote where the
+argument is data; slot where the argument is the active
+function.
+</p><!-- l. 203 --><p class="indent">   Notably, the value forms of B, C, and W use only Nock
+opcodes 0 and 1. The opcode 2 appears only in the formula
+they assemble at application time (<code class="lstinline"><span style="color:#000000">[2 g [1 f]]</span></code>), carried as
+quoted data. The combinators are pure construction; the
+application machinery is the structure they emit. Among the
+basis only S carries a 2 in its own body, because it performs
+two applications at once.
+                                                
+                                                
+</p><!-- l. 205 --><p class="indent">   The size payoff over bracket abstraction is large (cell
+counts; see Section <a href="#cost">7<!-- tex4ht:ref: sxn:cost  --></a> for method), as recorded in Table <a href="#compiled-nock-cell-counts-for-various-ski-terms-using-direct-derivation-rather-than-bracket-abstraction-compare-to-tableref-tblcost">1<!-- tex4ht:ref: tbl:direct  --></a>.
+</p>
+   <div class="table">
+                                                
+                                                
+<!-- l. 208 --><p class="indent">   </p><figure class="float" id="x1-11001r1"><span id="compiled-nock-cell-counts-for-various-ski-terms-using-direct-derivation-rather-than-bracket-abstraction-compare-to-tableref-tblcost"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 1: </span><span class="content">Compiled Nock cell counts for various SKI terms,
+using  direct  derivation  rather  than  bracket  abstraction;
+compare to Table <a href="#compiled-nock-cell-counts-for-various-ski-terms-these-numbers-are-via-bracket-abstraction-compare-to-tableref-tbldirect">3<!-- tex4ht:ref: tbl:cost  --></a>.
+</span></figcaption><!-- tex4ht:label?: x1-11001r1  -->
+<div class="tabular"> <table class="tabular" id="TBL-2"><colgroup id="TBL-2-1g"><col id="TBL-2-1" /><col id="TBL-2-2" /><col id="TBL-2-3" /><col id="TBL-2-4" /></colgroup><tr class="hline"><td></td><td></td><td></td><td></td></tr><tr class="hline"><td></td><td></td><td></td><td></td></tr><tr id="TBL-2-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-2-1-1" style="white-space:nowrap; text-align:left;"> Combinator  </td><td class="td11" id="TBL-2-1-2" style="white-space:nowrap; text-align:center;"> Direct  </td><td class="td11" id="TBL-2-1-3" style="white-space:nowrap; text-align:center;"> Via SKI  </td><td class="td11" id="TBL-2-1-4" style="white-space:nowrap; text-align:center;"> Ratio  </td></tr><tr class="hline"><td></td><td></td><td></td><td></td></tr><tr id="TBL-2-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-2-2-1" style="white-space:nowrap; text-align:left;"> B </td><td class="td11" id="TBL-2-2-2" style="white-space:nowrap; text-align:center;"> 11 </td><td class="td11" id="TBL-2-2-3" style="white-space:nowrap; text-align:center;"> 208 </td><td class="td11" id="TBL-2-2-4" style="white-space:nowrap; text-align:center;"> <span class="mathjax-inline">\(\approx \)</span>19×</td>
+</tr><tr id="TBL-2-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-2-3-1" style="white-space:nowrap; text-align:left;"> C                </td><td class="td11" id="TBL-2-3-2" style="white-space:nowrap; text-align:center;">   11    </td><td class="td11" id="TBL-2-3-3" style="white-space:nowrap; text-align:center;">   208     </td><td class="td11" id="TBL-2-3-4" style="white-space:nowrap; text-align:center;">  <span class="mathjax-inline">\(\approx \)</span>19×   </td>
+</tr><tr id="TBL-2-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-2-4-1" style="white-space:nowrap; text-align:left;"> W               </td><td class="td11" id="TBL-2-4-2" style="white-space:nowrap; text-align:center;">   6     </td><td class="td11" id="TBL-2-4-3" style="white-space:nowrap; text-align:center;">   130     </td><td class="td11" id="TBL-2-4-4" style="white-space:nowrap; text-align:center;">  <span class="mathjax-inline">\(\approx \)</span>22×   </td>
+</tr></table>                                 </div>
+                                                
+                                                
+   </figure>
+   </div>
+<!-- l. 221 --><p class="indent">   The two forms are extensionally identical on every input
+tested. For any combinator known by name, direct derivation
+is preferred and the abstraction tax is avoided entirely;
+bracket abstraction remains the general fallback for arbitrary
+lambda terms.
+   
+</p>
+   <h3 class="sectionHead" id="compilation-of-the-homomorphism"><span class="titlemark">4   </span> <a id="x1-120004"></a>Compilation of the Homomorphism</h3>
+<!-- l. 225 --><p class="noindent">Let <code class="lstinline"><span style="color:#000000">[[t]]</span></code> denote a <span class="ec-lmri-10">closed </span>Nock formula whose product is the
+value of the SKI term <code class="lstinline"><span style="color:#000000">t</span></code>. The compiler consists of four rules
+from bracket abstraction to Nock <span class="small-caps">isa</span>:
+</p>
+   <!-- l. 228 -->
+<pre class="lstlisting" id="listing-84"><span class="label"><a id="x1-12001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"><span class="ec-lmtt-9">]]</span></span><span style="color:#000000">   <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 S]   </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 [1 [1 2]] [1 [0 1]] [[1 1] [0 1]]]</span> 
+</span><span class="label"><a id="x1-12002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span class="ec-lmtt-9">K</span></span><span style="color:#000000"><span class="ec-lmtt-9">]]</span></span><span style="color:#000000">   <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 K]   </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 [1 1] [0 1]]</span> 
+</span><span class="label"><a id="x1-12003r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span class="ec-lmtt-9">I</span></span><span style="color:#000000"><span class="ec-lmtt-9">]]</span></span><span style="color:#000000">   <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 I]   </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 0 1]</span> 
+</span><span class="label"><a id="x1-12004r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span class="ec-lmtt-9">A</span></span><span style="color:#000000"> <span class="ec-lmtt-9">B]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 [[B]] [[A]]]</span></span></pre>
+<!-- l. 235 --><p class="noindent">with <code class="lstinline"><span style="color:#000000">S</span></code>, <code class="lstinline"><span style="color:#000000">K</span></code>, <code class="lstinline"><span style="color:#000000">I</span></code> the formulas of Section <a href="#combinator-formulas">3<!-- tex4ht:ref: sxn:combinators  --></a>. The combinators are
+<span class="ec-lmri-10">quoted </span>so that <code class="lstinline"><span style="color:#000000">[[·]]</span></code> always denotes a value-producing
+computation; application is opcode 2 applied to the two
+compiled operands. <code class="lstinline"><span style="color:#000000">[[t]]</span></code> produces the value of <code class="lstinline"><span style="color:#000000">t</span></code>; it is
+closed, so the naïve approach of <code class="lstinline"><span style="color:#000000">*[a [[t]]]</span></code> yields <code class="lstinline"><span style="color:#000000">val(t)</span></code>
+for any subject <code class="lstinline"><span style="color:#000000">a</span></code> and is not yet an application. To apply <code class="lstinline"><span style="color:#000000">t</span></code> to
+Nock-noun arguments <code class="lstinline"><span style="color:#000000">a[0] ... a[n]</span></code>, fold them onto the
+value, each quoted, by opcode 2:
+</p>
+   <!-- l. 239 -->
+<pre class="lstlisting" id="listing-96"><span class="label"><a id="x1-12005r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">run</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">t;</span></span><span style="color:#000000"> <span class="ec-lmtt-9">a[1] ... a[n]) </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">*[0 F[n]]</span></span></pre>
+<!-- l. 243 --><p class="noindent">where <code class="lstinline"><span style="color:#000000">F[0] = [[t]]</span></code>, <code class="lstinline"><span style="color:#000000">F[i] = [2 [1 a[i]] F[i-1]]</span></code>.
+Each layer <code class="lstinline"><span style="color:#000000">*[· [2 [1 a[i]] F]]</span></code> reduces to <code class="lstinline"><span style="color:#000000">*[a[i] val]</span></code>,
+the value applied to <code class="lstinline"><span style="color:#000000">a[i]</span></code> as subject. Throughout the remainder
+of this paper, we will write <code class="lstinline"><span style="color:#000000">t a[1] ... a[n] = r</span></code> as
+shorthand for <code class="lstinline"><span style="color:#000000">run(t; a[1] ... a[n]) = r</span></code>. The
+                                                
+                                                
+arguments are Nock nouns, not SKI terms: atoms in the
+identity and boolean laws, real formulas such as +/INC in the
+arithmetic examples. A tap must not fire until its formula is a
+concrete noun.
+</p><!-- l. 246 --><p class="indent">   Why quote, and why this order? Evaluating
+<code class="lstinline"><span style="color:#000000">[[A B]] = [2 [[B]] [[A]]]</span></code> against any subject <code class="lstinline"><span style="color:#000000">s</span></code> gives
+<code class="lstinline"><span style="color:#000000">*[*[s [[B]]] *[s [[A]]]]</span></code>. Because <code class="lstinline"><span style="color:#000000">[[B]]</span></code> and <code class="lstinline"><span style="color:#000000">[[A]]</span></code>
+are closed, they ignore <code class="lstinline"><span style="color:#000000">s</span></code> and reduce to the values <code class="lstinline"><span style="color:#000000">val(B)</span></code> and
+<code class="lstinline"><span style="color:#000000">val(A)</span></code>. The result is <code class="lstinline"><span style="color:#000000">*[val(B) val(A)]</span></code>—apply value
+<code class="lstinline"><span style="color:#000000">val(A)</span></code> to argument <code class="lstinline"><span style="color:#000000">val(B)</span></code>, i.e. <code class="lstinline"><span style="color:#000000">A</span></code> applied to <code class="lstinline"><span style="color:#000000">B</span></code>. The
+operands are reduced to values <span class="ec-lmri-10">before </span>application, which
+is what makes nested applications compose correctly;
+quoting a sub-application rather than evaluating it produces
+an “off-by-one error” (a residual <code class="lstinline"><span style="color:#000000">K</span></code> where the value was
+expected).
+</p><!-- l. 252 --><p class="indent">   Correctness is demonstrated practically by induction
+on term structure. For application, the rule computes
+<code class="lstinline"><span style="color:#000000">apply(val(A), val(B))</span></code>, and by the induction hypothesis
+<code class="lstinline"><span style="color:#000000">val(A)</span></code>, <code class="lstinline"><span style="color:#000000">val(B)</span></code> are the values of <code class="lstinline"><span style="color:#000000">A</span></code>, <code class="lstinline"><span style="color:#000000">B</span></code>; by §2 this is the
+value of <code class="lstinline"><span style="color:#000000">A B</span></code>. The translation is therefore a homomorphism
+from SKI application to Nock evaluation, under the
+call-by-value strategy forced by opcode 2’s eager semantics
+(see Section <a href="#limitations">8<!-- tex4ht:ref: sxn:limitations  --></a>).
+   
+</p>
+   <h3 class="sectionHead" id="worked-examples"><span class="titlemark">5   </span> <a id="x1-130005"></a>Worked Examples</h3>
+<!-- l. 257 --><p class="noindent">All terms below are written in lambda form for legibility,
+elaborated to SKI by standard bracket abstraction (<a id="x1-13001"></a>Kiselyov,
+2018), then compiled by the Nock SKI compiler and run. The
+results are the products actually computed.
+</p><!-- l. 259 --><p class="indent">   A script which resolves the SKI terms to Nock formulas,
+runs them in a Nock 4K interpreter, and checks the results is
+available at  <a href="https://github.com/sigilante/skitrace">sigilante/skitrace</a>.
+   
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead" id="identity-laws"><span class="titlemark">5.1   </span> <a id="x1-140005.1"></a>Identity laws</h4>
+<!-- l. 263 --><p class="noindent">From canonical SKI, we anticipate the following identity laws
+to hold true:
+</p>
+   <!-- l. 265 -->
+<pre class="lstlisting" id="listing-124"><span class="label"><a id="x1-14001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">I</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42         </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">42</span> 
+</span><span class="label"><a id="x1-14002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K K 42     </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">42</span>          </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">S K K</span> </span><span class="ec-lmtt-9">→</span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">I</span> 
+</span><span class="label"><a id="x1-14003r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K S 42     </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">42</span>          </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">S K *</span> </span><span class="ec-lmtt-9">→</span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">I</span></span></pre>
+<!-- l. 271 --><p class="noindent">The evaluation of <code class="lstinline"><span style="color:#000000">S K K 42</span></code>, worked in Nock SKI, is shown
+in Listings <a href="#x1-14004r1">1<!-- tex4ht:ref: lst:identity-law-1  --></a>, <a href="#x1-14018r2">2<!-- tex4ht:ref: lst:identity-law-2  --></a>, and <a href="#x1-14059r3">3<!-- tex4ht:ref: lst:identity-law-3  --></a>. The process is mechanical and
+discursive. The evaluation of <code class="lstinline"><span style="color:#000000">S K S 42</span></code> is similar and left as
+a proverbial exercise to the reader.
+</p>
+   <!-- l. 274 -->
+<p><a id="x1-14004r1"></a>
+</p><figcaption class="caption"><span class="id">Listing 1:
+    </span><span class="content">Compilation
+    expansion
+    of
+    S
+    K
+    K
+    42.</span></figcaption><!-- tex4ht:label?: x1-14004r5.1  --><pre class="lstlisting" id="listing-127"><span class="label"><a id="x1-14005r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[[S K K]]]</span> 
+</span><span class="label"><a id="x1-14006r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [[K]] [[S K]]]</span> 
+</span><span class="label"><a id="x1-14007r3"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">[[A B]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 [[B]] [[A]]]</span> 
+</span><span class="label"><a id="x1-14008r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 K] [[S K]]]</span> 
+</span><span class="label"><a id="x1-14009r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">                        <span class="ec-lmtt-9">[[K]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 K]</span> 
+</span><span class="label"><a id="x1-14010r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 K] 2 [[K]] [[S]]]</span> 
+</span><span class="label"><a id="x1-14011r7"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">[[A B]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 [[B]] [[A]]]</span> 
+</span><span class="label"><a id="x1-14012r8"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 K] 2 [1 K] [[S]]]</span> 
+</span><span class="label"><a id="x1-14013r9"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">[[K]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 K]</span> 
+</span><span class="label"><a id="x1-14014r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 K] 2 [1 K] 1 S]</span> 
+</span><span class="label"><a id="x1-14015r11"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">[[S]] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[1 S]</span> 
+</span><span class="label"><a id="x1-14016r12"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 [1 1] 0 1] 2 [1 [1 1] 0 1] 1 [1 1 2] [1 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14017r13"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">substitute S,K,I formulas</span></span></pre>
+   <!-- l. 290 -->
+<p><a id="x1-14018r2"></a>
+</p><figcaption class="caption"><span class="id">Listing 2:
+    </span><span class="content">Evaluation
+    of
+    S
+    K
+    K
+    42.</span></figcaption><!-- tex4ht:label?: x1-14018r5.1  --><pre class="lstlisting" id="listing-128"><span class="label"><a id="x1-14019r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [1 [1 1] 0 1] 2 [1 [1 1] 0 1] 1 [1 1 2] [1 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14020r2"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 2  *[a 2 b c] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">*[*[a b] *[a c]]</span> 
+</span><span class="label"><a id="x1-14021r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1 [1 1] 0 1] *[42 2 [1 [1 1] 0 1] 1 [1 1 2] [1 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14022r4"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14023r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] *[42 2 [1 [1 1] 0 1] 1 [1 1 2] [1 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14024r6"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 2  *[a 2 b c] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">*[*[a b] *[a c]]</span> 
+</span><span class="label"><a id="x1-14025r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] *[*[42 1 [1 1] 0 1] *[42 1 [1 1 2] [1 0 1] [1 1] 0 1]]]</span> 
+</span><span class="label"><a id="x1-14026r8"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14027r9"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] *[[[1 1] 0 1] *[42 1 [1 1 2] [1 0 1] [1 1] 0 1]]]</span> 
+</span><span class="label"><a id="x1-14028r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14029r11"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] *[[[1 1] 0 1] [1 1 2] [1 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14030r12"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14031r13"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] *[[[1 1] 0 1] 1 1 2] *[[[1 1] 0 1] [1 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14032r14"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14033r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] *[[[1 1] 0 1] [1 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14034r16"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14035r17"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] *[[[1 1] 0 1] 1 0 1] *[[[1 1] 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14036r18"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14037r19"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] [0 1] *[[[1 1] 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14038r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14039r21"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] [0 1] *[[[1 1] 0 1] 1 1] *[[[1 1] 0 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14040r22"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14041r23"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] [0 1] 1 *[[[1 1] 0 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14042r24"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 0  *[a 0 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">/[b a]</span> 
+</span><span class="label"><a id="x1-14043r25"></a><span class="ec-lmr-5">25</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] [0 1] 1 /[1 [[1 1] 0 1]]]</span> 
+</span><span class="label"><a id="x1-14044r26"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">/[1 a] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">a</span> 
+</span><span class="label"><a id="x1-14045r27"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] [1 2] [0 1] 1 [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14046r28"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14047r29"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1] 0 1] 1 2] *[[[1 1] 0 1] [0 1] 1 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14048r30"></a><span class="ec-lmr-5">30</span></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14049r31"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">*[[[1 1] 0 1] [0 1] 1 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14050r32"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14051r33"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">*[[[1 1] 0 1] 0 1] *[[[1 1] 0 1] 1 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14052r34"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 0  *[a 0 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">/[b a]</span> 
+</span><span class="label"><a id="x1-14053r35"></a><span class="ec-lmr-5">35</span></span><span style="color:#000000"><span class="ec-lmtt-9">[2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">/[1 [[1 1] 0 1]] *[[[1 1] 0 1] 1 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14054r36"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">/[1 a] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">a</span> 
+</span><span class="label"><a id="x1-14055r37"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[[1 1] 0 1] *[[[1 1] 0 1] 1 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14056r38"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14057r39"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[[1 1] 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14058r40"></a><span class="ec-lmr-5">40</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">=</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[2 K K], the identity combinator</span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">s value)</span></span></pre>
+   <!-- l. 333 -->
+<p><a id="x1-14059r3"></a>
+                                                
+                                                
+</p><figcaption class="caption"><span class="id">Listing 3:
+    </span><span class="content">Application
+    of
+    S
+    K
+    K
+    42.</span></figcaption><!-- tex4ht:label?: x1-14059r5.1  --><pre class="lstlisting" id="listing-129"><span class="label"><a id="x1-14060r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">#</span></span><span style="color:#000000"> <span class="ec-lmtt-9">applying val(S K K) to 42   ( *[42 val(S K K)] )</span> 
+</span><span class="label"><a id="x1-14061r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">val</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">S</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K K) </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 [[1 1] 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14062r3"></a></span> 
+<span class="label"><a id="x1-14063r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">#</span></span><span style="color:#000000"> <span class="ec-lmtt-9">evaluation of *[42 [2 [[1 1] 0 1] [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14064r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 [[1 1] 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-14065r6"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 2  *[a 2 b c] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">*[*[a b] *[a c]]</span> 
+</span><span class="label"><a id="x1-14066r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[1 1] 0 1] *[42 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14067r8"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14068r9"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[42</span></span><span style="color:#000000"> <span class="ec-lmtt-9">1 1] *[42 0 1]] *[42 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14069r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14070r11"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">*[42 0 1]] *[42 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14071r12"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 0  *[a 0 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">/[b a]</span> 
+</span><span class="label"><a id="x1-14072r13"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">/[1 42]] *[42 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14073r14"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">/[1 a] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">a</span> 
+</span><span class="label"><a id="x1-14074r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42] *[42 [1 1] 0 1]]</span> 
+</span><span class="label"><a id="x1-14075r16"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">cons  *[a [b c] d] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[*[a b c] *[a d]]</span> 
+</span><span class="label"><a id="x1-14076r17"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42] *[42 1 1] *[42 0 1]]</span> 
+</span><span class="label"><a id="x1-14077r18"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14078r19"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42] 1 *[42 0 1]]</span> 
+</span><span class="label"><a id="x1-14079r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 0  *[a 0 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">/[b a]</span> 
+</span><span class="label"><a id="x1-14080r21"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42] 1 /[1 42]]</span> 
+</span><span class="label"><a id="x1-14081r22"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">/[1 a] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">a</span> 
+</span><span class="label"><a id="x1-14082r23"></a></span><span style="color:#000000"><span class="ec-lmtt-9">*</span></span><span style="color:#000000"><span class="ec-lmtt-9">[[1</span></span><span style="color:#000000"> <span class="ec-lmtt-9">42] 1 42]</span> 
+</span><span class="label"><a id="x1-14083r24"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">Nock 1  *[a 1 b] </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">b</span> 
+</span><span class="label"><a id="x1-14084r25"></a><span class="ec-lmr-5">25</span></span><span style="color:#000000"><span class="ec-lmtt-9">42</span></span></pre>
+   
+   <h4 class="subsectionHead" id="church-booleans"><span class="titlemark">5.2   </span> <a id="x1-150005.2"></a>Church booleans</h4>
+<!-- l. 363 --><p class="noindent">Conventional Nock utilizes atoms, but SKI combinators are pure
+construction; we therefore must utilize Church-style booleans
+and numerals within the particular three-opcode discipline we
+follow here. Thus while this section is demonstrative of SKI in
+Nock, it evades the usual Nock idioms and in particular the
+economy afforded by the introduction of opcodes 3, 4, and
+5.
+</p><!-- l. 365 --><p class="indent">   A Church boolean is a two-argument function that selects
+one of its arguments. Because the combinators are pure
+construction, the truth values are instead represented as
+combinator sequences. With <code class="lstinline"><span style="color:#000000">TRUE = K</span></code> and <code class="lstinline"><span style="color:#000000">FALSE = K I</span></code>:
+</p>
+   <!-- l. 367 -->
+<pre class="lstlisting" id="listing-132"><span class="label"><a id="x1-15001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">TRUE</span></span><span style="color:#000000"> <span class="ec-lmtt-9">p q</span> 
+</span><span class="label"><a id="x1-15002r2"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">K p q</span> 
+</span><span class="label"><a id="x1-15003r3"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">p</span> 
+</span><span class="label"><a id="x1-15004r4"></a></span> 
+<span class="label"><a id="x1-15005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">FALSE</span></span><span style="color:#000000"> <span class="ec-lmtt-9">p q</span> 
+</span><span class="label"><a id="x1-15006r6"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">K I p q</span> 
+</span><span class="label"><a id="x1-15007r7"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">I q</span> 
+</span><span class="label"><a id="x1-15008r8"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">q</span> 
+</span><span class="label"><a id="x1-15009r9"></a></span> 
+<span class="label"><a id="x1-15010r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000"><span class="ec-lmtt-9">TRUE</span></span><span style="color:#000000">  <span class="ec-lmtt-9">7 8 </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">7</span> 
+</span><span class="label"><a id="x1-15011r11"></a></span><span style="color:#000000"><span class="ec-lmtt-9">FALSE</span></span><span style="color:#000000"> <span class="ec-lmtt-9">7 8 </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">8</span></span></pre>
+<!-- l. 381 --><p class="noindent">These are the canonical encodings from SKI praxis; here we
+probe with atom arguments because neither combinator
+applies its arguments as functions.
+   
+</p>
+   <h4 class="subsectionHead" id="the-b-c-w-combinators"><span class="titlemark">5.3   </span> <a id="x1-160005.3"></a>The B, C, W combinators</h4>
+<!-- l. 386 --><p class="noindent">Elaborated from their defining lambda terms:
+</p>
+   <!-- l. 388 -->
+                                                
+                                                
+<pre class="lstlisting" id="listing-133"><span class="label"><a id="x1-16001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">B</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">=  </span><span class="ec-lmtt-9">f g x. f (g x)    compose</span> 
+</span><span class="label"><a id="x1-16002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">C</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">=  </span><span class="ec-lmtt-9">f x y. f y x      transpose</span> 
+</span><span class="label"><a id="x1-16003r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">W</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">=  </span><span class="ec-lmtt-9">f x.   f x x      duplicate</span></span></pre>
+<!-- l. 394 --><p class="indent">   Driving B with a real Nock increment <code class="lstinline"><span style="color:#000000">inc = [4 0 1]</span></code> as
+payload, and C, W with atoms:
+</p>
+   <!-- l. 396 -->
+<pre class="lstlisting" id="listing-135"><span class="label"><a id="x1-16004r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">B</span></span><span style="color:#000000"> <span class="ec-lmtt-9">inc inc 7  </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">9</span>       </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">inc (inc 7)</span> 
+</span><span class="label"><a id="x1-16005r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">C</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K 7 8      </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">8</span>       </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">K 8 7 = 8</span> 
+</span><span class="label"><a id="x1-16006r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">W</span></span><span style="color:#000000"> <span class="ec-lmtt-9">K 7        </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">7</span>       </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">K 7 7 = 7</span></span></pre>
+<!-- l. 402 --><p class="noindent">These exercise three-variable abstraction and argument
+duplication. Note that the compiled SKI scaffolding remains pure
+0, 1, 2; the only 4 in B’s run is the external increment supplied as
+data.<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a id="x1-16007f3"></a> 
+   
+</p>
+   <h4 class="subsectionHead" id="church-numerals-and-arithmetic"><span class="titlemark">5.4   </span> <a id="x1-170005.4"></a>Church numerals and arithmetic</h4>
+<!-- l. 407 --><p class="noindent">A Church numeral <code class="lstinline"><span style="color:#000000">church n</span></code> applies its first argument <code class="lstinline"><span style="color:#000000">n</span></code> times to
+its second. Numerals are built and incremented entirely within the
+fragment.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a id="x1-17001f4"></a> 
+Examples of Church numerals and their Nock SKI
+representations are given in Table <a href="#church-numerals-and-their-nock-ski-representations-the-numeral-church-n-is-a-value-formula-that-applies-its-first-argument-n-times-to-its-second-the-decoding-l-a-n-r-b-n-inc-produces-the-nock-atom-corresponding-to-the-numeral">2<!-- tex4ht:ref: tbl:church-numerals  --></a>. At this point, we will
+revert in part to the lambda calculus notation for clarity, but
+the underlying Nock SKI formulas are always available and are
+used in the actual evaluation. The successor function is
+defined by the usual combinator formula:
+                                                
+                                                
+</p>
+   <!-- l. 411 -->
+<pre class="lstlisting" id="listing-144"><span class="label"><a id="x1-17003r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">church</span></span><span style="color:#000000"> <span class="ec-lmtt-9">n </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">f.x. f^n x</span> 
+</span><span class="label"><a id="x1-17004r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">succ</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">n.f.x. f (n f x)</span> 
+</span><span class="label"><a id="x1-17005r3"></a></span> 
+<span class="label"><a id="x1-17006r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">succ</span></span><span style="color:#000000"> <span class="ec-lmtt-9">(church 0) </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">church 1</span> 
+</span><span class="label"><a id="x1-17007r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">succ</span></span><span style="color:#000000"> <span class="ec-lmtt-9">(church 1) </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">church 2</span></span></pre>
+<!-- l. 419 --><p class="noindent">In explicit Nock SKI form, the Church numeral successor
+function becomes:
+</p>
+   <!-- l. 422 -->
+<pre class="lstlisting" id="listing-145"><span class="label"><a id="x1-17008r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">succ</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 1 2] [0 1] 1 [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17009r2"></a></span> 
+<span class="label"><a id="x1-17010r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">church</span></span><span style="color:#000000"> <span class="ec-lmtt-9">2 </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 2] [[1 2] [1 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17011r4"></a></span><span style="color:#000000">           <span class="ec-lmtt-9">[1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17012r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"> <span class="ec-lmr-9">church 2  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">2</span> 
+</span><span class="label"><a id="x1-17013r6"></a></span><span style="color:#000000"><span class="ec-lmr-9">succ</span></span><span style="color:#000000"> <span class="ec-lmr-9">(church 2) </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">[[1 2] [[1 2] [[1 2] [1 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17014r7"></a></span><span style="color:#000000">                   <span class="ec-lmr-9">[1 1] 0 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17015r8"></a></span><span style="color:#000000"> <span class="ec-lmr-9">succ (church 2)  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">3</span></span></pre>
+<!-- l. 433 --><p class="indent">   Arithmetic over the Church numerals is defined by the
+usual combinator formulas:
+</p>
+   <!-- l. 435 -->
+<pre class="lstlisting" id="listing-146"><span class="label"><a id="x1-17016r1"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">in Church numerals</span> 
+</span><span class="label"><a id="x1-17017r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">plus</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">m.n.f.x. m f (n f x)</span> 
+</span><span class="label"><a id="x1-17018r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">mult</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">m.n.f. m (n f)</span> 
+</span><span class="label"><a id="x1-17019r4"></a></span> 
+<span class="label"><a id="x1-17020r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">alternatively</span> 
+</span><span class="label"><a id="x1-17021r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">plus</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">m n. m succ n</span> 
+</span><span class="label"><a id="x1-17022r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">mult</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">m n. m (plus n) (church 0)</span> 
+</span><span class="label"><a id="x1-17023r8"></a></span> 
+<span class="label"><a id="x1-17024r9"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">compiled in Nock SKI form</span> 
+</span><span class="label"><a id="x1-17025r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000"><span class="ec-lmtt-9">plus</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 1 1 2] [1 0 1] [1 1 1 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17026r11"></a></span><span style="color:#000000"><span class="ec-lmtt-9">mult</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[[1 1 2] [1 0 1] [1 1 1] [1 1] 0 1]</span> 
+</span><span class="label"><a id="x1-17027r12"></a></span> 
+<span class="label"><a id="x1-17028r13"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">in Nock decoding</span> 
+</span><span class="label"><a id="x1-17029r14"></a></span><span style="color:#000000"> <span class="ec-lmr-9">church 0  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">0</span> 
+</span><span class="label"><a id="x1-17030r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000"> <span class="ec-lmr-9">church 3  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">3</span> 
+</span><span class="label"><a id="x1-17031r16"></a></span><span style="color:#000000"> <span class="ec-lmr-9">church 5  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">5</span> 
+</span><span class="label"><a id="x1-17032r17"></a></span><span style="color:#000000"> <span class="ec-lmr-9">plus 2 3  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">5</span> 
+</span><span class="label"><a id="x1-17033r18"></a></span><span style="color:#000000"> <span class="ec-lmr-9">mult 3 4  </span><span class="ec-lmbx-9">= </span><span class="ec-lmr-9">12</span></span></pre>
+                                                
+                                                
+<!-- l. 456 --><p class="indent">   </p><figure class="float" id="x1-17034r2"><span id="church-numerals-and-their-nock-ski-representations-the-numeral-church-n-is-a-value-formula-that-applies-its-first-argument-n-times-to-its-second-the-decoding-l-a-n-r-b-n-inc-produces-the-nock-atom-corresponding-to-the-numeral"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 2:             </span><span class="content">Church             numerals             and
+their Nock SKI representations. The numeral church n is a
+value (formula) that applies its first argument n times to
+its second. The decoding  n  = n inc 0 produces the Nock
+atom corresponding to the numeral.
+</span></figcaption><!-- tex4ht:label?: x1-17034r2  -->
+<div class="tabular"> <table class="tabular" id="TBL-3"><colgroup id="TBL-3-1g"><col id="TBL-3-1" /><col id="TBL-3-2" /><col id="TBL-3-3" /></colgroup><tr class="hline"><td></td><td></td><td></td></tr><tr class="hline"><td></td><td></td><td></td></tr><tr id="TBL-3-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-1-1" style="white-space:nowrap; text-align:center;"> n  </td><td class="td11" id="TBL-3-1-2" style="white-space:nowrap; text-align:center;"> ⌊church n⌋  </td><td class="td11" id="TBL-3-1-3" style="white-space:nowrap; text-align:right;">                                                  church n  </td>
+</tr><tr class="hline"><td></td><td></td><td></td></tr><tr id="TBL-3-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-2-1" style="white-space:nowrap; text-align:center;">  0  </td><td class="td11" id="TBL-3-2-2" style="white-space:nowrap; text-align:center;">     0        </td><td class="td11" id="TBL-3-2-3" style="white-space:nowrap; text-align:right;">                                                    [1 0 1]  </td>
+</tr><tr id="TBL-3-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-3-1" style="white-space:nowrap; text-align:center;">  1  </td><td class="td11" id="TBL-3-3-2" style="white-space:nowrap; text-align:center;">     1        </td><td class="td11" id="TBL-3-3-3" style="white-space:nowrap; text-align:right;">                                       [[1 2] [1 0 1] [1 1] 0 1]  </td>
+</tr><tr id="TBL-3-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-4-1" style="white-space:nowrap; text-align:center;">  2  </td><td class="td11" id="TBL-3-4-2" style="white-space:nowrap; text-align:center;">     2        </td><td class="td11" id="TBL-3-4-3" style="white-space:nowrap; text-align:right;">                           [[1 2] [[1 2] [1 0 1] [1 1] 0 1] [1 1] 0 1]  </td>
+</tr><tr id="TBL-3-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-5-1" style="white-space:nowrap; text-align:center;">  3  </td><td class="td11" id="TBL-3-5-2" style="white-space:nowrap; text-align:center;">     3        </td><td class="td11" id="TBL-3-5-3" style="white-space:nowrap; text-align:right;">              [[1 2] [[1 2] [[1 2] [1 0 1] [1 1] 0 1] [1 1] 0 1] [1 1] 0 1]  </td>
+</tr><tr id="TBL-3-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-6-1" style="white-space:nowrap; text-align:center;">  4  </td><td class="td11" id="TBL-3-6-2" style="white-space:nowrap; text-align:center;">     4        </td><td class="td11" id="TBL-3-6-3" style="white-space:nowrap; text-align:right;"> [[1 2] [[1 2] [[1 2] [[1 2] [1 0 1] [1 1] 0 1] [1 1] 0 1] [1 1] 0 1] [1 1] 0 1]  </td>
+</tr><tr id="TBL-3-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-3-7-1" style="white-space:nowrap; text-align:center;">  5  </td><td class="td11" id="TBL-3-7-2" style="white-space:nowrap; text-align:center;">     5        </td><td class="td11" id="TBL-3-7-3" style="white-space:nowrap; text-align:right;">   <table class="tabular" id="TBL-4"><colgroup id="TBL-4-1g"><col id="TBL-4-1" /></colgroup><tr id="TBL-4-1-" style="vertical-align:baseline;"><td class="td00" id="TBL-4-1-1" style="white-space:nowrap; text-align:right;">[[1 2] [[1 2] [[1 2] [[1 2] [[1 2] [1 0 1][1 1] 0 1] [1 1] 0 1] [1 1] 0 1]</td> </tr><tr id="TBL-4-2-" style="vertical-align:baseline;"><td class="td00" id="TBL-4-2-1" style="white-space:nowrap; text-align:right;"> [1 1] 0 1] [1 1] 0 1]</td>
+    </tr></table>                                                                                        </td>
+</tr><tr class="hline"><td></td><td></td><td></td></tr></table>                                                                          </div>
+                                                
+                                                
+   </figure>
+   
+   <h3 class="sectionHead" id="validation"><span class="titlemark">6   </span> <a id="x1-180006"></a>Validation</h3>
+<!-- l. 476 --><p class="noindent">Any valid Nock <span class="small-caps">isa</span> interpreter should correctly evaluate the
+examples above after the SKI compiler stage has been applied.
+We utilized both a simple interpreter with only opcodes 0, 1, and
+2,<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a id="x1-18001f5"></a> 
+and the pinochle interpreter with the full Nock
+<span class="small-caps">isa</span>.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a id="x1-18003f6"></a> 
+Results were identical (and correct) in both cases. The examples
+are not exhaustive, but they exercise the combinators and the
+compiler in a variety of ways, including nested applications,
+argument duplication, and Church-style numerals and
+booleans.
+   
+</p>
+   <h3 class="sectionHead" id="cost"><span class="titlemark">7   </span> <a id="x1-190007"></a>Cost</h3>
+<!-- l. 481 --><p class="noindent">The transformation is faithful but not frugal. Measuring SKI
+leaf count against compiled Nock cell count shows the extreme
+verbosity of the latter. Table <a href="#compiled-nock-cell-counts-for-various-ski-terms-these-numbers-are-via-bracket-abstraction-compare-to-tableref-tbldirect">3<!-- tex4ht:ref: tbl:cost  --></a> shows the compiled size of
+several terms, including the Church numerals and the named
+combinators.
+</p>
+   <div class="table">
+                                                
+                                                
+<!-- l. 484 --><p class="indent">   </p><figure class="float" id="x1-19001r3"><span id="compiled-nock-cell-counts-for-various-ski-terms-these-numbers-are-via-bracket-abstraction-compare-to-tableref-tbldirect"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 3: </span><span class="content">Compiled Nock cell counts for various SKI terms.
+These numbers are via bracket abstraction; compare to
+Table <a href="#compiled-nock-cell-counts-for-various-ski-terms-using-direct-derivation-rather-than-bracket-abstraction-compare-to-tableref-tblcost">1<!-- tex4ht:ref: tbl:direct  --></a>.
+</span></figcaption><!-- tex4ht:label?: x1-19001r3  -->
+<div class="tabular"> <table class="tabular" id="TBL-5"><colgroup id="TBL-5-1g"><col id="TBL-5-1" /><col id="TBL-5-2" /><col id="TBL-5-3" /></colgroup><tr class="hline"><td></td><td></td><td></td></tr><tr class="hline"><td></td><td></td><td></td></tr><tr id="TBL-5-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-1-1" style="white-space:nowrap; text-align:left;"> Term      </td><td class="td11" id="TBL-5-1-2" style="white-space:nowrap; text-align:center;"> SKI leaves  </td><td class="td11" id="TBL-5-1-3" style="white-space:nowrap; text-align:center;"> Nock cells  </td></tr><tr class="hline"><td></td><td></td><td></td></tr><tr id="TBL-5-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-2-1" style="white-space:nowrap; text-align:left;"> I </td><td class="td11" id="TBL-5-2-2" style="white-space:nowrap; text-align:center;"> 1 </td><td class="td11" id="TBL-5-2-3" style="white-space:nowrap; text-align:center;"> 2</td>
+</tr><tr id="TBL-5-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-3-1" style="white-space:nowrap; text-align:left;"> S K K      </td><td class="td11" id="TBL-5-3-2" style="white-space:nowrap; text-align:center;">     3        </td><td class="td11" id="TBL-5-3-3" style="white-space:nowrap; text-align:center;">    22       </td></tr><tr id="TBL-5-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-4-1" style="white-space:nowrap; text-align:left;"> W </td><td class="td11" id="TBL-5-4-2" style="white-space:nowrap; text-align:center;"> 16 </td><td class="td11" id="TBL-5-4-3" style="white-space:nowrap; text-align:center;"> 130</td>
+</tr><tr id="TBL-5-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-5-1" style="white-space:nowrap; text-align:left;"> B            </td><td class="td11" id="TBL-5-5-2" style="white-space:nowrap; text-align:center;">     25       </td><td class="td11" id="TBL-5-5-3" style="white-space:nowrap; text-align:center;">    208      </td>
+</tr><tr id="TBL-5-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-6-1" style="white-space:nowrap; text-align:left;"> C            </td><td class="td11" id="TBL-5-6-2" style="white-space:nowrap; text-align:center;">     25       </td><td class="td11" id="TBL-5-6-3" style="white-space:nowrap; text-align:center;">    208      </td>
+</tr><tr id="TBL-5-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-7-1" style="white-space:nowrap; text-align:left;"> church 2   </td><td class="td11" id="TBL-5-7-2" style="white-space:nowrap; text-align:center;">     76       </td><td class="td11" id="TBL-5-7-3" style="white-space:nowrap; text-align:center;">    640      </td>
+</tr><tr id="TBL-5-8-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-8-1" style="white-space:nowrap; text-align:left;"> church 5   </td><td class="td11" id="TBL-5-8-2" style="white-space:nowrap; text-align:center;">    187      </td><td class="td11" id="TBL-5-8-3" style="white-space:nowrap; text-align:center;">   1588     </td>
+</tr><tr id="TBL-5-9-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-9-1" style="white-space:nowrap; text-align:left;"> church 10  </td><td class="td11" id="TBL-5-9-2" style="white-space:nowrap; text-align:center;">    372      </td><td class="td11" id="TBL-5-9-3" style="white-space:nowrap; text-align:center;">   3168     </td>
+</tr><tr class="hline"><td></td><td></td><td></td></tr></table>                                    </div>
+                                                
+                                                
+   </figure>
+   </div>
+<!-- l. 503 --><p class="indent">   Compiled Nock runs roughly <span class="mathjax-inline">\(8.5\times \)</span> the SKI leaf count (a
+constant per combinator plus the opcode 2 application
+wrapper) and the SKI itself is already exponential in the worst
+case under naive bracket abstraction. The natural number ten
+compiles to a 3168-cell formula as a Church numeral.
+These figures are static, before reduction; at runtime
+S duplicates its argument into both branches with no
+sharing, so evaluation cost compounds on representation
+cost.
+</p><!-- l. 505 --><p class="indent">   Named combinators escape this blow-up before the
+compiler stage: derived directly rather than routed through
+bracket abstraction, B, C, and W are roughly twenty
+times smaller. The cost above is the price of the <span class="ec-lmri-10">general</span>
+compiler on arbitrary terms, not a property of the targets
+themselves.
+   
+</p>
+   <h3 class="sectionHead" id="limitations"><span class="titlemark">8   </span> <a id="x1-200008"></a>Limitations</h3>
+<!-- l. 511 --><p class="noindent">Three properties bound the construction. Each is a real
+boundary, not a deficiency to be patched away within the
+fragment.
+</p><!-- l. 513 --><p class="indent">
+     </p><ol class="enumerate1">
+<li class="enumerate" id="x1-20002x1"><strong>Call-by-value.</strong> Opcode  2  is  eager:  <code class="lstinline"><span style="color:#000000">*[a 2 b c]</span></code>
+     fully reduces <code class="lstinline"><span style="color:#000000">*[a b]</span></code> and <code class="lstinline"><span style="color:#000000">*[a c]</span></code> before applying.
+     The  compilation  is  therefore  applicative-order.  A
+     term whose normal form depends on discarding a
+     divergent subterm will loop. Concretely, with   = S
+     I I and   =   , normal-order K I   reduces to <code class="lstinline"><span style="color:#000000">I</span></code>, but
+     the compiled form diverges. For a compilation target
+     this is usually acceptable; for a faithful lazy surface it
+                                                
+                                                
+     is not, and recovering normal order requires explicit
+     thunking, which reintroduces runtime branching and
+     pulls in opcodes 3 and 6.
+     </li>
+<li class="enumerate" id="x1-20004x2">
+     <!-- l. 516 --><p class="noindent"><strong>No  readback  in  {0,  1,  2}.</strong> Compiled  SKI  can
+     be executed but its normal form cannot be printed
+     without distinguishing a residual <code class="lstinline"><span style="color:#000000">S</span></code> from a <code class="lstinline"><span style="color:#000000">K</span></code> from
+     an application at runtime. For Nock, this requires a
+     structural test (opcode 3), an equality test (opcode
+     5), and a conditional (opcode 6). The fragment is a
+     faithful execution target, not a normalizer.
+     </p><!-- l. 518 --><p class="noindent">A      normalizer      must      additionally      return
+     the normal form in an inspectable form, which means
+     recognizing combinators at runtime, which the {0, 1,
+     2} fragment cannot do. In other words, when an SKI
+     evaluator completes, it has a normal form or a tree
+     whose leaves are S, K, I and whose internal nodes are
+     applications. To print that normal form (to “read it
+     back"), one walks the tree and at each node decides
+     if it is a leaf or an application, and if a leaf, which
+     combinator?
+     </p></li>
+<li class="enumerate" id="x1-20006x3"><strong>No  sharing.</strong> This  is  tree  reduction.  <code class="lstinline"><span style="color:#000000">S</span></code> copies  its
+     argument  with  no  sharing,  so  terms  with  shared
+     redexes blow up exponentially. This is moderately
+     acceptable  as  an  intermediate  representation  to
+     compile through, but impractical as a runtime for
+     large terms, which want graph reduction. (The Nock
+     runtime itself may ameliorate the situation.)</li></ol>
+<!-- l. 523 --><p class="noindent">These can be read as an alternate set of motivations for
+opcodes beyond 2; as may be surmised, the {0, 1, 2}
+fragment is Turing-complete but lacks certain practical
+                                                
+                                                
+features.
+   
+</p>
+   <h3 class="sectionHead" id="conditionals"><span class="titlemark">9   </span> <a id="x1-210009"></a>Conditionals</h3>
+<!-- l. 528 --><p class="noindent">A conditional is an obvious stress test for such a small
+fragment because in a strict evaluator a conditional that
+evaluates both branches is useless for its principal job of
+guarding recursion. In practice, the conditional must be split
+into two parts.
+</p><!-- l. 530 --><p class="indent">   The Church booleans are already a form of conditional;
+with <code class="lstinline"><span style="color:#000000">TRUE = K</span></code> and <code class="lstinline"><span style="color:#000000">FALSE = K I</span></code>, the term <code class="lstinline"><span style="color:#000000">b t e</span></code> routes
+to the chosen branch. The routing itself executes neither
+branch: <code class="lstinline"><span style="color:#000000">K</span></code> reads its two arguments by slot and discards one,
+never applying them as formulas. If the branches are held as
+quoted formulas (thunks) and only the survivor is run, the
+unchosen branch is never evaluated. The whole conditional is
+one closed formula in the fragment:
+</p>
+   <!-- l. 532 -->
+<pre class="lstlisting" id="listing-158"><span class="label"><a id="x1-21001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">IF</span></span><span style="color:#000000"> <span class="ec-lmtt-9">cond tf ef s</span> 
+</span><span class="label"><a id="x1-21002r2"></a></span><span style="color:#000000">            <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">[2 [1 s] [2 [1 ef] [2 [1 tf] [1 cond]]]]</span></span></pre>
+<!-- l. 537 --><p class="noindent">Reading inner to outer: apply <code class="lstinline"><span style="color:#000000">cond</span></code> to <code class="lstinline"><span style="color:#000000">tf</span></code>, then to <code class="lstinline"><span style="color:#000000">ef</span></code>
+(selection), then run the survivor on subject <code class="lstinline"><span style="color:#000000">s</span></code>. It consists of
+fifteen cells of pure {0, 1, 2}.
+</p><!-- l. 540 --><p class="indent">   This conditional is genuinely
+lazy.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a id="x1-21003f7"></a> 
+The discipline this requires is exact: branches must be kept as
+quoted formulas rather than compiled as combinator
+sub-terms. Compile a divergent branch and the eager opcode 2
+forces it before selection ever happens (the K I  divergence).
+                                                
+                                                
+Thunking the branch keeps it inert until forced; this is similar
+to stored procedures in conventional Nock using cores with
+opcode 9.
+</p><!-- l. 544 --><p class="indent">   What the SKI/{0, 1, 2} fragment cannot do effectively
+is manufacture the boolean. <code class="lstinline"><span style="color:#000000">IF</span></code> above routes on a
+boolean it is handed; to branch on a property of data
+(atom as zero, cell-ness, etc.), one must first map a
+datum to <code class="lstinline"><span style="color:#000000">K</span></code> or <code class="lstinline"><span style="color:#000000">K I</span></code>, and that inspection reads an atom’s
+value or tests cell-ness. Neither is expressible in pure
+{0, 1, 2} because these have no notion of reading out
+structure.<span class="footnote-mark"><a href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a id="x1-21005f8"></a> 
+Selecting on a given boolean is free; deciding what the boolean
+should be requires the cell test (opcode 3), increment, equality
+(opcode 5), or negation (built with opcode 6 on opcode
+5).
+</p><!-- l. 546 --><p class="indent">   This is precisely the shape of Nock’s own conditional.
+Opcode 6 is trivially derivable from opcodes 0–5, and what it
+adds over the selector above is the data-derived predicate: run
+a formula b to compute a loobean on the subject, map that
+loobean to an address (using opcode 4) to pick one of two
+formulas, and run only the chosen one. The combinatory core
+we have built here is the selection half; the predicate
+half is a partial motivation for opcodes 3, 4, and 5 as
+minimal additions to the SKI basis rather than merely
+conveniences.
+   
+</p>
+   <h3 class="sectionHead" id="conclusion"><span class="titlemark">10   </span> <a id="x1-2200010"></a>Conclusion</h3>
+<!-- l. 550 --><p class="noindent">The SKI construction in Nock <span class="small-caps">isa</span> is Turing-complete, but it
+does not have laziness, normal-form readback, or sharing.
+Each of these properties marks a boundary where the
+                                                
+                                                
+fragment is genuinely insufficient and additional tooling
+beyond {0, 1, 2} plus the structural distribution rule is
+required.
+</p><!-- l. 552 --><p class="indent">   This article makes concrete the claim that Nock opcodes 0,
+1, and 2 are sufficient to represent the SKI combinator
+calculus and are thus Turing-complete (if insufficient to handle
+nouns natively). The embedding is a constructive proof
+that the opcode 0, 1, 2 fragment is Turing-complete: the
+deferred monograph which the “Documentary History”
+anticipated is rooted in a handful of lines of Nock. The
+compiler is a homomorphism from SKI application to Nock
+evaluation, under a fixed call-by-value convention. The
+combinators are pure construction; opcode 2 appears only in
+the formula they assemble at application time, carried as
+quoted data. A second corollary locates the fragment’s edge: a
+conditional’s <span class="ec-lmri-10">selection </span>is combinatory and lives in {0, 1, 2},
+but its <span class="ec-lmri-10">decision</span>—computing a boolean from data—does
+not, which motivates Nock’s basis as an SKI core plus a
+minimal inspection and arithmetic kernel. The Nock <span class="small-caps">isa</span> has
+been manifestly Turing-complete since its inception, but
+this exposition makes a new demonstration explicit and
+constructive.<img alt="PIC" src="ustj-logo-.png" />
+   
+</p>
+   <h3 class="sectionHead" id="references"><a id="x1-23000"></a>References</h3>
+<!-- l. 556 --><p class="noindent">
+   </p><dl class="thebibliography"><dt class="thebibliography" id="X0-Curry1958">
+</dt><dd class="thebibliography" id="bib-1">
+   <!-- l. 556 --><p class="noindent"><a id="cite.0_Curry1958"></a>Curry, Haskell B.
+   and
+   Robert Feys
+   (1958).
+   <span class="ec-lmri-10">Combinatory
+                                                
+                                                
+   Logic</span>.
+   Amsterdam:
+   North-Holland
+   Publishing
+   Company.
+   </p></dd><dt class="thebibliography" id="X0-Torre2024">
+</dt><dd class="thebibliography" id="bib-2">
+   <!-- l. 556 --><p class="noindent"><a id="cite.0_Torre2024"></a>~hex, James Torre
+   (2024)
+   “combinators.rkt”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/jpt4/nocks/blob/main/combinators.rkt">https://github.com/jpt4/nocks/blob/main/combinators.rkt</a>
+   (visited
+   on
+   ~2026.6.27).
+   </p></dd><dt class="thebibliography" id="X0-Kiselyov2018">
+</dt><dd class="thebibliography" id="bib-3">
+   <!-- l. 556 --><p class="noindent"><a id="cite.0_Kiselyov2018"></a>Kiselyov, Oleg
+   (2018).
+   “<span class="mathjax-inline">\(\lambda \)</span>
+   to
+   SKI,
+   Semantically:
+   Declarative
+   Pearl.”
+   In:
+   <span class="ec-lmri-10">Functional
+   and
+   Logic
+   Programming</span>.
+   Ed. by
+   John P. Gallagher
+   and
+   Martin Sulzmann.
+   Cham:
+   Springer
+   International
+                                                
+                                                
+   Publishing,
+   pp. 33–50.
+   </p></dd><dt class="thebibliography" id="X0-lagrev2025">
+</dt><dd class="thebibliography" id="bib-4">
+   <!-- l. 556 --><p class="noindent"><a id="cite.0_lagrev2025"></a><code>~lagrev-nocfep</code>, N. E. Davis
+   and
+   Curtis Yarvin <code>~sorreg-namtyv</code>
+   (2025).
+   “A
+   Documentary
+   History
+   of
+   the
+   Nock
+   Combinator
+   Calculus.”
+   In:
+   <span class="ec-lmri-10">Urbit
+   Systems
+   Technical
+   Journal</span>
+   2.1,
+   pp. 155–190.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://urbitsystems.tech/article/v02-i01/a-documentary-history-of-the-nock-combinator-calculus">https://urbitsystems.tech/article/v02-i01/a-documentary-history-of-the-nock-combinator-calculus</a>.
+   </p></dd><dt class="thebibliography" id="X0-Smullyan1985">
+</dt><dd class="thebibliography" id="bib-5">
+   <!-- l. 556 --><p class="noindent"><a id="cite.0_Smullyan1985"></a>Smullyan, Raymond M.
+   (1994).
+   <span class="ec-lmri-10">To
+   Mock
+   a
+   Mockingbird
+   and
+   Other
+   Logic
+   Puzzles:
+                                                
+                                                
+   :
+   Including
+   an
+   Amazing
+   Adventure
+   in
+   Combinatory
+   Logic</span>.
+   New
+   York:
+   Knopf.</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+<div class="footnote-text">
+  <!-- l. 58 --><p class="indent">     <span class="footnote-mark"><a id="x2-2004x1"></a><a id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">See particularly </span><a id="x2-2005"></a><span class="ec-lmr-8">Smullyan (1994) for more on combinatory
+  logic.</span><a href="#x1-2003f1">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 106 --><p class="indent">     <span class="footnote-mark"><a id="x3-3012x2"></a><a id="fn2x0">   <sup class="textsuperscript">2</sup></a></span><span class="ec-lmr-8">This approach merits further investigation.</span><a href="#x1-3011f2">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 403 --><p class="indent">     <span class="footnote-mark"><a id="x4-16008x5.3"></a><a id="fn3x0">   <sup class="textsuperscript">3</sup></a></span><span class="ec-lmr-8">We here draw a sharp distinction between opcode 4 as</span>
+  <code class="lstinline"><span style="color:#000000">inc = [4 0 1]</span></code> <span class="ec-lmr-8">which operates on Nock atoms, and </span><code class="lstinline"><span style="color:#000000">succ</span></code> <span class="ec-lmr-8">which
+  operates on Church numerals. The two are distinct: </span><code class="lstinline"><span style="color:#000000">succ</span></code> <span class="ec-lmr-8">maps a
+  numeral-value to a numeral-value in 0,1,2, while </span><code class="lstinline"><span style="color:#000000">inc</span></code> <span class="ec-lmr-8">maps an atom to an
+  atom via opcode 4.</span><a href="#x1-16007f3">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 408 --><p class="indent">     <span class="footnote-mark"><a id="x5-17002x5.4"></a><a id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span class="ec-lmr-8">A Church numeral is a value (formula), not an atom. To
+  read it out as a Nock atom we decode it: apply it to the atom
+  successor </span><code class="lstinline"><span style="color:#000000">inc = [4 0 1]</span></code> <span class="ec-lmr-8">and the atom </span><code class="lstinline"><span style="color:#000000">0</span></code><span class="ec-lmr-8">, writing   n = n inc 0:
+   church 0 = 0 ;  SUCC^5 (church 0) = 5 ;  SUCC (church 2) = 3.
+  Decoding is the only step that uses opcode 4, and it is readout, not
+  arithmetic.</span><a href="#x1-17001f4">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 476 --><p class="indent">     <span class="footnote-mark"><a id="x6-18002x6"></a><a id="fn5x0">   <sup class="textsuperscript">5</sup></a></span> <a href="https://github.com/sigilante/skitrace"><span class="ec-lmr-8">sigilante/skitrace</span></a><a href="#x1-18001f5">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 476 --><p class="indent">     <span class="footnote-mark"><a id="x7-18004x6"></a><a id="fn6x0">   <sup class="textsuperscript">6</sup></a></span> <a href="https://github.com/sigilante/pinochle"><span class="ec-lmr-8">sigilante/pinochle</span></a><span class="ec-lmr-8">.</span><a href="#x1-18003f6">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 541 --><p class="indent">     <span class="footnote-mark"><a id="x8-21004x9"></a><a id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span class="ec-lmr-8">Setting the unchosen branch to a crashing formula confirms it
+  never runs: IF TRUE 111 ⊥ returns 111 without crashing, IF FALSE ⊥
+  222 returns 222, and the control case IF TRUE ⊥ 222 does crash. The
+  chosen branch really executes, so the laziness is not an artifact of dead
+  code.</span><a href="#x1-21003f7">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 544 --><p class="indent">     <span class="footnote-mark"><a id="x9-21006x9"></a><a id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span class="ec-lmr-8">An objection may be made that opcode 0 does have an
+  explicit notion of structure due to cell addressing, but there is no
+  mechanism in non-virtualized (direct) Nock to utilize this without
+  crashing.</span><a href="#x1-21005f8">⤴</a></p></div>
+</body> 
+</html>

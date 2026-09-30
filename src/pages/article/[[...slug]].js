@@ -7,11 +7,23 @@ export default function Article({ issue, article }) {
   const ref = React.useRef(null);
   const [height, setHeight] = React.useState("0px");
 
-  const onLoad = () => {
-    setHeight(ref.current.contentWindow.document.body?.scrollHeight + "px");
+  const measure = () => {
+    const body = ref.current?.contentWindow?.document?.body;
+    if (body) setHeight(body.scrollHeight + "px");
   };
 
-  useEffect(onLoad, [ref]);
+  // Web fonts and MathJax finish after the iframe's load event and change
+  // the content height, so keep measuring as the article body resizes.
+  const onLoad = () => {
+    measure();
+    const body = ref.current?.contentWindow?.document?.body;
+    if (body && typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(body);
+    }
+  };
+
+  useEffect(measure, [ref]);
 
   useEffect(() => {
     document.body.style = `background-color:hsl(210, 20%, 98%);`;
