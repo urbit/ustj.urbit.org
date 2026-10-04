@@ -2,8 +2,17 @@ import React, { useEffect } from "react";
 import Head from "next/head";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
+import SocialMeta from "@/components/SocialMeta";
+import {
+  JOURNAL_NAME,
+  JOURNAL_DESCRIPTION,
+  HOME_CARD,
+  articleMeta,
+  excerpt,
+  slugify,
+} from "@/lib/articles.mjs";
 
-export default function Article({ issue, article }) {
+export default function Article({ issue, article, social }) {
   const ref = React.useRef(null);
   const [height, setHeight] = React.useState("0px");
 
@@ -32,8 +41,9 @@ export default function Article({ issue, article }) {
   return (
     <>
       <Head>
-        <title>{article.title} • UrbitSTJ</title>
+        <title>{`${social.title} • UrbitSTJ`}</title>
       </Head>
+      <SocialMeta type="article" {...social} />
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
         <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 layout">
@@ -57,18 +67,31 @@ export async function getStaticProps({ params }) {
     fs.readFileSync(`./ustj/${params.slug[0]}.json`, "utf8"),
   );
 
-  const article = issue.content.find((c) => {
-    const slug = c.title
-      .toLowerCase()
-      .replaceAll(/[^a-z0-9\s-]+/g, "")
-      .replaceAll(/\s+/g, "-");
-    return slug === params.slug[1];
-  });
+  const article = issue.content.find(
+    (c) => slugify(c.title) === params.slug[1],
+  );
+
+  // Link-preview tags. Articles without a generated card (pending ones, or a
+  // card not yet made by scripts/make-cards.mjs) fall back to the home card.
+  const meta = articleMeta(issue, params.slug[0], article);
+  const byline = meta.authors
+    .map((a) => (a.name ? `${a.name} ~${a.patp}` : `~${a.patp}`))
+    .join(", ");
+  const social = {
+    title: meta.title,
+    description: meta.summary ? excerpt(meta.summary, 200) : JOURNAL_DESCRIPTION,
+    path: meta.path,
+    image: meta.hasCard ? meta.card : HOME_CARD,
+    imageAlt: meta.hasCard
+      ? `${meta.title}, by ${byline}. ${JOURNAL_NAME}, ${issue.issue}.`
+      : `${JOURNAL_NAME}: ${issue.title}.`,
+  };
 
   return {
     props: {
       issue,
       article,
+      social,
     },
   };
 }
@@ -86,12 +109,7 @@ export async function getStaticPaths() {
   const paths = [];
   issues.forEach((i) => {
     i.content.forEach((c) => {
-      paths.push(
-        `/article/${i.slug}/${c.title
-          .toLowerCase()
-          .replaceAll(/[^a-z0-9\s-]+/g, "")
-          .replaceAll(/\s+/g, "-")}`,
-      );
+      paths.push(`/article/${i.slug}/${slugify(c.title)}`);
     });
   });
 

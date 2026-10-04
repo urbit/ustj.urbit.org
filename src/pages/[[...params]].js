@@ -6,6 +6,19 @@ import classnames from "classnames";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 import PdfIcon from "@/components/PdfIcon";
+import SocialMeta from "@/components/SocialMeta";
+import {
+  JOURNAL_NAME,
+  JOURNAL_DESCRIPTION,
+  HOME_CARD,
+} from "@/lib/articles.mjs";
+
+// Covers are 5.5 x 8.5 in. The carousel is 60% of the viewport tall, capped so
+// the front cover never grows wider than the screen less a small margin. On
+// phones that leaves the front cover nearly full width with the others tucked
+// behind it.
+const COVER_ASPECT = 8.5 / 5.5;
+const COVER_STAGE_HEIGHT = `min(60vh, calc((100vw - 2.5rem) * ${COVER_ASPECT}))`;
 
 function Row({ children, className, href }) {
   const c = classnames(
@@ -90,7 +103,7 @@ function Contents({ issue }) {
   );
 }
 
-export default function Home({ issues, initialSlug }) {
+export default function Home({ issues, initialSlug, path }) {
   const router = useRouter();
   const [issue, setIssue] = useState(
     issues.find((o) => o.slug === initialSlug) || issues[issues.length - 1],
@@ -123,6 +136,13 @@ export default function Home({ issues, initialSlug }) {
     };
   };
 
+  // On phones the arrows sit on top of the front cover, so give them a dark
+  // disc to stay legible against the artwork.
+  const arrowClass =
+    "absolute z-20 flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto " +
+    "rounded-full bg-black sm:bg-transparent text-primary text-2xl sm:text-4xl md:text-5xl " +
+    "sm:px-2 opacity-80 sm:opacity-70 hover:opacity-100 transition-opacity";
+
   useEffect(() => {
     if (issue) {
       document.body.style =
@@ -138,6 +158,13 @@ export default function Home({ issues, initialSlug }) {
       <Head>
         <title>Urbit Systems Technical Journal</title>
       </Head>
+      <SocialMeta
+        title={JOURNAL_NAME}
+        description={JOURNAL_DESCRIPTION}
+        path={path}
+        image={HOME_CARD}
+        imageAlt={`${JOURNAL_NAME}: ${issues[issues.length - 1].title}.`}
+      />
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center bg-black">
         <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 pb-16 layout bg-black">
@@ -151,14 +178,14 @@ export default function Home({ issues, initialSlug }) {
           </div>
           <div
             className="relative flex items-center justify-center w-full layout-px overflow-hidden"
-            style={{ height: "calc(100vh * 0.6)" }}
+            style={{ height: COVER_STAGE_HEIGHT }}
           >
             {issues.length > 1 && (
               <button
                 type="button"
                 aria-label="Previous issue"
                 onClick={() => showIssue(-1)}
-                className="absolute left-4 md:left-8 z-20 text-primary text-4xl md:text-5xl px-2 opacity-70 hover:opacity-100 transition-opacity"
+                className={classnames("left-1 sm:left-4 md:left-8", arrowClass)}
               >
                 ◂
               </button>
@@ -170,11 +197,11 @@ export default function Home({ issues, initialSlug }) {
               {issues.map((o, i) => (
                 <div
                   key={o.issue}
-                  className="absolute top-0 left-1/2 h-full flex items-center justify-center transition-all duration-500 ease-in-out"
+                  className="absolute top-0 left-1/2 h-full w-max flex items-center justify-center transition-all duration-500 ease-in-out"
                   style={coverStyle(i - issueIndex)}
                 >
                   <img
-                    className="h-full w-auto shadow-2xl"
+                    className="h-full w-auto max-w-none shrink-0 shadow-2xl"
                     alt=""
                     src={o.links.cover}
                   />
@@ -186,7 +213,7 @@ export default function Home({ issues, initialSlug }) {
                 type="button"
                 aria-label="Next issue"
                 onClick={() => showIssue(1)}
-                className="absolute right-4 md:right-8 z-20 text-primary text-4xl md:text-5xl px-2 opacity-70 hover:opacity-100 transition-opacity"
+                className={classnames("right-1 sm:right-4 md:right-8", arrowClass)}
               >
                 ▸
               </button>
@@ -235,7 +262,12 @@ export async function getStaticProps({ params }) {
     issues.find((o) => o.slug === requestedSlug) || issues[issues.length - 1];
 
   return {
-    props: { issues, initialSlug: initialIssue.slug },
+    props: {
+      issues,
+      initialSlug: initialIssue.slug,
+      // Canonical path for link previews: "/" or "/issue/<slug>".
+      path: requestedSlug ? `/issue/${initialIssue.slug}` : "/",
+    },
   };
 }
 

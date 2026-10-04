@@ -3,17 +3,15 @@ import Head from "next/head";
 import Link from "next/link";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
+import {
+  slugify,
+  extractAuthorNames,
+  extractAbstract,
+} from "@/lib/articles.mjs";
 
 const SITE_URL = "https://ustj.urbit.org";
 const JOURNAL_NAME = "Urbit Systems Technical Journal";
 const SEASONS = { WI: "Winter", SP: "Spring", SU: "Summer", FA: "Fall" };
-
-function slugify(title) {
-  return title
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9\s-]+/g, "")
-    .replaceAll(/\s+/g, "-");
-}
 
 function parseIssueCode(issue) {
   const m = issue.match(/^([A-Z]{2})(\d{4}):\s*Vol\.\s*(\d+),\s*No\.\s*(\d+)$/);
@@ -72,59 +70,6 @@ function bibtexEntry(article) {
   lines.push(`  url = {${url}}`);
   lines.push(`}`);
   return lines.join("\n");
-}
-
-function decodeEntities(str) {
-  return str
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&");
-}
-
-function extractAuthorNames(htmlPath, patps) {
-  if (!fs.existsSync(htmlPath)) return patps.map(() => null);
-  const html = fs.readFileSync(htmlPath, "utf8");
-  const divMatch = html.match(/<div class="author"[^>]*>([\s\S]*?)<\/div>/);
-  if (!divMatch) return patps.map(() => null);
-
-  const names = [];
-  divMatch[1].split(/<br\s*\/?>/).forEach((line) => {
-    let text = line.replace(/<[^>]+>/g, "");
-    text = decodeEntities(text).replace(/\s+/g, " ").trim();
-    const m = text.match(/~([a-z]+(?:-[a-z]+)*)/);
-    if (!m) return;
-    if (text[m.index + m[0].length] === ".") return;
-    const name = text.slice(0, m.index).trim().replace(/,$/, "").trim();
-    names.push(name || null);
-  });
-
-  return names.length === patps.length ? names : patps.map(() => null);
-}
-
-function extractAbstract(htmlPath) {
-  if (!fs.existsSync(htmlPath)) return "";
-  const html = fs.readFileSync(htmlPath, "utf8");
-  const match = html.match(/<section[^>]*role="doc-abstract"[^>]*>([\s\S]*?)<\/section>/);
-  if (!match) return "";
-
-  let body = match[1].replace(/<h3[^>]*class="abstracttitle"[\s\S]*?<\/h3>/, "");
-  body = body.replace(/<li[^>]*>/gi, "\n• ");
-  body = body.replace(/<\/(p|li)>/gi, "\n");
-  body = body.replace(/<br\s*\/?>/gi, "\n");
-  body = body.replace(/<[^>]+>/g, "");
-  body = decodeEntities(body);
-  body = body.replace(/[ \t]+/g, " ");
-  body = body.replace(/ *\n */g, "\n");
-  body = body.replace(/\n{2,}/g, "\n\n");
-  // TeX4ht keeps the PDF's line breaks; rejoin them into flowing text but
-  // keep paragraph breaks and bullet lines.
-  body = body.replace(/([^\n])\n(?!\n|• )/g, "$1 ");
-  return body.trim();
 }
 
 function downloadBibtex(articles) {
