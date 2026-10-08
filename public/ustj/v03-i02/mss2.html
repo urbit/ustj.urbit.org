@@ -1,0 +1,632 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en"> 
+<head><title>Input and Output in Hoon</title> 
+<meta charset="utf-8" /> 
+<meta content="TeX4ht (https://tug.org/tex4ht/)" name="generator" /> 
+<meta content="width=device-width,initial-scale=1" name="viewport" /> 
+<link href="/latex.css" rel="stylesheet" type="text/css" /> 
+<meta content="mss.tex" name="src" /> 
+<script>window.MathJax = { tex: { tags: "ams", packages: {"[+]": ["html"]}, macros: { mathand: "\\wedge", mathor: "\\vee", textsc: ["\\style{font-variant:small-caps}{\\text{#1}}", 1] } } }; </script> 
+<script async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>  
+</head><body>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Input and Output in Hoon</h2>
+ <div class="author"><span class="ec-lmbx-12">Philip Monk <code>~wicdev-wisryt</code></span>
+<br />       <span class="ec-lmbx-12">Tlon Corporation</span></div><br />
+<div class="date"></div>
+   </div>
+   <section class="abstract" role="doc-abstract"> 
+<h3 class="abstracttitle">
+<span class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!-- l. 40 --><p class="noindent"><span class="ec-lmr-9">Urbit’s input and output system is structured as
+     explicit  state  machines,  with  a  small  amount  of
+     monadic I/O at the top level. This is a deliberate
+     design choice, and we explore the design space.</span>
+</p>
+</section>
+   
+                                                
+                                                
+   <h3 class="likesectionHead" id="contents"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc">1 <a href="#introduction" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc">2 <a href="#the-three-styles-of-io" id="QQ2-1-3">The three styles of I/O</a></span>
+<br />   <span class="subsectionToc">2.1 <a href="#imperative-io" id="QQ2-1-4">Imperative I/O</a></span>
+<br />   <span class="subsectionToc">2.2 <a href="#monadic-io" id="QQ2-1-5">Monadic I/O</a></span>
+<br />   <span class="subsectionToc">2.3 <a href="#state-machines" id="QQ2-1-6">State machines</a></span>
+<br />   <span class="sectionToc">3 <a href="#a-stateful-loopy-example" id="QQ2-1-7">A stateful, loopy example</a></span>
+<br />   <span class="sectionToc">4 <a href="#in-urbit" id="QQ2-1-8">In Urbit</a></span>
+<br />   <span class="subsectionToc">4.1 <a href="#jael-a-case-study" id="QQ2-1-11">Jael: a case study</a></span>
+<br />   <span class="sectionToc">5 <a href="#recap" id="QQ2-1-13">Recap</a></span>
+   </div>
+   
+   <h3 class="sectionHead" id="introduction"><span class="titlemark">1   </span> <a id="x1-20001"></a>Introduction</h3>
+<!-- l. 53 --><p class="noindent">Let’s talk about input and output in Urbit. I won’t say much
+about how events and effects are processed by the runtime; it
+suffices to note that the runtime is a normal Unix program
+which 1) listens for various events, 2) passes them to Arvo
+(Urbit OS), and 3) processes the effects produced by Arvo.
+Instead, I’ll focus on how I/O works from the perspective
+of Hoon programs, like Arvo or apps running on Arvo.
+But first, let’s review I/O paradigms in other languages.
+<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-2001f1"></a>
+   
+</p>
+   <h3 class="sectionHead" id="the-three-styles-of-io"><span class="titlemark">2   </span> <a id="x1-30002"></a>The three styles of I/O</h3>
+<!-- l. 65 --><p class="noindent">I will call these styles imperative I/O, monadic I/O, and state
+                                                
+                                                
+machines (note that this classification refers only to the
+experience of using them and the program structure they
+dictate). An imperative programming language can use any of
+these and a functional programming language can use any of
+them.
+   
+</p>
+   <h4 class="subsectionHead" id="imperative-io"><span class="titlemark">2.1   </span> <a id="x1-40002.1"></a>Imperative I/O</h4>
+<!-- l. 73 --><p class="noindent">Imperative languages (such as C and Python) perform
+I/O by calling a function in the middle of whatever they
+were doing. Anywhere, in any statement, you could have
+I/O.
+</p><!-- l. 77 --><p class="indent">   In this example and others to follow, the task will be to
+read a filename from the command line, read a <span class="small-caps">url</span> out of that
+file, and fetch the contents at that <span class="small-caps">url</span>.
+</p>
+   <!-- l. 81 -->
+<pre class="lstlisting" id="listing-1"><span class="label"><a id="x1-4001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">output</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">fetch(stripWhitespace(readFile(cliInput())))</span></span></pre>
+<!-- l. 85 --><p class="noindent">For readability, intermediate variables would be a good idea,
+but nothing stops you from nesting I/O this way.
+   
+</p>
+   <h4 class="subsectionHead" id="monadic-io"><span class="titlemark">2.2   </span> <a id="x1-50002.2"></a>Monadic I/O</h4>
+<!-- l. 91 --><p class="noindent">Languages that use explicit monads for I/O (such as Haskell)
+perform I/O by running I/O behind a bind operation, which
+I’ll notate with ←. Thus, while you can’t put I/O <span class="ec-lmri-10">anywhere</span>,
+the general structure is a sequence of I/O operations, such
+as:
+</p>
+   <!-- l. 97 -->
+<pre class="lstlisting" id="listing-2"><span class="label"><a id="x1-5001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fileName</span></span><span style="color:#000000"> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">cliInput()</span> 
+</span><span class="label"><a id="x1-5002r2"></a></span><span style="color:#000000">     <span class="ec-lmtt-9">url</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">readFile(fileName)</span> 
+</span><span class="label"><a id="x1-5003r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">output</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">fetchUrl(stripWhitespace(url))</span></span></pre>
+                                                
+                                                
+<!-- l. 103 --><p class="noindent">Simon Peyton Jones’  <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/mark.pdf">“Tackling the Awkward Squad”</a> (2010)
+is the canonical description of monadic I/O, and does a great
+job of explaining how the Haskell community decided to use
+this as their primary I/O style.
+   
+</p>
+   <h4 class="subsectionHead" id="state-machines"><span class="titlemark">2.3   </span> <a id="x1-60002.3"></a>State machines</h4>
+<!-- l. 111 --><p class="noindent">Languages that use explicit state machines for I/O (such as
+Elm) perform I/O by accepting events and producing a list of
+effects.
+</p>
+   <!-- l. 114 -->
+<pre class="lstlisting" id="listing-3"><span class="label"><a id="x1-6001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">event</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">Initialize</span> 
+</span><span class="label"><a id="x1-6002r2"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| CLIInput text</span> 
+</span><span class="label"><a id="x1-6003r3"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| FileInput text</span> 
+</span><span class="label"><a id="x1-6004r4"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| HTTPResponse body</span> 
+</span><span class="label"><a id="x1-6005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000"><span class="ec-lmtt-9">effect</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">CLIInput</span> 
+</span><span class="label"><a id="x1-6006r6"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">| ReadFile fileName</span> 
+</span><span class="label"><a id="x1-6007r7"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">| FetchUrl url</span> 
+</span><span class="label"><a id="x1-6008r8"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">| Print text</span> 
+</span><span class="label"><a id="x1-6009r9"></a></span><span style="color:#000000"><span class="ec-lmtt-9">main</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">event</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"> <span class="ec-lmtt-9">{</span> 
+</span><span class="label"><a id="x1-6010r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">  <span class="ec-lmtt-9">switch event {</span> 
+</span><span class="label"><a id="x1-6011r11"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">Initialize</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[CLIInput ~]</span> 
+</span><span class="label"><a id="x1-6012r12"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">CLIinput fileName</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[ReadFile fileName]</span> 
+</span><span class="label"><a id="x1-6013r13"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">FileInput url</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[FetchUrl stripWhitespace(url)]</span> 
+</span><span class="label"><a id="x1-6014r14"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">HTTPResponse body</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[Print body]</span> 
+</span><span class="label"><a id="x1-6015r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">  <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-6016r16"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span></pre>
+<!-- l. 133 --><p class="noindent">The effects produced are not functions but data.
+</p><!-- l. 136 --><p class="indent">   It’s important to note that this example is chosen to
+highlight a particular kind of I/O – sequences of events.
+Further, this example has no persistent state – each I/O
+operation is a pure function of the output of the previous
+one.
+   
+</p>
+   <h3 class="sectionHead" id="a-stateful-loopy-example"><span class="titlemark">3   </span> <a id="x1-70003"></a>A stateful, loopy example</h3>
+<!-- l. 143 --><p class="noindent">Let’s look at another type of program: a simple <span class="small-caps">http</span> server
+that you can give text at the <span class="small-caps">cli</span>, which will respond to all
+<span class="small-caps">http</span> requests with that text.
+</p><!-- l. 147 --><p class="noindent">Imperative:
+</p>
+   <!-- l. 150 -->
+<pre class="lstlisting" id="listing-4"><span class="label"><a id="x1-7001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">text</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">"no text entered yet"</span> 
+</span><span class="label"><a id="x1-7002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">while</span></span><span style="color:#000000"> <span class="ec-lmtt-9">(true)</span> 
+</span><span class="label"><a id="x1-7003r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">cli </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">readCli()</span> 
+</span><span class="label"><a id="x1-7004r4"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">if (cli </span><span class="ec-lmtk-10x-x-90">!= </span><span class="ec-lmtt-9">Null)</span> 
+</span><span class="label"><a id="x1-7005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">    <span class="ec-lmtt-9">text </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">cli</span> 
+</span><span class="label"><a id="x1-7006r6"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">request </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">readHttp()</span> 
+</span><span class="label"><a id="x1-7007r7"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">if (request </span><span class="ec-lmtk-10x-x-90">!= </span><span class="ec-lmtt-9">Null)</span> 
+</span><span class="label"><a id="x1-7008r8"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">respond(request,text)</span></span></pre>
+                                                
+                                                
+<!-- l. 161 --><p class="noindent">Monadic:
+</p>
+   <!-- l. 164 -->
+<pre class="lstlisting" id="listing-5"><span class="label"><a id="x1-7009r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">loop</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">no</span></span><span style="color:#000000"> <span class="ec-lmtt-9">text entered yet")</span> 
+</span><span class="label"><a id="x1-7010r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">where:</span></span> 
+<span class="label"><a id="x1-7011r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">loop</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">text</span> </span><span class="ec-lmtt-9">→</span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">I/O Null</span> 
+</span><span class="label"><a id="x1-7012r4"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">loop </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">input</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">readInput()</span> 
+</span><span class="label"><a id="x1-7013r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  <span class="ec-lmtt-9">switch input</span> 
+</span><span class="label"><a id="x1-7014r6"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">CLIInput newText</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">loop(newText)</span> 
+</span><span class="label"><a id="x1-7015r7"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">HTTPRequest request</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-7016r8"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">_</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">respond(request, text)</span> 
+</span><span class="label"><a id="x1-7017r9"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">loop(text)</span></span></pre>
+<!-- l. 176 --><p class="noindent">State machine:
+</p>
+   <!-- l. 179 -->
+<pre class="lstlisting" id="listing-6"><span class="label"><a id="x1-7018r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">text</span></span><span style="color:#000000"> <span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">"no text entered yet"</span> 
+</span><span class="label"><a id="x1-7019r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">main</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">text</span></span><span style="color:#000000"> <span class="ec-lmtt-9">,event) {</span> 
+</span><span class="label"><a id="x1-7020r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">switch event {</span> 
+</span><span class="label"><a id="x1-7021r4"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">CLIInput newText</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[newText, Null]</span> 
+</span><span class="label"><a id="x1-7022r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">    <span class="ec-lmtt-9">HTTPRequest request</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[text, HTTPResponse text]</span> 
+</span><span class="label"><a id="x1-7023r6"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-7024r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span></pre>
+<!-- l. 189 --><p class="noindent">Again, note the response in the state machine is data, not a
+function.
+</p><!-- l. 192 --><p class="indent">   I’m not trying to make a point about which type is better
+in general. There’s a pretty strong argument that in the first
+example, imperative was the best option, followed by monadic,
+followed by state machine. There’s an equally strong argument
+that the second example is most naturally represented by the
+state machine.
+</p><!-- l. 198 --><p class="indent">   Look at how state is handled in the monadic example.
+Formally, bind composes functions, so that every time you see
+a ← there’s actually a new function (closure/delimited
+continuation) being created and stored for when we
+receive a response. All variables in scope are stored in
+that closure, so we can conveniently access them later
+without explicitly storing them. However, the state we
+preserve over time varies a lot. In this example, it varies
+between storing loop, [loop input], [loop input newText],
+and [loop input request].
+</p><!-- l. 209 --><p class="indent">   By comparison, the state machine does not store
+intermediate values, it only stores its explicit state. While this
+is somewhat less flexible, it puts the permanent state
+front-and-center.
+</p><!-- l. 213 --><p class="indent">   I’ll reiterate that all of these are possible to implement in
+purely functional languages, and further they can all be
+implemented in terms of each other. State machines are
+trivially implementable – it’s just a function
+</p>
+                                                
+                                                
+   <!-- l. 218 -->
+<pre class="lstlisting" id="listing-7"><span class="label"><a id="x1-7025r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#000000"><span class="ec-lmtt-9">state</span></span><span style="color:#000000"> <span class="ec-lmtt-9">event]</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[new-state (</span><span class="ec-lmtk-10x-x-90">list </span><span class="ec-lmtt-9">effect)]</span></span></pre>
+<!-- l. 222 --><p class="noindent">Monadic I/O can be implemented directly (as in Haskell) or
+on top of state machines by storing continuations in your
+state. Imperative I/O is somewhat more difficult but should
+be possible through algebraic effects.
+</p><!-- l. 228 --><p class="indent">   When inventing a new system, you should consider which
+of these you intend to support based on the sort of code you
+expect to see. For example, a scripting language will almost
+always benefit from imperative (or at least monadic)
+style.
+   
+</p>
+   <h3 class="sectionHead" id="in-urbit"><span class="titlemark">4   </span> <a id="x1-80004"></a>In Urbit</h3>
+<!-- l. 235 --><p class="noindent">So much for exploring the space of I/O solutions. In terms of
+deployed code on Earth, the split is about 90% imperative, 5%
+monadic, and 5% state machine. In Urbit, the split is about
+90% state machine and 10% monadic. This is what I intend to
+explain and defend.
+</p><!-- l. 240 --><p class="indent">   Urbit’s OS is called Arvo; it has several “kernel modules”
+called vanes, and it has userspace applications. Colloquially
+these are called “apps,” but when speaking about them
+abstractly, it’s helpful to use their more specific name: 
+<a href="https://developers.urbit.org/reference/glossary/agent">“agents”</a>. Arvo, the vanes, and agents are all structured as
+explicit state machines.
+</p><!-- l. 248 --><p class="indent">   In addition, there are  <a href="https://developers.urbit.org/reference/glossary/thread">“threads”</a>, which are structured as
+monadic I/O. Note there’s only a superficial resemblance to
+Unix threads: they are not executed in parallel and they don’t
+share memory, or at least not any more than agents do.
+They’re simply a computation that takes an argument and
+produces a result, possibly after doing some I/O, structured
+monadically.
+</p><!-- l. 256 --><p class="indent">   As you can see, all the lowest levels of Arvo are explicit
+state machines, and only the highest layer supports monadic
+                                                
+                                                
+I/O. To see why this is the case, let’s list advantages and
+disadvantages to each type. Note that, while I’m speaking
+specifically of agents and threads in the context of Urbit, these
+are fundamental properties of monadic and state machine
+I/O.
+</p><!-- l. 263 --><p class="indent">   Agents are:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Upgradable.  Since  the  state  is  explicit,  you  can
+     upgrade an agent in-place by supplying a new state
+     machine and a function from the old state type to
+     the new state type. This is very similar to a database
+     migration.
+     </li>
+     <li class="itemize">Robust. A state machine must accept any input at
+     any time. If it receives unexpected input, it must
+     have had explicit error handling for that input, since
+     it’s one of the types in the switch statement. Thus,
+     it’s relatively easy to stay in a consistent state.
+     </li>
+     <li class="itemize">Permanent. Since it’s upgradable and robust, there’s
+     no reason to stop its running.
+     </li>
+     <li class="itemize">Hard to write long sequences of I/O. Long sequences
+     of I/O create many possible states, and you must
+     handle any input in any state.  This can result in
+     complex, hard-to-follow code with code paths that
+     are rarely if ever taken.</li></ul>
+<!-- l. 286 --><p class="indent">   Arvo’s threads are:
+                                                
+                                                
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Not upgradable in-place. Since the state is implicit,
+     you can only cleanly upgrade by killing the thread
+     and restarting it, or letting it resolve to a defined
+     “upgradable state” periodically, usually at the top of
+     a “main loop”. In the latter case, then you are in fact
+     structuring it as a state machine, so other advantages
+     of threads are compromised.
+     </li>
+     <li class="itemize">Fragile.  If  we  don’t  receive  expected  input,  the
+     default behavior is to be stuck waiting for input. You
+     must remember to add any error-handling features
+     you want, and it’s easy to end up in an inconsistent
+     state.
+     </li>
+     <li class="itemize">Impermanent.  Since  a  thread  can’t  be  upgraded
+     and may get stuck in case of unexpected input, a
+     thread can’t be expected to last forever. It must be
+     “rebooted” from time to time.
+     </li>
+     <li class="itemize">Easy to write long sequences of I/O.</li></ul>
+<!-- l. 309 --><p class="indent">   Arvo proper and the vanes are permanent pieces of
+software and, for this reason, state machines are more
+natural.
+</p><!-- l. 312 --><p class="indent">   I’ll note that other kernels, like the Unix kernel, use
+imperative I/O. The difference is that Unix isn’t permanent in
+itself – it only lasts until you reboot. Since your permanent
+state is stored externally, you don’t need to be upgradable or
+                                                
+                                                
+permanent. With sufficient discipline you can write robust C
+code, so it makes sense to use imperative style. Even so, a lot
+of C code is written in a state machine style; even if it doesn’t
+need to be upgradable, it’s worth it for the robustness and
+concurrency advantages.
+</p><!-- l. 321 --><p class="indent">   However, Arvo is a single-level store – all of its state is
+permanent. This is convenient and eliminates many long-tail
+bugs, but it also means we need to code for permanence, and
+that’s much easier when you structure code with explicit
+state.
+</p><!-- l. 326 --><p class="indent">   Further, Arvo and the vanes rarely perform long sequences
+of I/O. Generally, they do one thing and emit some effects,
+similar to the <span class="small-caps">http</span> server example above. Sometimes they
+“pass through” a request. For example, the Eyre vane passes
+<span class="small-caps">http</span> requests to userspace agents or threads. In this case,
+there is a sequence of I/O, which in monadic code would
+be:
+</p>
+   <!-- l. 333 -->
+<pre class="lstlisting" id="listing-8"><span class="label"><a id="x1-8001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">loop</span></span><span style="color:#000000"><span class="ec-lmtt-9">()</span></span> 
+<span class="label"><a id="x1-8002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">where:</span></span> 
+<span class="label"><a id="x1-8003r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">loop </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">request</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">receiveRequest()</span> 
+</span><span class="label"><a id="x1-8004r4"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">agent </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">lookupAgent(request)</span> 
+</span><span class="label"><a id="x1-8005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  <span class="ec-lmtt-9">response</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">callAgent(agent, request)</span> 
+</span><span class="label"><a id="x1-8006r6"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">_</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">sendResponse(request, response)</span> 
+</span><span class="label"><a id="x1-8007r7"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">loop()</span></span></pre>
+<!-- l. 343 --><p class="noindent">This is clear code to read, but it leaves open the question of
+how to respond during the callAgent() function. If another
+request comes in, can we handle it in parallel? If we need to
+upgrade ourselves before the agent responds, can we make sure
+to properly handle the response?
+</p><!-- l. 349 --><p class="indent">   The naive solution in monadic code is to say that
+you can only handle one request at a time, and if an
+upgrade happens you just drop outstanding requests. You
+can resolve both of these by introducing a sort of main
+loop, which is just a way of saying “turn it into a state
+machine”.
+</p><!-- l. 355 --><p class="indent">   In a state machine, the naive solution is:
+</p>
+   <!-- l. 357 -->
+<pre class="lstlisting" id="listing-9"><span class="label"><a id="x1-8008r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">state</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">(map request agent)</span> 
+</span><span class="label"><a id="x1-8009r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">main</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">state,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">event) {</span> 
+</span><span class="label"><a id="x1-8010r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">switch event {</span> 
+</span><span class="label"><a id="x1-8011r4"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">HTTPRequest request</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8012r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">      <span class="ec-lmtt-9">agent </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">lookupAgent(request)</span> 
+</span><span class="label"><a id="x1-8013r6"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[put(state, request, agent),</span> 
+</span><span class="label"><a id="x1-8014r7"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">CallAgent agent request]</span> 
+</span><span class="label"><a id="x1-8015r8"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">AgentResponse request response</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8016r9"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[del(state, request),</span> 
+</span><span class="label"><a id="x1-8017r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">       <span class="ec-lmtt-9">HTTPRespond request response]</span> 
+</span><span class="label"><a id="x1-8018r11"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-8019r12"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span></pre>
+                                                
+                                                
+<!-- l. 372 --><p class="indent">   Upgrading this is trivial, since the state (map of requests
+to outstanding calls to agents) is explicit. It also trivially
+handles concurrent requests.
+</p><!-- l. 376 --><p class="indent">   I won’t claim this is easier to write than a monadic version,
+but it has the properties we need at this level of the
+system.
+</p><!-- l. 379 --><p class="indent">   Userspace agents similarly are permanent entities that
+need to not lose data or get stuck. For this reason they’re
+structured as state machines.
+</p><!-- l. 382 --><p class="indent">   A helpful comparison is that explicit state machines are
+basically Mealy machines, the kind you might have learned
+about in an introductory digital design class. This shouldn’t
+be surprising; a digital circuit must always be consistent
+because it can’t be manually “rebooted”, and their input and
+output is highly formalized. By contrast, a Rube Goldberg
+machine doesn’t have the same constraints; which is why
+they’re a lot more fun!
+</p><!-- l. 390 --><p class="indent">   It’s notable also that explicit state machines are considerably
+more declarative than imperative or monadic I/O. Not
+everyone thinks that’s a good thing, but anyone who defends
+functional programming should see some advantages to
+that.
+</p><!-- l. 395 --><p class="indent">   However, userspace sometimes needs to perform long
+sequences of I/O. Monadic and state machine pseudocode are
+given in Listing <a href="#x1-8020r1">1<!-- tex4ht:ref: lst:monadic  --></a> and <a href="#x1-8038r2">2<!-- tex4ht:ref: lst:state-machine  --></a>.
+</p><!-- l. 398 --><p class="indent">   Let’s look at an example where we want to fetch the
+front page of a site and the first couple comments on
+each story. <span class="small-caps">http</span> is unreliable, so on failure we retry five
+times.
+</p>
+   <!-- l. 402 -->
+                                                
+                                                
+   <figure class="float" id="x1-8020r1"><span id="monadic-io-example-of-fetching-top-stories-and-comments"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 1:
+    </span><span class="content">Monadic
+    I/O
+    example
+    of
+    fetching
+    top
+    stories
+    and
+    comments.</span></figcaption><!-- tex4ht:label?: x1-8020r4  --><pre class="lstlisting" id="listing-10"><span class="label"><a id="x1-8021r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">topStories</span></span><span style="color:#000000"> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">fetch(topStoriesUrl)</span> 
+</span><span class="label"><a id="x1-8022r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">loop</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">topStories</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x1-8023r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">where:</span></span> 
+<span class="label"><a id="x1-8024r4"></a></span><span style="color:#000000"><span class="ec-lmtt-9">loop</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">topStories</span> </span><span class="ec-lmtt-9">→</span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">IO Null</span> 
+</span><span class="label"><a id="x1-8025r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">  <span class="ec-lmtt-9">if topStories is Null</span> 
+</span><span class="label"><a id="x1-8026r6"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">return Null</span> 
+</span><span class="label"><a id="x1-8027r7"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">comments</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">retryLoop(5,head(topStories))</span> 
+</span><span class="label"><a id="x1-8028r8"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">otherComments</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">loop(tail(topStories))</span> 
+</span><span class="label"><a id="x1-8029r9"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">append(comments,otherComments)</span> 
+</span><span class="label"><a id="x1-8030r10"></a><span class="ec-lmr-5">10</span></span> 
+<span class="label"><a id="x1-8031r11"></a></span><span style="color:#000000"><span class="ec-lmtt-9">retryLoop</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">[n story]</span> </span><span class="ec-lmtt-9">→</span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">IO Comments</span> 
+</span><span class="label"><a id="x1-8032r12"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">comments</span> </span><span class="ec-lmtt-9">←</span><span style="color:#000000"> <span class="ec-lmtt-9">fetchComments(story)</span> 
+</span><span class="label"><a id="x1-8033r13"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">if comments is HTTPError:</span> 
+</span><span class="label"><a id="x1-8034r14"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">if n </span><span class="ec-lmtk-10x-x-90">== </span><span class="ec-lmtt-9">0:</span> 
+</span><span class="label"><a id="x1-8035r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">      <span class="ec-lmtt-9">bail</span> 
+</span><span class="label"><a id="x1-8036r16"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">else:</span> 
+</span><span class="label"><a id="x1-8037r17"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">retryLoop(n-1, story)</span></span></pre>
+                                                
+                                                
+   </figure>
+   <!-- l. 425 -->
+                                                
+                                                
+   <figure class="float" id="x1-8038r2"><span id="state-machine-example-of-fetching-top-stories-and-comments"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 2:
+    </span><span class="content">State
+    machine
+    example
+    of
+    fetching
+    top
+    stories
+    and
+    comments.</span></figcaption><!-- tex4ht:label?: x1-8038r4  --><pre class="lstlisting" id="listing-11"><span class="label"><a id="x1-8039r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">state</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">Initial</span> 
+</span><span class="label"><a id="x1-8040r2"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| FetchingTop</span> 
+</span><span class="label"><a id="x1-8041r3"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| FetchingStory comments stories retries</span> 
+</span><span class="label"><a id="x1-8042r4"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">| Done comments</span> 
+</span><span class="label"><a id="x1-8043r5"></a><span class="ec-lmr-5">5</span></span> 
+<span class="label"><a id="x1-8044r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">main</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">state,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">event) {</span> 
+</span><span class="label"><a id="x1-8045r7"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">switch event {</span> 
+</span><span class="label"><a id="x1-8046r8"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">Initialize</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8047r9"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">assert state </span><span class="ec-lmtk-10x-x-90">== </span><span class="ec-lmtt-9">Initial</span> 
+</span><span class="label"><a id="x1-8048r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">      <span class="ec-lmtt-9">[FetchingTop, Fetch topStoriesUrl]</span> 
+</span><span class="label"><a id="x1-8049r11"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">HttpResponse response</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8050r12"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">switch state {</span> 
+</span><span class="label"><a id="x1-8051r13"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">FetchingTop</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8052r14"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">[FetchingStory Null stories 5,</span> 
+</span><span class="label"><a id="x1-8053r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">           <span class="ec-lmtt-9">FetchComments head(stories)]</span> 
+</span><span class="label"><a id="x1-8054r16"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">FetchingStory comments stories retries</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-8055r17"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">if response is HTTPError:</span> 
+</span><span class="label"><a id="x1-8056r18"></a></span><span style="color:#000000">            <span class="ec-lmtt-9">if retries </span><span class="ec-lmtk-10x-x-90">== </span><span class="ec-lmtt-9">0:</span> 
+</span><span class="label"><a id="x1-8057r19"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">[Initial, Null]</span> 
+</span><span class="label"><a id="x1-8058r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">            <span class="ec-lmtt-9">else:</span> 
+</span><span class="label"><a id="x1-8059r21"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">[FetchingStory comments stories</span> 
+</span><span class="label"><a id="x1-8060r22"></a></span><span style="color:#000000">                             <span class="ec-lmtt-9">retries-1,</span> 
+</span><span class="label"><a id="x1-8061r23"></a></span><span style="color:#000000">               <span class="ec-lmtt-9">FetchComments head(stories)]</span> 
+</span><span class="label"><a id="x1-8062r24"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">else:</span> 
+</span><span class="label"><a id="x1-8063r25"></a><span class="ec-lmr-5">25</span></span><span style="color:#000000">            <span class="ec-lmtt-9">comments </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">append(response, comments)</span> 
+</span><span class="label"><a id="x1-8064r26"></a></span><span style="color:#000000">            <span class="ec-lmtt-9">if tail(stories) is Null:</span> 
+</span><span class="label"><a id="x1-8065r27"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">[Done comments, Null]</span> 
+</span><span class="label"><a id="x1-8066r28"></a></span><span style="color:#000000">            <span class="ec-lmtt-9">else:</span> 
+</span><span class="label"><a id="x1-8067r29"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">[FetchingStory append(comments,response)</span> 
+</span><span class="label"><a id="x1-8068r30"></a><span class="ec-lmr-5">30</span></span><span style="color:#000000">                             <span class="ec-lmtt-9">tail(stories) 5,</span> 
+</span><span class="label"><a id="x1-8069r31"></a></span><span style="color:#000000">               <span class="ec-lmtt-9">FetchComments head(tail(stories))]</span> 
+</span><span class="label"><a id="x1-8070r32"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-8071r33"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-8072r34"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 465 --><p class="indent">   With practice, the state machine version of this can be
+written correctly. However, 1) it’s verbose, 2) the control flow
+jumps all over the place, and 3) in practice it’s challenging to
+get exactly right. This is still a small example, and it gets
+much worse as the length and complexity of the I/O sequence
+grows.
+</p><!-- l. 471 --><p class="indent">   The monadic version, on the other hand, flows cleanly
+down the page. We can factor out generic functionality like
+“retry this request <span class="mathjax-inline">\(n\)</span> times” to make the essence of the
+computation clear.
+</p><!-- l. 475 --><p class="indent">   Suppose you have to upgrade this. In the state machine,
+you can see exactly which stage of the computation you’re in
+and write specific code to upgrade cleanly.
+</p><!-- l. 479 --><p class="indent">   Threads, as we’ve discussed, can’t be upgraded in-place.
+Let’s be real though: we’re downloading comment sections, not
+regulating a nuclear reactor. If we get a better version of this
+script, just kill the old one and start the new one from scratch.
+What’re a couple of extra <span class="small-caps">http</span> requests?
+</p><!-- l. 485 --><p class="indent">   This suggests a general division of workloads: code which
+needs to be permanent, upgradable, and concurrent should
+generally be a state machine. Code with long or complex
+sequences of I/O and definite termination should generally be
+a thread.
+</p><!-- l. 490 --><p class="indent">   These aren’t completely mutually exclusive, but it’s
+surprising how often they are.
+   
+</p>
+   <h4 class="subsectionHead" id="jael-a-case-study"><span class="titlemark">4.1   </span> <a id="x1-90004.1"></a>Jael: a case study</h4>
+<!-- l. 495 --><p class="noindent">When you need to do something permanent and upgradable,
+but you also need to do long sequences of I/O, the main trick
+is to factor your problem into both an agent and a thread (or
+several).
+</p><!-- l. 499 --><p class="indent">   As a case study, consider Jael, one of our vanes. This
+maintains our <span class="small-caps">pki</span> state, which it downloads over <span class="small-caps">http</span> from
+an Ethereum node. Downloading from an Ethereum node is a
+                                                
+                                                
+complex sequence that starts with fetching its most recent
+block number, then fetching all the blocks we haven’t seen and
+scanning for transactions we care about. We also maintain a
+map of block hashes to block number, and if we see that a
+block’s parent doesn’t have the hash we expect, that means a
+reorganization has occurred, so we must “rewind” one block at
+a time until we find where the fork happened, then restart
+going forward.
+</p><!-- l. 509 --><p class="indent">   You don’t have to understand this sequence of I/O; it’s
+sufficient to see that it’s complex and must be exactly
+right. We used to do this in a state machine directly in
+Jael. This data is, of course, permanent and needs to be
+accessible to the rest of the system, so Jael must be a state
+machine.
+</p><!-- l. 515 --><p class="indent">   However, we had many small mistakes in this sequence of
+I/O, some of which only appeared during unusual events, such
+as when an <span class="small-caps">http</span> request failed at the same time as a
+reorganization happened.
+</p><!-- l. 519 --><p class="indent">   We’re in a bit of a bind, though: Jael has to be a state
+machine. The solution is to factor out the act of getting
+updates into a thread while the main <span class="small-caps">pki</span> state is stored in the
+state machine in Jael.
+</p><!-- l. 523 --><p class="indent">   This thread has a definite purpose: given the most
+recent block number we already know about, fetch all
+the <span class="small-caps">pki</span> transactions since then. The function signature
+is:
+</p>
+   <!-- l. 527 -->
+<pre class="lstlisting" id="listing-12"><span class="label"><a id="x1-9001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">syncEthereum</span></span><span style="color:#000000"> <span class="ec-lmtt-9">oldBlockNumber</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-9002r2"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">I/O [newBlockNumber, newTxs]</span></span></pre>
+<!-- l. 532 --><p class="indent">   Jael runs this thread every five minutes and, if it succeeds,
+then we update our block number and <span class="small-caps">pki</span> state. If the thread
+fails, gets stuck, or we need to upgrade it, we just kill the old
+thread and start a new one. Again, a few extra <span class="small-caps">http</span> requests
+don’t matter.
+</p>
+   <!-- l. 537 -->
+                                                
+                                                
+   <figure class="float" id="x1-9003r3"><span id="jaels-state-machine"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 3:
+    </span><span class="content">Jael’s
+    state
+    machine</span></figcaption><!-- tex4ht:label?: x1-9003r4.1  --><pre class="lstlisting" id="listing-13"><span class="label"><a id="x1-9004r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">state</span></span><span style="color:#000000"> </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040"> <span class="ec-lmtti-10x-x-90">State block txs outstandingThread</span> 
+</span><span class="label"><a id="x1-9005r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">main</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">state,event</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"> <span class="ec-lmtt-9">{</span> 
+</span><span class="label"><a id="x1-9006r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">switch event {</span> 
+</span><span class="label"><a id="x1-9007r4"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">Initialize</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[State 0 Null Null,</span> 
+</span><span class="label"><a id="x1-9008r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">                  <span class="ec-lmtt-9">StartTimer (now + five minutes)]</span> 
+</span><span class="label"><a id="x1-9009r6"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">TimerFired</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-9010r7"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">effects </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">If outstandingThread is Null</span> 
+</span><span class="label"><a id="x1-9011r8"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">then Null</span> 
+</span><span class="label"><a id="x1-9012r9"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">else [Kill outstandingThread]</span> 
+</span><span class="label"><a id="x1-9013r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">      <span class="ec-lmtt-9">newId </span><span class="ec-lmtk-10x-x-90">= </span><span class="ec-lmtt-9">newThreadId()</span> 
+</span><span class="label"><a id="x1-9014r11"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[State txs newId,</span> 
+</span><span class="label"><a id="x1-9015r12"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">append(effects,</span> 
+</span><span class="label"><a id="x1-9016r13"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">StartThread newId syncEthereum(block),</span> 
+</span><span class="label"><a id="x1-9017r14"></a></span><span style="color:#000000">              <span class="ec-lmtt-9">StartTimer (now + five minutes))]</span> 
+</span><span class="label"><a id="x1-9018r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">    <span class="ec-lmtt-9">ThreadFinished Failure</span> </span><span class="ec-lmtt-9">→</span><span style="color:#000000"> <span class="ec-lmtt-9">[State block txs Null,</span> 
+</span><span class="label"><a id="x1-9019r16"></a></span><span style="color:#000000">                              <span class="ec-lmtt-9">Null]</span> 
+</span><span class="label"><a id="x1-9020r17"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">ThreadFinished Success newBlockNumber newTxs</span> </span><span class="ec-lmtt-9">→ 
+</span><span class="label"><a id="x1-9021r18"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">[State newBlockNumber append(txs,newTxs) Null,</span> 
+</span><span class="label"><a id="x1-9022r19"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">Null]</span> 
+</span><span class="label"><a id="x1-9023r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">  <span class="ec-lmtt-9">}</span> 
+</span><span class="label"><a id="x1-9024r21"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span></pre>
+                                                
+                                                
+   </figure>
+<!-- l. 564 --><p class="indent">   From Jael’s perspective, it looks something like Listing <a href="#x1-9003r3">3<!-- tex4ht:ref: lst:jael-state-machine  --></a>.
+In other words, it’s just a single I/O event that encapsulates
+arbitrarily complex I/O in the thread. A single I/O event is
+easy enough, and we can maintain all our permanency and
+robustness guarantees, because we know the thread will have
+one of three results: success, failure, or it hangs. If we set a
+timeout, hang becomes failure, so there’s only two possible
+results: success or failure. If we handle both of those correctly,
+we’ve handled all the possible I/O errors that could have
+occurred.
+</p><!-- l. 573 --><p class="indent">   What about upgrading? We’ve already said we can handle
+the thread dying for arbitrary reasons, so if an upgrade comes
+in, we just kill it. We can upgrade Jael’s state machine easily
+since its state is very simple.
+</p><!-- l. 577 --><p class="indent">
+                                                
+                                                
+   
+</p>
+   <h3 class="sectionHead" id="recap"><span class="titlemark">5   </span> <a id="x1-100005"></a>Recap</h3>
+<!-- l. 580 --><p class="noindent">Let’s recap what we’ve covered:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">There are three styles of I/O: imperative, monadic,
+     and explicit state machines.
+     </li>
+     <li class="itemize">Urbit supports explicit state machines (agents) and
+     monadic I/O (threads).
+     </li>
+     <li class="itemize">Explicit state machines are preferred for permanent,
+     robust, concurrent code.
+     </li>
+     <li class="itemize">Monadic I/O is preferred for short-lived code with
+     complex I/O.
+     </li>
+     <li class="itemize">If a state machine needs to perform complex I/O, it
+     should encapsulate it in a thread so that, from the
+     perspective of the state machine, it’s simple I/O.</li></ul>
+<!-- l. 594 --><p class="indent">   Hopefully it’s fairly clear why Urbit uses explicit state
+machines in most situations. More than anything else, our goal
+is to build software that can last forever. Explicit state
+machines are a crucial tool for that.<img alt="PIC" src="ustj-logo-.png" />
+</p>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+<div class="footnote-text">
+ <!-- l. 61 --><p class="indent">     <span class="footnote-mark"><a id="x2-2002x1"></a><a id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">All examples are in pseudocode, since it’s useful to understand
+ this before you’re comfortable in Hoon. If you want a challenge, try
+ translating them!</span><a href="#x1-2001f1">⤴</a></p></div>
+</body> 
+</html>
