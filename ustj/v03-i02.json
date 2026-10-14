@@ -22,7 +22,9 @@
     },
     {
       "author": ["lagrev-nocfep"],
-      "title": "A Deterministic Numerical Stack"
+      "title": "A Deterministic Numerical Stack",
+      "pdf": "/ustj/v03-i02/mss3.pdf",
+      "html": "/ustj/v03-i02/mss3.html"
     },
     {
       "author": ["bonbud-macryg", "tondes-sitrym", "hanfel-dovned"],

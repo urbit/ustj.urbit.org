@@ -1,0 +1,1642 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en"> 
+<head><title>A Deterministic Numerical Stack</title> 
+<meta charset="utf-8" /> 
+<meta content="TeX4ht (https://tug.org/tex4ht/)" name="generator" /> 
+<meta content="width=device-width,initial-scale=1" name="viewport" /> 
+<link href="/latex.css" rel="stylesheet" type="text/css" /> 
+<meta content="mss.tex" name="src" /> 
+<script>window.MathJax = { tex: { tags: "ams", packages: {"[+]": ["html"]}, macros: { mathand: "\\wedge", mathor: "\\vee", textsc: ["\\style{font-variant:small-caps}{\\text{#1}}", 1] } } }; </script> 
+<script async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>  
+</head><body>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">A Deterministic Numerical
+Stack</h2>
+ <div class="author"><span class="ec-lmbx-12">N. E. Davis <code>~lagrev-nocfep</code></span>
+<br />           <span class="ec-lmbx-12">ZeroAttest</span></div><br />
+<div class="date"></div>
+   </div>
+   <section class="abstract" role="doc-abstract"> 
+<h3 class="abstracttitle">
+<span class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!-- l. 47 --><p class="noindent"><span class="ec-lmr-9">Urbit’s
+     deterministic functional architecture requires that
+     all   computations   be   reproducible   to   the   bit
+     across  hosts.  This  article  describes  the  design
+     and implementation of a deterministic numerical
+     stack, including a software-defined </span><span class="small-caps">blas </span><span class="ec-lmr-9">library, a
+     software-defined universal number (unum) library,
+     a  rank-</span><span class="mathjax-inline">\(N\)  </span><span class="ec-lmr-9">array  library  with  type  dispatch,  and  a
+     transcendental  functions  library.  We  benchmark
+     Chebyshev basis functions with Cody–Waite range
+     reduction,  Taylor  series  expansions,  and  other
+     numerical methods.</span>
+                                                
+                                                
+</p>
+</section>
+   
+   <h3 class="likesectionHead" id="contents"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc">1 <a href="#introduction" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc">2 <a href="#background-and-literature" id="QQ2-1-3">Background and Literature</a></span>
+<br />   <span class="subsectionToc">2.1 <a href="#blas-as-a-pseudostandard" id="QQ2-1-4"><span class="small-caps">blas</span> as a pseudo-standard</a></span>
+<br />   <span class="subsectionToc">2.2 <a href="#sources-of-floatingpoint-nondeterminism" id="QQ2-1-5">Sources of floating-point nondeterminism</a></span>
+<br />   <span class="subsectionToc">2.3 <a href="#reproducibility" id="QQ2-1-6">Reproducibility</a></span>
+<br />   <span class="sectionToc">3 <a href="#deterministic-architecture" id="QQ2-1-7">Deterministic Architecture</a></span>
+<br />   <span class="subsectionToc">3.1 <a href="#the-numerical-stack" id="QQ2-1-8">The numerical stack</a></span>
+<br />   <span class="subsectionToc">3.2 <a href="#softblas-and-softunum" id="QQ2-1-11">SoftBLAS and SoftUnum</a></span>
+<br />   <span class="subsubsectionToc">3.2.1 <a href="#softblas" id="QQ2-1-12">SoftBLAS</a></span>
+<br />   <span class="subsubsectionToc">3.2.2 <a href="#softunum" id="QQ2-1-14">SoftUnum</a></span>
+<br />   <span class="sectionToc">4 <a href="#types" id="QQ2-1-15">Types</a></span>
+<br />   <span class="sectionToc">5 <a href="#contributions" id="QQ2-1-19">Contributions</a></span>
+<br />   <span class="sectionToc">6 <a href="#benchmarks" id="QQ2-1-20">Benchmarks</a></span>
+<br />   <span class="subsectionToc">6.1 <a href="#verification" id="QQ2-1-21">Verification</a></span>
+<br />   <span class="subsectionToc">6.2 <a href="#the-price-of-determinism" id="QQ2-1-27">The price of determinism</a></span>
+<br />   <span class="sectionToc">7 <a href="#future-work" id="QQ2-1-30">Future Work</a></span>
+<br />   <span class="sectionToc">8 <a href="#conclusion" id="QQ2-1-31">Conclusion</a></span>
+<br />   <span class="sectionToc"><a href="#references" id="QQ2-1-32">References</a></span>
+   </div>
+   
+   <h3 class="sectionHead" id="introduction"><span class="titlemark">1   </span> <a id="x1-20001"></a>Introduction</h3>
+<!-- l. 58 --><p class="noindent">Urbit is a deterministic functional operating system whose
+state is a pure function of its event log (<a id="x1-2001"></a><code>~sorreg-namtyv</code> et al.,
+2016). An event log replay must recover the state exactly,
+on any conforming runtime, indefinitely. This is not a
+performance nicety; it is the property that makes the system
+auditable, upgradeable, and peer-verifiable. Determinism is a
+                                                
+                                                
+load-bearing property all the way down.
+</p><!-- l. 60 --><p class="indent">   Numerical computing is one of the most slippery places for
+determinism to leak through its abstractions. Standard
+<span class="small-caps">ieee</span> 754 floating-point arithmetic is not associative, as
+an example, but the situation is much more dire. The
+<span class="small-caps">ieee</span> 754 standard (<a id="x1-2002"></a>2019) specifies the result of each
+individual operation under a given rounding mode, but a
+real numerical program is a composition of operations,
+and the standard says little about composition. A fused
+multiply-add computes <span class="mathjax-inline">\(a\cdot b + c\)</span> with a single rounding where two
+separate operations would round twice; a vectorized dot
+product sums partial results in an order chosen by the
+hardware; and a threaded <span class="small-caps">blas</span> reassociates a reduction
+differently depending on how many cores happened to be
+available.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-2003f1"></a> 
+Each of these is standards-conformant while none is
+deterministic across hosts.
+</p><!-- l. 62 --><p class="indent">   The treatment of floating-point representation in Hoon by
+<a id="x1-2005"></a><code>~lagrev-nocfep</code> (2024) established the foundation for Urbit’s
+deterministic numerical computing stack. This article
+expounds both the state of the art of Urbit’s basic numerical
+packaging and the next layer: dense linear algebra, where the
+nondeterminism of conventional <span class="small-caps">blas</span> and <span class="small-caps">ieee</span> 754 floating-point
+mathematics are acute and consequential. We introduce
+SoftBLAS,<span class="footnote-mark"><a href="#fn2x0"><sup class="textsuperscript">2</sup></a></span><a id="x1-2006f2"></a> 
+a software-defined <span class="small-caps">blas</span> package;
+SoftUnum,<span class="footnote-mark"><a href="#fn3x0"><sup class="textsuperscript">3</sup></a></span><a id="x1-2009f3"></a> 
+a software-defined universal number (unum) package; and
+other components of a C-based numerical stack that is
+deterministic and compliant with the Hoon specification. We
+further describe the “ray” data structure which facilitates the
+                                                
+                                                
+type dispatch for different numeric representations while
+preserving identity between Nock-specified atoms and
+C-recognized arrays.
+</p><!-- l. 64 --><p class="indent">   The central conceit is architectural. In conventional
+high-performance computing, C (or Fortran) takes
+primacy: the C implementation is what runs,
+and correctness is in some sense whatever the C
+does.<span class="footnote-mark"><a href="#fn4x0"><sup class="textsuperscript">4</sup></a></span><a id="x1-2011f4"></a> 
+Urbit inverts this relationship. The Hoon/Nock <span class="small-caps">isa</span>
+implementation is the specification; the C jet is an optimization
+that is <span class="ec-lmri-10">obligated </span>to produce the specification’s exact output for
+every input, and should be discarded silently whenever
+it cannot. Determinism then is not merely a testable
+desideratum but a mandate whose violation the Nock-side
+architecture cannot express.
+   
+</p>
+   <h3 class="sectionHead" id="background-and-literature"><span class="titlemark">2   </span> <a id="x1-30002"></a>Background and Literature</h3>
+<!-- l. 68 --><p class="noindent">Although the solution of partial differential equations is one of
+the oldest significant applications of computing (<a id="x1-3001"></a>Charney,
+Fjortoft, and Neumann, 1950), no standard library emerged
+for decades—unsurprising given the churn of hardware
+architectures, the diversity of numerical methods, the lack of a
+common interface definition, the rapid evolution of programming
+languages, and the active development of linear algebraic
+algorithms.<span class="footnote-mark"><a href="#fn5x0"><sup class="textsuperscript">5</sup></a></span><a id="x1-3002f5"></a> 
+Given that situation, rigorous bitwise determinism was a concern
+of vanishingly small importance, whether cross-platform
+or even for serial runs on the same machine. However,
+over time the advent of high-performance computing, the
+emergence of <span class="small-caps">blas</span> as a pseudo-standard, and the increasing
+                                                
+                                                
+importance of reproducibility in numerical computing
+have made determinism both more pressing and more
+achievable.
+   
+</p>
+   <h4 class="subsectionHead" id="blas-as-a-pseudostandard"><span class="titlemark">2.1   </span> <a id="x1-40002.1"></a>BLAS as a pseudo-standard</h4>
+<!-- l. 72 --><p class="noindent">The Basic Linear Algebra Subprograms originate with
+Lawson, Hanson, Kincaid, and Krogh’s 1979 specification of
+vector operations on strided arrays (<a id="x1-4001"></a>Lawson et al., 1979),
+later extended to matrix-vector (Level 2) and matrix-matrix
+(Level 3) routines. The levels track both chronology and
+(naïve) asymptotic cost: Level 1 is <span class="mathjax-inline">\(O(n)\)</span>, Level 2 is <span class="mathjax-inline">\(O(n^2)\)</span>, Level 3 is <span class="mathjax-inline">\(O(n^3)\)</span>.
+<span class="small-caps">blas</span> is less a standard than a pseudo-standard—a widely
+honored set of names and calling conventions (?axpy, ?gemv,
+?gemm, with type prefixes s, d, c, z) with many independent
+implementations. (The original <span class="small-caps">blas</span> predated floating-point
+standardization as <span class="small-caps">ieee</span> 754 by several years.) That plurality is
+exactly the problem for a consensus system: two conforming
+<span class="small-caps">blas</span> libraries routinely disagree in the low bits, and the
+same library disagrees with itself across machines and
+thread counts. Despite this fuzziness, <span class="small-caps">blas</span> quickly took its
+place as the bedrock layer of numerical and scientific
+computation.
+   
+</p>
+   <h4 class="subsectionHead" id="sources-of-floatingpoint-nondeterminism"><span class="titlemark">2.2   </span> <a id="x1-50002.2"></a>Sources of floating-point nondeterminism</h4>
+<!-- l. 77 --><p class="noindent">Cross-host divergence in a <span class="small-caps">blas</span> computation has a small
+number of recurring causes:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><span class="ec-lmri-10">Reduction  order</span>.  Floating-point  addition  is  not
+                                                
+                                                
+     associative, so a dot product or a gemm inner loop
+     summed in a different order yields a different rounded
+     result;  tiled  and  multithreaded  implementations
+     choose that order at run time.
+     </li>
+     <li class="itemize"><span class="ec-lmri-10">Fused multiply-add</span>. Hardware that contracts <span class="mathjax-inline">\(a\cdot b + c\)</span> to one
+     rounding produces different bits than two roundings,
+     and whether contraction happens is a compiler- and
+     target-dependent decision.
+     </li>
+     <li class="itemize"><span class="ec-lmri-10">Vectorization      and      instruction      selection</span>.
+     <span class="small-caps">simd</span> horizontal sums, x87 80-bit intermediates, and
+     differing libm-style kernels for fast paths all perturb
+     the last bits.
+     </li>
+     <li class="itemize"><span class="ec-lmri-10">Transcendental functions</span>. The elementary functions
+     are not specified to the bit by <span class="small-caps">ieee</span> 754 at all, and
+     every platform libm differs in its implementation.</li></ul>
+<!-- l. 86 --><p class="noindent"><a id="x1-5001"></a><code>~lagrev-nocfep</code> further enumerated other reasons that
+contemporary floating-point mathematics cannot be
+considered deterministic even when single-threaded
+on a particular hardware target and instruction set
+architecture.<span class="footnote-mark"><a href="#fn6x0"><sup class="textsuperscript">6</sup></a></span><a id="x1-5002f6"></a> 
+   
+</p>
+   <h4 class="subsectionHead" id="reproducibility"><span class="titlemark">2.3   </span> <a id="x1-60002.3"></a>Reproducibility</h4>
+                                                
+                                                
+<!-- l. 91 --><p class="noindent">Numerical determinism, or for our purposes synonymously
+reproducibility, requires that a computation yield the same
+result to the bit regardless of the platform on which it is
+carried out. This would not necessarily require the same
+algorithmic implementation in all cases (since all correct
+algorithms should converge on the true value given enough
+runway), but in practice floating-point quirks force this
+consideration in almost all cases.
+</p><!-- l. 93 --><p class="indent">   Projects like ReproBLAS have yielded reproducible
+summation (independent of summation order) through
+error-free transformations and pre-rounding (<a id="x1-6001"></a>Demmel and
+Nguyen, 2013). Intel’s Conditional Numerical Reproducibility
+offers run-to-run consistency within a fixed code path under
+documented constraints (<a id="x1-6002"></a>Intel Corporation, 2023). The
+<span class="small-caps">plasma</span> and <span class="small-caps">magma</span> projects (<a id="x1-6003"></a>Agullo et al., 2009) took
+the opposite design stance for performance: dynamic,
+dependency-driven scheduling that deliberately does not
+fix reduction order, which is excellent for throughput
+and fatal for bit-reproducibility. On the scalar side,
+correctly rounded elementary-function libraries—<span class="small-caps">cr-libm</span>
+(<a id="x1-6004"></a>Daramy et al., 2003), <span class="small-caps">rlibm</span> (<a id="x1-6005"></a>Lim and Nagarakatte,
+2021), and the <span class="small-caps">core-math</span> project (<a id="x1-6006"></a><span class="small-caps">core-math</span> Project,
+2022)—show that the transcendentals can be pinned down to
+the last bit, at a cost.
+</p><!-- l. 96 --><p class="indent">   Urbit is distinguished by its requirement that determinism
+be not one option among many but a first-class feature of the
+OS and runtime. This requirement is structurally enforced by
+the Nock <span class="small-caps">isa</span>–jetted runtime relationship. Jets utilize
+relatively faster code paths and reductions but produce
+the identical result as the slow path: the specification
+is authoritative. Thus linear algebra techniques, even
+those following the <span class="small-caps">blas</span> pseudo-standard, must follow a
+reproducible fast path on all supported architectures.
+   
+</p>
+   <h3 class="sectionHead" id="deterministic-architecture"><span class="titlemark">3   </span> <a id="x1-70003"></a>Deterministic Architecture</h3>
+                                                
+                                                
+<!-- l. 100 --><p class="noindent">A Nock computation is a pure function from noun to noun. A
+<span class="ec-lmri-10">jet </span>is a native routine registered against a named Hoon core;
+when the interpreter evaluates that core, it may run the jet
+instead of the Nock. The iron discipline that makes this sound
+is simple: the jet must produce the same noun as the Hoon,
+for every input, or it is a bug in the runtime. A divergence
+between jet and specification is termed a <span class="ec-lmri-10">jet mismatch</span>
+and is treated as a correctness failure, not a numerical
+tolerance.
+</p><!-- l. 102 --><p class="indent">   The Hoon (or its compiled result as Nock) is therefore the
+specification, in the strong sense that it defines what the right
+answer <span class="ec-lmri-10">is</span>. The C jet is an accelerant with no semantic
+authority. In some cases, the jet may decline: if a native
+routine returns the sentinel u3_none, the interpreter falls
+through and evaluates the Hoon directly. The consequence for
+numerics is that an arithmetic kind with no jet, or with a jet
+that punts on some inputs, is not unsupported—it is merely
+slow. The specification still runs, and the answer is still
+defined and still deterministic, because Hoon over exact nouns
+is deterministic by construction.
+</p><!-- l. 104 --><p class="indent">   This crystallizes, or perhaps even inverts, the usual
+relationship between correctness and performance. In
+conventional <span class="small-caps">hpc</span>, one has an optimized C or Fortran program,
+the optimized C arguably <span class="ec-lmri-10">is </span>the program and its source
+reference implementation is documentation (to say nothing
+of its documentation). There may of course be bugs in
+the compiled code, but the optimized program is the
+concrete artifact. By contrast in Urbit, the optimized
+C program must justify itself against an independent
+authoritative definition. Determinism follows from two facts:
+the specification is a pure function of its inputs, and
+the jet is contractually bit-identical to the specification.
+A host without the jet computes the same bits more
+slowly; a divergent jet is non-conforming and must be
+repaired.
+</p><!-- l. 107 --><p class="indent">   For our linked implementations like SoftBLAS, this means
+the library is never permitted to be “approximately”
+the specification. A gemm jet that summed its inner
+products in a hardware-chosen order would be a
+                                                
+                                                
+mismatch even if every individual rounding were <span class="small-caps">ieee</span>
+754-correct, because the Hoon specification sums them
+in one fixed order and the jet must reproduce that
+number.<span class="footnote-mark"><a href="#fn7x0"><sup class="textsuperscript">7</sup></a></span><a id="x1-7001f7"></a> 
+Our <span class="small-caps">blas</span> must satisfy the constraint of determinism to be
+admissible as a jet at all; thus, SoftBLAS was developed on
+top of SoftFloat (<a id="x1-7003"></a>Hauser, 2018). This yields correctness and
+consistency rather than hardware-optimized performance.
+   
+</p>
+   <h4 class="subsectionHead" id="the-numerical-stack"><span class="titlemark">3.1   </span> <a id="x1-80003.1"></a>The numerical stack</h4>
+<!-- l. 113 --><p class="noindent">Urbit natively supports <span class="small-caps">ieee</span> 754 floating-point mathematics
+in its %base distribution, and through the supplied numerical
+stack additionally supports unums (posits and quires);
+complex <span class="small-caps">ieee</span> 754; two’s complement integers; and fixed-point
+mathematics.
+</p><!-- l. 115 --><p class="indent">   The numerical libraries are layered as follows; each layer is
+Hoon-normative with optional, independently verifiable C
+jets.
+</p><!-- l. 118 --><p class="indent">
+     </p><ol class="enumerate1">
+<li class="enumerate" id="x1-8002x1">
+     <!-- l. 120 --><p class="noindent"><span class="ec-lmri-10">Libraries</span>. Imported from /lib at compile time.
+         </p><ol class="enumerate2">
+<li class="enumerate" id="x1-8004x1">/lib/math.  The  basic  <span class="small-caps">ieee</span>  754  arithmetic
+         and transcendental functions library supports
+         four precisions (16-bit @rh, 32-bit @rs, 64-bit
+         @rd,  and  128-bit  @rq)  across  a  battery  of
+                                                
+                                                
+         functions  like  exponentiation  and  logarithm,
+         trigonometric                                       and
+         inverse-trigonometric  functions,  and  rounding
+         and    comparison    utilities.    Transcendental
+         functions   are   implemented   as   Chebyshev
+         minimax polynomials with Cody–Waite range
+         reduction (<a id="x1-8005"></a>Cody and Waite, 1980). Jets run on
+         SoftFloat (<a id="x1-8006"></a>Hauser, 2018). Originally composed
+         by <code>~lagrev-nocfep</code> and <code>~mopfel-winrux</code>.
+         </li>
+<li class="enumerate" id="x1-8008x2">/lib/twoc.
+         A two’s-complement integer arithmetic package
+         supporting   scalar   operations.   Jetted   with
+         an  internal  library  against  <span class="small-caps">gmp</span>.  Originally
+         composed by <code>~litlep-nibbyt</code>.
+         </li>
+<li class="enumerate" id="x1-8010x3">/lib/fixed.  Fixed-point  (Q-format)  arithmetic
+         at power-of-two total widths. Unjetted beyond
+         standard  integer  arithmetic  jets  because  de
+         facto   integer   mathematics   hold.   Originally
+         composed by <code>~lagrev-nocfep</code>.
+         </li>
+<li class="enumerate" id="x1-8012x4">/lib/unum.
+         2022-standard posit arithmetic (<a id="x1-8013"></a>Posit Working
+         Group, 2022) at five widths (8-bit @rpb; 16-bit
+         @rph; 32-bit @rps; 64-bit @rpd; 128-bit @rpq,
+         i.e. posit8 through posit128), <span class="mathjax-inline">\(es=\text {2}\)</span> throughout, with
+         quire accumulation. See Section <a href="#verification">6.1<!-- tex4ht:ref: sec:verify  --></a> on oracle
+         coverage.  Jetted  with  SoftUnum.  Originally
+         composed by <code>~lagrev-nocfep</code>.
+         </li>
+                                                
+                                                
+<li class="enumerate" id="x1-8015x5">/lib/complex. Complex arithmetic over the four
+         <span class="small-caps">ieee</span> 754 precisions, riding on the scalar float
+         layer. Originally composed by <code>~lagrev-nocfep</code>.</li></ol>
+     </li>
+<li class="enumerate" id="x1-8017x2"><span class="ec-lmri-10">Lagoon (Linear AlGebra in hOON)</span>. A rank-<span class="mathjax-inline">\(N\)</span> array
+     library (a $ray) carrying a $kind field that dispatches to
+     the appropriate arithmetic: %i754, %uint, %int2,
+     %unum, %cplx, %fixp. Storage is row-major and
+     identical in memory layout to underlying runtime arrays;
+     the %i754 Level-3 path is jetted through SoftBLAS and
+     the %unum path is jetted through SoftUnum. Composed
+     by <code>~lagrev-nocfep</code> and <code>~mopfel-winrux</code>.
+     </li>
+<li class="enumerate" id="x1-8019x3"><span class="ec-lmri-10">Saloon (Scientific ALgorithms in hOON)</span>. Scientific
+     algorithms over Lagoon rays. Types correspond to the Lagoon
+     field. Element-wise transcendentals are dispatched through
+     /lib/math, and dense routines such as the Jacobi symmetric
+     eigendecomposition.<span class="footnote-mark"><a href="#fn8x0"><sup class="textsuperscript">8</sup></a></span><a id="x1-8020f8"></a> 
+     Composed by <code>~lagrev-nocfep</code> and <code>~mopfel-winrux</code>.
+     </li>
+<li class="enumerate" id="x1-8023x4"><span class="ec-lmri-10">Maroon (MAchine leaRning in hOON)</span>. An inchoate
+     machine learning library built atop Lagoon and
+     Saloon.</li></ol>
+<!-- l. 133 --><p class="noindent">The single most consequential design choice is Lagoon’s $kind
+dispatch with fall-through (Listing <a href="#x1-8026r1">1<!-- tex4ht:ref: lst:ray  --></a>). One basic array type
+serves six arithmetics; adding a seventh requires only a
+                                                
+                                                
+Hoon implementation, and a jet for it is optional and
+separately auditable. This is architecturally distinct from
+NumPy (which supplies one dtype per array with no
+in-band kind tag); from Julia (which has compile-time
+specialization per concrete type); and from the <span class="small-caps">apl</span>/J/K
+tradition (which supply a uniform numeric tower with no
+explicit kind dispatch). Because an un-jetted kind still
+runs its Hoon, the specification is authoritative for every
+kind, jetted or not. Two other features of $ray’s design
+call attention: the <span class="small-caps">msb</span> pinned 1 bit, which preserves
+otherwise-stripped leading zeroes in atoms and thus makes the
+atom representation exactly match the expected C memory
+layout of an array; and the tail=* arbitrary noun specialization
+field, which preserves jet axis addresses in case of future
+extension.<span class="footnote-mark"><a href="#fn9x0"><sup class="textsuperscript">9</sup></a></span><a id="x1-8024f9"></a> 
+</p>
+   <!-- l. 136 -->
+                                                
+                                                
+   <figure class="float" id="x1-8026r1"><span id="caption-"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 1:
+    </span><span class="content">Lagoon
+    base
+    types.
+    From
+    /sur/lagoon.</span></figcaption><!-- tex4ht:label?: x1-8026r3.1  --><pre class="lstlisting" id="listing-1"><span class="label"><a id="x1-8027r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">ray</span>               </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$ray:  n-dimensional array</span> 
+</span><span class="label"><a id="x1-8028r2"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$:  </span><span class="ec-lmtt-9">=meta</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">descriptor</span> 
+</span><span class="label"><a id="x1-8029r3"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">data=@ux</span>        </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">data, row-major order</span> 
+</span><span class="label"><a id="x1-8030r4"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span> 
+</span><span class="label"><a id="x1-8031r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8032r6"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">prec  [a=@ b=@]</span>   </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">fixed-point precision</span> 
+</span><span class="label"><a id="x1-8033r7"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">meta</span>              </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$meta:  metadata for a $ray</span> 
+</span><span class="label"><a id="x1-8034r8"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$:  </span><span class="ec-lmtt-9">shape=(</span><span class="ec-lmtk-10x-x-90">list @</span><span class="ec-lmtt-9">)</span>  </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">list of dimension lengths</span> 
+</span><span class="label"><a id="x1-8035r9"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">=bloq</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">logarithm of bitwidth</span> 
+</span><span class="label"><a id="x1-8036r10"></a><span class="ec-lmr-5">10</span></span><span style="color:#000000">      <span class="ec-lmtt-9">=kind</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">name of data type</span> 
+</span><span class="label"><a id="x1-8037r11"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">tail=*</span>          </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">per-kind specialization data</span> 
+</span><span class="label"><a id="x1-8038r12"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span> 
+</span><span class="label"><a id="x1-8039r13"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8040r14"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">kind</span>              </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$kind:  type of array scalars</span> 
+</span><span class="label"><a id="x1-8041r15"></a><span class="ec-lmr-5">15</span></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$?  </span><span class="ec-lmtt-9">%i754</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">IEEE 754 float</span> 
+</span><span class="label"><a id="x1-8042r16"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%uint</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">unsigned integer</span> 
+</span><span class="label"><a id="x1-8043r17"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%int2</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">2s-complement integer (/lib/twoc)</span> 
+</span><span class="label"><a id="x1-8044r18"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%unum</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">unum/posit (/lib/unum)</span> 
+</span><span class="label"><a id="x1-8045r19"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%cplx</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">complex (/lib/complex)</span> 
+</span><span class="label"><a id="x1-8046r20"></a><span class="ec-lmr-5">20</span></span><span style="color:#000000">      <span class="ec-lmtt-9">%fixp</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">fixed-point Q a.b (/lib/fixed)</span> 
+</span><span class="label"><a id="x1-8047r21"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span> 
+</span><span class="label"><a id="x1-8048r22"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8049r23"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">baum</span>              </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$baum:  ndray with metadata</span> 
+</span><span class="label"><a id="x1-8050r24"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$:  </span><span class="ec-lmtt-9">=meta</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8051r25"></a><span class="ec-lmr-5">25</span></span><span style="color:#000000">      <span class="ec-lmtt-9">data=ndray</span>      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8052r26"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span> 
+</span><span class="label"><a id="x1-8053r27"></a></span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span> 
+<span class="label"><a id="x1-8054r28"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">ndray</span>             </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$ndray:  n-dim array as list</span> 
+</span><span class="label"><a id="x1-8055r29"></a></span><span style="color:#000000">    <span class="ec-lmtk-10x-x-90">$@  @</span>             </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">single item</span> 
+</span><span class="label"><a id="x1-8056r30"></a><span class="ec-lmr-5">30</span></span><span style="color:#000000">    <span class="ec-lmtt-9">(</span><span class="ec-lmtk-10x-x-90">list </span><span class="ec-lmtt-9">ndray)</span>      </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">nonempty list of children</span></span></pre>
+                                                
+                                                
+   </figure>
+   
+   <h4 class="subsectionHead" id="softblas-and-softunum"><span class="titlemark">3.2   </span> <a id="x1-90003.2"></a>SoftBLAS and SoftUnum</h4>
+<!-- l. 174 --><p class="noindent">At the current time, two external numerical libraries
+facilitate the runtime jets: SoftBLAS and SoftUnum.
+Both are software-defined, deterministic, and
+cross-platform.<span class="footnote-mark"><a href="#fn10x0"><sup class="textsuperscript">10</sup></a></span><a id="x1-9001f10"></a> 
+   
+</p>
+   <h5 class="subsubsectionHead" id="softblas"><span class="titlemark">3.2.1   </span> <a id="x1-100003.2.1"></a>SoftBLAS</h5>
+<!-- l. 177 --><p class="noindent">SoftBLAS is built on Berkeley SoftFloat 3e (<a id="x1-10001"></a>Hauser,
+2018). Following SoftFloat, it requires a C99-compliant
+host and passes all floating-point quantities by value.
+Every arithmetic primitive used by every routine is a
+SoftFloat call: there is no path to a hardware floating-point
+instruction, and therefore no path to hardware-dependent
+rounding, contraction, or intermediate precision. For
+reasons enumerated by <a id="x1-10002"></a><code>~lagrev-nocfep</code> (2024), this is
+one of the only current methods which guarantees that
+the output of a floating-point computation is a pure
+function of its inputs, and therefore deterministic across
+hosts.<span class="footnote-mark"><a href="#fn11x0"><sup class="textsuperscript">11</sup></a></span><a id="x1-10003f11"></a> 
+</p><!-- l. 179 --><p class="indent">   SoftBLAS covers the four <span class="small-caps">ieee</span> 754 binary precisions used
+across the stack: half (h), single (s), double (d), and quadruple
+                                                
+                                                
+(q).<span class="footnote-mark"><a href="#fn12x0"><sup class="textsuperscript">12</sup></a></span><a id="x1-10006f12"></a> 
+Routines follow the <span class="small-caps">blas</span> prefixing convention extended to the
+half and quad types. Real-valued routines across all three
+levels supply a subset sufficient for Lagoon requirements as of
+the cited release; complex-valued routines are in progress but
+sufficient to support Lagoon’s requirements.
+</p>
+   <div class="table">
+                                                
+                                                
+<!-- l. 181 --><p class="indent">   </p><figure class="float" id="x1-10008r1"><span id="softblas-coverage-by-level-realvalued"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 1: </span><span class="content">SoftBLAS coverage by level (real-valued).      </span></figcaption><!-- tex4ht:label?: x1-10008r1  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-2"><colgroup id="TBL-2-1g"><col id="TBL-2-1" /><col id="TBL-2-2" /><col id="TBL-2-3" /></colgroup><tr id="TBL-2-1-" style="vertical-align:baseline;"><td class="td01" id="TBL-2-1-1" style="white-space:nowrap; text-align:left;">Level  </td><td class="td11" id="TBL-2-1-2" style="white-space:nowrap; text-align:left;"> Cost  </td><td class="td10" id="TBL-2-1-3" style="white-space:nowrap; text-align:left;"> Representative routines                   </td>
+</tr><tr id="TBL-2-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-2-2-1" style="white-space:nowrap; text-align:left;">1        </td><td class="td11" id="TBL-2-2-2" style="white-space:nowrap; text-align:left;"> <span class="mathjax-inline">\(O(n)\)</span>     </td><td class="td10" id="TBL-2-2-3" style="white-space:nowrap; text-align:left;"> ?dot, ?axpy, ?scal, ?nrm2, ?asum, etc.</td>
+</tr><tr id="TBL-2-3-" style="vertical-align:baseline;"><td class="td01" id="TBL-2-3-1" style="white-space:nowrap; text-align:left;">2        </td><td class="td11" id="TBL-2-3-2" style="white-space:nowrap; text-align:left;"> <span class="mathjax-inline">\(O(n^2)\)</span>     </td><td class="td10" id="TBL-2-3-3" style="white-space:nowrap; text-align:left;"> ?gemv                                          </td>
+</tr><tr id="TBL-2-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-2-4-1" style="white-space:nowrap; text-align:left;">3        </td><td class="td11" id="TBL-2-4-2" style="white-space:nowrap; text-align:left;"> <span class="mathjax-inline">\(O(n^3)\)</span>     </td><td class="td10" id="TBL-2-4-3" style="white-space:nowrap; text-align:left;"> ?gemm                                         </td>
+
+</tr></table>                                           </div>
+                                                
+                                                
+   </figure>
+   </div>
+<!-- l. 196 --><p class="indent">   The rounding mode is a global, softblas_roundingMode (a char
+typedef declared in softblas.h) interpreted by the underlying SoftFloat
+layer.<span class="footnote-mark"><a href="#fn13x0"><sup class="textsuperscript">13</sup></a></span><a id="x1-10009f13"></a> 
+The admissible values are the SoftFloat 3e rounding
+modes (round to nearest even, round toward zero,
+round toward <span class="mathjax-inline">\(+\infty \)</span>, round toward <span class="mathjax-inline">\(-\infty \)</span>, and round to
+nearest-away).<span class="footnote-mark"><a href="#fn14x0"><sup class="textsuperscript">14</sup></a></span><a id="x1-10011f14"></a> 
+The default is round to nearest-even, %n. The Hoon
+specification names the rounding mode in the %base
+distribution, and the jet is required to honor it.
+</p><!-- l. 198 --><p class="indent">   SoftBLAS satisfies three conditions that conventional <span class="small-caps">blas</span>
+libraries do not:
+     </p><ol class="enumerate1">
+<li class="enumerate" id="x1-10014x1"><span class="ec-lmri-10">Fixed          reduction          order</span>.            Every
+     reduction (dot products, gemm inner loops, norms)
+     sums in one canonical order, identical to the order
+     the Hoon specification uses. No tiling or threading is
+     permitted to reassociate it. (Urbit runtimes are, in
+     any case, single-threaded at the time of writing.)
+     </li>
+<li class="enumerate" id="x1-10016x2"><span class="ec-lmri-10">No contraction. </span>Multiply-add is two roundings, never
+     a fused one, because the specification rounds twice.
+     There is no <span class="small-caps">fma</span> path, which as <a id="x1-10017"></a><code>~lagrev-nocfep</code> (2024)
+     exhibited is prone to nondeterminism.
+                                                
+                                                
+     </li>
+<li class="enumerate" id="x1-10019x3"><span class="ec-lmri-10">Software  rounding.  </span>All  rounding  is  performed  by
+     SoftFloat in software, so it is identical on every host
+     regardless of native floating-point behavior.</li></ol>
+   
+   <h5 class="subsubsectionHead" id="softunum"><span class="titlemark">3.2.2   </span> <a id="x1-110003.2.2"></a>SoftUnum</h5>
+<!-- l. 208 --><p class="noindent">SoftUnum is a software-defined universal number (unum)
+library that implements the 2022 posit standard (<a id="x1-11001"></a>Posit
+Working Group, 2022). It supports five widths (8, 16, 32, 64,
+and 128 bits) with <span class="mathjax-inline">\(es=\text {2}\)</span> throughout. The quire accumulator is
+implemented in software and is bit-identical across hosts. The
+library is jetted into Lagoon’s %unum kind.
+   
+</p>
+   <h3 class="sectionHead" id="types"><span class="titlemark">4   </span> <a id="x1-120004"></a>Types</h3>
+<!-- l. 212 --><p class="noindent">The mathematical base types are enumerated in Listing <a href="#x1-12003r2">2<!-- tex4ht:ref: lst:types  --></a>.
+These have occasioned the introduction of several new
+atom auras, given in Table <a href="#existing-and-new-atom-auras-from-surlagoon">2<!-- tex4ht:ref: tab:auras  --></a>. We have not introduced
+an aura for two’s-complement integers at the current
+time, but these will likely nest under @s (signed integer)
+in the future. The @rqb through @rqq auras are quire
+accumulators for the corresponding posit widths,
+and are intended for internal algorithms not general
+use.<span class="footnote-mark"><a href="#fn15x0"><sup class="textsuperscript">15</sup></a></span><a id="x1-12001f15"></a> 
+</p>
+   <!-- l. 214 -->
+                                                
+                                                
+   <figure class="float" id="x1-12003r2"><span id="caption-1"></span><span></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Listing 2:
+    </span><span class="content">Mathematical
+    base
+    types.
+    From
+    /sur/lagoon.</span></figcaption><!-- tex4ht:label?: x1-12003r4  --><pre class="lstlisting" id="listing-2"><span class="label"><a id="x1-12004r1"></a></span><span style="color:#000000"><span class="ec-lmtk-10x-x-90">+$</span></span><span style="color:#000000">  <span class="ec-lmtt-9">kind</span>              </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">$kind:  type of array scalars</span> 
+</span><span class="label"><a id="x1-12005r2"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">$?  </span><span class="ec-lmtt-9">%i754</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">IEEE 754 float</span> 
+</span><span class="label"><a id="x1-12006r3"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%uint</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">unsigned integer</span> 
+</span><span class="label"><a id="x1-12007r4"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%int2</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">2s-complement integer (/lib/twoc)</span> 
+</span><span class="label"><a id="x1-12008r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">      <span class="ec-lmtt-9">%unum</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">unum/posit (/lib/unum)</span> 
+</span><span class="label"><a id="x1-12009r6"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%cplx</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">complex (/lib/complex)</span> 
+</span><span class="label"><a id="x1-12010r7"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">%fixp</span>           </span><span style="color:#404040"><span class="ec-lmtti-10x-x-90">::</span></span><span style="color:#404040">  <span class="ec-lmtti-10x-x-90">fixed-point Q a.b (/lib/fixed)</span> 
+</span><span class="label"><a id="x1-12011r8"></a></span><span style="color:#000000">  <span class="ec-lmtk-10x-x-90">==</span></span></pre>
+                                                
+                                                
+   </figure>
+   <div class="table">
+                                                
+                                                
+<!-- l. 228 --><p class="indent">   </p><figure class="float" id="x1-12012r2"><span id="existing-and-new-atom-auras-from-surlagoon"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 2: </span><span class="content">Existing and new atom auras. From /sur/lagoon.</span></figcaption><!-- tex4ht:label?: x1-12012r2  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-3"><colgroup id="TBL-3-1g"><col id="TBL-3-1" /><col id="TBL-3-2" /></colgroup><tr id="TBL-3-1-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-1-1" style="white-space:nowrap; text-align:right;">Atom aura  </td><td class="td10" id="TBL-3-1-2" style="white-space:nowrap; text-align:left;"> Description                                             </td>
+</tr><tr id="TBL-3-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-2-1" style="white-space:nowrap; text-align:right;">    @rh    </td><td class="td10" id="TBL-3-2-2" style="white-space:nowrap; text-align:left;"> 16-bit <span class="small-caps">ieee</span> 754 float                                 </td></tr><tr id="TBL-3-3-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-3-1" style="white-space:nowrap; text-align:right;"> @rs   </td><td class="td10" id="TBL-3-3-2" style="white-space:nowrap; text-align:left;"> 32-bit <span class="small-caps">ieee</span> 754 float</td>
+</tr><tr id="TBL-3-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-4-1" style="white-space:nowrap; text-align:right;">    @rd    </td><td class="td10" id="TBL-3-4-2" style="white-space:nowrap; text-align:left;"> 64-bit <span class="small-caps">ieee</span> 754 float                                 </td></tr><tr id="TBL-3-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-5-1" style="white-space:nowrap; text-align:right;"> @rq   </td><td class="td10" id="TBL-3-5-2" style="white-space:nowrap; text-align:left;"> 128-bit <span class="small-caps">ieee</span> 754 float</td>
+
+</tr><tr id="TBL-3-6-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-6-1" style="white-space:nowrap; text-align:right;">    @rpb   </td><td class="td10" id="TBL-3-6-2" style="white-space:nowrap; text-align:left;"> 8-bit posit                                               </td>
+</tr><tr id="TBL-3-7-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-7-1" style="white-space:nowrap; text-align:right;">    @rph   </td><td class="td10" id="TBL-3-7-2" style="white-space:nowrap; text-align:left;"> 16-bit posit                                             </td>
+</tr><tr id="TBL-3-8-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-8-1" style="white-space:nowrap; text-align:right;">     @rps   </td><td class="td10" id="TBL-3-8-2" style="white-space:nowrap; text-align:left;"> 32-bit posit                                             </td>
+</tr><tr id="TBL-3-9-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-9-1" style="white-space:nowrap; text-align:right;">    @rpd   </td><td class="td10" id="TBL-3-9-2" style="white-space:nowrap; text-align:left;"> 64-bit posit                                             </td>
+</tr><tr id="TBL-3-10-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-10-1" style="white-space:nowrap; text-align:right;">    @rpq   </td><td class="td10" id="TBL-3-10-2" style="white-space:nowrap; text-align:left;"> 128-bit posit                                            </td>
+</tr><tr id="TBL-3-11-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-11-1" style="white-space:nowrap; text-align:right;">    @rqbH  </td><td class="td10" id="TBL-3-11-2" style="white-space:nowrap; text-align:left;"> 8-bit quire (128-bit accumulator for @rpb)     </td>
+</tr><tr id="TBL-3-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-12-1" style="white-space:nowrap; text-align:right;">     @rqhI  </td><td class="td10" id="TBL-3-12-2" style="white-space:nowrap; text-align:left;"> 16-bit quire (256-bit accumulator for @rph)   </td>
+</tr><tr id="TBL-3-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-13-1" style="white-space:nowrap; text-align:right;">     @rqsJ  </td><td class="td10" id="TBL-3-13-2" style="white-space:nowrap; text-align:left;"> 32-bit quire (512-bit accumulator for @rps)   </td>
+</tr><tr id="TBL-3-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-14-1" style="white-space:nowrap; text-align:right;">    @rqdK  </td><td class="td10" id="TBL-3-14-2" style="white-space:nowrap; text-align:left;"> 64-bit quire (1024-bit accumulator for @rpd) </td>
+</tr><tr id="TBL-3-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-15-1" style="white-space:nowrap; text-align:right;">    @rqqL  </td><td class="td10" id="TBL-3-15-2" style="white-space:nowrap; text-align:left;"> 128-bit quire (2048-bit accumulator for @rpq)</td>
+
+</tr><tr id="TBL-3-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-16-1" style="white-space:nowrap; text-align:right;">    @ch    </td><td class="td10" id="TBL-3-16-2" style="white-space:nowrap; text-align:left;"> 32-bit complex (two 16-bit floats)                </td>
+</tr><tr id="TBL-3-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-17-1" style="white-space:nowrap; text-align:right;">     @cs    </td><td class="td10" id="TBL-3-17-2" style="white-space:nowrap; text-align:left;"> 64-bit complex (two 32-bit floats)                </td>
+</tr><tr id="TBL-3-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-18-1" style="white-space:nowrap; text-align:right;">    @cd    </td><td class="td10" id="TBL-3-18-2" style="white-space:nowrap; text-align:left;"> 128-bit complex (two 64-bit floats)               </td>
+</tr><tr id="TBL-3-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-3-19-1" style="white-space:nowrap; text-align:right;">    @cq    </td><td class="td10" id="TBL-3-19-2" style="white-space:nowrap; text-align:left;"> 256-bit complex (two 128-bit floats)             </td>
+
+</tr></table>                                         </div>
+                                                
+                                                
+   </figure>
+   </div>
+<!-- l. 260 --><p class="indent">   Aura types have been named after the target width in the
+cases of complex numbers and quires.
+   
+</p>
+   <h3 class="sectionHead" id="contributions"><span class="titlemark">5   </span> <a id="x1-130005"></a>Contributions</h3>
+<!-- l. 264 --><p class="noindent">This deterministic numerical stack contributes several
+properties to the broader discussion of numerical determinism
+and reproducibility. Determinism is a structural property of
+Urbit: while reproducible floating point is a standing goal of
+several parties (<a id="x1-13001"></a>Demmel and Nguyen (2013); <a id="x1-13002"></a>Intel Corporation
+(2023)), Urbit contributes a first-class philosophical
+requirement.<span class="footnote-mark"><a href="#fn16x0"><sup class="textsuperscript">16</sup></a></span><a id="x1-13003f16"></a> 
+</p><!-- l. 266 --><p class="indent">   Although not novel, the library covers a broad range of
+bit widths and precisions, including half-precision and
+quadruple-precision, which are not widely supported in
+other numerical computing libraries. Likewise we provided
+faithfully-rounded elementary functions at most precisions and
+quantify their accuracy.
+</p><!-- l. 268 --><p class="indent">   Lagoon’s heterogeneous-kind array design with a single
+$ray type is a novel approach to array libraries, allowing for
+in-band kind dispatch and fall-through to specification. As
+mentioned previously, this permits more flexibility and
+extensibility in the base representation than NumPy, Julia, or
+the <span class="small-caps">apl</span>/J/K tradition. The kind field allows for easy addition
+of new numeric types without requiring changes to the
+underlying array structure, and the fall-through mechanism
+ensures that un-jetted kinds can still be computed correctly
+using the Hoon specification.
+   
+                                                
+                                                
+</p>
+   <h3 class="sectionHead" id="benchmarks"><span class="titlemark">6   </span> <a id="x1-140006"></a>Benchmarks</h3>
+<!-- l. 272 --><p class="noindent">While a software-defined floating-point library will never
+match the performance of a hardware-accelerated one, we have
+nevertheless seen impressive speedups by refining the
+algorithms and the runtime jets. The benchmarks reported
+here are for a single-threaded, single-core execution on a
+modern 64-bit compiler <span class="small-caps">cpu</span> (AArch64, Apple M4 Max).
+They should serve as order-of-magnitude indications on
+contemporary hardware.
+</p><!-- l. 274 --><p class="indent">   The first benchmark results tabulate what the jetted
+system buys over interpreting the Hoon specification directly.
+Table <a href="#elapsed-times-and-relative-slowdowns-of-ieee-jetted-chebyshev-functions-for-doubleprecision-rd-atom-operations-with-libmath-interpreted-chebyshev-functions-and-interpreted-taylor-series-functions-slowdown-is-reported-relative-to-the-fastest-case-the-jetted-chebyshev-functions">3<!-- tex4ht:ref: tab:jet  --></a> reports jetted versus interpreted time for <span class="small-caps">ieee</span> 754
+/lib/math. For most trials, 100,000 runs were evaluated and
+averaged.<span class="footnote-mark"><a href="#fn17x0"><sup class="textsuperscript">17</sup></a></span><a id="x1-14001f17"></a> 
+For the very slowest functions (e.g. half-precision Taylor series
+inverse sine), this number was modulated downwards
+substantially.<span class="footnote-mark"><a href="#fn18x0"><sup class="textsuperscript">18</sup></a></span><a id="x1-14003f18"></a> 
+The original /lib/math and Saloon implementations of
+transcendentals were naïve Taylor series expansions and serve
+as a worst-case demonstration. Accuracies are comparable for
+the number of Taylor series terms utilized to achieve an
+appropriate relative tolerance, but the Chebyshev basis
+functions are uniformly faster and more correct. All values
+reported are measured within a running Urbit ship (rather
+than from an independent test harness).
+</p><!-- l. 276 --><p class="indent">   The /lib/unum transcendentals are currently implemented
+as Chebyshev basis expansions like the /lib/math operations.
+Results are included in Table <a href="#elapsed-times-and-relative-slowdowns-of-unum-jetted-chebyshev-functions-for-bit-rps-posit-operations-with-libunum-interpreted-chebyshev-functions-jetted-taylor-series-functions-and-interpreted-taylor-series-functions-slowdown-is-reported-relative-to-the-jetted-chebyshev-functions">4<!-- tex4ht:ref: tab:unum  --></a>.
+   
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead" id="verification"><span class="titlemark">6.1   </span> <a id="x1-150006.1"></a>Verification</h4>
+<!-- l. 281 --><p class="noindent">The determinism architecture reduces correctness to one
+question per routine: does the jet equal the specification
+on every input? We answer it insofar as possible with
+oracles external to both the Hoon and C implementations.
+SoftFloat by and large served as the oracle for the <span class="small-caps">ieee</span> 754
+floating-point operations (real and complex), while the posit
+mathematics were verified against two independent references:
+SoftPosit (<a id="x1-15001"></a>Leong, 2018) (posit8, posit16, posit32) and
+the Universal library (<a id="x1-15002"></a>Omtzigt et al., 2020) (posit64,
+posit128).
+</p><!-- l. 283 --><p class="indent">   The quire’s defining property—exact accumulation until a
+single final rounding—is checked directly against an exact
+rational sum.
+</p><!-- l. 285 --><p class="indent">   Elementary functions are checked against <span class="small-caps">mpfr</span> (<a id="x1-15003"></a>Fousse
+et al., 2007) at high precision. At half precision the input
+space is <span class="mathjax-inline">\(\text {2}^\text {16}\)</span> values and the test is exhaustive; at single precision
+the <span class="mathjax-inline">\(\text {2}^\text {32}\)</span> space is likewise tested in full. At double and quadruple
+precision, where exhaustive testing is infeasible, we report
+maximum observed unit in the last place (<span class="small-caps">ulp</span>) error over a
+sampled and edge-weighted input set rather than a guarantee.
+We claim a faithful-rounding (<span class="mathjax-inline">\(\leq \text {1}\)</span> <span class="small-caps">ulp</span>) result where the
+testing supports it and a measured bound where it does
+not.
+</p><!-- l. 287 --><p class="indent">   We report the errors of the transcendental functions in terms
+of <span class="small-caps">ulp</span> error, which is a standard measure of floating-point
+accuracy.<span class="footnote-mark"><a href="#fn19x0"><sup class="textsuperscript">19</sup></a></span><a id="x1-15004f19"></a> 
+The maximum observed <span class="small-caps">ulp</span> error for each function is
+reported against an independent oracle, which is typically a
+high-precision library such as mpmath. The results are
+                                                
+                                                
+summarized in Tables <a href="#maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled">5<!-- tex4ht:ref: tab:ulp-math  --></a> and <a href="#maximum-observed-ulp-error-libunum-standard-posits-against-an-mpmathchecked-oracle-all-three-widths-are-tested-exhaustively">6<!-- tex4ht:ref: tab:ulp-unum  --></a>.
+                                                
+                                                
+</p><!-- l. 289 --><p class="indent">   </p><figure class="float" id="x1-15008r3"><span id="elapsed-times-and-relative-slowdowns-of-ieee-jetted-chebyshev-functions-for-doubleprecision-rd-atom-operations-with-libmath-interpreted-chebyshev-functions-and-interpreted-taylor-series-functions-slowdown-is-reported-relative-to-the-fastest-case-the-jetted-chebyshev-functions"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 3:  </span><span class="content">Elapsed  times  and  relative  slowdowns  of  <span class="small-caps">ieee</span>
+754 jetted Chebyshev functions for double-precision @rd
+atom operations with /lib/math, interpreted Chebyshev
+functions,   and   interpreted   Taylor   series   functions.
+Slowdown is reported relative to the fastest case, the jetted
+Chebyshev functions.                              </span></figcaption><!-- tex4ht:label?: x1-15008r3  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-4"><colgroup id="TBL-4-1g"><col id="TBL-4-1" /><col id="TBL-4-2" /><col id="TBL-4-3" /><col id="TBL-4-4" /><col id="TBL-4-5" /><col id="TBL-4-6" /></colgroup><tr id="TBL-4-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-1-1" style="white-space:nowrap; text-align:left;"> Arm     </td><td class="td11" id="TBL-4-1-2" style="white-space:nowrap; text-align:right;"> Chebyshev (jet)  </td><td class="td11" id="TBL-4-1-3" style="white-space:nowrap; text-align:right;"> Chebyshev (int.)  </td><td class="td11" id="TBL-4-1-4" style="white-space:nowrap; text-align:right;"> Taylor (int.)  </td><td class="td11" id="TBL-4-1-5" style="white-space:nowrap; text-align:right;"> C. slowdown  </td><td class="td11" id="TBL-4-1-6" style="white-space:nowrap; text-align:right;"> T. slowdown  </td>
+</tr><tr id="TBL-4-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-2-1" style="white-space:nowrap; text-align:left;"> +exp     </td><td class="td11" id="TBL-4-2-2" style="white-space:nowrap; text-align:right;">         1.67 µs  </td><td class="td11" id="TBL-4-2-3" style="white-space:nowrap; text-align:right;">          296 µs  </td><td class="td11" id="TBL-4-2-4" style="white-space:nowrap; text-align:right;">     11.0 ms  </td><td class="td11" id="TBL-4-2-5" style="white-space:nowrap; text-align:right;">        177×  </td><td class="td11" id="TBL-4-2-6" style="white-space:nowrap; text-align:right;">       6,565×  </td>
+</tr><tr id="TBL-4-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-3-1" style="white-space:nowrap; text-align:left;"> +log      </td><td class="td11" id="TBL-4-3-2" style="white-space:nowrap; text-align:right;">         1.76 µs  </td><td class="td11" id="TBL-4-3-3" style="white-space:nowrap; text-align:right;">          164 µs  </td><td class="td11" id="TBL-4-3-4" style="white-space:nowrap; text-align:right;">     13.3 ms  </td><td class="td11" id="TBL-4-3-5" style="white-space:nowrap; text-align:right;">         94×  </td><td class="td11" id="TBL-4-3-6" style="white-space:nowrap; text-align:right;">       7,600×  </td>
+</tr><tr id="TBL-4-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-4-1" style="white-space:nowrap; text-align:left;"> +sin      </td><td class="td11" id="TBL-4-4-2" style="white-space:nowrap; text-align:right;">         1.95 µs  </td><td class="td11" id="TBL-4-4-3" style="white-space:nowrap; text-align:right;">          278 µs  </td><td class="td11" id="TBL-4-4-4" style="white-space:nowrap; text-align:right;">     0.94 ms  </td><td class="td11" id="TBL-4-4-5" style="white-space:nowrap; text-align:right;">        143×  </td><td class="td11" id="TBL-4-4-6" style="white-space:nowrap; text-align:right;">        480×  </td></tr><tr id="TBL-4-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-5-1" style="white-space:nowrap; text-align:left;"> +cos </td><td class="td11" id="TBL-4-5-2" style="white-space:nowrap; text-align:right;"> 1.97 µs </td><td class="td11" id="TBL-4-5-3" style="white-space:nowrap; text-align:right;"> 275 µs </td><td class="td11" id="TBL-4-5-4" style="white-space:nowrap; text-align:right;"> 0.94 ms </td><td class="td11" id="TBL-4-5-5" style="white-space:nowrap; text-align:right;"> 140× </td><td class="td11" id="TBL-4-5-6" style="white-space:nowrap; text-align:right;"> 476×</td>
+</tr><tr id="TBL-4-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-6-1" style="white-space:nowrap; text-align:left;"> +tan     </td><td class="td11" id="TBL-4-6-2" style="white-space:nowrap; text-align:right;">         4.53 µs  </td><td class="td11" id="TBL-4-6-3" style="white-space:nowrap; text-align:right;">          241 µs  </td><td class="td11" id="TBL-4-6-4" style="white-space:nowrap; text-align:right;">     1.30 ms  </td><td class="td11" id="TBL-4-6-5" style="white-space:nowrap; text-align:right;">         53×  </td><td class="td11" id="TBL-4-6-6" style="white-space:nowrap; text-align:right;">        288×  </td></tr><tr id="TBL-4-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-7-1" style="white-space:nowrap; text-align:left;"> +atan </td><td class="td11" id="TBL-4-7-2" style="white-space:nowrap; text-align:right;"> 2.23 µs </td><td class="td11" id="TBL-4-7-3" style="white-space:nowrap; text-align:right;"> 47.6 µs </td><td class="td11" id="TBL-4-7-4" style="white-space:nowrap; text-align:right;"> 109 ms </td><td class="td11" id="TBL-4-7-5" style="white-space:nowrap; text-align:right;"> 21× </td><td class="td11" id="TBL-4-7-6" style="white-space:nowrap; text-align:right;"> 48,784×</td>
+</tr><tr id="TBL-4-8-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-8-1" style="white-space:nowrap; text-align:left;"> +atan2  </td><td class="td11" id="TBL-4-8-2" style="white-space:nowrap; text-align:right;">         2.72 µs  </td><td class="td11" id="TBL-4-8-3" style="white-space:nowrap; text-align:right;">         56.2 µs  </td><td class="td11" id="TBL-4-8-4" style="white-space:nowrap; text-align:right;">     11.5 ms  </td><td class="td11" id="TBL-4-8-5" style="white-space:nowrap; text-align:right;">         21×  </td><td class="td11" id="TBL-4-8-6" style="white-space:nowrap; text-align:right;">       4,237×  </td>
+</tr><tr id="TBL-4-9-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-9-1" style="white-space:nowrap; text-align:left;"> +asin     </td><td class="td11" id="TBL-4-9-2" style="white-space:nowrap; text-align:right;">         2.07 µs  </td><td class="td11" id="TBL-4-9-3" style="white-space:nowrap; text-align:right;">         54.8 µs  </td><td class="td11" id="TBL-4-9-4" style="white-space:nowrap; text-align:right;">      205 ms  </td><td class="td11" id="TBL-4-9-5" style="white-space:nowrap; text-align:right;">         27×  </td><td class="td11" id="TBL-4-9-6" style="white-space:nowrap; text-align:right;">      99,130×  </td>
+</tr><tr id="TBL-4-10-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-10-1" style="white-space:nowrap; text-align:left;"> +acos    </td><td class="td11" id="TBL-4-10-2" style="white-space:nowrap; text-align:right;">         2.10 µs  </td><td class="td11" id="TBL-4-10-3" style="white-space:nowrap; text-align:right;">         51.2 µs  </td><td class="td11" id="TBL-4-10-4" style="white-space:nowrap; text-align:right;">     5.17 ms  </td><td class="td11" id="TBL-4-10-5" style="white-space:nowrap; text-align:right;">         24×  </td><td class="td11" id="TBL-4-10-6" style="white-space:nowrap; text-align:right;">       2,459×  </td>
+</tr><tr id="TBL-4-11-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-11-1" style="white-space:nowrap; text-align:left;"> +sqt      </td><td class="td11" id="TBL-4-11-2" style="white-space:nowrap; text-align:right;">         1.92 µs  </td><td class="td11" id="TBL-4-11-3" style="white-space:nowrap; text-align:right;">         10.3 µs  </td><td class="td11" id="TBL-4-11-4" style="white-space:nowrap; text-align:right;">      73.5 µs  </td><td class="td11" id="TBL-4-11-5" style="white-space:nowrap; text-align:right;">          5×  </td><td class="td11" id="TBL-4-11-6" style="white-space:nowrap; text-align:right;">         38×  </td>
+</tr><tr id="TBL-4-12-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-12-1" style="white-space:nowrap; text-align:left;"> +cbt      </td><td class="td11" id="TBL-4-12-2" style="white-space:nowrap; text-align:right;">         2.44 µs  </td><td class="td11" id="TBL-4-12-3" style="white-space:nowrap; text-align:right;">          467 µs  </td><td class="td11" id="TBL-4-12-4" style="white-space:nowrap; text-align:right;">      111 ms  </td><td class="td11" id="TBL-4-12-5" style="white-space:nowrap; text-align:right;">        192×  </td><td class="td11" id="TBL-4-12-6" style="white-space:nowrap; text-align:right;">      45,723×  </td>
+</tr><tr id="TBL-4-13-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-13-1" style="white-space:nowrap; text-align:left;"> +pow    </td><td class="td11" id="TBL-4-13-2" style="white-space:nowrap; text-align:right;">         2.87 µs  </td><td class="td11" id="TBL-4-13-3" style="white-space:nowrap; text-align:right;">          656 µs  </td><td class="td11" id="TBL-4-13-4" style="white-space:nowrap; text-align:right;">     1.68 ms  </td><td class="td11" id="TBL-4-13-5" style="white-space:nowrap; text-align:right;">        229×  </td><td class="td11" id="TBL-4-13-6" style="white-space:nowrap; text-align:right;">        585×  </td>
+</tr><tr id="TBL-4-14-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-14-1" style="white-space:nowrap; text-align:left;"> +pow-n  </td><td class="td11" id="TBL-4-14-2" style="white-space:nowrap; text-align:right;">         2.62 µs  </td><td class="td11" id="TBL-4-14-3" style="white-space:nowrap; text-align:right;">          217 µs  </td><td class="td11" id="TBL-4-14-4" style="white-space:nowrap; text-align:right;">      219 µs  </td><td class="td11" id="TBL-4-14-5" style="white-space:nowrap; text-align:right;">         83×  </td><td class="td11" id="TBL-4-14-6" style="white-space:nowrap; text-align:right;">         83×  </td>
+</tr><tr id="TBL-4-15-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-15-1" style="white-space:nowrap; text-align:left;"> +log-2   </td><td class="td11" id="TBL-4-15-2" style="white-space:nowrap; text-align:right;">         2.34 µs  </td><td class="td11" id="TBL-4-15-3" style="white-space:nowrap; text-align:right;">          164 µs  </td><td class="td11" id="TBL-4-15-4" style="white-space:nowrap; text-align:right;">     13.3 ms  </td><td class="td11" id="TBL-4-15-5" style="white-space:nowrap; text-align:right;">         70×  </td><td class="td11" id="TBL-4-15-6" style="white-space:nowrap; text-align:right;">       5,668×  </td>
+</tr><tr id="TBL-4-16-" style="vertical-align:baseline;"><td class="td11" id="TBL-4-16-1" style="white-space:nowrap; text-align:left;"> +log-10  </td><td class="td11" id="TBL-4-16-2" style="white-space:nowrap; text-align:right;">         2.38 µs  </td><td class="td11" id="TBL-4-16-3" style="white-space:nowrap; text-align:right;">          165 µs  </td><td class="td11" id="TBL-4-16-4" style="white-space:nowrap; text-align:right;">     13.4 ms  </td><td class="td11" id="TBL-4-16-5" style="white-space:nowrap; text-align:right;">         69×  </td><td class="td11" id="TBL-4-16-6" style="white-space:nowrap; text-align:right;">       5,638×  </td>
+
+</tr></table>                                                                                 </div>
+                                                
+                                                
+   </figure>
+                                                
+                                                
+<!-- l. 316 --><p class="indent">   </p><figure class="float" id="x1-15009r4"><span id="elapsed-times-and-relative-slowdowns-of-unum-jetted-chebyshev-functions-for-bit-rps-posit-operations-with-libunum-interpreted-chebyshev-functions-jetted-taylor-series-functions-and-interpreted-taylor-series-functions-slowdown-is-reported-relative-to-the-jetted-chebyshev-functions"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 4:   </span><span class="content">Elapsed   times   and   relative   slowdowns   of
+unum   jetted   Chebyshev   functions   for   32-bit   @rps
+posit32 operations with /lib/unum, interpreted Chebyshev
+functions, jetted Taylor series functions, and interpreted
+Taylor series functions. Slowdown is reported relative to
+the jetted Chebyshev functions.                      </span></figcaption><!-- tex4ht:label?: x1-15009r4  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-5"><colgroup id="TBL-5-1g"><col id="TBL-5-1" /><col id="TBL-5-2" /><col id="TBL-5-3" /><col id="TBL-5-4" /><col id="TBL-5-5" /><col id="TBL-5-6" /><col id="TBL-5-7" /></colgroup><tr id="TBL-5-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-1-1" style="white-space:nowrap; text-align:left;"> Arm     </td><td class="td11" id="TBL-5-1-2" style="white-space:nowrap; text-align:right;"> Chebyshev (jet)  </td><td class="td11" id="TBL-5-1-3" style="white-space:nowrap; text-align:right;"> Chebyshev (int.)  </td><td class="td11" id="TBL-5-1-4" style="white-space:nowrap; text-align:right;"> Taylor (jet)  </td><td class="td11" id="TBL-5-1-5" style="white-space:nowrap; text-align:right;"> Taylor (int.)  </td><td class="td11" id="TBL-5-1-6" style="white-space:nowrap; text-align:right;"> C. slowdown  </td><td class="td11" id="TBL-5-1-7" style="white-space:nowrap; text-align:right;"> T. slowdown  </td>
+</tr><tr id="TBL-5-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-2-1" style="white-space:nowrap; text-align:left;"> +exp     </td><td class="td11" id="TBL-5-2-2" style="white-space:nowrap; text-align:right;">         16.5 µs  </td><td class="td11" id="TBL-5-2-3" style="white-space:nowrap; text-align:right;">          550 µs  </td><td class="td11" id="TBL-5-2-4" style="white-space:nowrap; text-align:right;">     25.3 µs  </td><td class="td11" id="TBL-5-2-5" style="white-space:nowrap; text-align:right;">     19.4 ms  </td><td class="td11" id="TBL-5-2-6" style="white-space:nowrap; text-align:right;">         33×  </td><td class="td11" id="TBL-5-2-7" style="white-space:nowrap; text-align:right;">       1,176×  </td>
+</tr><tr id="TBL-5-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-3-1" style="white-space:nowrap; text-align:left;"> +log      </td><td class="td11" id="TBL-5-3-2" style="white-space:nowrap; text-align:right;">         17.9 µs  </td><td class="td11" id="TBL-5-3-3" style="white-space:nowrap; text-align:right;">          739 µs  </td><td class="td11" id="TBL-5-3-4" style="white-space:nowrap; text-align:right;">     39.9 µs  </td><td class="td11" id="TBL-5-3-5" style="white-space:nowrap; text-align:right;">     39.1 ms  </td><td class="td11" id="TBL-5-3-6" style="white-space:nowrap; text-align:right;">         41×  </td><td class="td11" id="TBL-5-3-7" style="white-space:nowrap; text-align:right;">       2,184×  </td>
+</tr><tr id="TBL-5-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-4-1" style="white-space:nowrap; text-align:left;"> +sin      </td><td class="td11" id="TBL-5-4-2" style="white-space:nowrap; text-align:right;">         18.3 µs  </td><td class="td11" id="TBL-5-4-3" style="white-space:nowrap; text-align:right;">          813 µs  </td><td class="td11" id="TBL-5-4-4" style="white-space:nowrap; text-align:right;">     34.8 µs  </td><td class="td11" id="TBL-5-4-5" style="white-space:nowrap; text-align:right;">     32.3 ms  </td><td class="td11" id="TBL-5-4-6" style="white-space:nowrap; text-align:right;">         44×  </td><td class="td11" id="TBL-5-4-7" style="white-space:nowrap; text-align:right;">       1,765×  </td>
+</tr><tr id="TBL-5-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-5-1" style="white-space:nowrap; text-align:left;"> +cos      </td><td class="td11" id="TBL-5-5-2" style="white-space:nowrap; text-align:right;">         18.3 µs  </td><td class="td11" id="TBL-5-5-3" style="white-space:nowrap; text-align:right;">          817 µs  </td><td class="td11" id="TBL-5-5-4" style="white-space:nowrap; text-align:right;">     35.7 µs  </td><td class="td11" id="TBL-5-5-5" style="white-space:nowrap; text-align:right;">     32.5 ms  </td><td class="td11" id="TBL-5-5-6" style="white-space:nowrap; text-align:right;">         45×  </td><td class="td11" id="TBL-5-5-7" style="white-space:nowrap; text-align:right;">       1,775×  </td>
+</tr><tr id="TBL-5-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-6-1" style="white-space:nowrap; text-align:left;"> +tan     </td><td class="td11" id="TBL-5-6-2" style="white-space:nowrap; text-align:right;">         19.5 µs  </td><td class="td11" id="TBL-5-6-3" style="white-space:nowrap; text-align:right;">          844 µs  </td><td class="td11" id="TBL-5-6-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-6-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-6-6" style="white-space:nowrap; text-align:right;">         43×  </td><td class="td11" id="TBL-5-6-7" style="white-space:nowrap; text-align:right;">          —  </td></tr><tr id="TBL-5-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-7-1" style="white-space:nowrap; text-align:left;"> +atan </td><td class="td11" id="TBL-5-7-2" style="white-space:nowrap; text-align:right;"> 18.3 µs </td><td class="td11" id="TBL-5-7-3" style="white-space:nowrap; text-align:right;"> 832 µs </td><td class="td11" id="TBL-5-7-4" style="white-space:nowrap; text-align:right;"> 850.3 µs </td><td class="td11" id="TBL-5-7-5" style="white-space:nowrap; text-align:right;"> 63.7 ms </td><td class="td11" id="TBL-5-7-6" style="white-space:nowrap; text-align:right;"> 45× </td><td class="td11" id="TBL-5-7-7" style="white-space:nowrap; text-align:right;"> 3,480×</td>
+</tr><tr id="TBL-5-8-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-8-1" style="white-space:nowrap; text-align:left;"> +asin     </td><td class="td11" id="TBL-5-8-2" style="white-space:nowrap; text-align:right;">         39.6 µs  </td><td class="td11" id="TBL-5-8-3" style="white-space:nowrap; text-align:right;">         2.01 ms  </td><td class="td11" id="TBL-5-8-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-8-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-8-6" style="white-space:nowrap; text-align:right;">         50×  </td><td class="td11" id="TBL-5-8-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-9-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-9-1" style="white-space:nowrap; text-align:left;"> +acos    </td><td class="td11" id="TBL-5-9-2" style="white-space:nowrap; text-align:right;">         40.9 µs  </td><td class="td11" id="TBL-5-9-3" style="white-space:nowrap; text-align:right;">         2.15 ms  </td><td class="td11" id="TBL-5-9-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-9-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-9-6" style="white-space:nowrap; text-align:right;">         52×  </td><td class="td11" id="TBL-5-9-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-10-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-10-1" style="white-space:nowrap; text-align:left;"> +sqt      </td><td class="td11" id="TBL-5-10-2" style="white-space:nowrap; text-align:right;">         17.1 µs  </td><td class="td11" id="TBL-5-10-3" style="white-space:nowrap; text-align:right;">          209 µs  </td><td class="td11" id="TBL-5-10-4" style="white-space:nowrap; text-align:right;">     17.3 µs  </td><td class="td11" id="TBL-5-10-5" style="white-space:nowrap; text-align:right;">      341 µs  </td><td class="td11" id="TBL-5-10-6" style="white-space:nowrap; text-align:right;">         12×  </td><td class="td11" id="TBL-5-10-7" style="white-space:nowrap; text-align:right;">         20×  </td>
+</tr><tr id="TBL-5-11-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-11-1" style="white-space:nowrap; text-align:left;"> +cbt      </td><td class="td11" id="TBL-5-11-2" style="white-space:nowrap; text-align:right;">         32.0 µs  </td><td class="td11" id="TBL-5-11-3" style="white-space:nowrap; text-align:right;">         1.76 ms  </td><td class="td11" id="TBL-5-11-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-11-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-11-6" style="white-space:nowrap; text-align:right;">         55×  </td><td class="td11" id="TBL-5-11-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-12-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-12-1" style="white-space:nowrap; text-align:left;"> +pow    </td><td class="td11" id="TBL-5-12-2" style="white-space:nowrap; text-align:right;">         31.2 µs  </td><td class="td11" id="TBL-5-12-3" style="white-space:nowrap; text-align:right;">         1.40 ms  </td><td class="td11" id="TBL-5-12-4" style="white-space:nowrap; text-align:right;">     60.7 µs  </td><td class="td11" id="TBL-5-12-5" style="white-space:nowrap; text-align:right;">     56.9 ms  </td><td class="td11" id="TBL-5-12-6" style="white-space:nowrap; text-align:right;">         45×  </td><td class="td11" id="TBL-5-12-7" style="white-space:nowrap; text-align:right;">       1,824×  </td>
+</tr><tr id="TBL-5-13-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-13-1" style="white-space:nowrap; text-align:left;"> +pow-n  </td><td class="td11" id="TBL-5-13-2" style="white-space:nowrap; text-align:right;">         2.81 µs  </td><td class="td11" id="TBL-5-13-3" style="white-space:nowrap; text-align:right;">          698 µs  </td><td class="td11" id="TBL-5-13-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-13-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-13-6" style="white-space:nowrap; text-align:right;">        248×  </td><td class="td11" id="TBL-5-13-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-14-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-14-1" style="white-space:nowrap; text-align:left;"> +log-2   </td><td class="td11" id="TBL-5-14-2" style="white-space:nowrap; text-align:right;">         18.1 µs  </td><td class="td11" id="TBL-5-14-3" style="white-space:nowrap; text-align:right;">          743 µs  </td><td class="td11" id="TBL-5-14-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-14-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-14-6" style="white-space:nowrap; text-align:right;">         41×  </td><td class="td11" id="TBL-5-14-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-15-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-15-1" style="white-space:nowrap; text-align:left;"> +log-10  </td><td class="td11" id="TBL-5-15-2" style="white-space:nowrap; text-align:right;">         18.1 µs  </td><td class="td11" id="TBL-5-15-3" style="white-space:nowrap; text-align:right;">          756 µs  </td><td class="td11" id="TBL-5-15-4" style="white-space:nowrap; text-align:right;">         —  </td><td class="td11" id="TBL-5-15-5" style="white-space:nowrap; text-align:right;">          —  </td><td class="td11" id="TBL-5-15-6" style="white-space:nowrap; text-align:right;">         42×  </td><td class="td11" id="TBL-5-15-7" style="white-space:nowrap; text-align:right;">          —  </td>
+</tr><tr id="TBL-5-16-" style="vertical-align:baseline;"><td class="td11" id="TBL-5-16-1" style="white-space:nowrap; text-align:left;"> +fdp      </td><td class="td11" id="TBL-5-16-2" style="white-space:nowrap; text-align:right;">         259 ns  </td><td class="td11" id="TBL-5-16-3" style="white-space:nowrap; text-align:right;">          157 µs  </td><td class="td11" id="TBL-5-16-4" style="white-space:nowrap; text-align:right;">     270 ns  </td><td class="td11" id="TBL-5-16-5" style="white-space:nowrap; text-align:right;">      205 µs  </td><td class="td11" id="TBL-5-16-6" style="white-space:nowrap; text-align:right;">        606×  </td><td class="td11" id="TBL-5-16-7" style="white-space:nowrap; text-align:right;">          —  </td>
+
+</tr></table>                                                                                              </div>
+                                                
+                                                
+   </figure>
+<!-- l. 352 --><p class="indent">   The libraries instrumented with the Chebyshev basis are
+designed to produce “faithfully rounded functions” rather than
+“correctly rounded functions” for composed operations, while
+dedicated (non-composed) kernels frequently do better still.
+The distinction is that a faithfully rounded result is within
+1 <span class="small-caps">ulp</span> of the exact result (<a id="x1-15010"></a>Rump, Ogita, and Oishi, 2008),
+while a correctly rounded result is the exact representable
+value closest to the exact result. Faithful rounding is often
+sufficient for numerical applications and is generally faster to
+compute than correct rounding. Truly correct rounding is
+often prohibitively expensive, especially for transcendental
+functions, and can require much higher intermediate precision to
+attain.<span class="footnote-mark"><a href="#fn20x0"><sup class="textsuperscript">20</sup></a></span><a id="x1-15011f20"></a> 
+Tables <a href="#maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled">5<!-- tex4ht:ref: tab:ulp-math  --></a> and <a href="#maximum-observed-ulp-error-libunum-standard-posits-against-an-mpmathchecked-oracle-all-three-widths-are-tested-exhaustively">6<!-- tex4ht:ref: tab:ulp-unum  --></a> report the maximum observed <span class="small-caps">ulp</span> error of every
+transcendental arm against an independent mpmath-checked
+oracle.<span class="footnote-mark"><a href="#fn21x0"><sup class="textsuperscript">21</sup></a></span><a id="x1-15016f21"></a> 
+</p><!-- l. 354 --><p class="indent">   In Tables <a href="#maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled">5<!-- tex4ht:ref: tab:ulp-math  --></a> and <a href="#maximum-observed-ulp-error-libunum-standard-posits-against-an-mpmathchecked-oracle-all-three-widths-are-tested-exhaustively">6<!-- tex4ht:ref: tab:ulp-unum  --></a>, the superscripts carry the following
+meanings:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>                marks               a               composed
+                                                
+                                                
+     arm,<span class="footnote-mark"><a href="#fn22x0"><sup class="textsuperscript">22</sup></a></span><a id="x1-15018f22"></a> 
+     whose  error  is  inherited  from  its  constituents’
+     chained roundings rather than directly controlled.
+     </li>
+     <li class="itemize"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup> marks an exhaustive sweep over the entire input
+     space. (Unmarked cells describe sampled ranges.)
+     </li>
+     <li class="itemize"><sup class="textsuperscript"><span class="ec-lmr-9">f</span></sup> marks where an imprecision in a previous version
+     of  the  Chebyshev  fit  led  to  massive  error  in  the
+     reduced  argument,  in  which  the  range  reduction
+     quotient  for  @rh  was  not  representable  in  half
+     precision (Table <a href="#rh-sin-cos-tan-maximum-observed-ulp-error-before-the-rangereduction-fix-tableref-tabulpmath-reports-the-corrected-current-values">7<!-- tex4ht:ref: tab:ulp-before  --></a>). This was replaced by widening
+     the intermediate result to @rs, producing a faithful
+     rounding  for  @rh  as  well.  As  this  bug  results
+     from  a  naïve  application  of  the  Chebyshev  fit  to
+     half-precision  range  reduction,  we  report  it  as  a
+     cautionary aside.
+     </li>
+     <li class="itemize"><sup class="textsuperscript"><span class="ec-lmr-9">k</span></sup>   marks  dedicated  kernels  for  +tan  (replacing
+     the  composed  sin/cos  ratio  used  at  @rh/@rq).  A
+     dedicated  kernel  was  investigated  but  found  to
+     regress @rh (the 11-bit mantissa leaves insufficient
+     headroom) and to need a different technique entirely
+     at  @rq  (the  Chebyshev  series  coefficients  grow
+     rather than shrink at high degree causing numerical
+     instability).
+                                                
+                                                
+     </li>
+     <li class="itemize"><sup class="textsuperscript"><span class="ec-lmr-9">n</span></sup> marks /lib/unum’s +cbt, which returns NaR for
+     negative inputs and so is swept over positive inputs
+     only.</li></ul>
+   <div class="table">
+                                                
+                                                
+<!-- l. 364 --><p class="indent">   </p><figure class="float" id="x1-15020r5"><span id="maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 5: </span><span class="content">Maximum observed <span class="small-caps">ulp</span> error, /lib/math (<span class="small-caps">ieee</span>
+754), against an mpmath-checked oracle. @rh and marked
+cells are exhaustive over the full input space; all others are
+sampled.                                         </span></figcaption><!-- tex4ht:label?: x1-15020r5  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-6"><colgroup id="TBL-6-1g"><col id="TBL-6-1" /><col id="TBL-6-2" /><col id="TBL-6-3" /><col id="TBL-6-4" /><col id="TBL-6-5" /><col id="TBL-6-6" /><col id="TBL-6-7" /><col id="TBL-6-8" /><col id="TBL-6-9" /></colgroup><tr id="TBL-6-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-1-1" style="white-space:nowrap; text-align:left;"> Arm     </td><td class="td10" colspan="2" id="TBL-6-1-2" style="white-space:nowrap; text-align:center;">    <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rh</div>    </td><td class="td10" colspan="2" id="TBL-6-1-4" style="white-space:nowrap; text-align:center;">   <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rs</div>   </td><td class="td10" colspan="2" id="TBL-6-1-6" style="white-space:nowrap; text-align:center;">   <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rd</div>   </td><td class="td10" colspan="2" id="TBL-6-1-8" style="white-space:nowrap; text-align:center;">   <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rq</div>
+</td></tr><tr id="TBL-6-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-2-1" style="white-space:nowrap; text-align:left;"> +exp     </td><td class="td10" id="TBL-6-2-2" style="white-space:nowrap; text-align:right;"> 1.00</td><td class="td01" id="TBL-6-2-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-2-4" style="white-space:nowrap; text-align:right;"> 0.86</td><td class="td01" id="TBL-6-2-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-2-6" style="white-space:nowrap; text-align:right;">  0.99</td><td class="td01" id="TBL-6-2-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-2-8" style="white-space:nowrap; text-align:right;"> 0.81</td><td class="td01" id="TBL-6-2-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-3-1" style="white-space:nowrap; text-align:left;"> +log      </td><td class="td10" id="TBL-6-3-2" style="white-space:nowrap; text-align:right;"> 0.84</td><td class="td01" id="TBL-6-3-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-3-4" style="white-space:nowrap; text-align:right;"> 0.61</td><td class="td01" id="TBL-6-3-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-3-6" style="white-space:nowrap; text-align:right;">  0.99</td><td class="td01" id="TBL-6-3-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-3-8" style="white-space:nowrap; text-align:right;"> 0.62</td><td class="td01" id="TBL-6-3-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-4-1" style="white-space:nowrap; text-align:left;"> +log-2   </td><td class="td10" id="TBL-6-4-2" style="white-space:nowrap; text-align:right;"> 1.57</td><td class="td01" id="TBL-6-4-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-4-4" style="white-space:nowrap; text-align:right;"> 0.90</td><td class="td01" id="TBL-6-4-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-4-6" style="white-space:nowrap; text-align:right;">  1.21</td><td class="td01" id="TBL-6-4-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-4-8" style="white-space:nowrap; text-align:right;"> 0.60</td><td class="td01" id="TBL-6-4-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-5-1" style="white-space:nowrap; text-align:left;"> +log-10  </td><td class="td10" id="TBL-6-5-2" style="white-space:nowrap; text-align:right;"> 1.37</td><td class="td01" id="TBL-6-5-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-5-4" style="white-space:nowrap; text-align:right;"> 1.30</td><td class="td01" id="TBL-6-5-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-5-6" style="white-space:nowrap; text-align:right;">  1.46</td><td class="td01" id="TBL-6-5-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-5-8" style="white-space:nowrap; text-align:right;"> 1.10</td><td class="td01" id="TBL-6-5-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-6-1" style="white-space:nowrap; text-align:left;"> +sin      </td><td class="td10" id="TBL-6-6-2" style="white-space:nowrap; text-align:right;"> 0.51</td><td class="td01" id="TBL-6-6-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e,f</span></sup>    </td><td class="td10" id="TBL-6-6-4" style="white-space:nowrap; text-align:right;"> 0.65</td><td class="td01" id="TBL-6-6-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-6-6" style="white-space:nowrap; text-align:right;">  0.73</td><td class="td01" id="TBL-6-6-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-6-8" style="white-space:nowrap; text-align:right;"> 0.73</td><td class="td01" id="TBL-6-6-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-7-1" style="white-space:nowrap; text-align:left;"> +cos      </td><td class="td10" id="TBL-6-7-2" style="white-space:nowrap; text-align:right;"> 0.53</td><td class="td01" id="TBL-6-7-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e,f</span></sup>    </td><td class="td10" id="TBL-6-7-4" style="white-space:nowrap; text-align:right;"> 0.53</td><td class="td01" id="TBL-6-7-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-7-6" style="white-space:nowrap; text-align:right;">  0.76</td><td class="td01" id="TBL-6-7-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-7-8" style="white-space:nowrap; text-align:right;"> 0.72</td><td class="td01" id="TBL-6-7-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-8-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-8-1" style="white-space:nowrap; text-align:left;"> +tan     </td><td class="td10" id="TBL-6-8-2" style="white-space:nowrap; text-align:right;"> 1.64</td><td class="td01" id="TBL-6-8-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e,f,c</span></sup>  </td><td class="td10" id="TBL-6-8-4" style="white-space:nowrap; text-align:right;"> 0.94</td><td class="td01" id="TBL-6-8-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">k</span></sup>  </td><td class="td10" id="TBL-6-8-6" style="white-space:nowrap; text-align:right;">  0.76</td><td class="td01" id="TBL-6-8-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">k</span></sup>  </td><td class="td10" id="TBL-6-8-8" style="white-space:nowrap; text-align:right;"> 1.67</td><td class="td01" id="TBL-6-8-9" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+</tr><tr id="TBL-6-9-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-9-1" style="white-space:nowrap; text-align:left;"> +atan    </td><td class="td10" id="TBL-6-9-2" style="white-space:nowrap; text-align:right;"> 0.74</td><td class="td01" id="TBL-6-9-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-9-4" style="white-space:nowrap; text-align:right;"> 0.58</td><td class="td01" id="TBL-6-9-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-9-6" style="white-space:nowrap; text-align:right;">  0.71</td><td class="td01" id="TBL-6-9-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-9-8" style="white-space:nowrap; text-align:right;"> 0.53</td><td class="td01" id="TBL-6-9-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-10-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-10-1" style="white-space:nowrap; text-align:left;"> +atan2  </td><td class="td10" id="TBL-6-10-2" style="white-space:nowrap; text-align:right;"> 1.80</td><td class="td01" id="TBL-6-10-3" style="white-space:nowrap; text-align:left;">    </td><td class="td10" id="TBL-6-10-4" style="white-space:nowrap; text-align:right;"> 1.16</td><td class="td01" id="TBL-6-10-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-10-6" style="white-space:nowrap; text-align:right;">  1.36</td><td class="td01" id="TBL-6-10-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-10-8" style="white-space:nowrap; text-align:right;"> 1.35</td><td class="td01" id="TBL-6-10-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-11-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-11-1" style="white-space:nowrap; text-align:left;"> +asin    </td><td class="td10" id="TBL-6-11-2" style="white-space:nowrap; text-align:right;"> 1.01</td><td class="td01" id="TBL-6-11-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-11-4" style="white-space:nowrap; text-align:right;"> 0.85</td><td class="td01" id="TBL-6-11-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-11-6" style="white-space:nowrap; text-align:right;">  0.84</td><td class="td01" id="TBL-6-11-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-11-8" style="white-space:nowrap; text-align:right;"> 0.77</td><td class="td01" id="TBL-6-11-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-12-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-12-1" style="white-space:nowrap; text-align:left;"> +acos    </td><td class="td10" id="TBL-6-12-2" style="white-space:nowrap; text-align:right;"> 1.00</td><td class="td01" id="TBL-6-12-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-12-4" style="white-space:nowrap; text-align:right;"> 0.98</td><td class="td01" id="TBL-6-12-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-12-6" style="white-space:nowrap; text-align:right;">  0.89</td><td class="td01" id="TBL-6-12-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-12-8" style="white-space:nowrap; text-align:right;"> 0.86</td><td class="td01" id="TBL-6-12-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-13-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-13-1" style="white-space:nowrap; text-align:left;"> +sqt      </td><td class="td10" id="TBL-6-13-2" style="white-space:nowrap; text-align:right;"> 0.50</td><td class="td01" id="TBL-6-13-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">e</span></sup>      </td><td class="td10" id="TBL-6-13-4" style="white-space:nowrap; text-align:right;"> 0.50</td><td class="td01" id="TBL-6-13-5" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-13-6" style="white-space:nowrap; text-align:right;">  0.50</td><td class="td01" id="TBL-6-13-7" style="white-space:nowrap; text-align:left;">  </td><td class="td10" id="TBL-6-13-8" style="white-space:nowrap; text-align:right;"> 0.50</td><td class="td01" id="TBL-6-13-9" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-6-14-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-14-1" style="white-space:nowrap; text-align:left;"> +cbt     </td><td class="td10" id="TBL-6-14-2" style="white-space:nowrap; text-align:right;"> 6.70</td><td class="td01" id="TBL-6-14-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c,e</span></sup>    </td><td class="td10" id="TBL-6-14-4" style="white-space:nowrap; text-align:right;"> 2.62</td><td class="td01" id="TBL-6-14-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td><td class="td10" id="TBL-6-14-6" style="white-space:nowrap; text-align:right;">  4.39</td><td class="td01" id="TBL-6-14-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td><td class="td10" id="TBL-6-14-8" style="white-space:nowrap; text-align:right;"> 4.29</td><td class="td01" id="TBL-6-14-9" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+</tr><tr id="TBL-6-15-" style="vertical-align:baseline;"><td class="td11" id="TBL-6-15-1" style="white-space:nowrap; text-align:left;"> +pow    </td><td class="td10" id="TBL-6-15-2" style="white-space:nowrap; text-align:right;"> 31.0</td><td class="td01" id="TBL-6-15-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>      </td><td class="td10" id="TBL-6-15-4" style="white-space:nowrap; text-align:right;"> 48.0</td><td class="td01" id="TBL-6-15-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td><td class="td10" id="TBL-6-15-6" style="white-space:nowrap; text-align:right;"> 133.7</td><td class="td01" id="TBL-6-15-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td><td class="td10" id="TBL-6-15-8" style="white-space:nowrap; text-align:right;"> 60.7</td><td class="td01" id="TBL-6-15-9" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+
+</tr></table>                                             </div>
+                                                
+                                                
+   </figure>
+   </div>
+   <div class="table">
+                                                
+                                                
+<!-- l. 390 --><p class="indent">   </p><figure class="float" id="x1-15021r6"><span id="maximum-observed-ulp-error-libunum-standard-posits-against-an-mpmathchecked-oracle-all-three-widths-are-tested-exhaustively"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 6:   </span><span class="content">Maximum   observed   <span class="small-caps">ulp</span>  error,   /lib/unum
+(2022-standard posits), against an mpmath-checked oracle.
+All three widths are tested exhaustively.               </span></figcaption><!-- tex4ht:label?: x1-15021r6  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-7"><colgroup id="TBL-7-1g"><col id="TBL-7-1" /><col id="TBL-7-2" /><col id="TBL-7-3" /><col id="TBL-7-4" /><col id="TBL-7-5" /><col id="TBL-7-6" /><col id="TBL-7-7" /></colgroup><tr id="TBL-7-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-1-1" style="white-space:nowrap; text-align:left;"> Arm     </td><td class="td10" colspan="2" id="TBL-7-1-2" style="white-space:nowrap; text-align:center;"> <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rpb</div> </td><td class="td10" colspan="2" id="TBL-7-1-4" style="white-space:nowrap; text-align:center;"> <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rph</div> </td><td class="td10" colspan="2" id="TBL-7-1-6" style="white-space:nowrap; text-align:center;"> <div class="multicolumn" style="white-space:nowrap; text-align:center;">@rps</div>
+</td></tr><tr id="TBL-7-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-2-1" style="white-space:nowrap; text-align:left;"> +exp     </td><td class="td10" id="TBL-7-2-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-2-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-2-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-2-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-2-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-2-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-3-1" style="white-space:nowrap; text-align:left;"> +log      </td><td class="td10" id="TBL-7-3-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-3-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-3-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-3-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-3-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-3-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-4-1" style="white-space:nowrap; text-align:left;"> +log-2   </td><td class="td10" id="TBL-7-4-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-4-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-4-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-4-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-4-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-4-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-5-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-5-1" style="white-space:nowrap; text-align:left;"> +log-10  </td><td class="td10" id="TBL-7-5-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-5-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-5-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-5-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-5-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-5-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-6-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-6-1" style="white-space:nowrap; text-align:left;"> +sin      </td><td class="td10" id="TBL-7-6-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-6-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-6-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-6-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-6-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-6-7" style="white-space:nowrap; text-align:left;">  </td></tr><tr id="TBL-7-7-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-7-1" style="white-space:nowrap; text-align:left;"> +cos </td><td class="td10" id="TBL-7-7-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-7-3" style="white-space:nowrap; text-align:left;"> </td><td class="td10" id="TBL-7-7-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-7-5" style="white-space:nowrap; text-align:left;"> </td><td class="td10" id="TBL-7-7-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-7-7" style="white-space:nowrap; text-align:left;"></td>
+</tr><tr id="TBL-7-8-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-8-1" style="white-space:nowrap; text-align:left;"> +tan     </td><td class="td10" id="TBL-7-8-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-8-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-8-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-8-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-8-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-8-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-9-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-9-1" style="white-space:nowrap; text-align:left;"> +atan    </td><td class="td10" id="TBL-7-9-2" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-9-3" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-9-4" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-9-5" style="white-space:nowrap; text-align:left;">   </td><td class="td10" id="TBL-7-9-6" style="white-space:nowrap; text-align:right;"> 0</td><td class="td01" id="TBL-7-9-7" style="white-space:nowrap; text-align:left;">  </td>
+</tr><tr id="TBL-7-10-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-10-1" style="white-space:nowrap; text-align:left;"> +asin     </td><td class="td10" id="TBL-7-10-2" style="white-space:nowrap; text-align:right;"> 1</td><td class="td01" id="TBL-7-10-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-10-4" style="white-space:nowrap; text-align:right;"> 1</td><td class="td01" id="TBL-7-10-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-10-6" style="white-space:nowrap; text-align:right;"> 3</td><td class="td01" id="TBL-7-10-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+</tr><tr id="TBL-7-11-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-11-1" style="white-space:nowrap; text-align:left;"> +acos    </td><td class="td10" id="TBL-7-11-2" style="white-space:nowrap; text-align:right;"> 1</td><td class="td01" id="TBL-7-11-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-11-4" style="white-space:nowrap; text-align:right;"> 7</td><td class="td01" id="TBL-7-11-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-11-6" style="white-space:nowrap; text-align:right;"> 4</td><td class="td01" id="TBL-7-11-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+</tr><tr id="TBL-7-12-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-12-1" style="white-space:nowrap; text-align:left;"> +cbt      </td><td class="td10" id="TBL-7-12-2" style="white-space:nowrap; text-align:right;"> 1</td><td class="td01" id="TBL-7-12-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">n</span></sup>   </td><td class="td10" id="TBL-7-12-4" style="white-space:nowrap; text-align:right;"> 2</td><td class="td01" id="TBL-7-12-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">n</span></sup>   </td><td class="td10" id="TBL-7-12-6" style="white-space:nowrap; text-align:right;"> 2</td><td class="td01" id="TBL-7-12-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">n</span></sup>  </td>
+</tr><tr id="TBL-7-13-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-13-1" style="white-space:nowrap; text-align:left;"> +pow    </td><td class="td10" id="TBL-7-13-2" style="white-space:nowrap; text-align:right;"> 3</td><td class="td01" id="TBL-7-13-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-13-4" style="white-space:nowrap; text-align:right;"> 4</td><td class="td01" id="TBL-7-13-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-13-6" style="white-space:nowrap; text-align:right;"> 4</td><td class="td01" id="TBL-7-13-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+</tr><tr id="TBL-7-14-" style="vertical-align:baseline;"><td class="td11" id="TBL-7-14-1" style="white-space:nowrap; text-align:left;"> +pow-n  </td><td class="td10" id="TBL-7-14-2" style="white-space:nowrap; text-align:right;"> 2</td><td class="td01" id="TBL-7-14-3" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-14-4" style="white-space:nowrap; text-align:right;"> 2</td><td class="td01" id="TBL-7-14-5" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>   </td><td class="td10" id="TBL-7-14-6" style="white-space:nowrap; text-align:right;"> 2</td><td class="td01" id="TBL-7-14-7" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript"><span class="ec-lmr-9">c</span></sup>  </td>
+
+</tr></table>                                     </div>
+                                                
+                                                
+   </figure>
+   </div>
+   <div class="table">
+                                                
+                                                
+<!-- l. 415 --><p class="indent">   </p><figure class="float" id="x1-15022r7"><span id="rh-sin-cos-tan-maximum-observed-ulp-error-before-the-rangereduction-fix-tableref-tabulpmath-reports-the-corrected-current-values"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 7: </span><span class="content">@rh +sin/+cos/+tan, maximum observed <span class="small-caps">ulp</span>
+error before the range-reduction fix (Table <a href="#maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled">5<!-- tex4ht:ref: tab:ulp-math  --></a> reports the
+corrected, current values).                          </span></figcaption><!-- tex4ht:label?: x1-15022r7  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-8"><colgroup id="TBL-8-1g"><col id="TBL-8-1" /><col id="TBL-8-2" /></colgroup><tr id="TBL-8-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-8-1-1" style="white-space:nowrap; text-align:left;"> Arm  </td><td class="td11" id="TBL-8-1-2" style="white-space:nowrap; text-align:right;"> @rh, before fix  </td>
+</tr><tr id="TBL-8-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-8-2-1" style="white-space:nowrap; text-align:left;"> +sin   </td><td class="td11" id="TBL-8-2-2" style="white-space:nowrap; text-align:right;">       437,291  </td>
+</tr><tr id="TBL-8-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-8-3-1" style="white-space:nowrap; text-align:left;"> +cos  </td><td class="td11" id="TBL-8-3-2" style="white-space:nowrap; text-align:right;">      1,818,711  </td>
+</tr><tr id="TBL-8-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-8-4-1" style="white-space:nowrap; text-align:left;"> +tan  </td><td class="td11" id="TBL-8-4-2" style="white-space:nowrap; text-align:right;">    2.16 × 10<sup class="textsuperscript"><span class="ec-lmr-9">10</span></sup>  </td>
+</tr></table>                                       </div>
+                                                
+                                                
+   </figure>
+   </div>
+<!-- l. 430 --><p class="indent">   The original Chebyshev-based implementation of the @rh
+transcendental functions had a subtle but catastrophic flaw in
+its range reduction. The @rh Chebyshev fits were correct, but
+the range reduction was performed entirely in half precision,
+which is insufficient for large arguments. @rh’s trigonometric
+arms did quarter-turn range reduction (<span class="mathjax-inline">\(q=\mathrm {round}(|x|\cdot \frac {\text {2}}{\pi })=|x|\cdot \frac {\text {4}}{\tau }\)</span>, <span class="mathjax-inline">\(r=|x|-q\cdot (\frac {\pi }{\text {2}})=|x|-q\cdot (\frac {\tau }{\text {4}})\)</span>) entirely in native
+@rh arithmetic, giving every reduction constant and every
+intermediate product only an 11-bit-mantissa half-precision
+value. Half precision guarantees exact integer representation
+only up to 2,048; once <span class="mathjax-inline">\(q\)</span> exceeds that value (<span class="mathjax-inline">\(|x|\)</span> past <span class="mathjax-inline">\(\sim \)</span>500), <span class="mathjax-inline">\(q\)</span>’s own
+rounding error was amplified by the <span class="mathjax-inline">\(\frac {\pi }{\text {2}}=\frac {\tau }{\text {4}}\)</span> leading term, injecting a
+multi-radian error into the reduced remainder. Table <a href="#rh-sin-cos-tan-maximum-observed-ulp-error-before-the-rangereduction-fix-tableref-tabulpmath-reports-the-corrected-current-values">7<!-- tex4ht:ref: tab:ulp-before  --></a>
+reports the resulting damage, measured before the fix:
+catastrophic, and well within @rh’s ordinary input range (max
+magnitude <span class="mathjax-inline">\(\sim \)</span>65,504), not an edge case. The fix widens to
+@rs (24-bit mantissa, exact <span class="mathjax-inline">\(q\)</span> up to 2<sup class="textsuperscript"><span class="ec-lmr-9">24</span></sup>, vastly beyond
+the dynamic range of @rh) via +widen-hs (exact) and
++narrow-sh (correctly rounded), primitives. These were
+verified exhaustively.
+</p><!-- l. 432 --><p class="indent">   Every /lib/unum transcendental with a dedicated,
+non-composed kernel is exactly correctly rounded (0 <span class="small-caps">ulp</span>) at
+all three tested widths, a stronger guarantee than the <span class="small-caps">ieee</span> 754
+/lib/math achieves at any precision, where the best case is
+faithful rounding around 0.5–1 <span class="small-caps">ulp</span> rather than 0 <span class="small-caps">ulp</span>. The
+composed arms (+pow, +cbt, and +pow-n beyond small
+positive exponents) lose this property in both libraries alike,
+landing in the 1–134 <span class="small-caps">ulp</span> range depending on precision and
+the number of chained roundings the composition involves—an
+inherent cost of composition rather than a library-specific
+weakness.
+   
+</p>
+   <h4 class="subsectionHead" id="the-price-of-determinism"><span class="titlemark">6.2   </span> <a id="x1-160006.2"></a>The price of determinism</h4>
+<!-- l. 437 --><p class="noindent">The third field of benchmarking measures the overhead of
+                                                
+                                                
+the determinism guarantee relative to a conventional,
+nondeterministic, hardware <span class="small-caps">blas</span>. We report SoftBLAS
+against Apple’s Accelerate framework—a stock <span class="small-caps">blas</span> on
+macOS which dispatches to Apple Silicon’s <span class="small-caps">amx</span> matrix
+coprocessor—for sgemm and dgemm (single-threaded to
+remove Accelerate’s automatic multithreading as a confound).
+We expect software-defined SoftBLAS to be slower; here we
+quantify how that cost scales. The results are summarized in
+Table <a href="#sgemm-dgemm-mean-percall-time-softblas-vs-apple-accelerate-singlethreaded-apple-m-max-n-is-the-square-matrix-dimension">8<!-- tex4ht:ref: tab:price  --></a> and Figure <a href="#sgemm-dgemm-mean-percall-time-vs-matrix-dimension-n-loglog-softblas-vs-apple-accelerate-data-from-tableref-tabprice-softblass-clean-on-scaling-appears-as-a-straight-line-of-slope-throughout-sgemm-and-dgemm-nearly-coincide-accelerates-subcubic-scaling-at-moderate-n-visibly-bends-below-that-trend-before-steepening-again-near-n-the-widening-vertical-gap-between-the-two-families-is-the-determinism-tax-growing-with-problem-size-the-accelerate-points-at-n-are-noisedominated-tableref-tabprice-note-hence-the-irregular-dip-rather-than-a-smooth-curve-at-small-n">1<!-- tex4ht:ref: fig:price  --></a>.
+</p><!-- l. 439 --><p class="indent">   <sup class="textsuperscript"><span class="ec-lmr-9">*</span></sup>At <span class="mathjax-inline">\(n\leq \text {20}\)</span> Accelerate’s own run-to-run standard deviation is
+comparable to its mean, so the reported slowdown there is
+noise-dominated; the trend is reliable and monotonic
+above <span class="mathjax-inline">\(n=\text {30}\)</span> (SoftBLAS’s timings are stable throughout since a
+fixed triple loop has no comparable startup-dominated
+regime).
+</p><!-- l. 441 --><p class="indent">   Determinism does not levy a fixed tax, but its cost
+grows with problem size, from single digits at <span class="mathjax-inline">\(n=\text {10}\)</span> to nearly
+four orders of magnitude by <span class="mathjax-inline">\(n=\text {1,000}\)</span> (sgemm) or over three
+orders of magnitude (dgemm). SoftBLAS’s triple-nested
+loop over SoftFloat calls is a clean <span class="mathjax-inline">\(O(n^3)\)</span> throughout the
+range tested (doubling <span class="mathjax-inline">\(n\)</span> consistently multiplies time
+by <span class="mathjax-inline">\(\sim \!8\times \)</span>), with no cache blocking or vectorization—each
+scalar multiply-add pays a full software floating-point
+call.<span class="footnote-mark"><a href="#fn23x0"><sup class="textsuperscript">23</sup></a></span><a id="x1-16001f23"></a> 
+Accelerate is sub-cubic through the moderate range (cache
+blocking and <span class="small-caps">simd</span>/<span class="small-caps">amx</span> dispatch absorb work that would
+otherwise scale as <span class="mathjax-inline">\(n^3\)</span>) before trending back toward cubic
+by <span class="mathjax-inline">\(n=\text {1,000}\)</span>. In throughput terms, SoftBLAS delivers roughly
+0.12 <span class="small-caps">gflop/s</span> at <span class="mathjax-inline">\(n=\text {1,000}\)</span> regardless of precision—consistent
+with SoftFloat call overhead, not memory bandwidth,
+being the bottleneck—against Accelerate’s approximately
+1,477 <span class="small-caps">gflop</span>/s (sgemm) and 401 <span class="small-caps">gflop</span>/s (dgemm), the
+latter gap itself illustrating that Accelerate’s single-precision
+path better exploits the <span class="small-caps">amx</span> unit’s native format.
+</p><!-- l. 443 --><p class="indent">   This sharply demonstrates a quantitative trade-off between
+                                                
+                                                
+determinism and performance introduced in Section <a href="#the-numerical-stack">3.1<!-- tex4ht:ref: sec:stack  --></a>:
+SoftBLAS is not merely “slower,” but slower by a margin
+that widens with the problem sizes—large dense linear
+algebra—where <span class="small-caps">blas</span> exists to be fast in the first place. A
+deterministic numerical stack should budget accordingly. A
+software <span class="small-caps">blas</span> that never touches a hardware floating-point
+instruction cannot reach a coprocessor-backed <span class="small-caps">blas</span>’s
+throughput, only close the distance to it, which argues in favor
+of new paradigms for deterministic numerical computing that
+can leverage hardware acceleration without sacrificing
+reproducibility.
+                                                
+                                                
+</p><!-- l. 445 --><p class="indent">   </p><figure class="float" id="x1-16003r8"><span id="sgemm-dgemm-mean-percall-time-softblas-vs-apple-accelerate-singlethreaded-apple-m-max-n-is-the-square-matrix-dimension"></span>
+                                                
+                                                
+
+<figcaption class="caption"><span class="id">Table 8:  </span><span class="content">sgemm/dgemm  mean  per-call  time,  SoftBLAS
+vs. Apple Accelerate, single-threaded, Apple M4 Max. <span class="mathjax-inline">\(n\)</span> is
+the (square) matrix dimension.                      </span></figcaption><!-- tex4ht:label?: x1-16003r8  -->
+<div class="tabular">
+ <table class="tabular" id="TBL-9"><colgroup id="TBL-9-1g"><col id="TBL-9-1" /><col id="TBL-9-2" /><col id="TBL-9-3" /><col id="TBL-9-4" /><col id="TBL-9-5" /></colgroup><colgroup id="TBL-9-6g"><col id="TBL-9-6" /><col id="TBL-9-7" /><col id="TBL-9-8" /></colgroup><tr id="TBL-9-1-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-1-1" style="white-space:nowrap; text-align:right;">    <span class="mathjax-inline">\(n\)</span></td><td class="td01" id="TBL-9-1-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-1-3" style="white-space:nowrap; text-align:right;"> SoftBLAS sgemm  </td><td class="td11" id="TBL-9-1-4" style="white-space:nowrap; text-align:right;"> Accelerate sgemm  </td><td class="td11" id="TBL-9-1-5" style="white-space:nowrap; text-align:right;"> slowdown  </td><td class="td11" id="TBL-9-1-6" style="white-space:nowrap; text-align:right;"> SoftBLAS dgemm  </td><td class="td11" id="TBL-9-1-7" style="white-space:nowrap; text-align:right;"> Accelerate dgemm  </td><td class="td11" id="TBL-9-1-8" style="white-space:nowrap; text-align:right;"> slowdown  </td>
+</tr><tr id="TBL-9-2-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-2-1" style="white-space:nowrap; text-align:right;">   10</td><td class="td01" id="TBL-9-2-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-2-3" style="white-space:nowrap; text-align:right;">          21.9 µs  </td><td class="td11" id="TBL-9-2-4" style="white-space:nowrap; text-align:right;">           7.3 µs  </td><td class="td11" id="TBL-9-2-5" style="white-space:nowrap; text-align:right;">      3.0×  </td><td class="td11" id="TBL-9-2-6" style="white-space:nowrap; text-align:right;">          20.8 µs  </td><td class="td11" id="TBL-9-2-7" style="white-space:nowrap; text-align:right;">            4.7 µs  </td><td class="td11" id="TBL-9-2-8" style="white-space:nowrap; text-align:right;">      4.4×  </td></tr><tr id="TBL-9-3-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-3-1" style="white-space:nowrap; text-align:right;"> 20</td><td class="td01" id="TBL-9-3-2" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript">
+<span class="ec-lmr-9">*</span></sup>  </td><td class="td11" id="TBL-9-3-3" style="white-space:nowrap; text-align:right;">           160 µs  </td><td class="td11" id="TBL-9-3-4" style="white-space:nowrap; text-align:right;">           9.0 µs  </td><td class="td11" id="TBL-9-3-5" style="white-space:nowrap; text-align:right;">      18×  </td><td class="td11" id="TBL-9-3-6" style="white-space:nowrap; text-align:right;">           151 µs  </td><td class="td11" id="TBL-9-3-7" style="white-space:nowrap; text-align:right;">            1.9 µs  </td><td class="td11" id="TBL-9-3-8" style="white-space:nowrap; text-align:right;">     80.0×  </td></tr><tr id="TBL-9-4-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-4-1" style="white-space:nowrap; text-align:right;"> 30</td><td class="td01" id="TBL-9-4-2" style="white-space:nowrap; text-align:left;"><sup class="textsuperscript">
+<span class="ec-lmr-9">*</span></sup>  </td><td class="td11" id="TBL-9-4-3" style="white-space:nowrap; text-align:right;">           521 µs  </td><td class="td11" id="TBL-9-4-4" style="white-space:nowrap; text-align:right;">          0.79 µs  </td><td class="td11" id="TBL-9-4-5" style="white-space:nowrap; text-align:right;">     662×  </td><td class="td11" id="TBL-9-4-6" style="white-space:nowrap; text-align:right;">           496 µs  </td><td class="td11" id="TBL-9-4-7" style="white-space:nowrap; text-align:right;">            1.4 µs  </td><td class="td11" id="TBL-9-4-8" style="white-space:nowrap; text-align:right;">     354×  </td></tr><tr id="TBL-9-5-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-5-1" style="white-space:nowrap; text-align:right;"> 40</td><td class="td01" id="TBL-9-5-2" style="white-space:nowrap; text-align:left;"> </td><td class="td11" id="TBL-9-5-3" style="white-space:nowrap; text-align:right;"> 1.20 ms </td><td class="td11" id="TBL-9-5-4" style="white-space:nowrap; text-align:right;"> 1.4 µs </td><td class="td11" id="TBL-9-5-5" style="white-space:nowrap; text-align:right;"> 873× </td><td class="td11" id="TBL-9-5-6" style="white-space:nowrap; text-align:right;"> 1.16 ms </td><td class="td11" id="TBL-9-5-7" style="white-space:nowrap; text-align:right;"> 2.3 µs </td><td class="td11" id="TBL-9-5-8" style="white-space:nowrap; text-align:right;"> 496×</td>
+</tr><tr id="TBL-9-6-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-6-1" style="white-space:nowrap; text-align:right;">   50</td><td class="td01" id="TBL-9-6-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-6-3" style="white-space:nowrap; text-align:right;">          2.27 ms  </td><td class="td11" id="TBL-9-6-4" style="white-space:nowrap; text-align:right;">           1.9 µs  </td><td class="td11" id="TBL-9-6-5" style="white-space:nowrap; text-align:right;">    1,202×  </td><td class="td11" id="TBL-9-6-6" style="white-space:nowrap; text-align:right;">          2.22 ms  </td><td class="td11" id="TBL-9-6-7" style="white-space:nowrap; text-align:right;">            4.1 µs  </td><td class="td11" id="TBL-9-6-8" style="white-space:nowrap; text-align:right;">    545.7×  </td>
+</tr><tr id="TBL-9-7-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-7-1" style="white-space:nowrap; text-align:right;">   75</td><td class="td01" id="TBL-9-7-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-7-3" style="white-space:nowrap; text-align:right;">          7.44 ms  </td><td class="td11" id="TBL-9-7-4" style="white-space:nowrap; text-align:right;">           3.2 µs  </td><td class="td11" id="TBL-9-7-5" style="white-space:nowrap; text-align:right;">    2,322×  </td><td class="td11" id="TBL-9-7-6" style="white-space:nowrap; text-align:right;">          7.25 ms  </td><td class="td11" id="TBL-9-7-7" style="white-space:nowrap; text-align:right;">            7.1 µs  </td><td class="td11" id="TBL-9-7-8" style="white-space:nowrap; text-align:right;">  1,020.4×  </td>
+</tr><tr id="TBL-9-8-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-8-1" style="white-space:nowrap; text-align:right;">  100</td><td class="td01" id="TBL-9-8-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-8-3" style="white-space:nowrap; text-align:right;">          17.3 ms  </td><td class="td11" id="TBL-9-8-4" style="white-space:nowrap; text-align:right;">           5.8 µs  </td><td class="td11" id="TBL-9-8-5" style="white-space:nowrap; text-align:right;">    2,970×  </td><td class="td11" id="TBL-9-8-6" style="white-space:nowrap; text-align:right;">          17.8 ms  </td><td class="td11" id="TBL-9-8-7" style="white-space:nowrap; text-align:right;">           13.9 µs  </td><td class="td11" id="TBL-9-8-8" style="white-space:nowrap; text-align:right;">  1,282.3×  </td>
+</tr><tr id="TBL-9-9-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-9-1" style="white-space:nowrap; text-align:right;">  200</td><td class="td01" id="TBL-9-9-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-9-3" style="white-space:nowrap; text-align:right;">          133 ms  </td><td class="td11" id="TBL-9-9-4" style="white-space:nowrap; text-align:right;">          22.5 µs  </td><td class="td11" id="TBL-9-9-5" style="white-space:nowrap; text-align:right;">    5,921×  </td><td class="td11" id="TBL-9-9-6" style="white-space:nowrap; text-align:right;">          135 ms  </td><td class="td11" id="TBL-9-9-7" style="white-space:nowrap; text-align:right;">           57.9 µs  </td><td class="td11" id="TBL-9-9-8" style="white-space:nowrap; text-align:right;">    2,342×  </td>
+</tr><tr id="TBL-9-10-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-10-1" style="white-space:nowrap; text-align:right;">  500</td><td class="td01" id="TBL-9-10-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-10-3" style="white-space:nowrap; text-align:right;">           2.02 s  </td><td class="td11" id="TBL-9-10-4" style="white-space:nowrap; text-align:right;">           203 µs  </td><td class="td11" id="TBL-9-10-5" style="white-space:nowrap; text-align:right;">    9,947×  </td><td class="td11" id="TBL-9-10-6" style="white-space:nowrap; text-align:right;">           2.02 s  </td><td class="td11" id="TBL-9-10-7" style="white-space:nowrap; text-align:right;">           675 µs  </td><td class="td11" id="TBL-9-10-8" style="white-space:nowrap; text-align:right;">    3,000×  </td>
+</tr><tr id="TBL-9-11-" style="vertical-align:baseline;"><td class="td10" id="TBL-9-11-1" style="white-space:nowrap; text-align:right;"> 1000</td><td class="td01" id="TBL-9-11-2" style="white-space:nowrap; text-align:left;">  </td><td class="td11" id="TBL-9-11-3" style="white-space:nowrap; text-align:right;">          16.05 s  </td><td class="td11" id="TBL-9-11-4" style="white-space:nowrap; text-align:right;">          1.35 ms  </td><td class="td11" id="TBL-9-11-5" style="white-space:nowrap; text-align:right;">   11,853×  </td><td class="td11" id="TBL-9-11-6" style="white-space:nowrap; text-align:right;">          16.25 s  </td><td class="td11" id="TBL-9-11-7" style="white-space:nowrap; text-align:right;">          4.99 ms  </td><td class="td11" id="TBL-9-11-8" style="white-space:nowrap; text-align:right;">    3,257×  </td>
+
+</tr></table>                                                                                                          </div>
+                                                
+                                                
+   </figure>
+   <figure class="figure"> 
+
+                                                
+                                                
+                                                
+                                                
+<!-- l. 469 --><p class="noindent" id="sgemm-dgemm-mean-percall-time-vs-matrix-dimension-n-loglog-softblas-vs-apple-accelerate-data-from-tableref-tabprice-softblass-clean-on-scaling-appears-as-a-straight-line-of-slope-throughout-sgemm-and-dgemm-nearly-coincide-accelerates-subcubic-scaling-at-moderate-n-visibly-bends-below-that-trend-before-steepening-again-near-n-the-widening-vertical-gap-between-the-two-families-is-the-determinism-tax-growing-with-problem-size-the-accelerate-points-at-n-are-noisedominated-tableref-tabprice-note-hence-the-irregular-dip-rather-than-a-smooth-curve-at-small-n"><img class="figure" alt="Figure" src="mss0x.svg" />
+<a id="x1-16004r1"></a>
+</p>
+<figcaption class="caption"><span class="id">Figure 1: </span><span class="content">sgemm/dgemm mean per-call time vs. matrix
+dimension <span class="mathjax-inline">\(n\)</span>, log–log, SoftBLAS vs. Apple Accelerate (data
+from  Table <a href="#sgemm-dgemm-mean-percall-time-softblas-vs-apple-accelerate-singlethreaded-apple-m-max-n-is-the-square-matrix-dimension">8<!-- tex4ht:ref: tab:price  --></a>).  SoftBLAS’s  clean  <span class="mathjax-inline">\(O(n^3)\)</span>  scaling  appears  as
+a  straight  line  of  slope  3  throughout  (sgemm  and
+dgemm nearly coincide); Accelerate’s sub-cubic scaling at
+moderate <span class="mathjax-inline">\(n\)</span> visibly bends below that trend before steepening
+again near <span class="mathjax-inline">\(n=\text {1,000}\)</span>—the widening vertical gap between the two
+families is the determinism tax growing with problem size.
+The Accelerate points at <span class="mathjax-inline">\(n\leq \text {30}\)</span> are noise-dominated (Table <a href="#sgemm-dgemm-mean-percall-time-softblas-vs-apple-accelerate-singlethreaded-apple-m-max-n-is-the-square-matrix-dimension">8<!-- tex4ht:ref: tab:price  --></a>,
+note *), hence the irregular dip rather than a smooth curve
+at small <span class="mathjax-inline">\(n\)</span>.
+</span></figcaption><!-- tex4ht:label?: x1-16004r1  -->
+                                                
+                                                
+   </figure>
+   
+   <h3 class="sectionHead" id="future-work"><span class="titlemark">7   </span> <a id="x1-170007"></a>Future Work</h3>
+<!-- l. 510 --><p class="noindent">The complex-valued SoftBLAS routines are in progress and
+will complete the Level 1–3 coverage. Quire operations in
+/lib/unum are implemented within the generic posit core but
+are not yet surfaced as callable top-level arms; exposing them
+is a prerequisite both for user access and for routing them
+through the verification harness. The unum specification also
+defines valids, which are arithmetic intervals which have not
+yet seen widespread adoption.
+</p><!-- l. 512 --><p class="indent">   Saloon will grow in methods adjacent to scientific
+computing: conjugate gradient minimization and other
+optimization algorithms; random number generators; and the
+like. The fixed-point library is relatively underdeveloped
+compared to the other arithmetics, and will be expanded to
+support more general Q-format widths and operations. More
+components of the various libraries need to be upgraded to a
+state-of-the-art Chebyshev basis and benchmarked for
+performance.<span class="footnote-mark"><a href="#fn24x0"><sup class="textsuperscript">24</sup></a></span><a id="x1-17001f24"></a> 
+</p><!-- l. 514 --><p class="indent">   Finally, Maroon, the machine learning library, is in
+its infancy and will be developed to support a range of
+machine learning algorithms and techniques. Part of this
+field of consideration encompasses the utilization of <span class="small-caps">gpu</span>
+programming for <span class="small-caps">llm</span>-based computing within or adjacent to
+Urbit. <span class="small-caps">gpu</span> numerical nondeterminism and host portability
+presents a challenge of the same order of magnitude as
+the baseline reproducibility we have tackled over the
+past several years in this project. One can envision a
+ReproCL as a deterministic counterpart to OpenCL, but it
+is unclear whether sufficient warrant exists to justify
+                                                
+                                                
+the effort as of the mid-2020s. Heterogeneous compute
+would be benefitted by the adoption of alternatives to
+<span class="small-caps">ieee</span> 754 with better guarantees of portability: not just
+unums but bfloat16 and other newer types may answer the
+need.
+   
+</p>
+   <h3 class="sectionHead" id="conclusion"><span class="titlemark">8   </span> <a id="x1-180008"></a>Conclusion</h3>
+<!-- l. 518 --><p class="noindent">Urbit as a deterministic state machine cannot treat numerical
+determinism or bitwise reproducibility as merely a tolerance.
+The architectural stack we have described here constitutes a
+partial answer to the challenge underlying <a id="x1-18001"></a><code>~lagrev-nocfep</code>
+(2024): how can a numerical computation built on a particular
+stack be reliably reproducible? We maintain this determinism
+by painstaking construction. The computational cost of
+determinism is currently (and regrettably) non-negligible,
+while one can hope for future developments, protocols, and
+architectures that make it more natural and tenable.<img alt="PIC" src="ustj-logo-.png" />
+   
+</p>
+   <h3 class="sectionHead" id="references"><a id="x1-19000"></a>References</h3>
+<!-- l. 522 --><p class="noindent">
+   </p><dl class="thebibliography"><dt class="thebibliography" id="X0-agullo2009plasma">
+</dt><dd class="thebibliography" id="bib-1">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_agullo2009plasma"></a>Agullo, Emmanuel
+   et al.
+   (2009).
+   “Numerical
+   Linear
+   Algebra
+   on
+                                                
+                                                
+   Emerging
+   Architectures:
+   The
+   <span class="small-caps">plasma</span>
+   and
+   <span class="small-caps">magma</span>
+   Projects.”
+   In:
+   <span class="ec-lmri-10">Journal
+   of
+   Physics:
+   Conference
+   Series</span>
+   180,
+   p. 012037.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1088/1742-6596/180/1/012037">10.1088/1742-6596/180/1/012037</a>.
+   </p></dd><dt class="thebibliography" id="X0-Charney1950">
+</dt><dd class="thebibliography" id="bib-2">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_Charney1950"></a>Charney, J.,
+   R. Fjortoft,
+   and
+   J. von Neumann
+   (1950).
+   “Numerical
+   Integration
+   of
+   the
+   Barotropic
+   Vorticity
+   Equation.”
+   In:
+   <span class="ec-lmri-10">Tellus</span>
+   2.4,
+   pp. 237–254.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1111/j.2153-3490.1950.tb00336.x">10.1111/j.2153-3490.1950.tb00336.x</a>.
+                                                
+                                                
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://doi.org/10.1111/j.2153-3490.1950.tb00336.x">https://doi.org/10.1111/j.2153-3490.1950.tb00336.x</a>.
+   </p></dd><dt class="thebibliography" id="X0-codywaite1980">
+</dt><dd class="thebibliography" id="bib-3">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_codywaite1980"></a>Cody, William J.
+   and
+   William M. Waite
+   (1980).
+   <span class="ec-lmri-10">Software
+   Manual
+   for
+   the
+   Elementary
+   Functions</span>.
+   Prentice-Hall.
+   </p></dd><dt class="thebibliography" id="X0-coremath">
+</dt><dd class="thebibliography" id="bib-4">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_coremath"></a><span class="small-caps">core-math</span>
+   Project
+   (2022)
+   “<span class="small-caps">core-math</span>:
+   Correctly
+   Rounded
+   Mathematical
+   Functions”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://core-math.gitlabpages.inria.fr/">https://core-math.gitlabpages.inria.fr/</a>.
+   </p></dd><dt class="thebibliography" id="X0-daramy2003crlibm">
+</dt><dd class="thebibliography" id="bib-5">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_daramy2003crlibm"></a>Daramy, Catherine
+   et al.
+   (2003).
+   “<span class="small-caps">cr-libm</span>:
+   A
+   Correctly
+   Rounded
+                                                
+                                                
+   Elementary
+   Function
+   Library.”
+   In:
+   <span class="ec-lmri-10">Proc.
+   </span><span class="small-caps">spie
+   </span><span class="ec-lmri-10">5205,
+   Advanced
+   Signal
+   Processing
+   Algorithms,
+   Architectures,
+   and
+   Implementations
+   </span><span class="small-caps">xiii</span>.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1117/12.505591">10.1117/12.505591</a>.
+   </p></dd><dt class="thebibliography" id="X0-demmel2013reproducible">
+</dt><dd class="thebibliography" id="bib-6">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_demmel2013reproducible"></a>Demmel, James
+   and
+   Hong Diep Nguyen
+   (2013).
+   “Fast
+   Reproducible
+   Floating-Point
+   Summation.”
+   In:
+   <span class="ec-lmri-10">2013
+   </span><span class="small-caps">ieee
+   </span><span class="ec-lmri-10">21st
+   Symposium
+   on
+   Computer
+   Arithmetic
+   (</span><span class="small-caps">arith</span><span class="ec-lmri-10">)</span>.
+   ReproBLAS
+   project,
+                                                
+                                                
+   pp. 163–172.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1109/ARITH.2013.9">10.1109/ARITH.2013.9</a>.
+   </p></dd><dt class="thebibliography" id="X0-fousse2007mpfr">
+</dt><dd class="thebibliography" id="bib-7">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_fousse2007mpfr"></a>Fousse, Laurent
+   et al.
+   (2007).
+   “<span class="small-caps">mpfr</span>:
+   A
+   Multiple-Precision
+   Binary
+   Floating-Point
+   Library
+   with
+   Correct
+   Rounding.”
+   In:
+   <span class="small-caps">acm
+   </span><span class="ec-lmri-10">Transactions
+   on
+   Mathematical
+   Software</span>
+   33.2,
+   13:1–13:15.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1145/1236463.1236468">10.1145/1236463.1236468</a>.
+   </p></dd><dt class="thebibliography" id="X0-glibc_matherr">
+</dt><dd class="thebibliography" id="bib-8">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_glibc_matherr"></a>Free
+   Software
+   Foundation
+   (2024).
+   <span class="ec-lmri-10">The
+   </span><span class="small-caps">gnu
+   </span><span class="ec-lmri-10">C
+   Library
+                                                
+                                                
+   Reference
+   Manual</span>.
+   Section
+   19.7,
+   Known
+   Maximum
+   Errors
+   in
+   Math
+   Functions.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://www.gnu.org/software/libc/manual/html_node/Errors-in-Math-Functions.html">https://www.gnu.org/software/libc/manual/html_node/Errors-in-Math-Functions.html</a>.
+   </p></dd><dt class="thebibliography" id="X0-hauser_softfloat">
+</dt><dd class="thebibliography" id="bib-9">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_hauser_softfloat"></a>Hauser, John R.
+   (2018)
+   “Berkeley
+   SoftFloat,
+   Release
+   3e”.
+   </p></dd><dt class="thebibliography" id="X0-ieee754-2019">
+</dt><dd class="thebibliography" id="bib-10">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_ieee754-2019"></a><span class="small-caps">ieee</span>
+   (2019).
+   <span class="small-caps">ieee
+   </span><span class="ec-lmri-10">Standard
+   for
+   Floating-Point
+   Arithmetic</span>.
+   <span class="small-caps">ieee</span>
+   Std
+   754-2019.
+   <span class="small-caps">ieee</span>.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1109/IEEESTD.2019.8766229">10.1109/IEEESTD.2019.8766229</a>.
+                                                
+                                                
+   </p></dd><dt class="thebibliography" id="X0-intel_cnr">
+</dt><dd class="thebibliography" id="bib-11">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_intel_cnr"></a>Intel
+   Corporation
+   (2023)
+   “Conditional
+   Numerical
+   Reproducibility
+   (<span class="small-caps">cnr</span>)
+   in
+   Intel
+   oneAPI
+   Math
+   Kernel
+   Library”.
+   </p></dd><dt class="thebibliography" id="X0-Davis2024">
+</dt><dd class="thebibliography" id="bib-12">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_Davis2024"></a><code>~lagrev-nocfep</code>, N. E. Davis
+   (2024).
+   “The
+   Desert
+   of
+   the
+   Reals:
+   Floating-Point
+   Arithmetic
+   on
+   Deterministic
+   Systems.”
+   In:
+   <span class="ec-lmri-10">Urbit
+   Systems
+   Technical
+   Journal</span>
+   1.1,
+   pp. 93–131.
+                                                
+                                                
+   </p></dd><dt class="thebibliography" id="X0-Davis2026">
+</dt><dd class="thebibliography" id="bib-13">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_Davis2026"></a>—   (2026a).
+   “Exact
+   Uniform
+   Random
+   Variates
+   for
+   Tapered-Precision
+   Posit
+   Arithmetic.”
+   In:
+   <span class="ec-lmri-10">The
+   Seventh
+   Conference
+   on
+   Next
+   Generation
+   Arithmetic
+   2026
+   (CoNGA’26)</span>.
+   accepted
+   for
+   publication.
+   </p></dd><dt class="thebibliography" id="X0-urbit_softunum">
+</dt><dd class="thebibliography" id="bib-14">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_urbit_softunum"></a>—   (2026b)
+   “SoftUnum:
+   Software-Defined
+   Universal
+   Number
+   Library
+   for
+   Deterministic
+   Jetting”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/sigilante/SoftUnum">https://github.com/sigilante/SoftUnum</a>.
+                                                
+                                                
+   </p></dd><dt class="thebibliography" id="X0-lawson1979blas">
+</dt><dd class="thebibliography" id="bib-15">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_lawson1979blas"></a>Lawson, C. L.
+   et al.
+   (1979).
+   “Basic
+   Linear
+   Algebra
+   Subprograms
+   for
+   Fortran
+   Usage.”
+   In:
+   <span class="small-caps">acm
+   </span><span class="ec-lmri-10">Transactions
+   on
+   Mathematical
+   Software</span>
+   5.3,
+   pp. 308–323.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1145/355841.355847">10.1145/355841.355847</a>.
+   </p></dd><dt class="thebibliography" id="X0-leong_softposit">
+</dt><dd class="thebibliography" id="bib-16">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_leong_softposit"></a>Leong, S. H. (Cerlane)
+   (2018)
+   “SoftPosit:
+   A
+   Software
+   Implementation
+   of
+   Posit
+   Arithmetic”.
+   </p></dd><dt class="thebibliography" id="X0-lim2021rlibm">
+</dt><dd class="thebibliography" id="bib-17">
+                                                
+                                                
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_lim2021rlibm"></a>Lim, Jay P.
+   and
+   Santosh Nagarakatte
+   (2021).
+   “High
+   Performance
+   Correctly
+   Rounded
+   Math
+   Libraries
+   for
+   32-bit
+   Floating
+   Point
+   Representations.”
+   In:
+   <span class="ec-lmri-10">Proc.
+   42nd
+   </span><span class="small-caps">acm
+   sigplan
+   </span><span class="ec-lmri-10">Conf.
+   on
+   Programming
+   Language
+   Design
+   and
+   Implementation
+   (</span><span class="small-caps">pldi</span><span class="ec-lmri-10">)</span>,
+   pp. 359–374.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1145/3453483.3454049">10.1145/3453483.3454049</a>.
+   </p></dd><dt class="thebibliography" id="X0-MullerEtAl2018">
+</dt><dd class="thebibliography" id="bib-18">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_MullerEtAl2018"></a>Muller, Jean-Michel
+   et al.
+   (2018).
+   <span class="ec-lmri-10">Handbook
+   of
+                                                
+                                                
+   Floating-Point
+   Arithmetic,
+   2nd
+   edition</span>.
+   Birkhäuser
+   Boston,
+   p. 632.
+   </p></dd><dt class="thebibliography" id="X0-omtzigt2020universal">
+</dt><dd class="thebibliography" id="bib-19">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_omtzigt2020universal"></a>Omtzigt, E. Theodore L.
+   et al.
+   (2020).
+   “Universal
+   Numbers
+   Library:
+   Design
+   and
+   Implementation
+   of
+   a
+   High-
+   Performance
+   Reproducible
+   Number
+   Systems
+   Library.”
+   In:
+   <span class="ec-lmri-10">arXiv
+   preprint
+   arXiv:2012.11011</span>.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://arxiv.org/abs/2012.11011">https://arxiv.org/abs/2012.11011</a>.
+   </p></dd><dt class="thebibliography" id="X0-positstd2022">
+</dt><dd class="thebibliography" id="bib-20">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_positstd2022"></a>Posit
+   Working
+   Group
+                                                
+                                                
+   (2022).
+   <span class="ec-lmri-10">Standard
+   for
+   Posit
+   Arithmetic
+   (2022)</span>.
+   Posit
+   Working
+   Group.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://posithub.org/docs/posit_standard-2.pdf">https://posithub.org/docs/posit_standard-2.pdf</a>.
+   </p></dd><dt class="thebibliography" id="X0-Rump2008">
+</dt><dd class="thebibliography" id="bib-21">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_Rump2008"></a>Rump, Siegfried M.,
+   Takeshi Ogita,
+   and
+   Shin’ichi Oishi
+   (2008).
+   “Accurate
+   Floating-Point
+   Summation
+   Part
+   I:
+   Faithful
+   Rounding.”
+   In:
+   <span class="small-caps">siam
+   </span><span class="ec-lmri-10">Journal
+   on
+   Scientific
+   Computing</span>
+   31.1,
+   pp. 189–224.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.1137/050645671">10.1137/050645671</a>.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://doi.org/10.1137/050645671">https://doi.org/10.1137/050645671</a>.
+                                                
+                                                
+   </p></dd><dt class="thebibliography" id="X0-Whitepaper">
+</dt><dd class="thebibliography" id="bib-22">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   et al.
+   (2016).
+   <span class="ec-lmri-10">Urbit:
+   A
+   Solid-State
+   Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://media.urbit.org/whitepaper.pdf">https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt class="thebibliography" id="X0-urbit_softblas">
+</dt><dd class="thebibliography" id="bib-23">
+   <!-- l. 522 --><p class="noindent"><a id="cite.0_urbit_softblas"></a>Urbit
+   Foundation
+   (2024)
+   “SoftBLAS:
+   Software-Defined
+   <span class="small-caps">blas</span>
+   for
+   Deterministic
+   Jetting”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/urbit/SoftBLAS">https://github.com/urbit/SoftBLAS</a>.</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+<div class="footnote-text">
+  <!-- l. 60 --><p class="indent">     <span class="footnote-mark"><a id="x2-2004x1"></a><a id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">Urbit computing is single-threaded which removes one possible
+  source of nondeterminism.</span><a href="#x1-2003f1">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 62 --><p class="indent">     <span class="footnote-mark"><a id="x3-2007x1"></a><a id="fn2x0">   <sup class="textsuperscript">2</sup></a></span> <a href="https://github.com/urbit/SoftBLAS"><span class="ec-lmr-8">urbit/SoftBLAS</span></a> <span class="ec-lmr-8">(</span><a id="x3-2008"></a><span class="ec-lmr-8">Urbit Foundation, 2024).</span><a href="#x1-2006f2">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 62 --><p class="indent">     <span class="footnote-mark"><a id="x4-2010x1"></a><a id="fn3x0">   <sup class="textsuperscript">3</sup></a></span> <a href="https://github.com/sigilante/SoftUnum"><span class="ec-lmr-8">sigilante/SoftUnum</span></a> <span class="ec-lmr-8">(<code>~lagrev-nocfep</code>, 2026b).</span><a href="#x1-2009f3">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 64 --><p class="indent">     <span class="footnote-mark"><a id="x5-2012x1"></a><a id="fn4x0">   <sup class="textsuperscript">4</sup></a></span><span class="ec-lmr-8">Verification and validation apply, of course.</span><a href="#x1-2011f4">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 68 --><p class="indent">     <span class="footnote-mark"><a id="x6-3003x2"></a><a id="fn5x0">   <sup class="textsuperscript">5</sup></a></span><span class="ec-lmr-8">Even the size of a byte took decades to standardize.</span><a href="#x1-3002f5">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 87 --><p class="indent">     <span class="footnote-mark"><a id="x7-5003x2.2"></a><a id="fn6x0">   <sup class="textsuperscript">6</sup></a></span><span class="ec-lmr-8">See <code>~lagrev-nocfep</code>, “The Desert of the Reals: Floating-Point
+  Arithmetic on Deterministic Systems,” </span><span class="ec-lmri-8">Urbit Systems Technical Journal
+  </span><span class="ec-lmr-8">volume 1 issue 1, pp. 93–131.</span><a href="#x1-5002f6">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 108 --><p class="indent">     <span class="footnote-mark"><a id="x8-7002x3"></a><a id="fn7x0">   <sup class="textsuperscript">7</sup></a></span><span class="ec-lmr-8">Summation will necessarily exhibit order-dependent drift at the
+  bit level.</span><a href="#x1-7001f7">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 129 --><p class="noindent"><span class="footnote-mark"><a id="x9-8021x8"></a><a id="fn8x0">   <sup class="textsuperscript">8</sup></a></span><span class="ec-lmr-8">Broadly speaking, Saloon:SciPy::Lagoon:NumPy.</span><a href="#x1-8020f8">⤴</a></p></div>
+<div class="footnote-text">
+  <!-- l. 134 --><p class="indent">     <span class="footnote-mark"><a id="x10-8025x3.1"></a><a id="fn9x0">   <sup class="textsuperscript">9</sup></a></span><span class="ec-lmr-8">For %cplx, bloq is the </span><span class="mathjax-inline">\(\log _\text {2}\) </span><span class="ec-lmr-8">of the packed-pair element width (both
+  components combined). Thus @cs (two @rs components) has bloq=6,
+  while each component @rs has bloq=5.</span><a href="#x1-8024f9">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 174 --><p class="indent">     <span class="footnote-mark"><a id="x11-9002x3.2"></a><a id="fn10x0">  <sup class="textsuperscript">10</sup></a></span><span class="ec-lmr-8">Urbit mathematics are supported internally by the  </span><a href="https://gmplib.org/"><span class="small-caps">gnu </span><span class="ec-lmr-8">Multiple
+   Precision Arithmetic Library</span></a> <span class="ec-lmr-8">and  </span><a href="https://www.jhauser.us/arithmetic/SoftFloat.html"><span class="ec-lmr-8">SoftFloat</span></a><span class="ec-lmr-8">.</span><a href="#x1-9001f10">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 177 --><p class="indent">     <span class="footnote-mark"><a id="x12-10004x3.2.1"></a><a id="fn11x0">  <sup class="textsuperscript">11</sup></a></span><span class="ec-lmr-8">ReproBLAS in contrast uses a hardware floating-point path by
+   binning and accumulation, making reduction order irrelevant but still
+   subject to hardware-dependent rounding (</span><a id="x12-10005"></a><span class="ec-lmr-8">Demmel and Nguyen, 2013).
+   SoftBLAS is slower but deterministic across platforms; it makes the
+   fewest assumptions about the host.</span><a href="#x1-10003f11">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 179 --><p class="indent">     <span class="footnote-mark"><a id="x13-10007x3.2.1"></a><a id="fn12x0">  <sup class="textsuperscript">12</sup></a></span><span class="ec-lmr-8">Complex routines are supplied at half (i), single (c), double (z),
+   and quadruple (v) precisions.</span><a href="#x1-10006f12">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 196 --><p class="indent">     <span class="footnote-mark"><a id="x14-10010x3.2.1"></a><a id="fn13x0">  <sup class="textsuperscript">13</sup></a></span><span class="ec-lmr-8">The transcendental function implementations ignore the rounding
+   mode, which thus applies only to the arithmetic operations.</span><a href="#x1-10009f13">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 196 --><p class="indent">     <span class="footnote-mark"><a id="x15-10012x3.2.1"></a><a id="fn14x0">  <sup class="textsuperscript">14</sup></a></span><span class="small-caps">ieee </span><span class="ec-lmr-8">754-2008 introduced another mode, round to nearest ties to
+   max magnitude, which is not included in Urbit’s toolset.</span><a href="#x1-10011f14">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 212 --><p class="indent">     <span class="footnote-mark"><a id="x16-12002x4"></a><a id="fn15x0">  <sup class="textsuperscript">15</sup></a></span><span class="ec-lmr-8">A quire is a </span><span class="mathjax-inline">\(\text {16}n\)</span><span class="ec-lmr-8">-bit two’s-complement fixed-point accumulator with
+   scale </span><span class="mathjax-inline">\(\text {2}^{-\text {qscale}}\) </span><span class="ec-lmr-8">(</span><span class="mathjax-inline">\(\text {qscale} = \text {8}n-\text {16}\)</span><span class="ec-lmr-8">): a posit value v contributes the exact integer </span><span class="mathjax-inline">\(v \times \text {2}^\text {qscale}\)</span><span class="ec-lmr-8">.</span><a href="#x1-12001f15">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 264 --><p class="indent">     <span class="footnote-mark"><a id="x17-13004x5"></a><a id="fn16x0">  <sup class="textsuperscript">16</sup></a></span><span class="ec-lmr-8">Jet co-design methodology is treated separately; see <code>~lagrev-nocfep</code>,
+   forthcoming paper in </span><span class="small-caps">ustj</span><span class="ec-lmr-8">, for a companion article.</span><a href="#x1-13003f16">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 274 --><p class="indent">     <span class="footnote-mark"><a id="x18-14002x6"></a><a id="fn17x0">  <sup class="textsuperscript">17</sup></a></span><span class="ec-lmr-8">Urbit memoizes aggressively, so countermeasures were taken to
+   prevent caching effects. Inputs were varied every iteration and
+   the result of each call was folded into a returned accumulator in
+   order that neither input nor whole loop is a cacheable constant
+   noun.</span><a href="#x1-14001f17">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 274 --><p class="indent">     <span class="footnote-mark"><a id="x19-14004x6"></a><a id="fn18x0">  <sup class="textsuperscript">18</sup></a></span><span class="ec-lmr-8">Exhaustive results are available at  </span><a href="https://github.com/urbit/numerics/tree/main/benchmark"><span class="ec-lmr-8">urbit/numerics@main:benchmark</span></a><span class="ec-lmr-8">.</span><a href="#x1-14003f18">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 287 --><p class="indent">     <span class="footnote-mark"><a id="x20-15005x6.1"></a><a id="fn19x0">  <sup class="textsuperscript">19</sup></a></span><span class="small-caps">ulp </span><span class="ec-lmr-8">is defined as the distance between two adjacent representable
+   floating-point numbers, although the exact definition can vary slightly
+   depending on the author; we follow </span><a id="x20-15006"></a><span class="ec-lmr-8">Muller et al. (2018). A very good </span><span class="small-caps">ulp
+   </span><span class="ec-lmr-8">error is typically 0.5 or less, which results from a correctly rounded
+   library instead of a faithfully rounded one. Production libm often offers
+   merely 1–4 maximum </span><span class="small-caps">ulp </span><span class="ec-lmr-8">(e.g.  </span><a href="gnu.org/software/libc/manual/html_node/Errors-in-Math-Functions.html"><span class="small-caps">gnu </span><span class="ec-lmr-8">libc</span></a> <span class="ec-lmr-8">claims “within a few </span><span class="small-caps">ulp</span><span class="ec-lmr-8">”, </span><a id="x20-15007"></a><span class="ec-lmr-8">Free
+   Software Foundation (2024)).</span><a href="#x1-15004f19">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 352 --><p class="indent">     <span class="footnote-mark"><a id="x21-15012x6.1"></a><a id="fn20x0">  <sup class="textsuperscript">20</sup></a></span><span class="ec-lmr-8">See </span><span class="small-caps">cr-libm </span><span class="ec-lmr-8">(</span><a id="x21-15013"></a><span class="ec-lmr-8">Daramy et al., 2003), </span><span class="small-caps">rlibm</span><span class="ec-lmr-8"> (</span><a id="x21-15014"></a><span class="ec-lmr-8">Lim and Nagarakatte,
+   2021), and the </span><span class="small-caps">core-math </span><span class="ec-lmr-8">project (</span><a id="x21-15015"></a><span class="small-caps">core-math </span><span class="ec-lmr-8">Project, 2022) for further
+   details.</span><a href="#x1-15011f20">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 352 --><p class="indent">     <span class="footnote-mark"><a id="x22-15017x6.1"></a><a id="fn21x0">  <sup class="textsuperscript">21</sup></a></span><span class="ec-lmr-8">libmath/tools/cheb_check.py and unum_cheb_check.py. mpmath
+   independently verifies the algorithm-of-record. Half precision </span><span class="small-caps">ieee </span><span class="ec-lmr-8">754
+   and all three posit widths are tested exhaustively over their entire input
+   space; single, double, and quadruple precision (@rs/@rd/@rq) are
+   sampled over a broad range with edge weighting near breakpoints
+   and powers of two, since exhaustive testing is infeasible at those
+   widths.</span><a href="#x1-15016f21">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 357 --><p class="noindent"><span class="footnote-mark"><a id="x23-15019x6.1"></a><a id="fn22x0">  <sup class="textsuperscript">22</sup></a></span><span class="ec-lmr-8">The arms +pow, +cbt, and integer-exponent +pow-n beyond the
+   cheap exact cases are built from +exp/+log or repeated multiplication
+   rather than an independently minimax-fit kernel; /lib/unum’s
+   +asin/+acos are likewise composed, as </span><span class="mathjax-inline">\(\mathrm {atan}(\frac {x}{\sqrt {\text {1}-x^\text {2}}})\) </span><span class="ec-lmr-8">(and the corresponding
+   identity for +acos) rather than a dedicated rational kernel—unlike
+   /lib/math’s +asin/+acos, which use one, and so are unmarked in
+   Table </span><a href="mss.html#maximum-observed-ulp-error-libmath-ieee-against-an-mpmathchecked-oracle-rh-and-marked-cells-are-exhaustive-over-the-full-input-space-all-others-are-sampled"><span class="ec-lmr-8">5</span><!-- tex4ht:ref: tab:ulp-math  --></a><span class="ec-lmr-8">.</span><a href="#x1-15018f22">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 441 --><p class="indent">     <span class="footnote-mark"><a id="x24-16002x6.2"></a><a id="fn23x0">  <sup class="textsuperscript">23</sup></a></span><span class="ec-lmr-8">Other matrix multiplication algorithms, such as Strassen’s
+   algorithm, can reduce the asymptotic complexity, but they are not used
+   in this context.</span><a href="#x1-16001f23">⤴</a></p></div>
+<div class="footnote-text">
+   <!-- l. 512 --><p class="indent">     <span class="footnote-mark"><a id="x25-17002x7"></a><a id="fn24x0">  <sup class="textsuperscript">24</sup></a></span><span class="ec-lmr-8">This work has been staged as of press at  </span><a href="https://github.com/urbit/urbit/pull/7372"><span class="ec-lmr-8">urbit/urbit#7372</span></a><span class="ec-lmr-8">.
+   Furthermore, a random number generation library has been completed for
+   Saloon at  </span><a href="https://github.com/urbit/numerics/pull/76"><span class="ec-lmr-8">urbit/numerics#76</span></a><span class="ec-lmr-8">, as documented in <code>~lagrev-nocfep</code>
+   (2026a).</span><a href="#x1-17001f24">⤴</a></p></div>
+</body> 
+</html>

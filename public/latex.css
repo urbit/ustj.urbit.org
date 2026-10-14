@@ -763,6 +763,21 @@ img.full {
   height: auto;
 }
 
+/* Figures rendered to SVG by TeX4ht (see scripts/tex4ht-postprocess.py). */
+p img.figure {
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin: 1em auto;
+}
+
+/* Tables wider than the column scroll sideways instead of being clipped. */
+div.tabular {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 a {
   scroll-margin-top: 3rem;
   scroll-margin-bottom: 3rem;

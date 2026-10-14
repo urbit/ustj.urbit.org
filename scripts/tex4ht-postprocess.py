@@ -66,6 +66,15 @@ html = html.replace(old_cfg, new_cfg)
 
 # 7. Site conventions: shared stylesheet, PNG logo.
 html = html.replace('href="mss.css"', 'href="/latex.css"')
+# Figures that TeX4ht rendered to SVG (tikz/pgfplots) land inside a <p>, where
+# latex.css sizes images as inline 1em glyphs. Mark them so the stylesheet can
+# show them at full size; the <figcaption> carries the text, so drop the
+# garbled alt that TeX4ht derives from the picture.
+html = re.sub(
+    r'<img\b([^>]*?)\s+alt="[^"]*"([^>]*?)src="(mss\d+x\.svg)"',
+    r'<img class="figure" alt="Figure"\1\2src="\3"',
+    html,
+)
 html = html.replace('src="ustj-logo.svg"', 'src="ustj-logo-.png"')
 
 out = sys.argv[1] if len(sys.argv) > 1 else 'mss0.html'
