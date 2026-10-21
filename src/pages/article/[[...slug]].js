@@ -17,22 +17,44 @@ export default function Article({ issue, article, social }) {
   const [height, setHeight] = React.useState("0px");
 
   const measure = () => {
-    const body = ref.current?.contentWindow?.document?.body;
+    // latex.css gives the body min-height: 100vh, so once the frame is sized
+    // it can only grow; content rarely shrinks after load, so that is fine.
+    const body = ref.current?.contentDocument?.body;
     if (body) setHeight(body.scrollHeight + "px");
   };
 
-  // Web fonts and MathJax finish after the iframe's load event and change
-  // the content height, so keep measuring as the article body resizes.
-  const onLoad = () => {
-    measure();
-    const body = ref.current?.contentWindow?.document?.body;
-    if (body && typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(measure);
-      observer.observe(body);
-    }
-  };
+  useEffect(() => {
+    const frame = ref.current;
+    if (!frame) return undefined;
+    let observer;
 
-  useEffect(measure, [ref]);
+    // Web fonts and MathJax finish after the iframe's load event and change
+    // the content height, so keep measuring as the article body resizes.
+    const attach = () => {
+      measure();
+      const doc = frame.contentDocument;
+      if (doc?.body && typeof ResizeObserver !== "undefined") {
+        observer?.disconnect();
+        observer = new ResizeObserver(measure);
+        observer.observe(doc.body);
+        observer.observe(doc.documentElement);
+      }
+    };
+
+    // The page is static HTML, so the browser often finishes loading the
+    // iframe before React hydrates and a React onLoad handler would never
+    // fire. Attach to a document that is already there, and listen for any
+    // later load as well.
+    const doc = frame.contentDocument;
+    if (doc?.readyState === "complete" && doc.body?.childElementCount) {
+      attach();
+    }
+    frame.addEventListener("load", attach);
+    return () => {
+      frame.removeEventListener("load", attach);
+      observer?.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style = `background-color:hsl(210, 20%, 98%);`;
@@ -54,7 +76,6 @@ export default function Article({ issue, article, social }) {
             frameBorder="0"
             scrolling="no"
             style={{ height }}
-            onLoad={onLoad}
           />
         </main>
       </div>

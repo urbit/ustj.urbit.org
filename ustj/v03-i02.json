@@ -28,7 +28,9 @@
     },
     {
       "author": ["bonbud-macryg", "tondes-sitrym", "hanfel-dovned"],
-      "title": "Groundwire:  Decentralized Sybil Resistance for a Dead Internet"
+      "title": "Groundwire:  Decentralized Sybil Resistance for a Dead Internet",
+      "pdf": "/ustj/v03-i02/mss4.pdf",
+      "html": "/ustj/v03-i02/mss4.html"
     }
   ],
   "theme": {

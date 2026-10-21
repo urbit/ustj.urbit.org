@@ -1,0 +1,2061 @@
+<!DOCTYPE html> 
+<html lang="en" xml:lang="en"> 
+<head><title>Groundwire: Decentralized Sybil Resistance for a Dead
+Internet</title> 
+<meta charset="utf-8" /> 
+<meta content="TeX4ht (https://tug.org/tex4ht/)" name="generator" /> 
+<meta content="width=device-width,initial-scale=1" name="viewport" /> 
+<link href="/latex.css" rel="stylesheet" type="text/css" /> 
+<meta content="mss.tex" name="src" /> 
+<script>window.MathJax = { tex: { tags: "ams", packages: {"[+]": ["html"]}, macros: { mathand: "\\wedge", mathor: "\\vee", textsc: ["\\style{font-variant:small-caps}{\\text{#1}}", 1] } } }; </script> 
+<script async="async" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>  
+</head><body>
+   <div class="maketitle">
+                                                
+                                                
+                                                
+                                                
+
+<h2 class="titleHead">Groundwire: Decentralized
+Sybil Resistance for a Dead
+Internet</h2>
+ <div class="author"><span class="ec-lmbx-12">Evan Forman <code>~bonbud-macryg</code></span>
+<br /> <span class="ec-lmbx-12">Jake Hamilton <code>~tondes-sitrym</code></span>
+<br />   <span class="ec-lmbx-12">Trent Steen <code>~hanfel-dovned</code></span><br />
+<br />     <span class="ec-lmbx-12">Groundwire Foundation</span></div><br />
+<div class="date"></div>
+   </div>
+   <section class="abstract" role="doc-abstract"> 
+<h3 class="abstracttitle">
+<span class="ec-lmbx-9">Abstract</span>
+</h3>
+     <!-- l. 45 --><p class="noindent"><span class="ec-lmr-9">Public-key  infrastructures  have  hitherto  assured
+     us that a message comes from whoever it says it
+     does, but we contend that this does not give us
+     secure,  sybil-resistant  networking  at  the  current
+     level of </span><span class="small-caps">llm </span><span class="ec-lmr-9">capability and proliferation, let alone
+     post-  or  even  near-</span><span class="small-caps">agi  </span><span class="ec-lmr-9">conditions.  Once  bots
+     represent  a  majority  of  internet  traffic  we  have
+                                                
+                                                
+     to  ask,  who  is  trying  to  send  us  this  message?
+     As  </span><span class="small-caps">llm</span><span class="ec-lmr-9">s  become  capable  of  sophisticated  social
+     engineering attacks we must ask, is the sender of
+     this message really who they say they are? And
+     as AI drives the price of information production
+     to near-zero, we ask:  at what cost?  This article
+     introduces a decentralized, sybil-resistant identity
+     and peer-to-peer networking stack which we design
+     for an internet where the overwhelming majority
+     of participants are autonomous AI agents.</span>
+</p>
+</section>
+   
+   <h3 class="likesectionHead" id="contents"><a id="x1-1000"></a>Contents</h3>
+   <div class="tableofcontents">
+   <span class="sectionToc">1 <a href="#introduction" id="QQ2-1-2">Introduction</a></span>
+<br />   <span class="sectionToc">2 <a href="#mnemonyms" id="QQ2-1-3">Mnemonyms</a></span>
+<br />   <span class="subsectionToc">2.1 <a href="#multiline-layouts" id="QQ2-1-4">Multi-line layouts</a></span>
+<br />   <span class="subsectionToc">2.2 <a href="#wordlist-construction" id="QQ2-1-5">Wordlist construction</a></span>
+<br />   <span class="sectionToc">3 <a href="#groundwire-id" id="QQ2-1-6">Groundwire ID</a></span>
+<br />   <span class="subsectionToc">3.1 <a href="#personally-identifiable-information" id="QQ2-1-7">Personally identifiable information</a></span>
+<br />   <span class="subsectionToc">3.2 <a href="#pki-metadata" id="QQ2-1-8"><span class="small-caps">pki</span> metadata</a></span>
+<br />   <span class="subsectionToc">3.3 <a href="#pki-evidence" id="QQ2-1-9"><span class="small-caps">pki</span> evidence</a></span>
+<br />   <span class="subsectionToc">3.4 <a href="#urbtc-implementation" id="QQ2-1-10">Urbtc implementation</a></span>
+<br />   <span class="subsectionToc">3.5 <a href="#confidential-comets" id="QQ2-1-11">Confidential comets</a></span>
+<br />   <span class="subsubsectionToc">3.5.1 <a href="#name-commitment" id="QQ2-1-12">Name commitment</a></span>
+<br />   <span class="subsubsectionToc">3.5.2 <a href="#onchain-attestation" id="QQ2-1-13">Onchain attestation</a></span>
+<br />   <span class="subsubsectionToc">3.5.3 <a href="#offchain-revelation" id="QQ2-1-14">Offchain revelation</a></span>
+<br />   <span class="sectionToc">4 <a href="#wire-uris" id="QQ2-1-15">Wire <span class="small-caps">uri</span>s</a></span>
+<br />   <span class="subsectionToc">4.1 <a href="#unsigned-wires" id="QQ2-1-16">Unsigned wires</a></span>
+<br />   <span class="subsectionToc">4.2 <a href="#signed-wires" id="QQ2-1-17">Signed wires</a></span>
+<br />   <span class="sectionToc">5 <a href="#future-work" id="QQ2-1-18">Future Work</a></span>
+<br />   <span class="subsectionToc">5.1 <a href="#named-data-networking" id="QQ2-1-19">Named data networking</a></span>
+<br />   <span class="subsectionToc">5.2 <a href="#postquantum-signatures" id="QQ2-1-20">Post-quantum signatures</a></span>
+<br />   <span class="subsectionToc">5.3 <a href="#hierarchical-identity" id="QQ2-1-21">Hierarchical identity</a></span>
+<br />   <span class="sectionToc">6 <a href="#conclusion" id="QQ2-1-22">Conclusion</a></span>
+                                                
+                                                
+<br />   <span class="sectionToc">7 <a href="#appendices" id="QQ2-1-23">Appendices</a></span>
+<br />   <span class="subsectionToc">7.1 <a href="#ossification" id="QQ2-1-24">Ossification</a></span>
+<br />   <span class="subsectionToc">7.2 <a href="#consensus" id="QQ2-1-25">Consensus</a></span>
+<br />   <span class="sectionToc"><a href="#references" id="QQ2-1-26">References</a></span>
+   </div>
+   
+   <h3 class="sectionHead" id="introduction"><span class="titlemark">1   </span> <a id="x1-20001"></a>Introduction</h3>
+<!-- l. 67 --><p class="noindent">Spam prevention efforts by legacy web platforms have failed to
+prevent the popular adoption of “dead internet theory”—that
+most visible internet activity is from bots—and an incipient
+retreat from the public web into closed (if not exactly private)
+online spaces. Everywhere you go online, there you are:
+ticking a box to prove you are human. Public discourse and
+culture at large suffer as the information environment is
+increasingly beset by engagement-farming bot accounts and
+increasingly automated, agentic pipelines for state and
+non-state manipulation of target demographics (<a id="x1-2001"></a>Lumbaca,
+2025).
+</p><!-- l. 76 --><p class="indent">   Spam prevention on these platforms is stymied by
+fundamental conflicts of interest: as AI agents become more
+capable, it becomes harder to automatically discriminate
+between human and nonhuman input, so human users suffer
+more onerous verification burdens. This runs counter to the
+platforms’ incentive to attract and retain as many users for as
+much time-spend as possible, as well as their incentive to
+report as many impressions to creators and advertisers as
+possible.
+</p><!-- l. 84 --><p class="indent">   How these platforms would adapt to an internet where an
+increasing supermajority of participants are AI agents is
+anyone’s guess: <span class="small-caps">sim</span> verification and photo ID laws such as
+those in Japan and Australia just increase operating expenses
+in the seller’s market for fake accounts. Fake accounts tied to
+phone numbers in those markets currently sell for an average
+$4.93 (Japan) and $3.24 (Australia) per account in the same
+bulk volumes as cheaper $0.10 (UK) and $0.26 (US) accounts,
+                                                
+                                                
+as sellers pass <span class="small-caps">sim</span> costs to buyers, with prices for accounts
+on Telegram and WhatsApp rising up to 15% in the
+lead-up to national elections (<a id="x1-2002"></a>University of Cambridge,
+2025).
+</p><!-- l. 94 --><p class="indent">   The spam resistance stack we outline here is general
+purpose: any platform could implement some or all of it. Our
+interest lies not in redeeming Web 2.0 from its malign
+incentives, nor do we seek a return to a prelapsarian
+“open web” whose very openness exposed it to predation,
+centralization, and enclosure (<a id="x1-2003"></a><code>~lagrev-nocfep</code>, 2022).
+</p><!-- l. 100 --><p class="indent">   This article introduces three separable but complementary
+layers of a new decentralized identity and peer-to-peer
+networking stack:
+</p><!-- l. 103 --><p class="indent">
+     </p><dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd class="enumerate-enumitem">Mnemonyms  §<a href="#mnemonyms">2<!-- tex4ht:ref: mnemonyms  --></a>,  a  <span class="small-caps">bip</span>-39-style  (<a id="x1-2005"></a>2013)  mnemonic
+     system   for   reasonably   short,   human-meaningful
+     references to public keys.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd class="enumerate-enumitem">Groundwire ID §<a href="#groundwire-id">3<!-- tex4ht:ref: groundwire-id  --></a>, a protocol for unique, persistent
+     cryptographic identity across key rotations, tied to
+     public signatures.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd class="enumerate-enumitem">Wire §<a href="#wire-uris">4<!-- tex4ht:ref: wire-uris  --></a>, a <span class="small-caps">uri</span> scheme for signing data on arbitrary
+     namespaces,  securing  it  against  the  value  of  the
+     signer’s Groundwire ID.</dd></dl>
+<!-- l. 119 --><p class="indent">   In the Future Work section §<a href="#future-work">5<!-- tex4ht:ref: future-work  --></a> we outline near- to
+medium-term projects including named data networking
+secured against Groundwire ID, post-quantum signatures,
+and derivative identities for AI agents and networked
+devices.
+</p><!-- l. 124 --><p class="indent">   Appendices §<a href="#appendices">7<!-- tex4ht:ref: appendices  --></a> detail our thinking around two key issues
+for the software ecosystem we anticipate: security by planned
+ossification, and trustless consensus mechanisms.
+</p><!-- l. 129 --><p class="indent">   Groundwire is in part an argument about structure:
+we contend that the collective cultivation of a global
+filesystem-like (or, “tree-shaped”) namespace where end-users
+are cryptographically sovereign root nodes can deliver a
+                                                
+                                                
+more effective sybil resistance regime than all mainstream
+solutions—<span class="small-caps">captcha</span>, <span class="small-caps">sim</span>/ID/Email verification, blacklisting IP
+ranges, etc.—which are isolated, interactive, “conversation-”
+or “connection-oriented” exchanges, as opposed to our
+“data-oriented” (as in Named Data Networking, <a id="x1-2008"></a><code>~rovnys-ricfer</code>
+et al., 2026) approach to sybil resistance.
+</p><!-- l. 140 --><p class="indent">   Materially, Groundwire’s first implementation §<a href="#groundwire-id">3<!-- tex4ht:ref: groundwire-id  --></a> requires
+a one-time proof-of-work action from the creator of a
+self-custodied keypair to attest to owning that keypair on the
+Bitcoin blockchain. This sybil resistance “challenge” only
+happens once, and is cashed out in every network interaction
+that involves the user sending an effectful write or an
+access-controlled read §<a href="#named-data-networking">5.1<!-- tex4ht:ref: named-data-networking  --></a>. Server operators may layer further
+automated checks on top of this, but no manual sybil
+resistance checks should be necessary to prove that the
+end-user is not a disposable botnet identity. If servers
+want to verify that the user is a human and not a benign
+AI agent, that’s their business; the protocol does not
+discriminate.
+</p><!-- l. 154 --><p class="indent">   A client may reconcile the namespace from multiple
+sources if it is not already unified in-situ. In the sybil
+resistance case they may apply policy to logical subtrees,
+analyse node provenance across space (permissions, derivative
+agent identities §<a href="#hierarchical-identity">5.3<!-- tex4ht:ref: hierarchical-identity  --></a>) and time (key rotations, verifiable
+onchain history §<a href="#onchain-attestation">3.5.2<!-- tex4ht:ref: onchain-attestation  --></a>). When this exact same filesystem
+addresses data storage, financial transactions, and networking
+traffic §<a href="#named-data-networking">5.1<!-- tex4ht:ref: named-data-networking  --></a>, the design space for simple and efficient (so,
+decentralizable) sybil resistance tooling is wide open.
+Any subtree in the namespace can be summed into some
+quantity of trust-value over and above the total financial,
+computational, and/or thermodynamic cost of creating the
+nodes in that subtree, where every node in the subtree is
+ultimately secured against the proof-of-work value of the
+keypair that created it.
+</p><!-- l. 168 --><p class="indent">   We take care from the outset to support interoperability
+between software that uses Mnemonyms, Groundwire ID, and
+Wire <span class="small-caps">uri</span>s, preferring to leave composition of that software to
+developers and end-users.
+</p><!-- l. 172 --><p class="indent">   The sections below are introductory snapshots of works in
+                                                
+                                                
+progress, and not full specifications. The Groundwire
+Foundation has implemented these protocols in public alpha
+software, and everything described below is subject to change
+before production launch.
+   
+</p>
+   <h3 class="sectionHead" id="mnemonyms"><span class="titlemark">2   </span> <a id="x1-30002"></a>Mnemonyms</h3>
+<!-- l. 179 --><p class="noindent">The mnemonym scheme is a general-purpose method for
+generating mnemonic references to binary strings. We use
+these as reasonably short, human-meaningful references to
+public keys on a <span class="small-caps">pki</span> such as Bitcoin, Nostr, and Groundwire
+ID.
+</p><!-- l. 184 --><p class="indent">   The mnemonym design is greatly inspired by <span class="small-caps">bip</span>-39. Like
+<span class="small-caps">bip</span>-39, a mnemonym wordlist is an alphabetically-sorted list
+of 2,048 words. Each word in the string represents 11 bits in a
+bitstring of entropy <span class="mathjax-inline">\(\textsc {ent}\)</span> with an appended checksum of bitlength
+<span class="mathjax-inline">\((\textsc {ent}/32)\)</span>.
+</p><!-- l. 190 --><p class="indent">   Two key differences from <span class="small-caps">bip</span>-39 mnemonics:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">We  do  not  expect  mnemonym  wordlists  to  be
+     embedded  in  crypto  hardware  wallets  in  the  base
+     case; as a result, we grant a proliferation of wordlists
+     for  various  languages,  communities,  and  personal
+     use-cases.
+     </li>
+     <li class="itemize">Mnemonym  strings  represent  an  entire  series  of
+     leading  null  words  by  omission;  non-leading  null
+     words are represented normally, with whichever word
+     is at index 0 in the list.</li></ul>
+<!-- l. 205 --><p class="indent">   By omitting leading zeroes, we allow for reasonably short
+mnemonyms (or “nyms”) to be distributed to users according
+                                                
+                                                
+to whichever scheme the underlying <span class="small-caps">pki</span> permits. Such
+schemes may include simple first-come-first-serve domain
+registration, digital feudalism (<a id="x1-3001"></a><code>~sorreg-namtyv</code>, 2010), or
+proof-of-work mining. In a centralized, permissioned, or feudal
+system the length of the nym is useless as a market signal in
+and of itself: you must understand its provenance to find
+out how it was attained and at what cost, if any. In a
+permissionless proof-of-work system, the length of the nym
+approximately illustrates the thermodynamic cost at which
+the keypair must have been discovered and acquired, whether
+the holder of the nym mined it on their own machine or
+purchased it from a miner.
+</p><!-- l. 218 --><p class="indent">   Our initial English wordlist §<a href="#wordlist-construction">2.2<!-- tex4ht:ref: wordlist-construction  --></a> consists exclusively of
+iambs. For example, the pubkey…
+</p>
+   <!-- l. 221 -->
+<pre class="lstlisting" id="listing-1"><span class="label"><a id="x1-3002r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">00000000000</span></span><span style="color:#000000"><span class="ec-lmtt-9">ba839b38bcfd68037176c</span></span></pre>
+<!-- l. 225 --><p class="noindent">would be encoded as…
+</p>
+   <!-- l. 228 -->
+<pre class="lstlisting" id="listing-2"><span class="label"><a id="x1-3003r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.preserves.astounds.regrets.ensoul</span></span> 
+<span class="label"><a id="x1-3004r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.repeats.about.receive.repulsed</span></span></pre>
+<!-- l. 233 --><p class="noindent">We reserve five visual representations of nyms at the protocol
+level:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">
+     <!-- l. 239 --><p class="noindent">Bare nyms, e. g.,
+     </p><!-- l. 241 --><p class="noindent">abet.baboon.caffeine.denounce.escape
+     </p></li>
+     <li class="itemize">
+     <!-- l. 243 --><p class="noindent">One-dot nyms, e. g.,
+     </p><!-- l. 245 --><p class="noindent">.abet.baboon.caffeine.denounce.escape
+     </p></li>
+     <li class="itemize">
+                                                
+                                                
+     <!-- l. 247 --><p class="noindent">Two-dot nyms, e. g.,
+     </p><!-- l. 249 --><p class="noindent">..abet.baboon.caffeine.denounce.escape
+     </p></li>
+     <li class="itemize">
+     <!-- l. 251 --><p class="noindent">“Foreshortened”  nyms  of  a  string’s  first,  second,
+     penultimate, and final words, e. g.,
+     </p><!-- l. 254 --><p class="noindent"> .abet.baboon..denounce.escape<br />
+     ..abet.baboon..denounce.escape
+     </p></li>
+     <li class="itemize">
+     <!-- l. 257 --><p class="noindent">“Abridged” nyms of just its first and last words, e. g.,
+     </p><!-- l. 260 --><p class="noindent"> .abet...escape<br />
+     ..abet...escape
+</p>
+     </li></ul>
+<!-- l. 264 --><p class="indent">   Applications must reserve these as follows:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">One-dot for nyms which they have verified as being
+     on the relevant <span class="small-caps">pki</span>.
+     </li>
+     <li class="itemize">Two-dot for nyms which they have either confirmed
+     are not on the <span class="small-caps">pki</span>, or for disposable references they
+     do  not  expect  to  correspond  to  user  identities  on
+     the <span class="small-caps">pki</span> (e. g. block hashes, content hashes, receiving
+     addresses, etc.).
+     </li>
+     <li class="itemize">Bare  nyms  are  reserved  for  intermediate  contexts
+     where a sender and receiver may or may not respect
+     the same <span class="small-caps">pki</span> (e. g. Wire <span class="small-caps">uri</span>s §<a href="#wire-uris">4<!-- tex4ht:ref: wire-uris  --></a>).</li></ul>
+<!-- l. 281 --><p class="indent">   “Foreshortened” and “abridged” nyms may be used
+however the application developer sees fit, though abridged
+nyms must not be used in contexts where user funds may be
+at risk, to mitigate against address poisoning.
+                                                
+                                                
+</p><!-- l. 285 --><p class="indent">   These are the only nym representations we formally bless.
+Informally, we grant that pseudonymous users may come
+up with various colloquial, context-sensitive shortname
+conventions to refer to themselves and eachother, such as
+“.abet.escape”, “caffeine.chanteuse”, “.eclipse”, “eclipse”, etc.
+We expect developers will layer conventional “contact book”
+or “display name” features on top of mnemonyms at some
+point, obviating their use in online social contexts beyond first
+contact or peer-to-peer financial transactions.
+</p><!-- l. 294 --><p class="indent">   The iambic English wordlist and libraries in C, Python,
+and Hoon are available at  <a href="https://github.com/gwbtc/mnemonyms">gwbtc/mnemonyms</a>. Our C
+library is implemented in  <a href="https://github.com/gwbtc/comet-miner">gwbtc/comet-miner</a>. The iambic
+English wordlist is still a work-in-progress and likely to
+change.
+   
+</p>
+   <h4 class="subsectionHead" id="multiline-layouts"><span class="titlemark">2.1   </span> <a id="x1-40002.1"></a>Multi-line layouts</h4>
+<!-- l. 301 --><p class="noindent">Application developers may lay the nym out across several
+lines, e. g. in a UI context specifically designed to help the
+user memorize a nym. We encourage the following layouts
+specifically:
+</p><!-- l. 305 --><p class="indent">   Twelve-word nym on three lines of four words:
+</p>
+   <!-- l. 307 -->
+<pre class="lstlisting" id="listing-3"><span class="label"><a id="x1-4001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.eclipse.betray.escape.delight</span></span> 
+<span class="label"><a id="x1-4002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.mankind.alone.delay.ignite</span></span> 
+<span class="label"><a id="x1-4003r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.implode.elect.enclose.alas</span></span></pre>
+<!-- l. 313 --><p class="indent">   Ten-word nym on two lines of five words:
+</p>
+   <!-- l. 315 -->
+<pre class="lstlisting" id="listing-4"><span class="label"><a id="x1-4004r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.tattoo.giraffe.kazoo.champagne.balloon</span></span> 
+<span class="label"><a id="x1-4005r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.auteurs.ablaze.admire.untamed.display</span></span></pre>
+<!-- l. 320 --><p class="indent">   Nine-word nym on three lines of three words:
+</p>
+   <!-- l. 322 -->
+                                                
+                                                
+<pre class="lstlisting" id="listing-5"><span class="label"><a id="x1-4006r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.raccoon.beret.lagoon</span></span> 
+<span class="label"><a id="x1-4007r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.typhoon.guitar.chateau</span></span> 
+<span class="label"><a id="x1-4008r3"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.concur.exempt.vacate</span></span></pre>
+<!-- l. 328 --><p class="indent">   Eight-word nym on two lines of four words:
+</p>
+   <!-- l. 330 -->
+<pre class="lstlisting" id="listing-6"><span class="label"><a id="x1-4009r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.disgrace.expired.infest.reject</span></span> 
+<span class="label"><a id="x1-4010r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">.doubloon.retells.entice.retreat</span></span></pre>
+   
+   <h4 class="subsectionHead" id="wordlist-construction"><span class="titlemark">2.2   </span> <a id="x1-50002.2"></a>Wordlist construction</h4>
+<!-- l. 337 --><p class="noindent">A nym wordlist may conform to any particular aesthetic or
+none at all. Wordlists should aspire to make resultant
+nyms as memorable, legible, and easy to work with as
+possible.
+</p><!-- l. 341 --><p class="indent">   In our iambic English wordlist, we achieve this like
+so:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Every word is a two-syllable iamb, which enhances
+     memorability in that it reduces the number of words
+     that could possibly follow another without reference
+     to the wordlist.
+     </li>
+     <li class="itemize">Words have no punctuation or diacritics in them.
+     </li>
+     <li class="itemize">We limit the number of words that share common
+     four-letter prefixes like “over-”, “semi-”, and “tran-”
+     for the sake of autocomplete features in text inputs.
+     </li>
+     <li class="itemize">No two words are exact homophones.
+                                                
+                                                
+     </li>
+     <li class="itemize">We  err  on  the  side  of  words  which  are  relatively
+     common.
+     </li>
+     <li class="itemize">Many words are plurals or verbs that end with ‘s’, so
+     we limit words beginning with ‘s’ to avoid confusion
+     in speech.
+     </li>
+     <li class="itemize">We err on the side of words which result in absurd,
+     concretely visual combinations inspired by memory
+     palace techniques, though it should be just as easy
+     to come up with a nym that is beautiful as one that
+     is humorous.</li></ul>
+   
+   <h3 class="sectionHead" id="groundwire-id"><span class="titlemark">3   </span> <a id="x1-60003"></a>Groundwire ID</h3>
+<!-- l. 371 --><p class="noindent">Groundwire ID is a platform-agnostic protocol for persistent
+decentralized identities belonging to humans and autonomous
+AI agents.
+</p><!-- l. 374 --><p class="indent">   The user is assumed to hold a <span class="small-caps">bip</span>-32 (<a id="x1-6001"></a>2012) HD crypto
+wallet that can derive an Ed25519 keypair whose pubkey will
+be encoded as a mnemonym. (Groundwire Foundation
+software uses the iambic English wordlist, but no wordlist
+is specified at the protocol level. Applications may use
+whichever wordlist they choose or let the user configure
+one.)
+</p><!-- l. 381 --><p class="indent">   In practice, Groundwire ID is a protocol for tweaking
+pubkeys with publicly-verifiable evidence of their sybil
+resistance value, where we take the position that “sybil
+resistance value” is mostly financial/thermodynamic cost plus
+supplementary analytics subject to some policy configured by
+the user that determines who can send packets their way
+§<a href="#offchain-revelation">3.5.3<!-- tex4ht:ref: offchain-revelation  --></a>.
+</p><!-- l. 388 --><p class="indent">   This tweak has two components: <span class="small-caps">pki</span> metadata, and a
+                                                
+                                                
+pointer to publicly-verifiable evidence on that <span class="small-caps">pki</span>. As we
+outlined in <span class="small-caps">uip</span>-0136 (<a id="x1-6002"></a>2026), the tweak is a “bidirectional
+cryptographic commitment between onchain and offchain
+attestations to prevent replay, spoofing, and double-spawning
+attacks. If there wasn’t an offchain anchor pointing to onchain
+data, then anyone could come in and attest to ownership
+of any comet and %ord-watcher would naively believe
+them.”
+</p>
+   <!-- l. 397 -->
+<pre class="lstlisting" id="listing-7"><span class="label"><a id="x1-6003r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">//</span></span><span style="color:#000000"> <span class="ec-lmtt-9">pseudocode to produce a Groundwire ID tweak</span> 
+</span><span class="label"><a id="x1-6004r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">concatenate</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[(length-encode </span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">urbtc</span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">)</span> 
+</span><span class="label"><a id="x1-6005r3"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">[(length-encode 8)</span> 
+</span><span class="label"><a id="x1-6006r4"></a></span><span style="color:#000000">                 <span class="ec-lmtt-9">(length-encode</span> 
+</span><span class="label"><a id="x1-6007r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">                  <span class="ec-lmtt-9">(serialize pki-evidence))]])</span></span></pre>
+<!-- l. 405 --><p class="indent">   Where (concatenate ...) concatenates an array of
+[bitwidth bitstring] pairs. This produces a bitstring which is
+hashed into the pubkey to couple it to the <span class="small-caps">pki</span> evidence.
+</p>
+   <!-- l. 409 -->
+<pre class="lstlisting" id="listing-8"><span class="label"><a id="x1-6008r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">//</span></span><span style="color:#000000"> <span class="ec-lmtt-9">pseudocode to apply the tweak to a pubkey</span> 
+</span><span class="label"><a id="x1-6009r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">sha256</span></span><span style="color:#000000"> <span class="ec-lmtt-9">pubkey</span> 
+</span><span class="label"><a id="x1-6010r3"></a></span><span style="color:#000000">  <span class="ec-lmtt-9">(concatenate [(length-encode </span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">urbtc</span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">)</span> 
+</span><span class="label"><a id="x1-6011r4"></a></span><span style="color:#000000">                  <span class="ec-lmtt-9">[(length-encode 8)</span> 
+</span><span class="label"><a id="x1-6012r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">                   <span class="ec-lmtt-9">(length-encode</span> 
+</span><span class="label"><a id="x1-6013r6"></a></span><span style="color:#000000">                    <span class="ec-lmtt-9">(serialize pki-evidence))]]))</span></span></pre>
+<!-- l. 418 --><p class="indent">   The first two items in this array are the <span class="small-caps">pki</span> metadata §<a href="#pki-metadata">3.2<!-- tex4ht:ref: pki-metadata  --></a>,
+and the third a link to <span class="small-caps">pki</span> evidence §<a href="#pki-evidence">3.3<!-- tex4ht:ref: pki-evidence  --></a>.
+   
+</p>
+   <h4 class="subsectionHead" id="personally-identifiable-information"><span class="titlemark">3.1   </span> <a id="x1-70003.1"></a>Personally identifiable information</h4>
+<!-- l. 424 --><p class="noindent">Notably, Groundwire ID does not imply that a verified nym
+correlates to a human person. (We assume an internet where
+99.9% of users are autonomous AI agents, an addressable
+market easily served by the 256-bit namespace that Ed25519
+nyms imply and plausibly served by a 128-bit namespace
+§<a href="#hierarchical-identity">5.3<!-- tex4ht:ref: hierarchical-identity  --></a>.)
+</p><!-- l. 430 --><p class="indent">   It <span class="ec-lmri-10">could </span>verifiably correlate to a human, and we are
+interested in exploring permissionless ZK solutions to couple
+Groundwire IDs to personally identifiable information without
+exposing that <span class="small-caps">pii</span> to anyone. A bridge towards <span class="small-caps">pii</span> in the
+general case and government-backed ID in particular is
+                                                
+                                                
+one direction in a greater design space: What can we
+cryptographically attest about an identity? And how can we
+compose those predicates into subprotocols useful for a variety
+of autonomous network actors within the bounds of a simple,
+freezable format?
+   
+</p>
+   <h4 class="subsectionHead" id="pki-metadata"><span class="titlemark">3.2   </span> <a id="x1-80003.2"></a>PKI metadata</h4>
+<!-- l. 441 --><p class="noindent">A <span class="small-caps">pki</span> may be one of several on the same technical substrate,
+e. g. the same blockchain. The tweak names this <span class="small-caps">pki</span> by a
+string of ^[a-z][a-z0-9-]*$. In the (length-encode <span class="ts1-lmr10-">'</span>urbtc<span class="ts1-lmr10-">'</span>)
+example above, the name of the <span class="small-caps">pki</span> is “urbtc”, which is
+Groundwire’s Urbit <span class="small-caps">pki</span> on Bitcoin. Verifiers will resolve this
+name however appropriate: in urbtc, the <span class="small-caps">pki</span> name is also the
+name of the local application an Urbit node will use to verify
+identities on that <span class="small-caps">pki</span>, which may be one of several <span class="small-caps">pki</span>s they
+follow.
+</p><!-- l. 451 --><p class="indent">   The other piece of <span class="small-caps">pki</span> metadata included in the tweak is
+(length-encode 8), which in this case tells us that the
+pubkey was tweaked against urbtc version 8K. <span class="small-caps">pki</span>s may
+support some kelvin versions §<a href="#ossification">7.1<!-- tex4ht:ref: ossification  --></a> and not others, and may
+have their own control flow for handling tweaks on old
+versions.
+</p><!-- l. 457 --><p class="indent">   One purpose of this is that it namespaces Groundwire IDs
+across <span class="small-caps">pki</span>s: the same inputs will not generate the same
+Groundwire ID on two different <span class="small-caps">pki</span>s, even if they’re on the
+same substrate. The probability of the same Groundwire ID
+(that is, the same verified nym) appearing on two <span class="small-caps">pki</span>s is
+astronomically tiny. This improbability leaves open a design
+space for cross-<span class="small-caps">pki</span> interoperability, e. g. “teleburning”
+Ethereum assets onto Bitcoin Ordinal inscriptions (<a id="x1-8001"></a>Rodarmor,
+2026), but at time of writing we have no plans to pursue
+this.
+   
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead" id="pki-evidence"><span class="titlemark">3.3   </span> <a id="x1-90003.3"></a>PKI evidence</h4>
+<!-- l. 468 --><p class="noindent">The second part of the tweak is some publicly-verifiable data
+on the <span class="small-caps">pki</span> for a verifier to do two things: 1) verify the
+existence of a peer on the <span class="small-caps">pki</span> and 2) judge the sybil resistance
+value of that data, according to some policy hard-coded in the
+verifier or set by the user.
+</p><!-- l. 473 --><p class="indent">   The content of the pki-evidence in the
+(length-encode (serialize pki-evidence)) pseudocode above
+will vary by PKI. For example, in urbtc §<a href="#urbtc-implementation">3.4<!-- tex4ht:ref: urbtc-implementation  --></a> the <span class="small-caps">pki</span> evidence
+is the relative ordinal number (<a id="x1-9001"></a>Rodarmor, 2022) of a sat in a
+<span class="small-caps">utxo</span> belonging to the Bitcoin wallet that generated the
+Groundwire ID in question. We avoid using absolute ordinal
+numbers for performance reasons.
+</p><!-- l. 481 --><p class="indent">   Notably, we do not include key rotations here or anywhere
+in the tweak, because doing so would change the resulting nym
+every key rotation. Reconciling the history of an identity
+across key rotations is the job of the <span class="small-caps">pki</span>. Key rotations should
+generally not be considered to “reset” the sybil resistance
+value of an ID: on a blockchain where operations require
+transaction fees paid to infrastructure providers, an ID should
+accrue sybil resistance value over successive key rotations and
+miscellaneous transactions.
+   
+</p>
+   <h4 class="subsectionHead" id="urbtc-implementation"><span class="titlemark">3.4   </span> <a id="x1-100003.4"></a>Urbtc implementation</h4>
+<!-- l. 493 --><p class="noindent">The centerpiece of our public alpha is urbtc, a protocol for
+maintaining an Urbit <span class="small-caps">pki</span> on the Bitcoin blockchain. Urbtc
+only supports Urbit “comets”—nodes in Urbit’s self-signed
+128-bit namespace—which can be spawned by anyone and
+have no speculative value. Ordinarily, comets are reliant on
+one of Urbit’s 256 “galaxy” root nodes to do peer discovery
+and routing, and the comet’s galaxy is hard-coded by the
+last 8 bits of their ID. Groundwire allows any comet to
+serve as a root node by attesting to a stable IP address
+onchain.
+                                                
+                                                
+</p><!-- l. 502 --><p class="indent">   An urbtc tweak looks like this:
+</p>
+   <!-- l. 504 -->
+<pre class="lstlisting" id="listing-9"><span class="label"><a id="x1-10001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">//</span></span><span style="color:#000000"> <span class="ec-lmtt-9">pseudocode</span> 
+</span><span class="label"><a id="x1-10002r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">concatenate</span></span><span style="color:#000000"> <span class="ec-lmtt-9">[(length-encode </span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">urbtc</span><span class="ts1-lmtt9-">'</span><span class="ec-lmtt-9">)</span> 
+</span><span class="label"><a id="x1-10003r3"></a></span><span style="color:#000000">                <span class="ec-lmtt-9">[(length-encode 8)</span> 
+</span><span class="label"><a id="x1-10004r4"></a></span><span style="color:#000000">                 <span class="ec-lmtt-9">(length-encode</span> 
+</span><span class="label"><a id="x1-10005r5"></a><span class="ec-lmr-5">5</span></span><span style="color:#000000">                  <span class="ec-lmtt-9">(serialize spawn-sont))]])</span></span></pre>
+<!-- l. 512 --><p class="noindent">where the spawn-sont is a tuple of {txid vout offset}:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">txid:  ID  of  a  Bitcoin  transaction  whose  outputs
+     contain the relevant <span class="small-caps">utxo</span>.
+     </li>
+     <li class="itemize">vout:  the  relevant  <span class="small-caps">utxo</span>’s  position  in  a  0-indexed
+     array   of   the   “vector   of   outputs”   from   this
+     transaction.
+     </li>
+     <li class="itemize">offset: relative ordinal number of a sat in this <span class="small-caps">utxo</span>;
+     the Groundwire ID is pinned to this sat, which we
+     will follow through successive <span class="small-caps">utxo</span>s.</li></ul>
+<!-- l. 529 --><p class="indent">   To facilitate comets attesting to their identities via
+urbtc, we introduced Groundwire’s notion of multiple
+<span class="small-caps">pki</span>s to Jael, along with vane tasks for registering and
+suspending <span class="small-caps">pki</span>s. Each corresponds to the name of a Gall
+agent permissioned to update information for one <span class="small-caps">pki</span>
+(pending userspace permissions work currently underway).
+We additionally introduced a “Suite C” cryptographic
+core utilized by Groundwire comets, detailed in <span class="small-caps">uip</span>-0136
+(<a id="x1-10006"></a>2026).
+</p><!-- l. 537 --><p class="indent">   When a ship receives an introductory “self-attestation”
+packet from a Suite C comet, the comet includes the <span class="small-caps">pki</span> data
+needed for verification. Ames then passes this data to Jael and
+subscribes for a verdict on whether the self-attestation is valid.
+Jael passes the data to the corresponding agent for that <span class="small-caps">pki</span>,
+and upon receiving a positive update sends a fact to Ames
+along the relevant subscription, and Ames completes the
+                                                
+                                                
+handshake appropriately. From here, the userspace agent can
+continue to watch the <span class="small-caps">pki</span> substrate for further key rotations
+for that comet.
+</p><!-- l. 547 --><p class="indent">   Due to the confidential nature of key rotations on
+urbtc, userspace agents only know upon seeing a key
+rotation that that identity’s old keys are now out-of-date;
+they do not know what the new networking keys are
+until receiving a new self-attestation packet from that
+identity. The Urbit ship must, then, ignore all new packets
+from that identity except for self-attestation packets. We
+introduce the %snob task to Ames (as a counterpart to
+%snub) which is used to put an identity into this limbo
+state.
+</p><!-- l. 556 --><p class="indent">   In addition to your sponsor—which maintains contact with
+your ship for relay and route rediscovery from peers if your
+node is behind a WiFi router—we extended the routing hint
+options in $point:jael with a $fief, an IPv4, IPv6, or <span class="small-caps">dns</span> static
+transport address that may be used for route selection
+in the kernel and which we attest in onchain routing
+state on Bitcoin. Any node that has such an address can
+straightforwardly sponsor and route for comets running on
+mobile or a home server, and optionally supply value-add
+services, so we’re inclined to grow this set early to enable a
+robust network topology and incentivize development of QoS
+protocols.
+</p><!-- l. 567 --><p class="indent">   Urbtc is implemented across  <a href="https://github.com/gwbtc/urbit">gwbtc/urbit</a>,  <a href="https://github.com/gwbtc/vere">gwbtc/vere</a>,
+and  <a href="https://github.com/gwbtc/groundwire">gwbtc/groundwire</a>. We aim to upstream our Arvo and
+Vere work into the corresponding  <a href="https://github.com/urbit/urbit">urbit/urbit</a> and  <a href="https://github.com/urbit/vere">urbit/vere</a>
+repos.
+   
+</p>
+   <h4 class="subsectionHead" id="confidential-comets"><span class="titlemark">3.5   </span> <a id="x1-110003.5"></a>Confidential comets</h4>
+<!-- l. 574 --><p class="noindent">Our initial tweak was designed for a version of the urbtc
+protocol that used ordinal inscriptions (<a id="x1-11001"></a>Rodarmor et al.,
+2026). Inscriptions serialize data as chained OP_PUSH
+opcodes of a <span class="small-caps">utxo</span>’s Taproot script in a “commit” transaction,
+                                                
+                                                
+then a “reveal” transaction makes that hashed onchain data
+legible as a plaintext <span class="small-caps">mime</span> response. This required all Urbit
+nodes to index all Bitcoin blocks to find urbtc reveal
+transactions and use those to maintain their local <span class="small-caps">pki</span>
+state.
+</p><!-- l. 582 --><p class="indent">   In testing we found that the computational burden
+of this indexing was trivial for Groundwire nodes on a
+commercial <span class="small-caps">vps</span> and the developers’ own laptops. The
+main issue was that nodes could take hours to catch up
+with their peers, which we ameliorated with a stopgap
+trusted snapshot system for onboarding. This helped
+testers by skipping an initial sync from our chosen block
+943,140 to the present, but we couldn’t help them speed
+up recovery from unplanned downtime because Urbit
+doesn’t allow users to overwrite <span class="small-caps">pki</span> state outwith Jael’s
+<span class="small-caps">api</span>. This snapshot system was just a convenience, and
+injecting a null value where the snapshot should have
+been would trigger re-indexing of the chain from block
+943,140.
+</p><!-- l. 593 --><p class="indent">   However, this question of using Bitcoin as arbitrary
+data storage has been a source of long-running debate
+in the Bitcoin community, citing a concern for keeping
+the burden on Bitcoin node operators as low as possible
+(<a id="x1-11002"></a><span class="small-caps">bip</span>-0110, 2025). Making all <span class="small-caps">pki</span> state public onchain is
+also a privacy concern, even if the data is apparently
+trivial.
+</p><!-- l. 600 --><p class="indent">   For these reasons, we implemented a system of “confidential
+comets” by, for a start, simply omitting the “reveal”
+transaction for attestations. Instead, we have comets reveal
+their <span class="small-caps">pki</span> history offchain as part of the initial handshake with
+a new peer. As of 8K, the three data commitments that
+comprise a Groundwire ID attestation have the following
+shapes.
+   
+</p>
+                                                
+                                                
+   <h5 class="subsubsectionHead" id="name-commitment"><span class="titlemark">3.5.1   </span> <a id="x1-120003.5.1"></a>Name commitment</h5>
+<!-- l. 609 --><p class="noindent">The keypair underlying the comet’s name commits via Schnorr
+tweak (scalar addition) to [%urbtc spawn-sont], which is
+a <span class="small-caps">pki</span> tag and a unique chainstate pointer binding one
+name to one sat. (No other name may be bound to this
+sat.)
+</p><!-- l. 614 --><p class="indent">   The %urbtc tag is a Hoon text constant that names our
+<span class="small-caps">pki</span> in Urbit’s Jael kernel module. The sat is addressed
+relative to its host <span class="small-caps">utxo</span> at comet generation time rather than
+by a global sequence number as in the ordinals protocol, due
+to heavy indexing requirements, but we retain ordinals’
+first-in-first-out convention for ordering input sats over
+transaction outputs when following a bound sat through its
+subsequent spends.
+   
+</p>
+   <h5 class="subsubsectionHead" id="onchain-attestation"><span class="titlemark">3.5.2   </span> <a id="x1-130003.5.2"></a>Onchain attestation</h5>
+<!-- l. 624 --><p class="noindent">Subsequent <span class="small-caps">utxo</span>s containing the bound sat are used to
+permanently attest the comet name and various <span class="small-caps">pki</span> state
+commitments beginning with the spawn transaction, which is
+a spend of the original host <span class="small-caps">utxo</span> which we create following
+key generation and sat selection.
+</p><!-- l. 629 --><p class="indent">   This bidirectional cryptographic binding between the
+offchain (name) and onchain (wallet) signers, plus the tweak’s
+<span class="small-caps">pki</span> separator prefix, prevents “double-spending” of a spawn
+transaction across <span class="small-caps">pki</span>s, as well as some potential replay
+attacks within Bitcoin.
+</p><!-- l. 634 --><p class="indent">   The base onchain “confidential attestation” is itself also a
+Schnorr tweak, in Pay-to-Taproot (<span class="small-caps">p2tr</span>) output pubkeys.
+The scalar we add to the wallet keypair to derive the <span class="small-caps">p2tr</span>
+key is a Merkle root committing to the serialized Nock noun
+containing the comet name, its life (key rotation) and rift
+(continuity-breaking key rotation), latest networking pubkey,
+routing hints, and at least one of a sponsor (Urbit ID) or a fief
+(<span class="small-caps">ip/dns</span>).
+</p><!-- l. 642 --><p class="indent">   For an output hosting one ID and bound sat, its <span class="small-caps">pki</span> state
+                                                
+                                                
+is a Merkle leaf at axis 2 (first left child), and currently this is
+the only attestation type in the protocol. Batch custodial
+outputs containing multiple bound sats (“shared <span class="small-caps">utxo</span>s”)
+aren’t yet supported on the alpha network, but we’re exploring
+the design space particularly with respect to potential
+L2 architectures. So except in case of a breach (Urbit’s
+continuity-breaking key rotation) the state hash is the root
+hash which is the scalar tweak. We reserve the right-hand
+subtree for future protocol expansion to support other
+attestation use-cases, such as display names and profile
+images, external links, web-of-trust links, code signatures, and
+proof of funds.
+</p><!-- l. 653 --><p class="indent">   At spawn the initial networking key is the (preimage
+of the) name itself, but subsequent state commitments
+include both the name and a distinct latest messaging
+pubkey. Every time an output bearing the sat is spent,
+we require the new <span class="small-caps">utxo</span> containing it to commit the
+current tip of its <span class="small-caps">pki</span> log, even if the spend is simple
+custody-management e. g. transferring to a fresh address, and
+the committed state duplicates the previous tip. Otherwise,
+the vocabulary of update types that we support is 1)
+rotate networking key 2) update routing info 3) publish an
+attestation and 4) continuity breach. Continuity breaches are
+signalled by the presence of a 0-valued second leaf at axis
+3.
+</p><!-- l. 664 --><p class="indent">   Plaintext publication of <span class="small-caps">pki</span> data is an opt-in second layer
+“public attestation” in an added OP_RETURN output from
+the published state transaction. This serves two purposes: 1)
+permissionless advertising and discovery of public bootstrap
+sponsors, and 2) peer-recovery-of-last-resort for ships
+partitioned from each other by a mutual routing failure
+(e. g. extended sponsor downtime).
+</p><!-- l. 671 --><p class="indent">   Note that we did not specify any tapscript encoding
+(Bitcoin Script in Merkle leaves that a <span class="small-caps">p2tr</span> spend can
+execute with an inclusion proof) of the protocol’s Merkle
+data above. That would be necessary if we wanted to
+publish data in the transaction witness to take advantage of
+the Segwit fee discount, as in the ordinals inscription
+mechanism. However, witness inscriptions bypass a Bitcoin
+                                                
+                                                
+node operator’s ability to filter the data without foregoing
+witness verification of signature operations as well, and the
+Segwit discount is actively harmful in the Groundwire setting
+since our sybil resistance mechanism <span class="ec-lmri-10">is </span>Bitcoin-denominated
+costliness.
+</p><!-- l. 682 --><p class="indent">   Non-tapscript Merkle data commitments in the output
+chain are, instead, verifiably revealed by an OP_RETURN
+output that includes the internal (pre-tweak) keys of previous
+outputs and their signatures along with the state history. This
+is the same format as our offchain revelation in the peer
+attestation packet, detailed below.
+</p><!-- l. 688 --><p class="indent">   In the taxonomy of Bitcoin Layer 2 constructs, urbtc is
+therefore a client-side validated (<span class="small-caps">csv</span>) protocol.
+   
+</p>
+   <h5 class="subsubsectionHead" id="offchain-revelation"><span class="titlemark">3.5.3   </span> <a id="x1-140003.5.3"></a>Offchain revelation</h5>
+<!-- l. 693 --><p class="noindent">In Urbit’s peer-to-peer networking flow, comets introduce
+themselves offchain by exchanging attestation packets with a
+peer, and provide a refreshed packet when they broadcast new
+confidential attestations of <span class="small-caps">pki</span> state onchain.
+</p><!-- l. 697 --><p class="indent">   Legacy comets simply sign a minimal handshake, sufficient
+to negotiate the per-peer <span class="small-caps">ecdh</span> channel, using the same key of
+which their ID is a straightforward hash. Groundwire IDs
+instead sign the packet with their latest messaging key, <span class="ec-lmri-10">and</span>
+must reveal the plaintext tweak data their name committed
+to, plus all data required for the recipient’s <span class="small-caps">pki</span> agent to verify
+the signature, the validity of the key, and the validity of the
+name. If the <span class="small-caps">pki</span> tag is recognized by the receiver’s Jael,
+it will forward the packet to the responsible <span class="small-caps">pki</span> agent
+and chain client for validation. Otherwise, it will treat
+the sender as a legacy comet and require it to be at life
+1 and sign with its identity key. For urbtc comets, the
+required information is outpoints and block heights for
+the sender’s entire onchain history, and plaintext state
+commitments with Schnorr inclusion proofs for their current
+rift.
+                                                
+                                                
+</p><!-- l. 711 --><p class="indent">   By the time we get to a production launch, ships should be
+able to configure their own sybil resistance policies including
+minimum acceptable values for costliness or proof-of-funds
+needed to accept a peer. That any ship may have their own
+secret policy obscures the requirements that a bad actor needs
+to meet to spawn a usable batch of fake accounts for any one
+ship or range of ships under one policy. Since a negative policy
+decision prevents peer discovery from happening at all, ships
+may only ever further constrain whichever policy is applied by
+their sponsor. Sponsors might advertise these policies as
+a point of differentiation. Sponsees may route around
+their sponsors’ policies by accepting a new peer’s keyfile
+out-of-band, e. g. by scanning a QR code or tapping an <span class="small-caps">nfc</span>
+tag in-person.
+</p><!-- l. 724 --><p class="indent">   Since the attestation packet format specifies the content,
+location, and encoding of confidential attestations, and is itself
+broadcast in a public attestation, we can use a single
+kelvin version on the packet to cover both layers of the
+protocol, while freezing the ID tweak-data format straight to
+0K. The attestation packet’s current kelvin version is
+8K.
+   
+</p>
+   <h3 class="sectionHead" id="wire-uris"><span class="titlemark">4   </span> <a id="x1-150004"></a>Wire URIs</h3>
+<!-- l. 733 --><p class="noindent">The Wire <span class="small-caps">uri</span> scheme enables Groundwire IDs to make
+cryptographic claims on other namespaces with minimal
+integration between Groundwire and that namespace’s
+ecosystem.
+</p><!-- l. 737 --><p class="indent">   There are two forms of Wire <span class="small-caps">uri</span> (or “wire”): signed, and
+unsigned.
+   
+</p>
+   <h4 class="subsectionHead" id="unsigned-wires"><span class="titlemark">4.1   </span> <a id="x1-160004.1"></a>Unsigned wires</h4>
+<!-- l. 741 --><p class="noindent">An unsigned wire is of the form:
+                                                
+                                                
+</p>
+   <!-- l. 743 -->
+<pre class="lstlisting" id="listing-10"><span class="label"><a id="x1-16001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">wire://id/tag/path</span></span></pre>
+<!-- l. 747 --><p class="noindent">as in these examples:
+</p>
+   <!-- l. 750 -->
+<pre class="lstlisting" id="listing-11"><span class="label"><a id="x1-16002r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">wire://aback.baboon.cabal.enough/https/groundwire.io</span></span> 
+<span class="label"><a id="x1-16003r2"></a></span><span style="color:#000000"><span class="ec-lmtt-9">wire://abyss.conceal.decrypt/geo/38.89278,-77.04583</span></span></pre>
+<!-- l. 755 --><p class="indent">   An unsigned wire’s id is a Groundwire ID in the form of a
+bare nym, since we can’t assume the signer and verifier exist
+on the same <span class="small-caps">pki</span>. The tag (a string ^[a-z][a-z0-9-]*$) refers to
+some protocol that a client may or may not know what
+to do with, and the path is any /-separated path that
+corresponds to a resource the client can locate via that
+protocol.
+</p><!-- l. 762 --><p class="indent">   An unsigned wire may be generated by the client
+as a human-readable reference to a signed wire stored
+elsewhere in the client. Unlike signed wires, they do not
+self-describe a version number, so a client parsing an unsigned
+wire without reference to a corresponding signed wire
+would have to handle a case if the /tag/path format ever
+changed during a kelvin version decrement in the signed
+wire.
+   
+</p>
+   <h4 class="subsectionHead" id="signed-wires"><span class="titlemark">4.2   </span> <a id="x1-170004.2"></a>Signed wires</h4>
+<!-- l. 771 --><p class="noindent">Signed wires are of the form:
+</p>
+   <!-- l. 773 -->
+<pre class="lstlisting" id="listing-12"><span class="label"><a id="x1-17001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">wire://id/base64url</span></span></pre>
+<!-- l. 777 --><p class="noindent">as in this example:
+</p>
+   <!-- l. 780 -->
+                                                
+                                                
+<pre class="lstlisting" id="listing-13"><span class="label"><a id="x1-17002r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">wire://abate.banal.campaign.debate.elite/8BEBAC9odHRw</span></span> 
+<span class="label"><a id="x1-17003r2"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">cy9leGFtcGxlLmNvbRam2y5UYO8BaCbZDGFToaaToJugs8</span> 
+</span><span class="label"><a id="x1-17004r3"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">BX_uEOs3Hy7M95LhTn21s3_Mg-wH9WG-CsUxm2JGWjAbou</span> 
+</span><span class="label"><a id="x1-17005r4"></a></span><span style="color:#000000">       <span class="ec-lmtt-9">m7waoMSWfgc</span></span></pre>
+<!-- l. 787 --><p class="indent">   Signed wires serve a similar function to <span class="small-caps">json</span> Web
+Tokens (<a id="x1-17006"></a>RFC 7519, 2015), in that we can use them to
+non-interactively verify that the owner of some public key
+signed a given string. We use Wire <span class="small-caps">uri</span>s and not <span class="small-caps">jwt</span>s in part
+because Wire <span class="small-caps">uri</span>s have a human-readable trust root and
+always represent a path in a signed namespace beneath that
+root.
+</p><!-- l. 793 --><p class="indent">   Signed wires only have one segment after the id: a
+Base64URL string that encodes a header and a payload.
+</p><!-- l. 796 --><p class="indent">   The 12-bit header has this structure:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><strong>First 1 bit:</strong> A 0 or 1 flag that tells us if the signer
+     has signed a hash of the /tag/path string (1), or the
+     /tag/path string concatenated with the response we
+     will receive from that path (0). This flag bit is not
+     subject to kelvin versioning.
+     </li>
+     <li class="itemize"><strong>Next 3 bits:</strong> kelvin version number. Wires launch
+     at  7K,  or  111.  Everything  to  the  right  of  this  is
+     version-dependent.
+     </li>
+     <li class="itemize"><strong>Next  8  bits:</strong>  The  bytewidth  of  the  decoded
+     /tag/path string, which is up to 256 <span class="small-caps">ascii</span> characters.</li></ul>
+<!-- l. 814 --><p class="indent">   The payload has this structure:
+</p>
+     <ul class="itemize1">
+     <li class="itemize"><strong>First 16 bits:</strong> Key rotation number, an abstraction
+     over  whatever  key  rotation  mechanism  the  <span class="small-caps">pki</span>
+     substrate uses. May not be 0, we assume the signer’s
+                                                
+                                                
+     first keypair is 1.
+     </li>
+     <li class="itemize"><strong>Next  n  bytes:</strong>  The  plaintext  /tag/path  string,
+     where <span class="ec-lmri-10">n </span>is specified in the header
+     </li>
+     <li class="itemize"><strong>Next        64        bytes:</strong>       7K’s        EdDSA
+     signature      of      a      32-byte      <span class="small-caps">sha</span>-256      of
+     either       <code class="lstinline"><span style="color:#000000">key_rotation || tag_path</span></code>     or
+     <code class="lstinline"><span style="color:#000000">key_rotation || tag_path || content_hash</span></code>,
+     where  <code class="lstinline"><span style="color:#000000">content_hash</span></code> is  itself  a  32-byte  hash  of
+     the octet stream a request on this path will receive.
+     What exactly goes in the octet string depends on the
+     /tag protocol; the signer may assume that a relevant
+     client knows what kind of response to expect for a
+     given protocol.</li></ul>
+<!-- l. 836 --><p class="indent">   Clients can verify a signed wire that has no content on
+receipt. If they receive a signed wire with content, they should
+reconstruct the content hash on receipt and verify that against
+the signature before further processing.
+</p><!-- l. 841 --><p class="indent">   Since Groundwire ID persists across key rotations, the
+client must verify the signature using the public key that
+corresponded to the wire’s id at the key rotation signed in the
+payload. Key rotation events should not invalidate signed
+wires from previous key rotations, as verifiers should be able
+to get the keypair that corresponds to the wire from historical
+state. That historical state may be public (e. g. onchain)
+or privately distributed among peers, relays, or other
+network providers. (<span class="small-caps">pki</span>s such as urbtc may implement
+a special, continuity-breaking key rotation event that
+<span class="ec-lmri-10">does </span>invalidate previous signatures, upon which peers
+should treat all historical state for that ID as having been
+wiped. If an ID signed a wire at keypair 2 before and after
+the continuity breach, only the post-continuity-break
+keypair 2 should be under consideration by the verifier. All
+signatures from before the breach should be considered
+invalid.)
+                                                
+                                                
+</p><!-- l. 856 --><p class="indent">   Some example use-cases for Wire <span class="small-caps">uri</span>s are as follows:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">/mailto: A business or government agency signs their
+     email address in a public link.
+     </li>
+     <li class="itemize">/https: A business signs links in their emails such
+     that a Groundwire-aware email client can filter out
+     phishing scams without reference to a trusted third
+     party.
+     </li>
+     <li class="itemize">/tel: A government agency signs their public-facing
+     telephone  numbers;  they  sign  numbers  they  may
+     call from such that a Groundwire-aware phone/VoIP
+     client can verify the number is legitimate before it
+     rings.
+     </li>
+     <li class="itemize">/bitcoin:  A  Groundwire  ID  requests  payment  to
+     a  Bitcoin  address  that  may  or  may  not  hold
+     the  Groundwire  ID’s  corresponding  sat,  enabling
+     multi-wallet  setups.  The  <span class="small-caps">uri</span>  may  also  include  a
+     requested payment amount.
+     </li>
+     <li class="itemize">/wss: A WebSockets server provider links a server
+     they run to their Groundwire ID, without necessarily
+     having to run that server on their Groundwire node.
+     </li>
+     <li class="itemize">/ssh:  A  <span class="small-caps">vps</span> host  signs  their  host  key  fingerprint,
+     supplementing trust-on-first-use for users who want
+     to ssh into that server.
+     </li>
+                                                
+                                                
+     <li class="itemize">/geo:  A  Groundwire  ID  signs  coordinates  of  a
+     geocache.
+     </li>
+     <li class="itemize">/ipfs:  A  Groundwire  ID  signs  some  distributed
+     content by its hash, linking the content to the ID
+     without the ID user having to run their own storage.</li></ul>
+<!-- l. 893 --><p class="indent">   At time of writing there is no canonical reference
+implementation of the Wire <span class="small-caps">uri</span> scheme, but it is used in
+the gwbtc/chorus repo to store references to advertised
+content. This may be replaced with a Kademlia <span class="small-caps">dht</span>
+implementation which stores references as content hashes
+rather than Wire <span class="small-caps">uri</span>s, mostly to improve upon Chorus’s
+gossip protocol.
+   
+</p>
+   <h3 class="sectionHead" id="future-work"><span class="titlemark">5   </span> <a id="x1-180005"></a>Future Work</h3>
+<!-- l. 901 --><p class="noindent">Sections §<a href="#mnemonyms">2<!-- tex4ht:ref: mnemonyms  --></a>, §<a href="#groundwire-id">3<!-- tex4ht:ref: groundwire-id  --></a>, and §<a href="#wire-uris">4<!-- tex4ht:ref: wire-uris  --></a> describe code which is running in a
+public alpha release. This section discusses three future
+projects which are most pertinent to the ideas in this
+article: named data networking between Groundwire IDs,
+post-quantum signatures, and “child” identities derived from
+root-level Groundwire IDs.
+   
+</p>
+   <h4 class="subsectionHead" id="named-data-networking"><span class="titlemark">5.1   </span> <a id="x1-190005.1"></a>Named data networking</h4>
+<!-- l. 909 --><p class="noindent">Alongside kelvin versioning §<a href="#ossification">7.1<!-- tex4ht:ref: ossification  --></a>, the other part of Urbit that
+we aim to lift out of that system is Directed Messaging
+(colloquially called “Mesa” by Urbit developers), which was
+detailed in a previous issue of this journal (<a id="x1-19001"></a><code>~rovnys-ricfer</code>
+et al., 2026).
+</p><!-- l. 914 --><p class="indent">   We think Mesa’s named data networking (<span class="small-caps">ndn</span>) behavior is
+                                                
+                                                
+a natural fit for any network of cryptographically sovereign
+root nodes, whether those correspond to separate physical
+machines in a peer-to-peer network or as virtual nodes on a
+cloud server.
+</p><!-- l. 919 --><p class="indent">   <span class="small-caps">ndn</span> is sometimes described with terms like “data-oriented”
+as opposed to “connection-oriented” <span class="small-caps">tcp/ip</span>, and one can
+think of Groundwire as a data-oriented sybil resistance as
+opposed to connection-oriented sybil resistance (<span class="small-caps">captcha</span>, JS
+challenge, etc.).
+</p><!-- l. 924 --><p class="indent">   To pull Mesa out of Urbit means removing some of
+the assumptions around network topology. For instance,
+Groundwire has no concept of a hierarchy of “galaxy”, “star”,
+and “planet” nodes; sponsor-sponsee relationships are formed
+between service providers and their users, and any comet can
+sponsor another.
+</p><!-- l. 930 --><p class="indent">   We don’t assume that Groundwire nodes are running Urbit
+OS, though our Mesa implementation should work for those
+nodes. One of the main goals of our Mesa project is seamless
+peer-to-peer networking between non-Urbit clients and Urbit
+servers.
+</p><!-- l. 935 --><p class="indent">   Other than the caveats above and some other details,
+all headline features of Directed Messaging should be
+implemented in a Mesa library as protocol invariants:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">All  messages  should  be  requests  or  authenticated
+     responses carrying named data.
+     </li>
+     <li class="itemize">Authentication should happen on packets and not
+     sessions.
+     </li>
+     <li class="itemize">Source-independent   single   hop   routing   should
+     be   sufficient   for   networking,   which   minimizes
+     bookkeeping required for nodes.</li></ul>
+                                                
+                                                
+<!-- l. 951 --><p class="indent">   Other features of Mesa, such as exactly-once messaging,
+may be configurable per networking flow depending on the
+stack the peer in that flow is running Mesa on. Details
+like cache management and congestion control are
+implementation-specific.
+</p><!-- l. 956 --><p class="indent">   This has the benefits of <span class="small-caps">ndn</span> as typically described,
+such as more resilient routing in unpredictable physical
+network conditions and less reliance on single points of
+control. Directed Messaging’s referentially-transparent
+namespace, with Groundwire IDs at the root, has its own
+use-cases for the distributed networking cases we’re interested
+in:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Every  path  is  signed  by  its  publisher  and  has  a
+     version  number,  and  there  is  currently  no  way  to
+     request data at a path without knowing its version
+     number, so unversioned imports are impossible.
+     </li>
+     <li class="itemize">Referentially-transparent paths under identities with
+     key rotation enable more long-lived authorities over
+     links,  and  Mesa’s  caching  and  relay  properties
+     trivialize  distributed  archives  and  other  <span class="small-caps">cdn</span>-like
+     setups.
+     </li>
+     <li class="itemize">Cheap,  mechanically  trivial  <span class="small-caps">cdn</span>s  distribute  load
+     away from content publishers. Effectful writes must
+     be  signed  by  the  Groundwire  ID  that  originally
+     sent them via <span class="small-caps">hmac</span>. The likelihood that a write or
+     access-controlled read comes from a disposable ID in
+     a botnet can be priced at the moment of receipt of
+     the first packet: either the peer writing to us is known
+     and validated, or we ask for a self-attestation packet
+     that includes the <span class="small-caps">pki</span> evidence described in §<a href="#pki-evidence">3.3<!-- tex4ht:ref: pki-evidence  --></a>.
+                                                
+                                                
+     </li>
+     <li class="itemize">Publishers
+     and relays don’t need to verify connections because
+     there are no connections. Reads to access-controlled
+     paths have similar caching properties as anonymous
+     reads on public paths.</li></ul>
+<!-- l. 988 --><p class="indent">   Our Mesa release will be a formal spec and at least one
+open-source reference implementation, likely in C. Many
+implementation details are left as exercises for network
+developers, including:
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Peer discovery mechanisms (bootstrap nodes, <span class="small-caps">dht</span>s,
+     pre-distributed <span class="small-caps">pki</span>s, etc.).
+     </li>
+     <li class="itemize">Transport layers (Mesa over <span class="small-caps">tcp</span>, <span class="small-caps">udp</span>, <span class="small-caps">sctp</span>, etc.).
+     </li>
+     <li class="itemize">Caching policies.
+     </li>
+     <li class="itemize">Peer-to-peer economic incentives (congestion control,
+     relays, <span class="small-caps">cdn</span>s, etc.).
+     </li>
+     <li class="itemize">Interaction with anonymous requesters.
+     </li>
+     <li class="itemize">Reputation/uptime scoring.</li></ul>
+<!-- l. 1009 --><p class="indent">   Our Mesa work is in a preliminary  <a href="https://github.com/gwbtc/libmesa">gwbtc/libmesa</a> repo,
+which will be made public once it’s ready for a public alpha
+release.
+   
+                                                
+                                                
+</p>
+   <h4 class="subsectionHead" id="postquantum-signatures"><span class="titlemark">5.2   </span> <a id="x1-200005.2"></a>Post-quantum signatures</h4>
+<!-- l. 1014 --><p class="noindent">At this point in time Groundwire’s persistent cryptographic
+identity across key rotations is aimed at networks like Nostr,
+which have no affordance for transferring identity in the event
+of a compromised private key. Key rotation is presently a
+narrow use-case that even diligent users should rarely have to
+go through.
+</p><!-- l. 1020 --><p class="indent" id="introduction">   However, cryptographically-relevant quantum computing
+could make key rotation a much more salient issue, even in
+normal circumstances. (PQ keypairs in stateful schemes like
+<span class="small-caps">xmss</span> and <span class="small-caps">lms</span> are finite, enumerated trees of single-use
+keypairs; the number of keypairs in a tree may be as low
+as 2<sup class="textsuperscript"><span class="ec-lmr-9">5</span></sup> or up to 2<sup class="textsuperscript"><span class="ec-lmr-9">25</span></sup> (<a id="x1-20001"></a>Cooper et al., 2020).) With Google
+recommending migration to post-quantum cryptography by
+2029 (<a id="x1-20002"></a>Google Quantum AI, 2026), technical communities like
+Bitcoin are urgently weighing their options for migration of
+legacy wallets to <span class="small-caps">pqc</span>.
+</p><!-- l. 1029 --><p class="indent">   We use “pre-quantum” signatures for urbtc and Wire <span class="small-caps">uri</span>s
+at their current kelvin versions because this is the status quo
+in both Urbit networking and Bitcoin consensus. In particular,
+the Schnorr cryptography we base our overlay of the comet
+namespace on is high among the signature features that will
+be difficult or impossible to achieve in the known PQ
+algorithms that are feasible for Bitcoin.
+</p><!-- l. 1036 --><p class="indent">   Our strategy for an early, low-overhead migration precisely
+mirrors the <span class="small-caps">bip</span>-360 “Pay-to-Merkle-Root” quantum resistance
+project (<a id="x1-20003"></a><span class="small-caps">bip</span>-0360, 2024):
+</p>
+     <ul class="itemize1">
+     <li class="itemize">Abandon offchain key tweaking.
+     </li>
+     <li class="itemize">Breach  comet  semantics  from  pubkey  hashes  to
+     pure hashes of structured data that attest multiple
+                                                
+                                                
+     signature algorithms.
+     </li>
+     <li class="itemize">Implement  a  range  of  high-attention  open  PQ
+     signature schemes drawn from Bitcoin research and
+     other networks.</li></ul>
+<!-- l. 1051 --><p class="indent">   We expect that efforts in that third area, implementing
+new signature schemes, are likely to lead and drive timing for
+the migration as a whole, but a major goal will be to improve
+modularity of cryptosystem adoption in the future as well as
+upgrading the core crypto suites.
+</p><!-- l. 1056 --><p class="indent">   Once Bitcoin developers and hardware providers settle on
+a PQ migration plan, we will develop a migration plan
+from pre- to post-quantum kelvin versions which preserve
+continuity of identity and attestations to the fullest extent
+possible.
+   
+</p>
+   <h4 class="subsectionHead" id="hierarchical-identity"><span class="titlemark">5.3   </span> <a id="x1-210005.3"></a>Hierarchical identity</h4>
+<!-- l. 1063 --><p class="noindent">Groundwire ID’s namespace has no outer limit: a nym can
+have as many words as you need. Urbtc’s namespace can
+accommodate <span class="mathjax-inline">\(2^{128}\)</span> identities because each must correlate to an
+Urbit comet. Urbtc identities must also correlate to Bitcoin
+sats, of which there will only ever be 2.1 quadrillion in
+existence, with far fewer in circulation. How could one
+Groundwire <span class="small-caps">pki</span> like urbtc scale to name all humans, devices,
+and AI agents on and near Earth?
+</p><!-- l. 1071 --><p class="indent">   As it stands a Groundwire ID is an Ed25519 keypair
+generated by an HD wallet, which gives us an obvious way to
+correlate “sibling” identities owned by the same user
+wallet. But it also allows urbtc to fill the remainder of
+the 128-bit namespace by allowing the 2.1 quadrillion
+onchain root nodes to continue the next level of their HD
+derivation tree and derive many “child” identities, each
+of which can likewise derive their own children, and so
+on.
+                                                
+                                                
+</p><!-- l. 1079 --><p class="indent">   This hierarchical recursion of the HD wallet tree-structure
+gives us a natural way to represent relationships of
+ownership, responsibility, and granular access control
+amongst human-driven identities (e. g. multiple signing
+devices belonging to one human) and AI agent identities
+(e. g. multiple agents belonging to one human, multiple
+subagents belonging to one agent, etc.). Since child keys
+are derived by tweaking the parent with an arbitrary
+nonce, we can use this to commit to descriptors for the
+role, origin, authority, etc. of the child, cryptographic
+authorizations like a signature over permissions, or even a
+discretionary spending budget in the form of Chaumian ecash
+signatures.
+</p><!-- l. 1091 --><p class="indent">   We haven’t explored the design space for this yet, but for
+our purposes a system for deriving and verifying identities
+must satisfy these requirements:
+</p><!-- l. 1095 --><p class="indent">
+     </p><dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd class="enumerate-enumitem">Derived identities are trivially verifiable as belonging
+     to  their  ultimate  root  identities  and  any  parent
+     identities in between.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd class="enumerate-enumitem">Deriving
+     an identity is mechanically simple, computationally
+     cheap, and almost instantaneous; an AI agent can
+     trivially derive their own identities, having gained
+     approval from its root identity via manual sign-off or
+     hard-coded policy.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd class="enumerate-enumitem">Freshly  derived  identities  have  no  sybil  resistance
+     value  of  their  own,  instead  backed  by  the  sybil
+     value of their ultimate root identity and subject to
+     whichever calculation a verifier chooses.
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd class="enumerate-enumitem">Parent/child relationships can be expressed in the
+     namespace and children may be identified via their
+     parents; e. g. if AI agent ..denounce...escape belongs
+     to                       human                       operator
+                                                
+                                                
+     .abet...baboon, they might be identified in a UI as
+     .abet...baboon::denounce...escape, or ::abet...escape,
+     or some other representation. Namespaces belonging
+     to a derived identity may be viewed as subtrees of
+     their root identity’s namespace.</dd></dl>
+   
+   <h3 class="sectionHead" id="conclusion"><span class="titlemark">6   </span> <a id="x1-220006"></a>Conclusion</h3>
+<!-- l. 1123 --><p class="noindent">Groundwire is cool and you should check it out.<img alt="PIC" src="ustj-logo-.png" />
+   
+</p>
+   <h3 class="sectionHead" id="appendices"><span class="titlemark">7   </span> <a id="x1-230007"></a>Appendices</h3>
+<!-- l. 1127 --><p class="noindent">The following appendices are supplementary notes on software
+ossification and consensus mechanisms, detailing the thinking
+behind some of our design decisions above.
+   
+</p>
+   <h4 class="subsectionHead" id="ossification"><span class="titlemark">7.1   </span> <a id="x1-240007.1"></a>Ossification</h4>
+<!-- l. 1133 --><p class="noindent">One of the premises of open-source software is that “given
+enough eyeballs, all bugs are shallow”. Looking at recent
+large-scale cyberattacks—like the 2025 “Shai-Hulud” attacks
+distributed via node package manager (npm), and possibly
+written by an <span class="small-caps">llm</span> (<a id="x1-24001"></a>Moore, 2025)—we anticipate a future
+where the majority of those eyes are fleets of fully-automated
+cyberattack agents with near- or super-human ability to
+discover vulnerabilities and exploit targets via malicious code
+and social engineering. All automatic software update
+pipelines are attack vectors, and dependency managers such
+as npm might import dozens of untrusted dependency
+versions—recursively—at build time for even the smallest
+projects.
+                                                
+                                                
+</p><!-- l. 1145 --><p class="indent">   Conversely, the developers of these dependencies find that
+updates become more fraught the greater the number of
+dependents, such that even desirable updates become impossible
+in practice. This kind of unplanned ossification is almost
+always bad. Two software communities in which developers
+embrace planned ossification are Urbit, which formally counts
+down to an immutable OS kernel, and Bitcoin, where an
+informally-defined stable state is seen as part of the investment
+thesis.<span class="footnote-mark"><a href="#fn1x0"><sup class="textsuperscript">1</sup></a></span><a id="x1-24002f1"></a> 
+</p><!-- l. 1155 --><p class="indent">   In a 2017 blog post on urbit.org called “Towards a Frozen
+Operating System” (<a id="x1-24005"></a><code>~sorreg-namtyv</code> and <code>~ravmel-ropdyl</code>,
+2017), Curtis Yarvin and Galen Wolfe-Pauly contended that
+“there is almost never any good reason to automatically
+update dependencies with fresh versions of foreign code. In the
+case of a security update, the maintainer of an app which
+depends on a patched library needs to catch the patch and
+propagate the update in a new version of the app. An app
+shouldn’t be security-critical to begin with, and propagating
+updates is a basic function of a modern OS. Also, if the
+app is security-critical, it could have its own bugs, so it
+needs a maintainer and an update pathway anyway.”
+In a 2020 urbit.org post (<a id="x1-24006"></a><code>~wicdev-wisryt</code>, 2020) Urbit
+developer Philip Monk wrote that “system modules should be
+designed to be frozen permanently; conversely, Urbit
+consists of that system software which admits of a Kelvin
+version.”
+</p><!-- l. 1170 --><p class="indent">   What is a kelvin version? The 2016 Urbit whitepaper
+(<a id="x1-24007"></a><code>~sorreg-namtyv</code> et al., 2016) doesn’t define it. At time of
+writing, no formal specification has been signed off on by the
+Urbit Foundation or Urbit’s core developers. We do find one
+subsubsection of informal description in Yarvin’s 2010 blog
+post <span class="ec-lmri-10">Urbit: functional programming from scratch</span>, which
+publicized Urbit under the name “Urbit” for the first time:
+“the true, Martian way to perma-freeze a system is what
+I call Kelvin versioning. In Kelvin versioning, releases
+                                                
+                                                
+count down by integer degrees Kelvin. At absolute zero,
+the system can no longer be changed. At 1K, one more
+modification is possible. And so on.” (<a id="x1-24008"></a><code>~sorreg-namtyv</code>,
+2010)
+</p><!-- l. 1181 --><p class="indent">   Today, Urbit’s OS is distributed at 408K. This version
+number tags the zuse.hoon file which defines Urbit’s kernel
+module <span class="small-caps">api</span>s; the modules themselves are not kelvin versioned.
+Zuse is the “outermost” layer of Urbit’s OS, and deeper layers
+may have their own kelvin versions. (The Hoon standard
+library at 135K, for instance.)
+</p><!-- l. 1187 --><p class="indent">   This raises the question of kelvin-versioned dependency
+management. In “Towards a Frozen Operating System,”
+Yarvin and Pauly wrote:
+     </p><blockquote class="quote">
+     <!-- l. 1191 --><p class="noindent">The  right  way  for  this  trunk  to  approach
+     absolute  zero  is  to  “telescope”  its  Kelvin
+     versions. The rules of telescoping are simple:
+    </p><dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd class="enumerate-enumitem">If tool B sits on platform A, either both
+    A and B must be at absolute zero, or B
+    must be warmer than A.
+    </dd><dt class="enumerate-enumitem">
+  2. </dt><dd class="enumerate-enumitem">Whenever  the  temperature  of  A  (the
+    platform) declines, the temperature of B
+    (the tool) must also decline.
+    </dd><dt class="enumerate-enumitem">
+  3. </dt><dd class="enumerate-enumitem">B  must  state  the  version  of  A  it  was
+    developed against.
+    </dd><dt class="enumerate-enumitem">
+  4. </dt><dd class="enumerate-enumitem">A,                 when                 loading
+    B, must state its own current version, and
+    the warmest version of itself with which
+    it’s backward-compatible.
+    </dd><dt class="enumerate-enumitem">
+  5. </dt><dd class="enumerate-enumitem">Of course, if B itself is a platform on which
+    some higher-level tool C depends, it must
+                                                
+                                                
+    follow the same constraints recursively.</dd></dl>
+     <!-- l. 1212 --><p class="noindent">The important effect of obeying rule 2: in a tall
+     trunk, it’s sufficient to state your dependency on
+     the platform directly below you. Suppose C sits on
+     B, which sits on A and exports features of A. C
+     can state only the version of B it’s written
+     against, because when A chills, B must also
+     chill.</p></blockquote>
+<!-- l. 1219 --><p class="indent">   In practice, Urbit core developers update Zuse and its
+dependencies at once: every Urbit release is either a new Zuse
+kelvin or a non-kelvin patch to the current distribution of
+Zuse. Any change to any kelvin-versioned file below Zuse will
+be slated for release in the next Zuse kelvin release. Significant
+changes to unversioned kernel modules usually go in the next
+Zuse release, but this is at the discretion of the Urbit Core
+Guild.
+</p><!-- l. 1226 --><p class="indent">   Today, Urbit userspace applications must declare the Zuse
+version they were built against. If the user is running Zuse
+408K, an application update built against 407K will be
+received and stored for later. Once the user is ready to update
+to Zuse 407K, the app update is applied in the latter stages of
+an <span class="ec-lmri-10">atomic </span>upgrade of Zuse and its dependents, which will
+cleanly fail if even one dependent has no pending update to
+407K. If the user wishes to update Zuse anyway, they can
+“suspend” the application to prevent it from running but hang
+onto its code and data in the event that a 407K update ever
+arrives.
+</p><!-- l. 1236 --><p class="indent">   The maintenance burden this places on Urbit userspace
+developers is nontrivial: most Urbit userspace code available
+online will not compile against Zuse 408K. This fact runs
+counter to one of the stated goals of kelvin versioning, which is
+perfect forward compatibility. Quoting “Towards a Frozen
+Operating System”:
+     </p><blockquote class="quote">
+     <!-- l. 1243 --><p class="noindent">C is a very mature language. C has long since
+                                                
+                                                
+     mastered backward compatibility. We can be
+     sure that any C program which compiles on
+     today’s correct C compilers will compile on any
+     future correct C compiler.
+     </p><!-- l. 1248 --><p class="noindent">But, since C is not frozen, we can’t be sure
+     that  today’s  C  compilers  will  compile  any
+     future C program. So C has not yet achieved
+     perfect forward compatibility. By definition, a
+     frozen system is compatible both forward and
+     backward. So C is mature, but it could still get
+     more mature.
+     </p><!-- l. 1254 --><p class="noindent">The  point  of  a  frozen  OS  is  to  shoot  for
+     infinite maturity. Obviously a frozen platform
+     is compatible forever in both directions.</p></blockquote>
+<!-- l. 1259 --><p class="indent">   The Urbit Foundation is doing prototype work on
+“kelvin shimming”, which allows Urbit to run userspace
+applications built against previous kelvins in their own
+sandbox, but what form that solution will take is still an open
+question.
+   
+</p>
+   <h4 class="subsectionHead" id="consensus"><span class="titlemark">7.2   </span> <a id="x1-250007.2"></a>Consensus</h4>
+<!-- l. 1266 --><p class="noindent">Groundwire is a protocol and has no opinions about technical
+substrates. The Groundwire Foundation has such opinions,
+and our choice of the Bitcoin blockchain as the substrate for
+urbtc is highly motivated by the same concerns that inform
+our protocol design.
+</p><!-- l. 1271 --><p class="indent">   The most important feature of Bitcoin for our use-case is
+the “longest-chain rule” in its consensus protocol. Per the
+Bitcoin whitepaper (<a id="x1-25001"></a>Nakamoto, 2008), “proof-of-work
+… solves the problem of determining representation in
+majority decision making. If the majority were based on
+one-IP-address-per-vote, it could be subverted by anyone
+able to allocate many IPs. Proof-of-work is essentially
+one-<span class="small-caps">cpu</span>-one-vote. The majority decision is represented by the
+                                                
+                                                
+longest chain, which has the greatest proof-of-work effort
+invested in it.”
+</p><!-- l. 1281 --><p class="indent">   A Bitcoin node accepts the longest proof-of-work chain
+as the canonical record of Bitcoin’s transaction history,
+without question. If one finalized chain is overwritten by a
+longer one, so be it. This simple decentralized governance
+mechanism has survived many bitter disputes in Bitcoin’s
+history. Amongst competing Bitcoin forks, a single chain
+holds onto almost all nodes due to simple network effects
+and the game-theory of proof-of-work: in 2014 Vitalik
+Buterin wrote that “when contributing one’s work to the
+blockchain, a miner must make the choice of which of
+all possible forks to contribute to (or whether to try to
+start a new fork), and the different options are mutually
+exclusive. Double-voting, including double-voting where
+the second vote is made many years after the first, is
+unprofitablem [sic] since it requires you to split your
+mining power among the different votes; the dominant
+strategy is always to put your mining power exclusively on
+the fork that you think is most likely to win.” (<a id="x1-25002"></a>Buterin,
+2014)
+</p><!-- l. 1297 --><p class="indent">   Technical debates amongst Bitcoin developers, such as that
+around <span class="small-caps">bip</span>-110 (<a id="x1-25003"></a>2025), hold it as a priority that independent
+and hobbyist node operators using consumer hardware
+should be able to feasibly replay the history of the chain
+to arrive at its current state. This property is essential
+for decentralization and it falls out of proof-of-work: on
+initial sync a node operator may choose to trust or verify
+previously-committed blocks via an assumevalid flag, but in
+any case they are replaying the longest proof-of-work
+chain upon the genesis block which serves as the trust
+root.
+</p><!-- l. 1307 --><p class="indent">   Quoting <span class="small-caps">uip</span>-0136, “Groundwire’s thesis is pragmatic: over
+the long term, Bitcoin is the only chain that provides an
+unambiguous, protocol-level canonical history (the heaviest
+valid proof-of-work chain) that a Kelvin 0 Urbit could
+resolve without social coordination or trusted checkpoints.
+This suggests a clean long-term anchor for the Urbit
+<span class="small-caps">pki</span>.”
+                                                
+                                                
+</p><!-- l. 1314 --><p class="indent">   Compare this to Ethereum’s proof-of-stake model. If an
+Ethereum node receives two finalized blocks that contradict
+each other, there is no programmatic fork-choice rule to
+choose between them (<a id="x1-25004"></a>ethereum.org contributors, 2023). The
+node’s version of chain history must be re-derived from a
+“weak subjectivity checkpoint”: some block height acquired
+from a trusted third party which they claim to be a truth
+universally acknowledged by all node operators.
+</p><!-- l. 1322 --><p class="indent">   <span class="small-caps">uip</span>-0136 continues: “It is too early to propose that that
+belief be enforced by [Urbit] kernel policy … Thus while
+Bitcoin’s popular ordinal/inscription protocol is a functional
+and easy-to-reason-about initial choice of onchain mechanism,
+it would also be premature to commit the kernel to these
+abstractions. Instead, Urbit should provide a general
+mechanism whereby comets can attest keys to any <span class="small-caps">pki</span> source
+(chosen by a Jael %listen task) and peers can verify these
+attestations.”
+</p><!-- l. 1331 --><p class="indent">   Having enabled Groundwire users to compose multiple <span class="small-caps">pki</span>
+substrates—at least one of which is Bitcoin, and several of
+which may be other blockchains—we have fallen through a
+trapdoor and landed in the “blockchain interoperability
+problem”. Groundwire ID’s name commitment is supposed to
+namespace <span class="small-caps">pki</span>s such that two <span class="small-caps">pki</span>s should never hold the
+same ID, but if we nonetheless receive a self-attestation packet
+from an ID on Solana claiming to be an ID on Bitcoin we are
+about to send money to, who do we trust? Which of our <span class="small-caps">pki</span>
+gateways is broken or malicious? Which record of history is
+correct? What are the semantics by which history is recorded,
+and how do we reconcile those histories if two consensus
+mechanisms use different semantics?
+</p><!-- l. 1343 --><p class="indent">   At this point we may fall back on human judgement, but
+Groundwire assumes that 99.9% of internet users are
+not humans and cannot be held accountable for their
+judgements.
+</p><!-- l. 1347 --><p class="indent">   If we grant that even Bitcoin’s longest-chain rule is
+inevitably backed by the human drama of social consensus,
+institutional governance, conflicting incentives, and spirited
+public debate, we think this is all the more reason to secure
+those out-of-band techno-social systems against a flood of
+                                                
+                                                
+highly capable bad actors with kelvin-versioned software and
+sybil-resistant identity and networking. By hosting the <span class="small-caps">pki</span>
+onchain, Bitcoin could secure the host environment in which
+its own developers, node operators, and other stakeholders
+work in public and come to important decisions about its
+future. This holds for proof-of-stake chains which are
+even more dependent on these out-of-band consensus
+mechanisms.
+</p><!-- l. 1359 --><p class="indent">   So a programmatic symmetry-breaking rule is desirable
+where we cannot reconcile the histories of two blockchains. If
+the chains in question are both Ethereum L2s, we wait for the
+transactions to settle on Ethereum; if Ethereum produces two
+finalized blocks, we phone a friend. The opening of the Bitcoin
+whitepaper gives us such a programmatic rule, which we may
+apply recursively upwards through increasingly meta-level
+conflicts amongst consensus mechanisms: “we propose a
+solution to the double-spending problem using a peer-to-peer
+network. The network timestamps transactions by hashing
+them into an ongoing chain of hash-based proof-of-work,
+forming a record that cannot be changed without redoing the
+proof-of-work. The longest chain not only serves as proof of
+the sequence of events witnessed, but proof that it came from
+the largest pool of <span class="small-caps">cpu</span> power. As long as a majority of <span class="small-caps">cpu</span>
+power is controlled by nodes that are not cooperating to
+attack the network, they’ll generate the longest chain and
+outpace attackers.”
+</p><!-- l. 1375 --><p class="indent">   May the longest proof-of-work chain win.
+   
+</p>
+   <h3 class="sectionHead" id="references"><a id="x1-26000"></a>References</h3>
+<!-- l. 1379 --><p class="noindent">
+   </p><dl class="thebibliography"><dt class="thebibliography" id="X0-BIP0360">
+</dt><dd class="thebibliography" id="bib-1">
+                                                
+                                                
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_BIP0360"></a>Beast, Hunter,
+   Ethan Heilman,
+   and
+   Isabel Foxen Duke
+   (2024)
+   “Pay-to-Merkle-Root
+   (<span class="small-caps">p2mr</span>)”.
+   Consensus
+   (soft
+   fork),
+   status
+   Draft,
+   version
+   0.12.0.
+   Consensus
+   (soft
+   fork),
+   status
+   Draft,
+   version
+   0.12.0.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Buterin2014">
+</dt><dd class="thebibliography" id="bib-2">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Buterin2014"></a>Buterin, Vitalik
+   (2014)
+   “Proof
+   of
+   Stake:
+   How
+   I
+   Learned
+   to
+   Love
+                                                
+                                                
+   Weak
+   Subjectivity”.
+   Blog
+   post,
+   Ethereum
+   Foundation.
+   Blog
+   post,
+   Ethereum
+   Foundation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://blog.ethereum.org/2014/11/25/proof-stake-learned-love-weak-subjectivity">https://blog.ethereum.org/2014/11/25/proof-stake-learned-love-weak-subjectivity</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-NIST800208">
+</dt><dd class="thebibliography" id="bib-3">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_NIST800208"></a>Cooper, David A.,
+   Daniel C. Apon,
+   Quynh H. Dang,
+   Michael S. Davidson,
+   Morris J. Dworkin,
+   and
+   Carl A. Miller
+   (2020).
+   <span class="ec-lmri-10">Recommendation
+   for
+   Stateful
+   Hash-Based
+   Signature
+   Schemes</span>.
+   <span class="small-caps">nist</span>
+   Special
+   Publication
+   800-208.
+   National
+   Institute
+   of
+                                                
+                                                
+   Standards
+   and
+   Technology.
+   <span class="small-caps">doi</span>:
+   <a href="https://doi.org/10.6028/NIST.SP.800-208">10.6028/NIST.SP.800-208</a>.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-208.pdf">https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-208.pdf</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-EthereumOrgWeakSubjectivity">
+</dt><dd class="thebibliography" id="bib-4">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_EthereumOrgWeakSubjectivity"></a>ethereum.org
+   contributors
+   (2023)
+   “Weak
+   Subjectivity”.
+   Ethereum
+   developer
+   documentation,
+   Ethereum
+   Foundation.
+   Ethereum
+   developer
+   documentation,
+   Ethereum
+   Foundation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://ethereum.org/developers/docs/consensus-mechanisms/pos/weak-subjectivity/">https://ethereum.org/developers/docs/consensus-mechanisms/pos/weak-subjectivity/</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-GoogleQuantumAI2026">
+</dt><dd class="thebibliography" id="bib-5">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_GoogleQuantumAI2026"></a>Google
+   Quantum
+   AI
+                                                
+                                                
+   (2026)
+   “Safeguarding
+   Cryptocurrency
+   by
+   Disclosing
+   Quantum
+   Vulnerabilities
+   Responsibly”.
+   Google
+   Research
+   Blog.
+   Google
+   Research
+   Blog.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://research.google/blog/safeguarding-cryptocurrency-by-disclosing-quantum-vulnerabilities-responsibly/">https://research.google/blog/safeguarding-cryptocurrency-by-disclosing-quantum-vulnerabilities-responsibly/</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-UIP-0136">
+</dt><dd class="thebibliography" id="bib-6">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_UIP-0136"></a><code>~hanfel-dovned</code>, Trent Steen,
+   Michael Bensemann <code>~tinnus-napbus</code>,
+   Evan Forman <code>~bonbud-macryg</code>,
+   and
+   Jake Hamilton <code>~tondes-sitrym</code>
+   (2026)
+   “<span class="ec-lmcsc-10">uip-0136</span>:
+   Comet
+   Attestation”.
+   Standards
+   Track,
+   status
+   Review.
+   Standards
+   Track,
+   status
+   Review.
+                                                
+                                                
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0136.md">https://github.com/urbit/UIPs/blob/main/UIPS/UIP-0136.md</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-RFC7519">
+</dt><dd class="thebibliography" id="bib-7">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_RFC7519"></a>Jones, Michael B.,
+   John Bradley,
+   and
+   Nat Sakimura
+   (2015)
+   “<span class="small-caps">json</span>
+   Web
+   Token
+   (<span class="small-caps">jwt</span>)”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://datatracker.ietf.org/doc/html/rfc7519">https://datatracker.ietf.org/doc/html/rfc7519</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Davis2022">
+</dt><dd class="thebibliography" id="bib-8">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Davis2022"></a><code>~lagrev-nocfep</code>, N. E. Davis
+   (2022)
+   “Immunology
+   for
+   the
+   Internet
+   Age”.
+   Blog
+   post.
+   Blog
+   post.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://urbit.org/blog/immunology-for-the-internet-age">https://urbit.org/blog/immunology-for-the-internet-age</a>
+   (visited
+                                                
+                                                
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Lopp2024">
+</dt><dd class="thebibliography" id="bib-9">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Lopp2024"></a>Lopp, Jameson
+   (2024)
+   “On
+   Ossification”.
+   Cypherpunk
+   Cogitations.
+   Cypherpunk
+   Cogitations.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://blog.lopp.net/on-ossification/">https://blog.lopp.net/on-ossification/</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Lumbaca2025">
+</dt><dd class="thebibliography" id="bib-10">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Lumbaca2025"></a>Lumbaca, Jeremiah
+   (2025).
+   <span class="ec-lmri-10">Cognitive
+   Warfare
+   to
+   Dominate
+   and
+   Redefine
+   Adversary
+   Realities:
+   Implications
+   for
+   U.S.
+   Special
+   Operations
+   Forces</span>.
+   Occasional
+   Paper,
+                                                
+                                                
+   <span class="small-caps">jsou</span>
+   Report
+   25-23.
+   Joint
+   Special
+   Operations
+   University
+   Press.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://jsouapplicationstorage.blob.core.windows.net/press/578/Cognitive%20Warfare_FINAL.pdf">https://jsouapplicationstorage.blob.core.windows.net/press/578/Cognitive%20Warfare_FINAL.pdf</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Moore2025ShaiHulud">
+</dt><dd class="thebibliography" id="bib-11">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Moore2025ShaiHulud"></a>Moore, Justin
+   (2025)
+   ““Shai-Hulud”
+   Worm
+   Compromises
+   npm
+   Ecosystem
+   in
+   Supply
+   Chain
+   Attack”.
+   Unit
+   42,
+   Palo
+   Alto
+   Networks.
+   Unit
+   42,
+   Palo
+   Alto
+   Networks.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://unit42.paloaltonetworks.com/npm-supply-chain-attack/">https://unit42.paloaltonetworks.com/npm-supply-chain-attack/</a>
+                                                
+                                                
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Nakamoto2008">
+</dt><dd class="thebibliography" id="bib-12">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Nakamoto2008"></a>Nakamoto, Satoshi
+   (2008).
+   <span class="ec-lmri-10">Bitcoin:
+   A
+   Peer-to-Peer
+   Electronic
+   Cash
+   System</span>.
+   Whitepaper.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://bitcoin.org/bitcoin.pdf">https://bitcoin.org/bitcoin.pdf</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-BIP0110">
+</dt><dd class="thebibliography" id="bib-13">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_BIP0110"></a>Ohm, Dathon
+   (2025)
+   “Reduced
+   Data
+   Temporary
+   Softfork”.
+   Consensus
+   (soft
+   fork),
+   status
+   Closed.
+   Consensus
+   (soft
+   fork),
+   status
+   Closed.
+                                                
+                                                
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-BIP0039">
+</dt><dd class="thebibliography" id="bib-14">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_BIP0039"></a>Palatinus, Marek,
+   Pavol Rusnak,
+   Aaron Voisine,
+   and
+   Sean Bowe
+   (2013)
+   “Mnemonic
+   Code
+   for
+   Generating
+   Deterministic
+   Keys”.
+   Standards
+   Track,
+   Applications
+   layer.
+   Standards
+   Track,
+   Applications
+   layer.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Rodarmor2022Ordinals">
+</dt><dd class="thebibliography" id="bib-15">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Rodarmor2022Ordinals"></a>Rodarmor, Casey
+   (2022)
+   “Ordinal
+                                                
+                                                
+   Numbers”.
+   Draft
+   <span class="small-caps">bip</span>,
+   number
+   unassigned,
+   Informational,
+   Applications
+   layer.
+   Draft
+   <span class="small-caps">bip</span>,
+   number
+   unassigned,
+   Informational,
+   Applications
+   layer.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/ordinals/ord/blob/master/bip.mediawiki">https://github.com/ordinals/ord/blob/master/bip.mediawiki</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Rodarmor2026Inscriptions">
+</dt><dd class="thebibliography" id="bib-16">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Rodarmor2026Inscriptions"></a>Rodarmor, Casey
+   et al.
+   (2026)
+   “Inscriptions”.
+   Ordinal
+   Theory
+   Handbook.
+   Ordinal
+   Theory
+   Handbook.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://docs.ordinals.com/inscriptions.html">https://docs.ordinals.com/inscriptions.html</a>
+   (visited
+   on
+   ~2026.9.2).
+                                                
+                                                
+   </p></dd><dt class="thebibliography" id="X0-Rodarmor2026Teleburning">
+</dt><dd class="thebibliography" id="bib-17">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Rodarmor2026Teleburning"></a>Rodarmor, Casey
+   (2026)
+   “Teleburning”.
+   Ordinal
+   Theory
+   Handbook.
+   Ordinal
+   Theory
+   Handbook.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://docs.ordinals.com/guides/teleburning.html">https://docs.ordinals.com/guides/teleburning.html</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-DirectedMessaging2026">
+</dt><dd class="thebibliography" id="bib-18">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_DirectedMessaging2026"></a><code>~rovnys-ricfer</code>, Ted Blackman,
+   Joe Bryan <code>~master-morzod</code>,
+   Luke Champine <code>~watter-parter</code>,
+   Pyry Kovanen <code>~dinleb-rambep</code>,
+   Jose Cisneros <code>~norsyr-torryn</code>,
+   and
+   Liam Fitzgerald <code>~hastuc-dibtux</code>
+   (2026).
+   “Directed
+   Messaging.”
+   In:
+   <span class="ec-lmri-10">Urbit
+   Systems
+   Technical
+   Journal</span>
+   3.1.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://urbitsystems.tech/article/v03-i01/directed-messaging">https://urbitsystems.tech/article/v03-i01/directed-messaging</a>
+   (visited
+                                                
+                                                
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-YarvinSpecIntro">
+</dt><dd class="thebibliography" id="bib-19">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_YarvinSpecIntro"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   (2010a)
+   “Introduction”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/cgyarvin/urbit/blob/6ac688960687aa9c89d4da6fff49a3125c10aca1/Spec/urbit/3-intro.txt">https://github.com/cgyarvin/urbit/blob/6ac688960687aa9c89d4da6fff49a3125c10aca1/Spec/urbit/3-intro.txt</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Yarvin2010">
+</dt><dd class="thebibliography" id="bib-20">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Yarvin2010"></a>—   (2010b)
+   “Urbit:
+   functional
+   programming
+   from
+   scratch”.
+   <span class="small-caps">url</span>:
+   <a class="url" href="http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html">http://moronlab.blogspot.com/2010/01/urbit-functional-programming-from.html</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt class="thebibliography" id="X0-YarvinWolfePauly2017">
+</dt><dd class="thebibliography" id="bib-21">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_YarvinWolfePauly2017"></a><code>~sorreg-namtyv</code>, Curtis Yarvin
+   and
+   Galen Wolfe-Pauly <code>~ravmel-ropdyl</code>
+   (2017)
+   “Toward
+   a
+   Frozen
+   Operating
+   System”.
+                                                
+                                                
+   Blog
+   post,
+   Tlon
+   Corporation.
+   Blog
+   post,
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://urbit.org/blog/toward-a-frozen-operating-system">https://urbit.org/blog/toward-a-frozen-operating-system</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Whitepaper">
+</dt><dd class="thebibliography" id="bib-22">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Whitepaper"></a><code>~sorreg-namtyv</code>, Curtis Yarvin,
+   Philip Monk <code>~wicdev-wisryt</code>,
+   Anton Dyudin ~fyr,
+   and
+   Raymond Pasco <code>~sigryn-habrex</code>
+   (2016).
+   <span class="ec-lmri-10">Urbit:
+   A
+   Solid-State
+   Interpreter</span>.
+   Whitepaper.
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://media.urbit.org/whitepaper.pdf">https://media.urbit.org/whitepaper.pdf</a>
+   (visited
+   on
+   ~2024.1.25).
+   </p></dd><dt class="thebibliography" id="X0-Cambridge2025">
+</dt><dd class="thebibliography" id="bib-23">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Cambridge2025"></a>University
+   of
+                                                
+                                                
+   Cambridge
+   (2025)
+   “Price
+   of
+   a
+   Bot
+   Army
+   Revealed
+   Across
+   Hundreds
+   of
+   Online
+   Platforms”.
+   Research
+   news.
+   Research
+   news.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://www.cam.ac.uk/stories/price-bot-army-global-index">https://www.cam.ac.uk/stories/price-bot-army-global-index</a>
+   (visited
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-Monk2020">
+</dt><dd class="thebibliography" id="bib-24">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_Monk2020"></a><code>~wicdev-wisryt</code>, Philip C. Monk
+   (2020)
+   “Precepts”.
+   Blog
+   post,
+   Tlon
+   Corporation.
+   Blog
+   post,
+   Tlon
+   Corporation.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://urbit.org/blog/precepts">https://urbit.org/blog/precepts</a>
+   (visited
+                                                
+                                                
+   on
+   ~2026.9.2).
+   </p></dd><dt class="thebibliography" id="X0-BIP0032">
+</dt><dd class="thebibliography" id="bib-25">
+   <!-- l. 1379 --><p class="noindent"><a id="cite.0_BIP0032"></a>Wuille, Pieter
+   (2012)
+   “Hierarchical
+   Deterministic
+   Wallets”.
+   Standards
+   Track,
+   Applications
+   layer.
+   Standards
+   Track,
+   Applications
+   layer.
+   <span class="small-caps">url</span>:
+   <a class="url" href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki</a>
+   (visited
+   on
+   ~2026.9.2).</p></dd></dl>
+    
+<h3 class="sectionHead"><a id="x1-65536"></a>Footnotes</h3>
+<div class="footnote-text">
+  <!-- l. 1153 --><p class="indent">     <span class="footnote-mark"><a id="x2-24003x7.1"></a><a id="fn1x0">   <sup class="textsuperscript">1</sup></a></span><span class="ec-lmr-8">Jameson Lopp argued against an ossifying Bitcoin in 2024 (</span><a id="x2-24004"></a><span class="ec-lmr-8">Lopp,
+  2024), but gave a generous summary of the pro-ossification arguments
+  he’d encountered.</span><a href="#x1-24002f1">⤴</a></p></div>
+</body> 
+</html>

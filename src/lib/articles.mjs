@@ -81,20 +81,26 @@ function htmlToText(body) {
     (_, text) => text.toUpperCase(),
   );
   body = body.replace(/<span class=["']footnote-mark["']>[\s\S]*?<\/span>/g, "");
-  body = body.replace(/<li[^>]*>/gi, "\n• ");
-  body = body.replace(/<\/(p|li)>/gi, "\n");
+  // Paragraph and list-item boundaries are the only real breaks. Mark them
+  // before flattening, because TeX4ht also emits line breaks and
+  // whitespace-only lines in the middle of a paragraph.
+  // (A control character: JS \s would swallow U+2029 in the whitespace passes.)
+  const PARA = "\u0001";
+  body = body.replace(/<li[^>]*>/gi, PARA + "• ");
+  body = body.replace(/<\/(p|li)>/gi, PARA);
   body = body.replace(/<br\s*\/?>/gi, "\n");
   body = body.replace(/<[^>]+>/g, "");
   body = decodeEntities(body);
   // Presentation ligatures (ﬁ, ﬂ, ﬃ) back to plain letters.
-  body = body.replace(/[ﬀ-ﬆ]/g, (c) => c.normalize("NFKD"));
+  body = body.replace(/[\uFB00-\uFB06]/g, (c) => c.normalize("NFKD"));
   body = texToText(body);
-  body = body.replace(/[ \t ]+/g, " ");
-  body = body.replace(/ *\n */g, "\n");
-  body = body.replace(/\n{2,}/g, "\n\n");
-  // TeX4ht keeps the PDF's line breaks; rejoin them into flowing text but
-  // keep paragraph breaks and bullet lines.
-  body = body.replace(/([^\n])\n(?!\n|• )/g, "$1 ");
+  body = body.replace(/[ \t\u00a0]+/g, " ");
+  body = body.replace(/\s*\n\s*/g, " ");
+  body = body.replace(/(\s*\u0001)+\s*/g, "\n\n");
+  // A list item's own paragraph: keep the bullet on the text's line, and
+  // separate consecutive items by a single line.
+  body = body.replace(/• \n\n/g, "• ");
+  body = body.replace(/\n\n(?=• )/g, "\n");
   return body.trim();
 }
 
