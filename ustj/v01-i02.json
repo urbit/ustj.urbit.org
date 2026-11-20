@@ -1,54 +1,63 @@
 {
   "issue": "FA2024: Vol. 1, No. 2",
   "title": "The Journal of Solid-State Computing",
+  "doi": "10.5281/zenodo.24389588",
   "content": [
     {
       "author": ["wicdev-wisryt"],
       "title": "Designing a Permanent Personal Identity: The Public Key Infrastructure Maze",
       "pdf": "/ustj/v01-i02/mss0-pki.pdf",
-      "html": "/ustj/v01-i02/mss0-pki.html"
+      "html": "/ustj/v01-i02/mss0-pki.html",
+      "doi": "10.5281/zenodo.24389616"
     },
     {
       "author": ["sarlev-sarsen"],
       "title": "On the Utility of Azimuth and Decentralized Identity",
       "pdf": "/ustj/v01-i02/mss1-l1l2.pdf",
-      "html": "/ustj/v01-i02/mss1-l1l2.html"
+      "html": "/ustj/v01-i02/mss1-l1l2.html",
+      "doi": "10.5281/zenodo.24389618"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "Typed Revision Control",
       "pdf": "/ustj/v01-i02/mss2-typed-rcs.pdf",
-      "html": "/ustj/v01-i02/mss2-typed-rcs.html"
+      "html": "/ustj/v01-i02/mss2-typed-rcs.html",
+      "doi": "10.5281/zenodo.24389622"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "A Note on Subsecond Base-2 Time Intervals",
       "pdf": "/ustj/v01-i02/mss3-subsecond-timing.pdf",
-      "html": "/ustj/v01-i02/mss3-subsecond-timing.html"
+      "html": "/ustj/v01-i02/mss3-subsecond-timing.html",
+      "doi": "10.5281/zenodo.24389626"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "Trusting Trust on Mars: Thoughts on Urbit Security",
       "pdf": "/ustj/v01-i02/mss4-trusting-trust.pdf",
-      "html": "/ustj/v01-i02/mss4-trusting-trust.html"
+      "html": "/ustj/v01-i02/mss4-trusting-trust.html",
+      "doi": "10.5281/zenodo.24389628"
     },
     {
       "author": ["ritpub-sipsyl", "rovnys-ricfer"],
       "title": "Urbit Networking: Ad Fontes",
       "pdf": "/ustj/v01-i02/mss5-ad-fontes.pdf",
-      "html": "/ustj/v01-i02/mss5-ad-fontes.html"
+      "html": "/ustj/v01-i02/mss5-ad-fontes.html",
+      "doi": "10.5281/zenodo.24389630"
     },
     {
       "author": ["rovnys-ricfer"],
       "title": "Ford Fusion",
       "pdf": "/ustj/v01-i02/mss6-ford-fusion.pdf",
-      "html": "/ustj/v01-i02/mss6-ford-fusion.html"
+      "html": "/ustj/v01-i02/mss6-ford-fusion.html",
+      "doi": "10.5281/zenodo.24389634"
     },
     {
       "author": ["palfun-foslup", "rovnys-ricfer", "master-morzod"],
       "title": "Eyre HTTP Caching",
       "pdf": "/ustj/v01-i02/mss7-eyre-caching.pdf",
-      "html": "/ustj/v01-i02/mss7-eyre-caching.html"
+      "html": "/ustj/v01-i02/mss7-eyre-caching.html",
+      "doi": "10.5281/zenodo.24389636"
     }
   ],
   "theme": {

@@ -1,36 +1,42 @@
 {
   "issue": "FA2026: Vol. 3, No. 2",
   "title": "The Journal of Solid-State Computing",
+  "doi": "10.5281/zenodo.24389594",
   "content": [
     {
       "author": ["dozreg-toplud"],
       "title": "Nock Compilation (Subject Knowledge Analysis II)",
       "pdf": "/ustj/v03-i02/mss0.pdf",
-      "html": "/ustj/v03-i02/mss0.html"
+      "html": "/ustj/v03-i02/mss0.html",
+      "doi": "10.5281/zenodo.24389665"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "Representing the SKI Combinator Calculus in the Nock Instruction Set Architecture",
       "pdf": "/ustj/v03-i02/mss1.pdf",
-      "html": "/ustj/v03-i02/mss1.html"
+      "html": "/ustj/v03-i02/mss1.html",
+      "doi": "10.5281/zenodo.24389667"
     },
     {
       "author": ["wicdev-wisryt"],
       "title": "Input and Output in Hoon",
       "pdf": "/ustj/v03-i02/mss2.pdf",
-      "html": "/ustj/v03-i02/mss2.html"
+      "html": "/ustj/v03-i02/mss2.html",
+      "doi": "10.5281/zenodo.24389669"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "A Deterministic Numerical Stack",
       "pdf": "/ustj/v03-i02/mss3.pdf",
-      "html": "/ustj/v03-i02/mss3.html"
+      "html": "/ustj/v03-i02/mss3.html",
+      "doi": "10.5281/zenodo.24389671"
     },
     {
       "author": ["bonbud-macryg", "tondes-sitrym", "hanfel-dovned"],
       "title": "Groundwire:  Decentralized Sybil Resistance for a Dead Internet",
       "pdf": "/ustj/v03-i02/mss4.pdf",
-      "html": "/ustj/v03-i02/mss4.html"
+      "html": "/ustj/v03-i02/mss4.html",
+      "doi": "10.5281/zenodo.24389673"
     }
   ],
   "theme": {

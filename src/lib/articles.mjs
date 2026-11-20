@@ -159,6 +159,7 @@ export function articleMeta(issue, issueSlug, entry) {
   return {
     title,
     issueLabel: issue.issue,
+    doi: entry.doi || null,
     authors: entry.author.map((patp, i) => ({ patp, name: names[i] })),
     abstract,
     // What a card or link preview shows: the abstract, else the first

@@ -4,6 +4,7 @@ import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 import SocialMeta from "@/components/SocialMeta";
 import {
+  SITE_URL,
   JOURNAL_NAME,
   JOURNAL_DESCRIPTION,
   HOME_CARD,
@@ -12,7 +13,7 @@ import {
   slugify,
 } from "@/lib/articles.mjs";
 
-export default function Article({ issue, article, social }) {
+export default function Article({ issue, article, social, scholar }) {
   const ref = React.useRef(null);
   const [height, setHeight] = React.useState("0px");
 
@@ -66,9 +67,30 @@ export default function Article({ issue, article, social }) {
         <title>{`${social.title} • UrbitSTJ`}</title>
       </Head>
       <SocialMeta type="article" {...social} />
+      <Head>
+        {/* Highwire Press tags, read by Google Scholar and reference managers. */}
+        <meta key="citation_title" name="citation_title" content={scholar.title} />
+        {scholar.authors.map((a, i) => (
+          <meta key={`citation_author_${i}`} name="citation_author" content={a} />
+        ))}
+        <meta key="citation_journal_title" name="citation_journal_title" content={JOURNAL_NAME} />
+        {scholar.year && <meta key="citation_publication_date" name="citation_publication_date" content={scholar.year} />}
+        {scholar.volume && <meta key="citation_volume" name="citation_volume" content={scholar.volume} />}
+        {scholar.number && <meta key="citation_issue" name="citation_issue" content={scholar.number} />}
+        {scholar.pdf && <meta key="citation_pdf_url" name="citation_pdf_url" content={scholar.pdf} />}
+        {scholar.doi && <meta key="citation_doi" name="citation_doi" content={scholar.doi} />}
+      </Head>
       <div className="flex flex-col min-h-screen w-screen max-w-full items-center">
         <IntraNav shopUrl={issue.links.shop} />
         <main className="flex flex-col items-center flex-1 layout">
+          {scholar.doi && (
+            <p className="w-full type-ui text-muted mt-2">
+              DOI:{" "}
+              <a href={`https://doi.org/${scholar.doi}`} className="hover:text-primary">
+                {scholar.doi}
+              </a>
+            </p>
+          )}
           <iframe
             ref={ref}
             className="w-full overflow-auto"
@@ -108,11 +130,23 @@ export async function getStaticProps({ params }) {
       : `${JOURNAL_NAME}: ${issue.title}.`,
   };
 
+  const m = issue.issue.match(/^[A-Z]{2}(\d{4}):\s*Vol\.\s*(\d+),\s*No\.\s*(\d+)$/);
+  const scholar = {
+    title: meta.title,
+    authors: meta.authors.map((a) => a.name || `~${a.patp}`),
+    year: m ? m[1] : null,
+    volume: m ? m[2] : null,
+    number: m ? m[3] : null,
+    pdf: article.pdf ? SITE_URL + article.pdf : null,
+    doi: meta.doi,
+  };
+
   return {
     props: {
       issue,
       article,
       social,
+      scholar,
     },
   };
 }

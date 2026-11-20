@@ -1,36 +1,42 @@
 {
   "issue": "WI2026: Vol. 3, No. 1",
   "title": "The Journal of Solid-State Computing",
+  "doi": "10.5281/zenodo.24389592",
   "content": [
     {
       "author": ["rovnys-ricfer","master-morzod","watter-parter","dinleb-rambep","norsyr-torryn","hastuc-dibtux"],
       "title": "Directed Messaging",
       "pdf": "/ustj/v03-i01/mss0.pdf",
-      "html": "/ustj/v03-i01/mss0.html"
+      "html": "/ustj/v03-i01/mss0.html",
+      "doi": "10.5281/zenodo.24389653"
     },
     {
       "author": ["dozreg-toplud"],
       "title": "Subject Knowledge Analysis",
       "pdf": "/ustj/v03-i01/mss1.pdf",
-      "html": "/ustj/v03-i01/mss1.html"
+      "html": "/ustj/v03-i01/mss1.html",
+      "doi": "10.5281/zenodo.24389655"
     },
     {
       "author": ["hanfel-dovned"],
       "title": "Groundwire Comet Cryptography",
       "pdf": "/ustj/v03-i01/mss2.pdf",
-      "html": "/ustj/v03-i01/mss2.html"
+      "html": "/ustj/v03-i01/mss2.html",
+      "doi": "10.5281/zenodo.24389657"
     },
     {
       "author": ["ticlys-monlun", "lagrev-nocfep"],
       "title": "Noun Serialization",
       "pdf": "/ustj/v03-i01/mss3.pdf",
-      "html": "/ustj/v03-i01/mss3.html"
+      "html": "/ustj/v03-i01/mss3.html",
+      "doi": "10.5281/zenodo.24389659"
     },
     {
       "author": ["nomryg-nilref"],
       "title": "Obelisk:  Reinventing SQL for Modern Computing",
       "pdf": "/ustj/v03-i01/mss4.pdf",
-      "html": "/ustj/v03-i01/mss4.html"
+      "html": "/ustj/v03-i01/mss4.html",
+      "doi": "10.5281/zenodo.24389663"
     }
   ],
   "theme": {

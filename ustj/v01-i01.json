@@ -1,48 +1,56 @@
 {
   "issue": "SP2024: Vol. 1, No. 1",
   "title": "The Journal of Solid-State Computing",
+  "doi": "10.5281/zenodo.24389585",
   "content": [
     {
       "author": ["rovnys-ricfer"],
       "title": "Eight Years After the Whitepaper",
       "pdf": "/ustj/v01-i01/mss0.pdf",
-      "html": "/ustj/v01-i01/mss0.html"
+      "html": "/ustj/v01-i01/mss0.html",
+      "doi": "10.5281/zenodo.24389598"
     },
     {
       "author": ["rovnys-ricfer", "fodwyt-ragful", "mastyr-bottec"],
       "title": "The Stakes of Scrying:  .^ dotket and the Seer Proposal",
       "pdf": "/ustj/v01-i01/mss1.pdf",
-      "html": "/ustj/v01-i01/mss1.html"
+      "html": "/ustj/v01-i01/mss1.html",
+      "doi": "10.5281/zenodo.24389600"
     },
     {
       "author": ["nomryg-nilref"],
       "title": "A Philosophy of (Inductive) Testing",
       "pdf": "/ustj/v01-i01/mss2.pdf",
-      "html": "/ustj/v01-i01/mss2.html"
+      "html": "/ustj/v01-i01/mss2.html",
+      "doi": "10.5281/zenodo.24389602"
     },
     {
       "author": ["rovnys-ricfer", "wicdev-wisryt"],
       "title": "A Solution to Static vs. Dynamic Linking",
       "pdf": "/ustj/v01-i01/mss3.pdf",
-      "html": "/ustj/v01-i01/mss3.html"
+      "html": "/ustj/v01-i01/mss3.html",
+      "doi": "10.5281/zenodo.24389604"
     },
     {
       "author": ["mopfel-winrux"],
       "title": "What Agreement Hath Mars with Earth?  An Exploration of Urbit's IPC Interfaces",
       "pdf": "/ustj/v01-i01/mss4.pdf",
-      "html": "/ustj/v01-i01/mss4.html"
+      "html": "/ustj/v01-i01/mss4.html",
+      "doi": "10.5281/zenodo.24389606"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "The Desert of the Reals:  Floating-Point Arithmetic on Deterministic Systems",
       "pdf": "/ustj/v01-i01/mss5.pdf",
-      "html": "/ustj/v01-i01/mss5.html"
+      "html": "/ustj/v01-i01/mss5.html",
+      "doi": "10.5281/zenodo.24389608"
     },
     {
       "author": ["dozreg-toplud"],
       "title": "The urwasm WebAssembly Interpreter Suite on Urbit",
       "pdf": "/ustj/v01-i01/mss6.pdf",
-      "html": "/ustj/v01-i01/mss6.html"
+      "html": "/ustj/v01-i01/mss6.html",
+      "doi": "10.5281/zenodo.24389612"
     }
   ],
   "theme": {

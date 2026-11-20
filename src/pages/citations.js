@@ -4,12 +4,12 @@ import Link from "next/link";
 import fs from "fs";
 import IntraNav from "@/components/IntraNav";
 import {
+  SITE_URL,
   slugify,
   extractAuthorNames,
   extractAbstract,
 } from "@/lib/articles.mjs";
 
-const SITE_URL = "https://ustj.urbit.org";
 const JOURNAL_NAME = "Urbit Systems Technical Journal";
 const SEASONS = { WI: "Winter", SP: "Spring", SU: "Summer", FA: "Fall" };
 
@@ -42,10 +42,10 @@ function formatAuthorsApa(authors) {
 }
 
 function apaCitation(article) {
-  const { authors, title, year, volume, number, url, forthcoming } = article;
+  const { authors, title, year, volume, number, url, doi, forthcoming } = article;
   const yearStr = year ? `(${year}).` : "(n.d.).";
   const volNo = volume && number ? ` ${volume}(${number}).` : "";
-  const tail = forthcoming ? "Forthcoming." : url;
+  const tail = forthcoming ? "Forthcoming." : doi ? `https://doi.org/${doi}` : url;
   return `${formatAuthorsApa(authors)} ${yearStr} ${title}. ${JOURNAL_NAME},${volNo} ${tail}`;
 }
 
@@ -56,7 +56,7 @@ function bibtexKey(article) {
 }
 
 function bibtexEntry(article) {
-  const { authors, title, year, volume, number, url, forthcoming } = article;
+  const { authors, title, year, volume, number, url, doi, forthcoming } = article;
   const lines = [
     `@article{${bibtexKey(article)},`,
     `  author = {${authors.map(authorBibtex).join(" and ")}},`,
@@ -67,6 +67,7 @@ function bibtexEntry(article) {
   if (volume) lines.push(`  volume = {${volume}},`);
   if (number) lines.push(`  number = {${number}},`);
   if (forthcoming) lines.push(`  note = {Forthcoming},`);
+  if (doi) lines.push(`  doi = {${doi}},`);
   lines.push(`  url = {${url}}`);
   lines.push(`}`);
   return lines.join("\n");
@@ -222,6 +223,7 @@ export async function getStaticProps() {
         url: forthcoming ? `${SITE_URL}/issue/${issueSlug}` : `${SITE_URL}${path}`,
         abstract: forthcoming ? "" : extractAbstract(`./public${c.html}`),
         issueLabel: issue.issue,
+        doi: c.doi || null,
         forthcoming,
       });
     });

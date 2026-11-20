@@ -1,48 +1,56 @@
 {
   "issue": "SU2025: Vol. 2, No. 1",
   "title": "The Journal of Solid-State Computing",
+  "doi": "10.5281/zenodo.24389590",
   "content": [
     {
       "author": ["timluc-miptev"],
       "title": "Nock for Everyday Coders",
       "pdf": "/ustj/v02-i01/mss0.pdf",
-      "html": "/ustj/v02-i01/mss0.html"
+      "html": "/ustj/v02-i01/mss0.html",
+      "doi": "10.5281/zenodo.24389638"
     },
     {
       "author": ["niblyx-malnus"],
       "title": "Deriving Nock Opcodes 6–11",
       "pdf": "/ustj/v02-i01/mss1.pdf",
-      "html": "/ustj/v02-i01/mss1.html"
+      "html": "/ustj/v02-i01/mss1.html",
+      "doi": "10.5281/zenodo.24389640"
     },
     {
       "author": ["lacnes"],
       "title": "Metacircular Virtualization and Practical Nock Interpretation",
       "pdf": "/ustj/v02-i01/mss2.pdf",
-      "html": "/ustj/v02-i01/mss2.html"
+      "html": "/ustj/v02-i01/mss2.html",
+      "doi": "10.5281/zenodo.24389642"
     },
     {
       "author": ["mopfel-winrux"],
       "title": "An Implementation of Nock Combinator Logic in Hardware:  The NockPU Project",
       "pdf": "/ustj/v02-i01/mss3.pdf",
-      "html": "/ustj/v02-i01/mss3.html"
+      "html": "/ustj/v02-i01/mss3.html",
+      "doi": "10.5281/zenodo.24389644"
     },
     {
       "author": ["lagrev-nocfep"],
       "title": "Notes on Vases",
       "pdf": "/ustj/v02-i01/mss4.pdf",
-      "html": "/ustj/v02-i01/mss4.html"
+      "html": "/ustj/v02-i01/mss4.html",
+      "doi": "10.5281/zenodo.24389647"
     },
     {
       "author": ["lagrev-nocfep", "sorreg-namtyv"],
       "title": "A Documentary History of the Nock Combinator Calculus",
       "pdf": "/ustj/v02-i01/mss5.pdf",
-      "html": "/ustj/v02-i01/mss5.html"
+      "html": "/ustj/v02-i01/mss5.html",
+      "doi": "10.5281/zenodo.24389649"
     },
     {
       "author": ["barpub-tarber"],
       "title": "Conk:  The Permutation Group of Nocks; Ax: An Algebraic Executable Ur-Machine",
       "pdf": "/ustj/v02-i01/mss6.pdf",
-      "html": "/ustj/v02-i01/mss6.html"
+      "html": "/ustj/v02-i01/mss6.html",
+      "doi": "10.5281/zenodo.24389651"
     }
   ],
   "theme": {
